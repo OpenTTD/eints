@@ -3,7 +3,7 @@ Unique ordered identification of things and events
 """
 import re, datetime
 
-re_datetime = re.compile('([1-9][0-9]{3})-([01][0-9])-([0-3][0-9])T' +
+re_datetime = re.compile('([1-2][0-9]{3})-([01][0-9])-([0-3][0-9])T' +
                          '([0-2][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]{1,6})?$')
 
 class Stamp:
@@ -100,7 +100,7 @@ class TimeStamper:
             if m.group(7) is None:
                 microsecond = 0
             else:
-                microsecond = int(m.group(7))
+                microsecond = int(m.group(7)[1:])
 
             stamp = datetime.datetime(year, month, day, hour, minute, second, microsecond)
         except ValueError:

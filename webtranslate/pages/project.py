@@ -6,7 +6,7 @@ from webtranslate.protect import protected
 from webtranslate import users, projects
 
 @route('/projects/<name>', method = 'GET')
-@protected(['single_project', 'name', '-'])
+@protected(['project', 'name', '-'])
 def project(name):
     proj = projects.projects.projects.get(name)
     if proj is None:

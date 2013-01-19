@@ -17,7 +17,18 @@ class TextString:
         self.text = text
         self.time_stamp = time_stamp
 
-class TranslatedString:
+
+class StringEntry:
+    """
+    Base class of a string.
+
+    @ivar name: Name of the string.
+    @type name: C{str}
+    """
+    def __init__(self, name):
+        self.name = name
+
+class TranslatedString(StringEntry):
     """
     String that is translated.
 
@@ -31,27 +42,24 @@ class TranslatedString:
       the translation time stamp got changed without textual change iff L{orig}
       is not empty.
 
-    @ivar name: Name of the string.
-    @type name: C{str}
-
-    @ivar translation: Current text (the current translation).
-    @type translation: L{TextString}
+    @ivar text: Current text (the current translation).
+    @type text: L{TextString} (C{None} if no translation exists)
 
     @ivar orig: Text of this string in the master language at the time L{text} was created.
-    @type orig: L{TextString}
+    @type orig: L{TextString} (may be C{None})
 
     @ivar master: Current master text for this string.
-    @type master: L{TextString}
+    @type master: L{TextString} (may be C{None})
     """
-    def __init__(self, name, translation, orig, master):
-        self.name = name
-        self.translation = translation
+    def __init__(self, name, text, orig, master):
+        StringEntry.__init__(self, name)
+        self.text = text
         self.orig = orig
         self.master = master
 
 
 
-class MasterString:
+class MasterString(StringEntry):
     """
     String in a master language.
 
@@ -63,8 +71,19 @@ class MasterString:
     """
     # XXX Do we actually need this?
     def __init__(self, name, master):
-        self.name = name
+        StringEntry.__init__(self, name)
         self.master = master
+
+
+class Strings:
+    """
+    Wrapper class holding the strings of a language.
+
+    @ivar texts: Strings in the language ordered by name of the string.
+    @type texts: C{dict} of C{str} to L{MasterString} or of L{TranslatedString}
+    """
+    def __init__(self, texts):
+        self.texts = texts
 
 
 class Language:
@@ -80,8 +99,8 @@ class Language:
     @ivar master_lang: Language name of the master language, if available.
     @type master_lang: C{str} or C{None}
 
-    @ivar strings: Strings in the language ordered by name of the string.
-    @type strings: C{dict} of C{str} to L{MasterString} or of L{TranslatedString}
+    @ivar strings: Strings in the language, if available.
+    @type strings: L{Strings} or C{None}
 
     @ivar master_stamp: Last time stamp of its master language (if available).
     @type master_stamp: L{Stamp} or C{None}
@@ -89,11 +108,12 @@ class Language:
     @ivar last_stamp: Last stamp of itself, if available.
     @type last_stamp: L{Stamp} or C{None}
     """
+    # XXX Move last_stamp to L{Strings}
     def __init__(self, lang_file, lang_name, master_lang):
         self.lang_file = lang_file
         self.lang_name = lang_name
         self.master_lang = master_lang
-        self.strings = {}
+        self.strings = None
         self.master_stamp = None
         self.last_stamp = None
 

@@ -105,7 +105,8 @@ users = Users()
 
 methods = {'GET': 'read', 'POST': 'add', 'PUT': 'set', 'DELETE': 'del'}
 general_page_names = set(['root', 'projects'])
-project_page_names = set(['single_project'])
+project_page_names = set(['project'])
+language_page_names = set(['language'])
 
 def may_access(page_name, path, meth, user, passwd):
     """
@@ -126,9 +127,9 @@ def may_access(page_name, path, meth, user, passwd):
     @param passwd: Password
     @type  passwd: C{str}
     """
-    if page_name[0] in general_page_names:
-        access = page_name + [methods[meth]]
-    elif page_name[0] in project_page_names:
+    if page_name[0] in general_page_names or \
+            page_name[0] in project_page_names or \
+            page_name[0] in language_page_names:
         access = page_name + [methods[meth]]
     else:
         print("Access: Weird access right {!r}".format(page_name))

@@ -12,7 +12,7 @@
 % if len(project.languages) > 0:
     <table><tr><th>Language</th><tr>
 %   for lang in sorted(p.lang_name for p in project.languages.values()):
-        <tr><td><a href="{{name}}/{{lang}}">{{lang}}</a></td></tr>
+        <tr><td><a href="../languages/{{name}}/{{lang}}">{{lang}}</a></td></tr>
 %   end
     </table></p>
 % end
