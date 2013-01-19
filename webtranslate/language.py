@@ -71,6 +71,9 @@ class Language:
     """
     A language.
 
+    @ivar lang_file: Absolute path to the language filename.
+    @type lang_file: C{str}
+
     @ivar lang_name: Language name.
     @type lang_name: C{str}
 
@@ -86,7 +89,8 @@ class Language:
     @ivar last_stamp: Last stamp of itself, if available.
     @type last_stamp: L{Stamp} or C{None}
     """
-    def __init__(self, lang_name, master_lang):
+    def __init__(self, lang_file, lang_name, master_lang):
+        self.lang_file = lang_file
         self.lang_name = lang_name
         self.master_lang = master_lang
         self.strings = {}
@@ -101,10 +105,22 @@ class LanguageSystem:
     @note: This class is the interface base class, derive a class from this one,
            and register it with L{language_systems}.
     """
+    def get_name(self):
+        """
+        Retrieve the name of the language system.
+
+        @return: The name of the language system.
+        @rtype:  C{str}
+        """
+        raise NotImplementedError("Implement me in {}".format(type(self)))
+
 
 class NewGrfLanguageSystem(LanguageSystem):
     """
     Language system for NewGRFs.
     """
+    def get_name(self):
+        return "newgrf"
 
-language_systems = [('newgrf', NewGrfLanguageSystem)]
+# Mapping of name of the language system to its *class*.
+language_systems = {'newgrf': NewGrfLanguageSystem}
