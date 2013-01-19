@@ -1,0 +1,6 @@
+[ {"name":null, "password":null,
+   "allow":["root/-/-/read",
+            "projects/-/-/read",
+            "single_project/*/-/read"
+           ]}
+]
