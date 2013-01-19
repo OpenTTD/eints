@@ -10,11 +10,11 @@
     <p>Website: <a href="{{project.website}}">{{project.website}}</a></p>
 % end
 % if len(project.languages) > 0:
-    <p>Languages:
+    <table><tr><th>Language</th><tr>
 %   for lang in sorted(p.lang_name for p in project.languages.values()):
-        <a href="{{lang}}">{{lang}}</a>
+        <tr><td><a href="{{name}}/{{lang}}">{{lang}}</a></td></tr>
 %   end
-    </p>
+    </table></p>
 % end
 </body>
 </html>

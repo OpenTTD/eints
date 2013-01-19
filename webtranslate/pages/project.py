@@ -1,7 +1,7 @@
 """
 Page of a single project.
 """
-from webtranslate.bottle import route, template
+from webtranslate.bottle import route, template, abort
 from webtranslate.protect import protected
 from webtranslate import users, projects
 
