@@ -309,7 +309,7 @@ class ProjectData:
         for mname, mval in mtexts.items():
             if mname not in ttexts:
                 # New string
-                ttexts[mname] = language.TranslatedString(mname, None, None, mval)
+                ttexts[mname] = language.TranslatedString(mname, None, None, mval.master)
                 modified = True
 
         # XXX Handle 'modified'
