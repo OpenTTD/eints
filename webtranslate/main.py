@@ -1,19 +1,18 @@
 """
 Main program.
 """
-from webtranslate import bottle, users, projects
-
-from webtranslate.pages import root as root_page
-from webtranslate.pages import projects as projects_page
-from webtranslate.pages import project as project_page
-from webtranslate.pages import language as language_page
+from webtranslate import bottle, protect, config
+from webtranslate.pages import root
+from webtranslate.pages import projects
+from webtranslate.pages import project
+from webtranslate.pages import translation
+from webtranslate.pages import upload_language
 
 def run():
-    # Initialize application
-    users.users.load()
-    projects.projects.load()
+    config.cfg = config.Config('config.xml')
+    config.cfg.load_fromxml()
 
-    # Start web service
+    # Start the web service
     bottle.debug(True)
     bottle.run(host='localhost', port=8000)
 

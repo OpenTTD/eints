@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config>
+	<project-root>root_dir</project-root>
+	<project-cache>1</project-cache>
+	<language-file-size>100000</language-file-size>
+</config>

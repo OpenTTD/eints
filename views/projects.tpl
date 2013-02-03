@@ -1,16 +1,11 @@
 <html>
 <head>
-<title>Web translator - projects</title>
+<title>Web translator projects</title>
 </head>
 <body>
-<h1>Web translator - projects</h1>
-<p>Projects available for translation</p>
-<p><table>
-   <tr><th>Project</th><th>Description</th></tr>
-   % for p in projdatas:
-       <tr><td><a href="projects/{{p.dir_name}}">{{p.dir_name}}</a></td>
-           <td>{{p.description}}</td></tr>
-   %end
-   </table></p>
-</body>
-</html>
+<h1>Projects available for translation</h1>
+<ul>
+% for p in projects:
+	<li><a href="project/{{p.name}}">{{p.proj_name}}</a>
+% end
+</ul>
