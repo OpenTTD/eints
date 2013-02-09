@@ -18,12 +18,12 @@ def page(proj_name):
 @route('/upload/<proj_name>', method = 'POST')
 @protected(['upload', 'proj_name', '-'])
 def page(proj_name):
-    proj = config.cache.projects.get(proj_name)
-    if proj is None:
+    pmd = config.cache.get_pmd(proj_name)
+    if pmd is None:
         abort(404, "Page not found")
         return
 
-    pdata = proj.pdata
+    pdata = pmd.pdata
     assert pdata is not None
 
     langfile      = request.files.langfile
@@ -66,7 +66,8 @@ def page(proj_name):
     assert len(pdata.languages) == 0 # XXX Incorporate loaded data in other files too otherwise.
     # Copy string changes into the language.
     for sv in ng_data.strings:
-        chg = data.Change(sv.name, sv.case, sv.text, None, stamp, user)
+        base_text = data.Text(sv.text, sv.case, stamp)
+        chg = data.Change(sv.name, sv.case, base_text, None, stamp, user)
         chgs = lng.changes.get(chg.string_name)
         if chgs is None:
             lng.changes[chg.string_name] = [chg]
@@ -77,5 +78,5 @@ def page(proj_name):
     pdata.base_language = lng.name
     pdata.skeleton = ng_data.skeleton
 
-    # XXX Save project!!
+    config.cache.save_pmd(pmd)
     return template('upload_ok', proj_name = proj_name)

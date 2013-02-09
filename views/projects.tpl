@@ -6,6 +6,6 @@
 <h1>Projects available for translation</h1>
 <ul>
 % for p in projects:
-	<li><a href="project/{{p.name}}">{{p.proj_name}}</a>
+	<li><a href="project/{{p.name}}">{{p.name}}</a>
 % end
 </ul>

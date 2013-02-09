@@ -2,9 +2,194 @@
 Project data.
 """
 import time
+from xml.dom import minidom
 from webtranslate import loader
 
+def load_file(fname):
+    """
+    Load a project with everything in it.
 
+    @param fname: File to load.
+    @type  fname: C{str}
+
+    @return: The loaded project.
+    @rtype:  L{Project}
+    """
+    xloader = XmlLoader()
+    return xloader.load_project(fname)
+
+def save_file(proj, fname):
+    """
+    Save the project to the file.
+
+    @param proj: The project to save.
+    @type  proj: L{Project}
+
+    @param fname: Name of the file to write.
+    @type  fname: C{str}
+    """
+    xsaver = XmlSaver()
+    doc = xsaver.save_project(proj)
+
+    handle = open(fname, 'w')
+    handle.write(doc.toprettyxml())
+    handle.close()
+
+# {{{ class XmlLoader:
+class XmlLoader:
+    """
+    Helper class to load a project from an XML file.
+
+    @ivar stamps: Time stamps loaded so far, mapping of seconds and indices to L{Stamp}.
+    @type stamps: C{dict} of (C{int, C{int}) to L{Stamp}
+
+    @ivar: texts: Loaded texts, ordered by their reference.
+    @type  texts: C{dict} of C{str} to L{Text}
+    """
+    def __init__(self):
+        self.stamps = {}
+
+    def get_stamp(self, secs, index):
+        """
+        Get a time stamp from loaded 'stamp' data.
+
+        @param secs: Seconds since epoch.
+        @type  secs: C{int}
+
+        @param index: Index within L{secs}.
+        @type  index: C{int}
+
+        @return: Associated time stamp.
+        @rtype:  L{Stamp}
+        """
+        s = self.stamps.get((secs, index))
+        if s is None:
+            s = Stamp(secs, index)
+            self.stamps[(secs, index)] = s
+            if last_stamp < secs:
+                last_stamp = secs
+                last_index = index
+            elif last_stamp == secs and last_index < index:
+                last_index = index
+
+        return s
+
+    def load_project(self, fname):
+        """
+        Load a project from the given file.
+
+        @param fname: Name of the file to load.
+        @type  fname: C{str}
+
+        @return: The loaded project.
+        @rtype:  L{Project}
+        """
+        data = loader.load_dom(fname)
+        pnode = loader.get_single_child_node(data, 'project')
+        self.stamps = {}
+
+        # Load texts
+        self.texts = {}
+        texts = loader.get_single_child_node(data, 'texts')
+        if texts is not None:
+            for node in texts.get_child_nodes('string'):
+                ref = node.getAttribute('ref')
+                case = loader.get_opt_DOMattr(node, 'case')
+                stamp = load_stamp(self, node.get_single_child_node('stamp'))
+                txt = loader.get_single_child_node('text')
+                txt = loader.collect_text_DOM(txt)
+                self.texts[ref] = Text(text, case, stamp)
+
+        return load_project(self, pnode)
+
+    def get_textref(self, ref):
+        """
+        Get the text object associated with the L{ref} string.
+
+        @param ref: Reference name of the text.
+        @type  ref: C{str}
+
+        @return: The text object belonging to the reference.
+        @rtype:  L{Text}
+        """
+        return self.texts[ref]
+# }}}
+# {{{ class XmlSaver:
+class XmlSaver:
+    """
+    Saver helper class, storing the top-level document, and the referenced texts.
+
+    @ivar doc: Xml document node.
+    @type doc: L{xml.dom.minidom,Document}
+
+    @ivar texts_node: Node containing the texts.
+    @type texts_node: L{xml.dom.minidom.Node}
+
+    @ivar texts: Text references of the project, ordered by text object.
+    @type texts: C{dict} of L{Text} to C{str}
+
+    @ivar number: Number for creating unique text references.
+    @type number: C{int}
+    """
+    def __init__(self):
+        self.doc = None
+        self.texts_node = None
+        self.texts = {}
+        self.number = 1
+
+    def save_project(self, project):
+        """
+        Save a project as xml doc document.
+
+        @param project: Project to save.
+        @type  project: L{Project}
+
+        @return: Xml document.
+        @rtype:  L{xml.dom.minidom.Document}
+        """
+        self.doc = minidom.Document()
+        self.texts_node = self.doc.createElement('texts')
+        self.texts = {}
+        self.number = 1
+
+        node = save_project(self, project)
+        node.appendChild(self.texts_node)
+        self.doc.appendChild(node)
+        return self.doc
+
+    def get_textref(self, text):
+        """
+        Construct a node containing the text, and return a reference to it.
+
+        @param text: Text to save.
+        @type  text: L{Text}
+
+        @return: Reference to the text node.
+        @rtype:  C{str}
+        """
+        ref = self.texts.get(text)
+        if ref is not None: return ref
+
+        node = self.doc.createElement('string')
+        if text.case is not None: node.setAttribute('case', text.case)
+
+        ref = "text_{:04d}".format(self.number)
+        self.number = self.number + 1
+        node.setAttribute('ref', ref)
+
+        stamp = save_stamp(self, text.stamp)
+        node.appendChild(stamp)
+        tnode = self.doc.createElement('text')
+        node.appendChild(tnode)
+        xnode = self.doc.createTextNode(text.text)
+        tnode.appendChild(xnode)
+
+        self.texts_node.appendChild(node)
+        self.texts[text] = ref
+        return ref
+# }}}
+
+# {{{ Project
 class Project:
     """
     Project object.
@@ -12,7 +197,7 @@ class Project:
     @ivar name: Project name.
     @type name: C{str}
 
-    @ivar languages: Languages of the project ordered by name (iso_code).
+    @ivar languages: Languages of the project ordered by name (isocode).
     @type languages: C{dict} of C{str} to L{Language}
 
     @ivar base_language: Base language of the project.
@@ -34,12 +219,129 @@ class Project:
 
         self.skeleton = []
 
+def load_project(xloader, node):
+    """
+    Load a project node from the Xml file.
 
+    @param xloader: Loader helper.
+    @type  xloader: L{XmlLoader}
+
+    @param node: Node containing the time stamp.
+    @type  node: L{xml.dom.minidom.Node}
+
+    @return: Loaded project
+    @rtype:  L{Project}
+    """
+    assert node.tagName == 'project'
+    name = node.getAttribute('name')
+    project = Project(name)
+
+    langnodes = loader.get_child_nodes(node, 'language')
+    project.languages = {}
+    for lnode in langnodes:
+        lng = load_language(xloader, lnode)
+        project.languages[name] = lng
+
+    baselang = loader.get_opt_DOMattr(node, 'baselang', None)
+    if baselang is None or baselang not in project.languages:
+        baselang = None
+        if len(project.languages) > 0:
+            print("Project \"" + project.name + "\" has no base language, dropping all translations")
+            project.languages = {}
+            return project # Also skip loading the skeleton.
+    project.base_language = baselang
+
+    skelnode = loader.get_single_child_node(node, 'skeleton')
+    if skelnode is None:
+        project.skeleton = []
+    else:
+        project.skeleton = load_skeleton(xloader, skelnode)
+    return project
+
+def load_skeleton(xloader, node):
+    """
+    Load the skeleton list from the xml node.
+
+    @param xloader: Loader helper.
+    @type  xloader: L{XmlLoader}
+
+    @param node: Skeleton root node.
+    @type  node: L{xml.dom.minidom.Node}
+
+    @return: The loaded skeleton data, as described in the L{Project} class.
+    @rtype:  C{list} of (C{str}, C{str})
+    """
+    assert node.tagName == 'skeleton'
+    skeleton = []
+    for lnode in node.childNodes:
+        if lnode.tagName == 'literal':
+            text = loader.collect_text_DOM(lnode)
+            skeleton.append(('literal', text))
+        elif lnode.tagName == 'string':
+            name = lnode.getAttribute('name')
+            if name is not None: skeleton.append(('string', name))
+        elif lnode.tagName in ('grflangid', 'plural', 'case', 'gender'):
+            skeleton.append((lnode.tagName, ''))
+    return skeleton
+
+def save_project(xsaver, proj):
+    """
+    Save the project to Xml.
+
+    @param xsaver: Saver class.
+    @type  xsaver: L{XmlSaver}
+
+    @param proj: Project to save.
+    @type  proj: L{Project}
+
+    @return: Node containing the project.
+    @rtype:  L{xml.dom.minidom.Node}
+    """
+    node = xsaver.doc.createElement('project')
+    node.setAttribute('name', proj.name)
+    if proj.base_language is not None:
+        node.setAttribute('baselang', proj.base_language)
+
+    for lang in proj.languages.values():
+        lnode = save_language(xsaver, lang)
+        node.appendChild(lnode)
+
+    skelnode = save_skeleton(xsaver, proj.skeleton)
+    node.appendChild(skelnode)
+    return node
+
+def save_skeleton(xsaver, skel):
+    """
+    Save the skeleton list.
+
+    @param xsaver: Saver class.
+    @type  xsaver: L{XmlSaver}
+
+    @param skel: Skeleton list, as described in the L{Project} class.
+    @type  skel: C{list} of (C{str}, C{str})
+
+    @return: The skeleton data as xml node.
+    @rtype:  L{xml.dom.minidom.Node}
+    """
+    root = xsaver.doc.createElement('skeleton')
+    for stp, sparm in skel:
+        node = xsaver.doc.createElement(stp)
+        if stp == 'literal' and len(sparm) > 0:
+            txt = xsaver.doc.createTextNode(sparm)
+            node.appendChild(txt)
+        elif stp == 'string':
+            node.setAttribute('name', sparm)
+
+        root.appendChild(node)
+    return root
+
+# }}}
+# {{{ Language
 class Language:
     """
     A language in a project.
 
-    @ivar name: Name of the language.
+    @ivar name: Name of the language (isocode).
     @type name: C{str}
 
     @ivar grflangid: Language id.
@@ -65,7 +367,83 @@ class Language:
         self.case  = []
         self.changes = {}
 
+def save_language(xsaver, lang):
+    """
+    Save the language to Xml.
 
+    @param xsaver: Saver class.
+    @type  xsaver: L{XmlSaver}
+
+    @param lang: Language to save.
+    @type  lang: L{Language}
+
+    @return: Node containing the language.
+    @rtype:  L{xml.dom.minidom.Node}
+    """
+    # Paranoia check, genders and cases should not have white space in them.
+    for g in lang.gender:
+        assert " " not in g
+    for c in lang.cases:
+        assert " " not in c
+
+    node = xsaver.doc.createElement('language')
+    node.setAttribute('name', lang.name)
+    node.setAttribute('langid', str(lang.grflangid))
+    node.setAttribute('plural', str(lang.plural))
+    if len(lang.gender) > 0:
+        node.setAttribute('gender', " ".join(lang.gender))
+    if len(lang.cases) > 0:
+        node.setAttribute('cases', " ".join(lang.cases))
+    for chgs in lang.changes.values():
+        for chg in chgs:
+            cnode = save_change(xsaver, chg)
+            node.appendChild(cnode)
+    return node
+
+def load_language(xloader, node):
+    """
+    Load a language from the given xml node.
+
+    @param xloader: Loader helper.
+    @type  xloader: L{XmlLoader}
+
+    @param node: Node containing the language.
+    @type  node: L{xml.dom.minidom.Node}
+
+    @return: The loaded language.
+    @rtype:  L{Language}
+    """
+    assert node.tagName == 'language'
+    name = node.getAttribute('name')
+
+    lng = Language(name)
+    lng.grflangid = int(node.getAttribute('langid'), 10)
+    lng.plural = int(node.getAttribute('plural'), 10)
+
+    gender = loader.get_opt_DOMattr(node, 'gender', None)
+    if gender is None:
+        lng.gender = []
+    else:
+        lng.gender = gender.split(' ')
+
+    case = loader.get_opt_DOMattr(node, 'cases', None)
+    if case is None:
+        lng.case = []
+    else:
+        lng.case = case.split(' ')
+
+    lng.changes = {}
+    for ch_node in loader.get_child_nodes(node, 'change'):
+        change = load_change(xloader, ch_node)
+        chgs = lng.changes.get(change.string_name)
+        if chgs is None:
+            lng.changes[change.string_name] = [change]
+        else:
+            chgs.append(change)
+
+    return lng
+# }}}
+# {{{ Change
 class Change:
     """
     A change (adding a new string in the base language, adding or updating a
@@ -88,7 +466,7 @@ class Change:
     @type stamp: L{Stamp}
 
     @ivar user: User making the change.
-    @type user: L{User}
+    @type user: C{str}
     """
     def __init__(self, string_name, case, base_text, new_text, stamp, user):
         self.string_name = string_name
@@ -98,7 +476,59 @@ class Change:
         self.stamp = stamp
         self.user = user
 
+def save_change(xsaver, change):
+    """
+    Save a change.
 
+    @param xsaver: Saver class.
+    @type  xsaver: L{XmlSaver}
+
+    @param change: Change to save.
+    @type  change: L{Change}
+
+    @return: Xml node containing the change.
+    @rtype:  L{xml.dom.minidom.Node}
+    """
+    node = xsaver.doc.createElement('change')
+    node.setAttribute('strname', change.string_name)
+    if change.case is not None: node.setAttribute('case', change.case)
+    if change.user is not None: node.setAttribute('user', change.user)
+
+    node.setAttribute('basetext', make_ref_text(xsaver, change.base_text))
+    if change.new_text is not None:
+        node.setAttribute('newtext', make_ref_text(xsaver, change.new_text))
+
+    snode = save_stamp(xsaver, change.stamp)
+    node.appendChild(snode)
+    return node
+
+def load_change(xloader, node):
+    """
+    Load a change.
+
+    @param xloader: Loader helper.
+    @type  xloader: L{XmlLoader}
+
+    @param node: Node containing the change.
+    @type  node: L{xml.dom.minidom.Node}
+
+    @return: The loaded change.
+    @rtype:  L{Change}
+    """
+    assert node.tagName == 'change'
+    strname = node.getAttribute('change')
+    case = loader.get_opt_DOMattr(node, 'case', None)
+    user = loader.get_opt_DOMattr(node, 'user', None)
+    base_text = get_text(xloader, node.getAttribute('basetext'))
+    new_text = loader.get_opt_DOMattr('newtext', None)
+    if newtext is not None:
+        newtext = get_text(xloader, new_text)
+    stamp = loader.get_single_child_node(node, 'stamp')
+    stamp = load_stamp(xloader, stamp)
+    return Change(strname, case, base_text, new_text, stamp, user)
+
+# }}}
+# {{{ Text (references)
 class Text:
     """
     Text of a string in a language.
@@ -117,7 +547,38 @@ class Text:
         self.case = case
         self.stamp = stamp
 
+def make_ref_text(xsaver, text):
+    """
+    Construct a reference to a text node.
 
+    @param xsaver: Saver class.
+    @type  xsaver: L{XmlSaver}
+
+    @param text: Text node.
+    @type  text: L{Text}
+
+    @return: Reference to the actual text.
+    @rtype:  C{str}
+    """
+    return xsaver.get_textref(text)
+
+def get_text(xloader, ref):
+    """
+    Get the text referenced by L{ref}.
+
+    @param xloader: Loader helper.
+    @type  xloader: L{XmlLoader}
+
+    @param ref: Text of the reference.
+    @type  ref: C{str}
+
+    @return: Text object being referenced.
+    @rtype:  L{Text}
+    """
+    return xloader.get_text(ref)
+
+# }}}
+# {{{ Time stamps
 class Stamp:
     """
     Time stamp.
@@ -154,14 +615,42 @@ def make_stamp():
     return Stamp(last_stamp, last_index)
 
 
-def load_project(fname):
+def load_stamp(xloader, node):
     """
-    Load the project xml data.
+    Load a time stamp.
 
-    @param fname: Name of the file to load.
+    @param xloader: Loader helper.
+    @type  xloader: L{XmlLoader}
+
+    @param node: Node containing the time stamp.
+    @type  node: L{xml.dom.minidom.Node}
+
+    @return: Loaded time stamp.
+    @rtype:  L{Stamp}
     """
-    data = loader.load_dom(fname)
-    project = loader.get_single_child_node(data, 'project')
+    assert node.tagName == 'stamp'
+    seconds = int(node.getAttribute('second'), 10)
+    number = int(loader.get_opt_DOMattr(node, 'number', '0'), 10)
+    return xloader.get_stamp(seconds, number)
 
-    proj_name = loader.collect_text_DOM(loader.get_single_child_node(project, 'name'))
-    return Project(proj_name)
+def save_stamp(xsaver, stamp):
+    """
+    Construct an xml representation of the L{stamp} object.
+
+    @param xsaver: Saver class.
+    @type  xsaver: L{XmlSaver}
+
+    @param stamp: Text object to save.
+    @type  stamp: L{Stamp}
+
+    @return: The created xml representation.
+    @rtype:  L{xml.dom.minidom.Node}
+    """
+    node = xsaver.doc.createElement('stamp')
+    node.setAttribute('second', str(stamp.seconds))
+    if stamp.number > 0:
+        node.setAttribute('number', str(stamp.number))
+    return node
+
+# }}}
+

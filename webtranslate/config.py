@@ -66,32 +66,32 @@ class ProjectCache:
 
         for name in os.listdir(self.project_root):
             if not name.endswith('.xml'): continue
-            path = os.path.join(self.project_root, name)
             name = name[:4]
+            path = os.path.join(self.project_root, name)
             pmd = ProjectMetaData(path, name)
             assert name not in self.projects
             self.projects[name] = pmd
 
-            pd = self.load_project(name)
+            pd = self.get_pmd(name)
             assert pd is pmd
             pd = pd.pdata
 
             pmd.proj_name = pd.name
 
-    def load_project(self, name):
+    def get_pmd(self, proj_name):
         """
         Load a project.
 
-        @param name: Name of the project (filename without .xml extension)
-        @type  name: C{str}
+        @param proj_name: Name of the project (filename without .xml extension)
+        @type  proj_name: C{str}
 
         @return: The project, or C{None}
         @rtype:  L{ProjectMetaData} or C{None}
         """
         # Does it exist?
-        pmd = self.projects.get(name)
+        pmd = self.projects.get(proj_name)
         if pmd is None:
-            print("ERROR: Retrieving project " + name)
+            print("ERROR: Retrieving project " + proj_name)
             return None
 
         # Is it loaded?
@@ -102,7 +102,7 @@ class ProjectCache:
             assert len(lru) == len(self.lru)
             self.lru = lru
             print("Retrieving project " + pmd.path + " from cache")
-            return pmdata
+            return pmd
 
         # Load the data, first make some room.
         size = len(self.lru)
@@ -128,6 +128,15 @@ class ProjectCache:
         print("Loading project " + pmd.path)
         return pmd
 
+    def save_pmd(self, pmd):
+        """
+        Save the project.
+
+        @param pmd: Project meta data.
+        @type  pmd: L{ProjectMetaData}
+        """
+        pmd.save()
+
 
 
 class ProjectMetaData:
@@ -143,7 +152,7 @@ class ProjectMetaData:
     @ivar proj_name: Project name for humans.
     @type proj_name: C{str}
 
-    @ivar path: Path of the project file at disk.
+    @ivar path: Path of the project file at disk (without extension.
     @type path: C{str}
     """
     def __init__(self, path, name):
@@ -154,14 +163,15 @@ class ProjectMetaData:
 
     def load(self):
         assert self.pdata is None
-        self.pdata = data.load_project(self.path)
+        self.pdata = data.load_file(self.path + ".xml")
 
     def unload(self):
         # XXX Unlink the data
         self.pdata = None
 
     def save(self):
-        assert False
+        print("Save project to " + self.path)
+        data.save_file(self.pdata, self.path + ".xml.new")
 
 
 cfg = None

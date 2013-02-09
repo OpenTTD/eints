@@ -91,8 +91,7 @@ def get_single_child_node(node, name, optional=False):
     if len(result) == 1: return result[0]
     if optional and len(result) == 0: return None
 
-    print("ERROR: Failed to find precisely one child node named \"" + name + "\" in")
-    print(node.toxml())
-    sys.exit(1)
+    print("ERROR: Failed to find precisely one child node named \"" + name + "\"")
+    return None
 # }}}
 
