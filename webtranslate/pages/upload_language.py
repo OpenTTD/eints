@@ -8,7 +8,7 @@ from webtranslate.newgrf import language_file
 
 @route('/upload/<proj_name>', method = 'GET')
 @protected(['upload', 'proj_name', '-'])
-def page(proj_name):
+def page_get(proj_name):
     proj = config.cache.projects.get(proj_name)
     if proj is None:
         abort(404, "Page not found")
@@ -17,7 +17,7 @@ def page(proj_name):
 
 @route('/upload/<proj_name>', method = 'POST')
 @protected(['upload', 'proj_name', '-'])
-def page(proj_name):
+def page_post(proj_name):
     pmd = config.cache.get_pmd(proj_name)
     if pmd is None:
         abort(404, "Page not found")

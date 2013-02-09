@@ -62,6 +62,8 @@ class XmlLoader:
         @return: Associated time stamp.
         @rtype:  L{Stamp}
         """
+        global last_stamp, last_index
+
         s = self.stamps.get((secs, index))
         if s is None:
             s = Stamp(secs, index)
@@ -90,15 +92,15 @@ class XmlLoader:
 
         # Load texts
         self.texts = {}
-        texts = loader.get_single_child_node(data, 'texts')
+        texts = loader.get_single_child_node(pnode, 'texts')
         if texts is not None:
-            for node in texts.get_child_nodes('string'):
+            for node in loader.get_child_nodes(texts, 'string'):
                 ref = node.getAttribute('ref')
-                case = loader.get_opt_DOMattr(node, 'case')
-                stamp = load_stamp(self, node.get_single_child_node('stamp'))
-                txt = loader.get_single_child_node('text')
+                case = loader.get_opt_DOMattr(node, 'case', None)
+                stamp = load_stamp(self, loader.get_single_child_node(node, 'stamp'))
+                txt = loader.get_single_child_node(node, 'text')
                 txt = loader.collect_text_DOM(txt)
-                self.texts[ref] = Text(text, case, stamp)
+                self.texts[ref] = Text(txt, case, stamp)
 
         return load_project(self, pnode)
 
@@ -520,9 +522,9 @@ def load_change(xloader, node):
     case = loader.get_opt_DOMattr(node, 'case', None)
     user = loader.get_opt_DOMattr(node, 'user', None)
     base_text = get_text(xloader, node.getAttribute('basetext'))
-    new_text = loader.get_opt_DOMattr('newtext', None)
-    if newtext is not None:
-        newtext = get_text(xloader, new_text)
+    new_text = loader.get_opt_DOMattr(node, 'newtext', None)
+    if new_text is not None:
+        new_text = get_text(xloader, new_text)
     stamp = loader.get_single_child_node(node, 'stamp')
     stamp = load_stamp(xloader, stamp)
     return Change(strname, case, base_text, new_text, stamp, user)
@@ -575,7 +577,7 @@ def get_text(xloader, ref):
     @return: Text object being referenced.
     @rtype:  L{Text}
     """
-    return xloader.get_text(ref)
+    return xloader.get_textref(ref)
 
 # }}}
 # {{{ Time stamps

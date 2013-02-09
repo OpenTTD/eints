@@ -1,4 +1,6 @@
-import sys
+"""
+Helper functions for loading an Xml tree.
+"""
 from xml.dom import minidom
 from xml.dom.minidom import Node
 
@@ -9,7 +11,7 @@ def load_dom(fname):
     @param fname: File to load.
     @type  fname: C{str}
 
-    @todo: Implement some safe guards for loading too big files.
+    @todo: XXX Implement some safe guards for loading too big files.
     """
     dom = minidom.parse(fname)
     return dom

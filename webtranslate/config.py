@@ -1,8 +1,44 @@
 """
 Configuration and global routines of the translator service.
 """
-import os
+import os, sys, re, glob
 from webtranslate import data, loader
+
+def get_subnode_text(node, tag):
+    """
+    Get the text of a child node of L{node}.
+
+    @param node: Parent node of the node containing the text.
+    @type  node: L{xml.dom.minidom.Node}
+
+    @param tag: Name of the child node to retrieve.
+    @type  tag: C{str}
+
+    @return: The text in the child node.
+    @rtype:  C{str}
+    """
+    child = loader.get_single_child_node(node, tag)
+    if child is None:
+        return ""
+    return loader.collect_text_DOM(child)
+
+def convert_num(txt, default):
+    """
+    Convert the number given in L{txt} to a numeric form.
+
+    @param txt: Text containing the number.
+    @type  txt: C{str}
+
+    @param default: Default value, in case the L{txt} is not a number.
+    @type  default: C{int} or C{None}
+
+    @return: The numeric value of the number if it is convertable.
+    @rtype:  C{int} or the provided default
+    """
+    m = re.match("\\d+$", txt)
+    if not m: return default
+    return int(txt)
+
 
 class Config:
     """
@@ -13,11 +49,15 @@ class Config:
 
     @ivar language_file_size: Maximum accepted file size of a language file.
     @type language_file_size: C{int}
+
+    @ivar num_backup_files: Number of backup files kept for a project.
+    @type num_backup_files: C{int}
     """
     def __init__(self, config_path):
         self.config_path = config_path
         self.language_file_size = 10000
         self.project_root = None
+        self.num_backup_files = 5
 
     def load_fromxml(self):
         if not os.path.isfile(self.config_path):
@@ -29,10 +69,16 @@ class Config:
         data = loader.load_dom(self.config_path)
         cfg = loader.get_single_child_node(data, 'config')
 
-        self.project_root = loader.collect_text_DOM(loader.get_single_child_node(cfg, 'project-root'))
-        self.language_file_size = int(loader.collect_text_DOM(loader.get_single_child_node(cfg, 'language-file-size')))
+        self.project_root = get_subnode_text(cfg, 'project-root')
+        if self.project_root is None or self.project_root == "":
+            print("No project root found, aborting!")
+            sys.exit(1)
 
-        cache_size = int(loader.collect_text_DOM(loader.get_single_child_node(cfg, 'project-cache')))
+        self.language_file_size = convert_num(get_subnode_text(cfg, 'language-file-size'), self.language_file_size)
+        self.num_backup_files   = convert_num(get_subnode_text(cfg, 'num-backup-files'),   self.num_backup_files)
+        if self.num_backup_files > 100: self.num_backup_files = 100 # To limit it two numbers in backup files.
+
+        cache_size = convert_num(get_subnode_text(cfg, 'project-cache'), 1)
         cache.init(self.project_root, cache_size)
 
 
@@ -170,8 +216,28 @@ class ProjectMetaData:
         self.pdata = None
 
     def save(self):
-        print("Save project to " + self.path)
+        base_path = self.path + ".xml."
+        bpl = len(base_path)
+        backup_files = []
+        for fname in glob.glob(base_path + "*"):
+            extname = fname[bpl:]
+            if extname.startswith == "bup":
+                num = convert_num(extname[3:], None)
+                if num is not None: backup_files.append((num, fname))
+        backup_files.sort()
+        if len(backup_files) > 0:
+            new_num = backup_files[-1][0] % 100
+        else:
+            new_num = 0
+        if cfg.num_backup_files > 0: backup_files = backup_files[:-cfg.num_backup_files]
+        for num, fname in backup_files:
+            print("unlink " + fname)
+            #os.unlink(fname)
+
+        print("Save project to " + self.path + " (renaming to {:02d})".format(new_num))
         data.save_file(self.pdata, self.path + ".xml.new")
+        os.rename(self.path + ".xml", self.path + ".xml.bup{:02d}".format(new_num))
+        os.rename(self.path + ".xml.new", self.path + ".xml")
 
 
 cfg = None

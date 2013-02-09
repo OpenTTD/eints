@@ -1,4 +1,952 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- This file is just example data -->
-<project name="SRIF">
+<?xml version="1.0" ?>
+<project baselang="en_GB" name="SRIF">
+	<language langid="1" name="en_GB" plural="0">
+		<change basetext="text_0001" strname="STR_NAME_kwangtung_utility_tug">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0002" strname="STR_NAME_fiumelatte_paddle_steamer">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0003" strname="STR_NAME_fastnet_paddle_steamer">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0004" strname="STR_TANKER_INLAND">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0005" strname="STR_VEHICLE_FERRY">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0006" strname="STR_GENERAL_PURPOSE_VESSEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0007" strname="STR_NAME_san_juan_mark_2_vehicle_ferry">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0008" strname="STR_NAME_SUFFIX_ISLAND_TRADER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0009" strname="STR_4_DIESEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0010" strname="STR_NAME_quessant_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0011" strname="STR_NAME_gran_sol_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0012" strname="STR_NAME_island_trader">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0013" strname="STR_NAME_roland_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0014" strname="STR_OIL_FIRED_STEAM_TURBINE">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0015" strname="STR_LOG_TUG_REFIT_SUBTYPE_2">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0016" strname="STR_LARGE_COASTER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0017" strname="STR_LOG_TUG_REFIT_SUBTYPE_0">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0018" strname="STR_GENERAL_PURPOSE_SEA_GOING_VESSEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0019" strname="STR_LOG_TUG">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0020" strname="STR_NAME_SUFFIX_CATAMARAN">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0021" strname="STR_NAME_constance_freight_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0022" strname="STR_NAME_eddystone_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0023" strname="STR_NAME_taurus_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0024" strname="STR_NAME_volgoneft_six_thirty_tanker_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0025" strname="STR_CARGO_VESSEL_INLAND">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0026" strname="STR_NAME_rosario_vehicle_ferry">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0027" strname="STR_NAME_shannon_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0028" strname="STR_LOG_TUG_REFIT_SUBTYPE_1">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0029" strname="STR_BUY_MENU_TEXT">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0030" strname="STR_NAME_eight_one_eight_hydrofoil">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0031" strname="STR_PARAM_RESET_CONSTRUCTION_COSTS_DESC">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0032" strname="STR_NAME_labrador_utility_vessel">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0033" strname="STR_NAME_SUFFIX_TANKER_BARGE">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0034" strname="STR_NAME_san_juan_vehicle_ferry">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0035" strname="STR_HYDROFOIL_FAST_FERRY">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0036" strname="STR_NAME_patraikos_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0037" strname="STR_NAME_finisterre_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0038" strname="STR_NAME_huanghai_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0039" strname="STR_NAME_volgoneft_five_forty_tanker_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0040" strname="STR_NAME_SUFFIX_HOVERCRAFT">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0041" strname="STR_GRF_DESCRIPTION">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0042" strname="STR_PARAM_RESET_CONSTRUCTION_COSTS">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0043" strname="STR_NAME_maddelena_vehicle_ferry">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0044" strname="STR_CATAMARAN_FAST_FERRY">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0045" strname="STR_NAME_rockall_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0046" strname="STR_NAME_oran_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0047" strname="STR_NAME_bundaberg_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0048" strname="STR_CARGO_HOVERCRAFT">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0049" strname="STR_BUY_MENU_REFIT_CAPACITIES_PAX_CARGO">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0050" strname="STR_NAME_SUFFIX_FREIGHTER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0051" strname="STR_NAME_tyskebukta_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0052" strname="STR_NAME_SUFFIX_PADDLE_STEAMER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0053" strname="STR_2_GAS_TURBINE_JETS">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0054" strname="STR_NAME_stornoway_vehicle_ferry">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0055" strname="STR_SMALL_COASTAL_TANKER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0056" strname="STR_NAME_castlepoint_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0057" strname="STR_2_MARINE_GAS_TURBINE">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0058" strname="STR_FAST_GENERAL_PURPOSE_VESSEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0059" strname="STR_NAME_schipbeek_freight_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0060" strname="STR_COMPOUND_STEAM">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0061" strname="STR_NAME_gorky_freight_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0062" strname="STR_NAME_volgoneft_three_twenty_tanker_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0063" strname="STR_NAME_SUFFIX_FREIGHT_BARGE">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0064" strname="STR_NAME_lutschine_freight_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0065" strname="STR_NAME_malin_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0066" strname="STR_NAME_sungei_catamaran">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0067" strname="STR_NAME_SUFFIX_HYDROFOIL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0068" strname="STR_NAME_SUFFIX_TANKER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0069" strname="STR_DIESEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0070" strname="STR_NAME_olympic_log_tug">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0071" strname="STR_NAME_volgoneft_two_seventy_tanker_barge">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0072" strname="STR_NAME_cadiz_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0073" strname="STR_SMALL_GENERAL_PURPOSE_VESSEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0074" strname="STR_COASTER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0075" strname="STR_LARGE_COASTAL_TANKER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0076" strname="STR_JUMBO_VEHICLE_FERRY">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0077" strname="STR_GRF_NAME">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0078" strname="STR_NAME_SUFFIX_UTILITY_TUG">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0079" strname="STR_OIL_FIRED_STEAM_ENGINE">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0080" strname="STR_NAME_SUFFIX_UTILITY_VESSEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0081" strname="STR_NAME_klyazma_hydrofoil">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0082" strname="STR_NAME_SUFFIX_FERRY">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0083" strname="STR_NAME_la_orchilla_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0084" strname="STR_NAME_colorado_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0085" strname="STR_NAME_kagoshima_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0086" strname="STR_STEAM_TURBINE">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0087" strname="STR_NAME_fitzroy_utility_tug">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0088" strname="STR_NAME_SUFFIX_LOG_TUG">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0089" strname="STR_2_DIESEL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0090" strname="STR_2_DIESEL_CYCLOIDAL">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0091" strname="STR_STEAM">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0092" strname="STR_EMPTY">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0093" strname="STR_COASTAL_TANKER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0094" strname="STR_NAME_munkegrund_freighter">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0095" strname="STR_NAME_josephine_utility_vessel">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0096" strname="STR_NAME_banquereau_utility_vessel">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0097" strname="STR_SMALL_COASTER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0098" strname="STR_NAME_nagasaki_tanker">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0099" strname="STR_PADDLE_STEAMER">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0100" strname="STR_NAME_porcupine_thirty_hovercraft">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0101" strname="STR_LOG_TUG_BUY_MENU">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0102" strname="STR_NAME_tiree_vehicle_ferry">
+			<stamp second="1360428290"/>
+		</change>
+		<change basetext="text_0103" strname="STR_NAME_freshney_freight_barge">
+			<stamp second="1360428290"/>
+		</change>
+	</language>
+	<skeleton>
+		<grflangid/>
+		<plural/>
+		<string name="STR_GRF_NAME"/>
+		<string name="STR_GRF_DESCRIPTION"/>
+		<literal/>
+		<literal># don't translate empty string :)</literal>
+		<string name="STR_EMPTY"/>
+		<literal/>
+		<literal># parameters / action 14 stuff</literal>
+		<string name="STR_PARAM_RESET_CONSTRUCTION_COSTS"/>
+		<string name="STR_PARAM_RESET_CONSTRUCTION_COSTS_DESC"/>
+		<literal/>
+		<literal># type suffixes for vehicle names</literal>
+		<string name="STR_NAME_SUFFIX_FREIGHTER"/>
+		<string name="STR_NAME_SUFFIX_FREIGHT_BARGE"/>
+		<string name="STR_NAME_SUFFIX_TANKER"/>
+		<string name="STR_NAME_SUFFIX_TANKER_BARGE"/>
+		<string name="STR_NAME_SUFFIX_UTILITY_VESSEL"/>
+		<string name="STR_NAME_SUFFIX_UTILITY_TUG"/>
+		<string name="STR_NAME_SUFFIX_LOG_TUG"/>
+		<string name="STR_NAME_SUFFIX_FERRY"/>
+		<string name="STR_NAME_SUFFIX_HYDROFOIL"/>
+		<string name="STR_NAME_SUFFIX_CATAMARAN"/>
+		<string name="STR_NAME_SUFFIX_PADDLE_STEAMER"/>
+		<string name="STR_NAME_SUFFIX_HOVERCRAFT"/>
+		<string name="STR_NAME_SUFFIX_ISLAND_TRADER"/>
+		<literal/>
+		<literal/>
+		<literal/>
+		<literal># extra buy menu info</literal>
+		<string name="STR_BUY_MENU_TEXT"/>
+		<string name="STR_BUY_MENU_REFIT_CAPACITIES_PAX_CARGO"/>
+		<literal/>
+		<string name="STR_SMALL_GENERAL_PURPOSE_VESSEL"/>
+		<string name="STR_GENERAL_PURPOSE_VESSEL"/>
+		<string name="STR_FAST_GENERAL_PURPOSE_VESSEL"/>
+		<string name="STR_GENERAL_PURPOSE_SEA_GOING_VESSEL"/>
+		<string name="STR_SMALL_COASTER"/>
+		<string name="STR_COASTER"/>
+		<string name="STR_LARGE_COASTER"/>
+		<string name="STR_SMALL_COASTAL_TANKER"/>
+		<string name="STR_COASTAL_TANKER"/>
+		<string name="STR_LARGE_COASTAL_TANKER"/>
+		<string name="STR_CARGO_VESSEL_INLAND"/>
+		<string name="STR_TANKER_INLAND"/>
+		<string name="STR_PADDLE_STEAMER"/>
+		<string name="STR_CARGO_HOVERCRAFT"/>
+		<string name="STR_HYDROFOIL_FAST_FERRY"/>
+		<string name="STR_CATAMARAN_FAST_FERRY"/>
+		<string name="STR_VEHICLE_FERRY"/>
+		<string name="STR_JUMBO_VEHICLE_FERRY"/>
+		<string name="STR_LOG_TUG"/>
+		<literal/>
+		<string name="STR_STEAM"/>
+		<string name="STR_COMPOUND_STEAM"/>
+		<string name="STR_STEAM_TURBINE"/>
+		<string name="STR_OIL_FIRED_STEAM_ENGINE"/>
+		<string name="STR_OIL_FIRED_STEAM_TURBINE"/>
+		<string name="STR_DIESEL"/>
+		<string name="STR_2_DIESEL"/>
+		<string name="STR_2_GAS_TURBINE_JETS"/>
+		<string name="STR_2_MARINE_GAS_TURBINE"/>
+		<string name="STR_4_DIESEL"/>
+		<string name="STR_2_DIESEL_CYCLOIDAL"/>
+		<literal/>
+		<literal># specific strings for certain ships</literal>
+		<string name="STR_LOG_TUG_REFIT_SUBTYPE_0"/>
+		<string name="STR_LOG_TUG_REFIT_SUBTYPE_1"/>
+		<string name="STR_LOG_TUG_REFIT_SUBTYPE_2"/>
+		<string name="STR_LOG_TUG_BUY_MENU"/>
+		<literal/>
+		<literal/>
+		<literal># don't include any code below here in translated lang files (these are generated code blocks)</literal>
+		<literal># vehicle names</literal>
+		<literal/>
+		<string name="STR_NAME_rosario_vehicle_ferry"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_malin_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_munkegrund_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_gran_sol_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_gorky_freight_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_colorado_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_huanghai_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_volgoneft_six_thirty_tanker_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_tyskebukta_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_josephine_utility_vessel"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_banquereau_utility_vessel"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_san_juan_mark_2_vehicle_ferry"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_fastnet_paddle_steamer"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_maddelena_vehicle_ferry"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_quessant_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_sungei_catamaran"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_volgoneft_two_seventy_tanker_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_finisterre_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_island_trader"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_volgoneft_five_forty_tanker_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_kwangtung_utility_tug"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_la_orchilla_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_roland_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_lutschine_freight_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_oran_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_cadiz_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_eddystone_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_rockall_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_fiumelatte_paddle_steamer"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_tiree_vehicle_ferry"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_klyazma_hydrofoil"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_kagoshima_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_bundaberg_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_stornoway_vehicle_ferry"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_san_juan_vehicle_ferry"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_labrador_utility_vessel"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_taurus_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_fitzroy_utility_tug"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_schipbeek_freight_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_porcupine_thirty_hovercraft"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_castlepoint_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_patraikos_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_shannon_freighter"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_olympic_log_tug"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_freshney_freight_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_volgoneft_three_twenty_tanker_barge"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_nagasaki_tanker"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_eight_one_eight_hydrofoil"/>
+		<literal/>
+		<literal/>
+		<string name="STR_NAME_constance_freight_barge"/>
+		<literal/>
+		<literal/>
+	</skeleton>
+	<texts>
+		<string ref="text_0001">
+			<stamp second="1360428290"/>
+			<text>Kwangtung  {STRING}</text>
+		</string>
+		<string ref="text_0002">
+			<stamp second="1360428290"/>
+			<text>Fiumelatte  {STRING}</text>
+		</string>
+		<string ref="text_0003">
+			<stamp second="1360428290"/>
+			<text>Fastnet  {STRING}</text>
+		</string>
+		<string ref="text_0004">
+			<stamp second="1360428290"/>
+			<text>Tanker for inland waterways (rivers, canals and lakes)</text>
+		</string>
+		<string ref="text_0005">
+			<stamp second="1360428290"/>
+			<text>Vehicle ferry</text>
+		</string>
+		<string ref="text_0006">
+			<stamp second="1360428290"/>
+			<text>General purpose vessel</text>
+		</string>
+		<string ref="text_0007">
+			<stamp second="1360428290"/>
+			<text>San Juan Mark 2  {STRING}</text>
+		</string>
+		<string ref="text_0008">
+			<stamp second="1360428290"/>
+			<text>Island Trader</text>
+		</string>
+		<string ref="text_0009">
+			<stamp second="1360428290"/>
+			<text>4 diesel engines</text>
+		</string>
+		<string ref="text_0010">
+			<stamp second="1360428290"/>
+			<text>Quessant  {STRING}</text>
+		</string>
+		<string ref="text_0011">
+			<stamp second="1360428290"/>
+			<text>Gran Sol  {STRING}</text>
+		</string>
+		<string ref="text_0012">
+			<stamp second="1360428290"/>
+			<text> {STRING}</text>
+		</string>
+		<string ref="text_0013">
+			<stamp second="1360428290"/>
+			<text>Roland  {STRING}</text>
+		</string>
+		<string ref="text_0014">
+			<stamp second="1360428290"/>
+			<text>Oil-fired steam turbine</text>
+		</string>
+		<string ref="text_0015">
+			<stamp second="1360428290"/>
+			<text>(400t)</text>
+		</string>
+		<string ref="text_0016">
+			<stamp second="1360428290"/>
+			<text>Large coaster</text>
+		</string>
+		<string ref="text_0017">
+			<stamp second="1360428290"/>
+			<text>(80t)</text>
+		</string>
+		<string ref="text_0018">
+			<stamp second="1360428290"/>
+			<text>General purpose sea-going vessel</text>
+		</string>
+		<string ref="text_0019">
+			<stamp second="1360428290"/>
+			<text>Tugboat for towing floating logs</text>
+		</string>
+		<string ref="text_0020">
+			<stamp second="1360428290"/>
+			<text>Catamaran</text>
+		</string>
+		<string ref="text_0021">
+			<stamp second="1360428290"/>
+			<text>Constance  {STRING}</text>
+		</string>
+		<string ref="text_0022">
+			<stamp second="1360428290"/>
+			<text>Eddystone  {STRING}</text>
+		</string>
+		<string ref="text_0023">
+			<stamp second="1360428290"/>
+			<text>Taurus  {STRING}</text>
+		</string>
+		<string ref="text_0024">
+			<stamp second="1360428290"/>
+			<text>Volgoneft 630  {STRING}</text>
+		</string>
+		<string ref="text_0025">
+			<stamp second="1360428290"/>
+			<text>Cargo vessel for inland waterways (rivers, canals and lakes)</text>
+		</string>
+		<string ref="text_0026">
+			<stamp second="1360428290"/>
+			<text>Rosario  {STRING}</text>
+		</string>
+		<string ref="text_0027">
+			<stamp second="1360428290"/>
+			<text>Shannon  {STRING}</text>
+		</string>
+		<string ref="text_0028">
+			<stamp second="1360428290"/>
+			<text>(240t)</text>
+		</string>
+		<string ref="text_0029">
+			<stamp second="1360428290"/>
+			<text>Type: {GOLD}{STRING}{}{STRING}{BLACK}Propulsion: {GOLD}{STRING}</text>
+		</string>
+		<string ref="text_0030">
+			<stamp second="1360428290"/>
+			<text>818  {STRING}</text>
+		</string>
+		<string ref="text_0031">
+			<stamp second="1360428290"/>
+			<text>Reduces construction (and removal) costs for canals, aqueducts and locks.  Provides a better balance between water transport and other transport types.</text>
+		</string>
+		<string ref="text_0032">
+			<stamp second="1360428290"/>
+			<text>Labrador  {STRING}</text>
+		</string>
+		<string ref="text_0033">
+			<stamp second="1360428290"/>
+			<text>Tanker Barge</text>
+		</string>
+		<string ref="text_0034">
+			<stamp second="1360428290"/>
+			<text>San Juan  {STRING}</text>
+		</string>
+		<string ref="text_0035">
+			<stamp second="1360428290"/>
+			<text>Hydrofoil fast ferry</text>
+		</string>
+		<string ref="text_0036">
+			<stamp second="1360428290"/>
+			<text>Patraikos  {STRING}</text>
+		</string>
+		<string ref="text_0037">
+			<stamp second="1360428290"/>
+			<text>Finisterre  {STRING}</text>
+		</string>
+		<string ref="text_0038">
+			<stamp second="1360428290"/>
+			<text>Huanghai  {STRING}</text>
+		</string>
+		<string ref="text_0039">
+			<stamp second="1360428290"/>
+			<text>Volgoneft 540  {STRING}</text>
+		</string>
+		<string ref="text_0040">
+			<stamp second="1360428290"/>
+			<text>Hovercraft</text>
+		</string>
+		<string ref="text_0041">
+			<stamp second="1360428290"/>
+			<text>License: {SILVER}GPL v2{}{BLACK}</text>
+		</string>
+		<string ref="text_0042">
+			<stamp second="1360428290"/>
+			<text>Use improved construction costs for canals, aqueducts and locks</text>
+		</string>
+		<string ref="text_0043">
+			<stamp second="1360428290"/>
+			<text>Maddelena  {STRING}</text>
+		</string>
+		<string ref="text_0044">
+			<stamp second="1360428290"/>
+			<text>Catamaran fast ferry</text>
+		</string>
+		<string ref="text_0045">
+			<stamp second="1360428290"/>
+			<text>Rockall  {STRING}</text>
+		</string>
+		<string ref="text_0046">
+			<stamp second="1360428290"/>
+			<text>Oran  {STRING}</text>
+		</string>
+		<string ref="text_0047">
+			<stamp second="1360428290"/>
+			<text>Bundaberg  {STRING}</text>
+		</string>
+		<string ref="text_0048">
+			<stamp second="1360428290"/>
+			<text>Cargo hovercraft</text>
+		</string>
+		<string ref="text_0049">
+			<stamp second="1360428290"/>
+			<text>({COMMA} passengers or {COMMA}t of cargo){}</text>
+		</string>
+		<string ref="text_0050">
+			<stamp second="1360428290"/>
+			<text>Freighter</text>
+		</string>
+		<string ref="text_0051">
+			<stamp second="1360428290"/>
+			<text>Tyskebukta  {STRING}</text>
+		</string>
+		<string ref="text_0052">
+			<stamp second="1360428290"/>
+			<text>Paddle Steamer</text>
+		</string>
+		<string ref="text_0053">
+			<stamp second="1360428290"/>
+			<text>2 gas turbines, with water jets</text>
+		</string>
+		<string ref="text_0054">
+			<stamp second="1360428290"/>
+			<text>Stornoway  {STRING}</text>
+		</string>
+		<string ref="text_0055">
+			<stamp second="1360428290"/>
+			<text>Small coastal tanker</text>
+		</string>
+		<string ref="text_0056">
+			<stamp second="1360428290"/>
+			<text>Castlepoint  {STRING}</text>
+		</string>
+		<string ref="text_0057">
+			<stamp second="1360428290"/>
+			<text>2 marine gas turbines</text>
+		</string>
+		<string ref="text_0058">
+			<stamp second="1360428290"/>
+			<text>Fast general purpose vessel</text>
+		</string>
+		<string ref="text_0059">
+			<stamp second="1360428290"/>
+			<text>Schipbeek  {STRING}</text>
+		</string>
+		<string ref="text_0060">
+			<stamp second="1360428290"/>
+			<text>Compound steam engine</text>
+		</string>
+		<string ref="text_0061">
+			<stamp second="1360428290"/>
+			<text>Gorky  {STRING}</text>
+		</string>
+		<string ref="text_0062">
+			<stamp second="1360428290"/>
+			<text>Volgoneft 320  {STRING}</text>
+		</string>
+		<string ref="text_0063">
+			<stamp second="1360428290"/>
+			<text>Freight Barge</text>
+		</string>
+		<string ref="text_0064">
+			<stamp second="1360428290"/>
+			<text>Lutschine  {STRING}</text>
+		</string>
+		<string ref="text_0065">
+			<stamp second="1360428290"/>
+			<text>Malin  {STRING}</text>
+		</string>
+		<string ref="text_0066">
+			<stamp second="1360428290"/>
+			<text>Sungei  {STRING}</text>
+		</string>
+		<string ref="text_0067">
+			<stamp second="1360428290"/>
+			<text>Hydrofoil</text>
+		</string>
+		<string ref="text_0068">
+			<stamp second="1360428290"/>
+			<text>Tanker</text>
+		</string>
+		<string ref="text_0069">
+			<stamp second="1360428290"/>
+			<text>Diesel engine</text>
+		</string>
+		<string ref="text_0070">
+			<stamp second="1360428290"/>
+			<text>Olympic  {STRING}</text>
+		</string>
+		<string ref="text_0071">
+			<stamp second="1360428290"/>
+			<text>Volgoneft 270  {STRING}</text>
+		</string>
+		<string ref="text_0072">
+			<stamp second="1360428290"/>
+			<text>Cadiz  {STRING}</text>
+		</string>
+		<string ref="text_0073">
+			<stamp second="1360428290"/>
+			<text>Small general purpose vessel</text>
+		</string>
+		<string ref="text_0074">
+			<stamp second="1360428290"/>
+			<text>Coaster</text>
+		</string>
+		<string ref="text_0075">
+			<stamp second="1360428290"/>
+			<text>Large coastal tanker</text>
+		</string>
+		<string ref="text_0076">
+			<stamp second="1360428290"/>
+			<text>Jumbo vehicle ferry</text>
+		</string>
+		<string ref="text_0077">
+			<stamp second="1360428290"/>
+			<text>FISH FISH r938M</text>
+		</string>
+		<string ref="text_0078">
+			<stamp second="1360428290"/>
+			<text>Utility Tug</text>
+		</string>
+		<string ref="text_0079">
+			<stamp second="1360428290"/>
+			<text>Oil-fired steam engine</text>
+		</string>
+		<string ref="text_0080">
+			<stamp second="1360428290"/>
+			<text>Utility Vessel</text>
+		</string>
+		<string ref="text_0081">
+			<stamp second="1360428290"/>
+			<text>Klyazma  {STRING}</text>
+		</string>
+		<string ref="text_0082">
+			<stamp second="1360428290"/>
+			<text>Ferry</text>
+		</string>
+		<string ref="text_0083">
+			<stamp second="1360428290"/>
+			<text>La Orchilla  {STRING}</text>
+		</string>
+		<string ref="text_0084">
+			<stamp second="1360428290"/>
+			<text>Colorado  {STRING}</text>
+		</string>
+		<string ref="text_0085">
+			<stamp second="1360428290"/>
+			<text>Kagoshima  {STRING}</text>
+		</string>
+		<string ref="text_0086">
+			<stamp second="1360428290"/>
+			<text>Steam turbine</text>
+		</string>
+		<string ref="text_0087">
+			<stamp second="1360428290"/>
+			<text>Fitzroy  {STRING}</text>
+		</string>
+		<string ref="text_0088">
+			<stamp second="1360428290"/>
+			<text>Log Tug</text>
+		</string>
+		<string ref="text_0089">
+			<stamp second="1360428290"/>
+			<text>2 diesel engines</text>
+		</string>
+		<string ref="text_0090">
+			<stamp second="1360428290"/>
+			<text>2 diesel engines, with cycloidal propellors</text>
+		</string>
+		<string ref="text_0091">
+			<stamp second="1360428290"/>
+			<text>Steam engine</text>
+		</string>
+		<string ref="text_0092">
+			<stamp second="1360428290"/>
+			<text></text>
+		</string>
+		<string ref="text_0093">
+			<stamp second="1360428290"/>
+			<text>Coastal tanker</text>
+		</string>
+		<string ref="text_0094">
+			<stamp second="1360428290"/>
+			<text>Munkegrund  {STRING}</text>
+		</string>
+		<string ref="text_0095">
+			<stamp second="1360428290"/>
+			<text>Josephine  {STRING}</text>
+		</string>
+		<string ref="text_0096">
+			<stamp second="1360428290"/>
+			<text>Banquereau  {STRING}</text>
+		</string>
+		<string ref="text_0097">
+			<stamp second="1360428290"/>
+			<text>Small coaster</text>
+		</string>
+		<string ref="text_0098">
+			<stamp second="1360428290"/>
+			<text>Nagasaki  {STRING}</text>
+		</string>
+		<string ref="text_0099">
+			<stamp second="1360428290"/>
+			<text>Paddle steamer</text>
+		</string>
+		<string ref="text_0100">
+			<stamp second="1360428290"/>
+			<text>Porcupine 30  {STRING}</text>
+		</string>
+		<string ref="text_0101">
+			<stamp second="1360428290"/>
+			<text>{STRING}{}{BLACK}Refittable capacities: {GOLD}80t, 240t, 400t</text>
+		</string>
+		<string ref="text_0102">
+			<stamp second="1360428290"/>
+			<text>Tiree  {STRING}</text>
+		</string>
+		<string ref="text_0103">
+			<stamp second="1360428290"/>
+			<text>Freshney  {STRING}</text>
+		</string>
+	</texts>
 </project>
