@@ -7,6 +7,7 @@ from webtranslate.pages import projects
 from webtranslate.pages import project
 from webtranslate.pages import translation
 from webtranslate.pages import upload_language
+from webtranslate.pages import newproject
 
 def run():
     config.cfg = config.Config('config.xml')

@@ -242,6 +242,14 @@ class NewGrfData:
             return 0
         return num_plurals[self.plural]
 
+    def cleanup_skeleton(self):
+        """
+        Clean up the skeleton file, and ensure it has all language properties.
+        """
+        while len(self.skeleton) > 0 and self.skeleton[0][0] == 'literal' and self.skeleton[0][1] == '': del self.skeleton[0]
+        while len(self.skeleton) > 0 and self.skeleton[-1][0] == 'literal' and self.skeleton[-1][1] == '': del self.skeleton[-1]
+
+
 def handle_pragma(lnum, line, data, errors):
     """
     Handle a pragma line.
@@ -260,8 +268,6 @@ def handle_pragma(lnum, line, data, errors):
     """
     line = line.split()
     if line[0] == '##grflangid':
-        data.skeleton.append(('grflangid', ''))
-
         if len(line) != 2:
             errors.append((ERROR, lnum, "##grflangid takes exactly one argument"))
             return
@@ -289,8 +295,6 @@ def handle_pragma(lnum, line, data, errors):
         return
 
     if line[0] == '##plural':
-        data.skeleton.append(('plural', ''))
-
         if len(line) != 2:
             errors.append((ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
             return
@@ -305,8 +309,6 @@ def handle_pragma(lnum, line, data, errors):
         return
 
     if line[0] == '##gender':
-        data.skeleton.append(('gender', ''))
-
         if len(line) == 1:
             errors.append((ERROR, lnum, "##gender takes a non-empty list of gender names"))
             return
@@ -314,8 +316,6 @@ def handle_pragma(lnum, line, data, errors):
         return
 
     if line[0] == '##case':
-        data.skeleton.append(('case', ''))
-
         if len(line) == 1:
             errors.append((ERROR, lnum, "##case takes a non-empty list of case names"))
             return
@@ -349,6 +349,14 @@ def load_language_file(handle, max_size, errors):
     seen_strings = False
     skeleton_strings = set()
 
+    # Ensure the skeleton has all language properties.
+    data.skeleton.append(('grflangid', ''))
+    data.skeleton.append(('plural', ''))
+    data.skeleton.append(('gender', ''))
+    data.skeleton.append(('case', ''))
+    data.skeleton.append(('literal', ''))
+
+    # Read file, and process the lines.
     text = handle.read(max_size)
     if len(text) == max_size: errors.append((ERROR, None, 'File not completely read'))
     text = str(text, encoding = "utf-8")
@@ -395,6 +403,7 @@ def load_language_file(handle, max_size, errors):
     if data.language_data is None:
         errors.append((ERROR, None, 'Language file has no ##grflangid'))
 
+    data.cleanup_skeleton()
     return data
 
 ParameterInfo = collections.namedtuple('ParameterInfo', 'literal arg_count')

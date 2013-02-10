@@ -112,7 +112,7 @@ class ProjectCache:
 
         for name in os.listdir(self.project_root):
             if not name.endswith('.xml'): continue
-            name = name[:4]
+            name = name[:-4]
             path = os.path.join(self.project_root, name)
             pmd = ProjectMetaData(path, name)
             assert name not in self.projects
@@ -123,6 +123,34 @@ class ProjectCache:
             pd = pd.pdata
 
             pmd.proj_name = pd.name
+
+    def create_project(self, disk_name, proj_name):
+        """
+        Create a new project.
+
+        @param disk_name: Base name of the project at the disk.
+        @type  disk_name: C{str}
+
+        @param proj_name: Project name.
+        @type  proj_name: C{str}
+
+        @return: Error description, or nothing if creation succeeded.
+        @rtype:  C{str} or C{None}
+        """
+        if disk_name in self.projects:
+            return "A project named \"{}\" already exists".format(disk_name)
+
+        path =  os.path.join(self.project_root, disk_name)
+        if os.path.exists(path + ".xml"):
+            return "A project file named \"{}\" already exists".format(disk_name)
+
+        # Construct a new project from scratch.
+        pmd = ProjectMetaData(path, proj_name)
+        self.projects[disk_name] = pmd
+        pmd.pdata = data.Project(proj_name)
+        self.lru.append(pmd)
+        self.save_pmd(pmd)
+        return None
 
     def get_pmd(self, proj_name):
         """
@@ -216,10 +244,10 @@ class ProjectMetaData:
         self.pdata = None
 
     def save(self):
-        base_path = self.path + ".xml."
-        bpl = len(base_path)
+        base_path = self.path + ".xml"
+        bpl = len(base_path) + 1 # "projname.xml." + "<something>"
         backup_files = []
-        for fname in glob.glob(base_path + "*"):
+        for fname in glob.glob(base_path + ".*"):
             extname = fname[bpl:]
             if extname.startswith == "bup":
                 num = convert_num(extname[3:], None)
@@ -234,10 +262,11 @@ class ProjectMetaData:
             print("unlink " + fname)
             #os.unlink(fname)
 
-        print("Save project to " + self.path + " (renaming to {:02d})".format(new_num))
         data.save_file(self.pdata, self.path + ".xml.new")
-        os.rename(self.path + ".xml", self.path + ".xml.bup{:02d}".format(new_num))
-        os.rename(self.path + ".xml.new", self.path + ".xml")
+        if os.path.exists(base_path):
+            print("Save project to " + self.path + " (renaming to {:02d})".format(new_num))
+            os.rename(base_path, self.path + ".xml.bup{:02d}".format(new_num))
+        os.rename(self.path + ".xml.new", base_path)
 
 
 cfg = None
