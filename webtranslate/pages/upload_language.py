@@ -26,77 +26,177 @@ def page_post(proj_name):
     pdata = pmd.pdata
     assert pdata is not None
 
-    langfile      = request.files.langfile
-    is_existing   = request.forms.is_existing
-    override      = request.forms.override
-    base_language = request.forms.base_language
+    langfile    = request.files.langfile
+    is_existing = request.forms.is_existing
+    override    = request.forms.override
+    is_base     = request.forms.base_language
 
-    if not base_language and pdata.base_language is None:
-        abort(404, "Project has no base language")
-        return
-
+    # Missing language file in the upload.
     if not langfile or not langfile.file:
         abort(404, "Missing language file")
         return
-    # parse language file.
+
+    # Get the base language of the project.
+    if pdata.base_language is not None and pdata.base_language in pdata.languages:
+        base_language = pdata.languages[pdata.base_language]
+    else:
+        base_language = None
+
+    # Cannot download a translation without base language.
+    if not is_base and base_language is None:
+        abort(404, "Project has no base language")
+        return
+
+    # Parse language file, and report any errors.
     errors = []
     ng_data = language_file.load_language_file(langfile.file, config.cfg.language_file_size, errors)
-
     if len(errors) > 0:
         return template('upload_errors', proj_name = proj_name, errors = errors)
 
     user = None # XXX Get user
     stamp = data.make_stamp()
-    # XXX Implement the other cases as well.
-    assert base_language
-    assert not is_existing
-    assert override
 
-    if ng_data.language_data.isocode not in pdata.languages:
-        # Adding a new language.
-        result = add_new_language(ng_data, pdata, base_language)
+    lng = pdata.languages.get(ng_data.language_data.isocode)
+    if lng is None: # New language being added.
+        result = add_new_language(ng_data, pdata, is_base)
         if not result[0]:
             abort(404, result[0])
             return
         lng = result[1]
+        if is_base and base_language is None: base_language = lng
 
-    else:
-        # Updating a language
-        pass # XXX Remove old stuff
+    if is_base:
+        if base_language is not None and base_language != lng:
+            abort(404, "Cannot change a translation to a base language")
+            return
 
-    if base_language:
         # Add strings as changes.
         for sv in ng_data.strings:
-            base_text = data.Text(sv.text, sv.case, stamp)
-            chg = data.Change(sv.name, sv.case, base_text, None, stamp, user)
-            chgs = lng.changes.get(chg.string_name)
-            if chgs is None:
-                lng.changes[chg.string_name] = [chg]
+            chg = get_best_change(sv, base_language, None, True, False)
+            if chg is None: # New change.
+                base_text = data.Text(sv.text, sv.case, stamp)
+                chg = data.Change(sv.name, sv.case, base_text, None, stamp, user)
+                chgs = base_language.changes.get(sv.name)
+                if chgs is None:
+                     base_language.changes[sv.name] = [chg]
+                else:
+                    chgs.append(chg)
             else:
-                found = None
-                for c in chgs:
-                    if c.case == chg.case and c.base_text == chg.base_text:
-                        found = c # String already present.
-                        break
-                if found is not None: # Found a duplicate.
-                    if override: # Don't mind other changes at all.
-                        found.stamp = chg.stamp
-                        found.user = chg.user
-                    continue
+                if override: # Don't mind other changes at all.
+                    found.stamp = chg.stamp
+                    found.user = chg.user
 
-                chgs.append(chg)
-                continue
 
-        # XXX Incorporate loaded data in other files too.
+        pdata.skeleton = ng_data.skeleton # Use the new skeleton file.
+
+        # Push the new set of string-names to all languages (this includes the base language).
+        str_names = set(sv.name for sv in ng_data.strings)
+        for lng in pdata.languages.values():
+            not_seen = str_names.copy()
+            for sn in lng.changes.keys():
+                not_seen.discard(sn)
+                if sn in str_names: continue # Name is kept.
+                del lng.changes[sn] # Old string, delete
+            for sn in not_seen:
+                lng.changes[sn] = []
+
 
     else:
-        # Add strings as a translation.
-        pass
-        # XXX
+        # Not a base language -> it is a translation.
+        if base_language is not None and base_language == lng:
+            abort(404, "Cannot change a base language to a translation")
+            return
+
+        for sv in ng_data.strings:
+            base_text = get_newest_text(sv.name, base_language)
+            if base_text is None: continue # Nothing to base against.
+
+            lng_chg  = get_best_change(sv, lng, base_text, True, True)
+            if lng_chg is None: # It's a new text or new case.
+                lng_text = data.Text(sv.text, sv.case, stamp)
+                chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, user)
+                chgs = lng.changes.get(sv.name)
+                if chgs is None:
+                    lng.changes[sv.name] = [chg]
+                else:
+                    chgs.append(chg)
+            elif override: # Override existing entry.
+                lng_chg.stamp = stamp
+                lng_chg.user = user
+
+    # XXX remove old stuff
 
     config.cache.save_pmd(pmd)
     return template('upload_ok', proj_name = proj_name)
 
+def get_newest_text(sname, lng):
+    """
+    Get the newest version of the given string name in 'lng' (which should be a base language).
+
+    @param sname: String name.
+    @type  sname: C{str}
+
+    @param lng: Language to examine.
+    @type  lng: L{Language}
+
+    @return: The newest entry if it exists.
+    @rtype:  C{None} or C{Text}
+    """
+    chgs = lng.changes.get(sname)
+    if chgs is None or len(chgs) == 0: return None
+
+    best = None
+    for chg in chgs:
+        if chg.case is not None: continue
+        if best is None or best.stamp < chg.stamp: best = chg
+
+    if best is None: return best
+    return best.base_text
+
+
+def get_best_change(sv, lng, base_text, check_case, search_new):
+    """
+    Get the best matching change in a language for a given string value.
+    (string and case should match, and the newest time stamp)
+
+    @param sv: String value to match.
+    @type  sv: L{StringValue}
+
+    @param lng: Language to examine.
+    @type  lng: L{Language}
+
+    @param base_text: Base text to match (if set).
+    @type  base_text: C{None} or C{Text}
+
+    @param check_case: If set, the case should match. If unset, the case must be C{None}
+    @type  check_case: C{bool}
+
+    @param search_new: If set, search the 'new_text' field, else search the 'base_text' field of the changes.
+    @type  search_new: C{bool}
+
+    @return: The best change, if a matching change was found.
+    @rtype:  C{None} or L{Change}
+    """
+    assert lng is not None
+    chgs = lng.changes.get(sv.name)
+    if chgs is None or len(chgs) == 0: return None
+
+    best = None
+    for chg in chgs:
+        if check_case:
+            if sv.case != chg.case: continue
+        else:
+            if chg.case is not None: continue
+
+        if search_new:
+            if base_text is not None and chg.base_text != base_text: continue
+            if chg.new_text is None or sv.text != chg.new_text: continue
+        else:
+            if sv.text != chg.base_text: continue
+
+        if best is None or best.stamp < chg.stamp: best = chg
+
+    return best
 
 def add_new_language(ng_data, pdata, base_lang):
     """
@@ -130,9 +230,13 @@ def add_new_language(ng_data, pdata, base_lang):
     pdata.languages[lng.name] = lng
 
     # Make it a base language if needed.
-    if base_language:
+    if base_lang:
         pdata.base_language = lng.name
         pdata.skeleton = ng_data.skeleton
+
+    # Add the current string names to the new language.
+    for stp, sparam in pdata.skeleton:
+        if stp == 'string': lng.changes[sparam] = []
 
     return (True, lng)
 

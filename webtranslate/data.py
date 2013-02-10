@@ -3,6 +3,7 @@ Project data.
 """
 import time
 from xml.dom import minidom
+from xml.dom.minidom import Node
 from webtranslate import loader
 
 def load_file(fname):
@@ -242,7 +243,7 @@ def load_project(xloader, node):
     project.languages = {}
     for lnode in langnodes:
         lng = load_language(xloader, lnode)
-        project.languages[name] = lng
+        project.languages[lng.name] = lng
 
     baselang = loader.get_opt_DOMattr(node, 'baselang', None)
     if baselang is None or baselang not in project.languages:
@@ -276,6 +277,7 @@ def load_skeleton(xloader, node):
     assert node.tagName == 'skeleton'
     skeleton = []
     for lnode in node.childNodes:
+        if lnode.nodeType != Node.ELEMENT_NODE: continue
         if lnode.tagName == 'literal':
             text = loader.collect_text_DOM(lnode)
             skeleton.append(('literal', text))
@@ -385,7 +387,7 @@ def save_language(xsaver, lang):
     # Paranoia check, genders and cases should not have white space in them.
     for g in lang.gender:
         assert " " not in g
-    for c in lang.cases:
+    for c in lang.case:
         assert " " not in c
 
     node = xsaver.doc.createElement('language')
@@ -394,8 +396,8 @@ def save_language(xsaver, lang):
     node.setAttribute('plural', str(lang.plural))
     if len(lang.gender) > 0:
         node.setAttribute('gender', " ".join(lang.gender))
-    if len(lang.cases) > 0:
-        node.setAttribute('cases', " ".join(lang.cases))
+    if len(lang.case) > 0:
+        node.setAttribute('cases', " ".join(lang.case))
     for chgs in lang.changes.values():
         for chg in chgs:
             cnode = save_change(xsaver, chg)
@@ -518,7 +520,7 @@ def load_change(xloader, node):
     @rtype:  L{Change}
     """
     assert node.tagName == 'change'
-    strname = node.getAttribute('change')
+    strname = node.getAttribute('strname')
     case = loader.get_opt_DOMattr(node, 'case', None)
     user = loader.get_opt_DOMattr(node, 'user', None)
     base_text = get_text(xloader, node.getAttribute('basetext'))
@@ -594,6 +596,15 @@ class Stamp:
     def __init__(self, seconds, number):
         self.seconds = seconds
         self.number = number
+
+    def __lt__(self, other):
+        if not isinstance(other, Stamp): return False
+        return self.seconds < other.seconds or \
+               (self.seconds == other.seconds and self.number < other.number)
+
+    def __eq__(self, other):
+        if not isinstance(other, Stamp): return False
+        return self.seconds == other.seconds and self.number == other.number
 
 last_stamp = 0 # A loooooong time ago.
 last_index = -1
