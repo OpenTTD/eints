@@ -1,30 +1,37 @@
 <html>
 <head>
-<title>Web translator - {{proj_name}}</title>
+<title>Web translator - {{pdata.name}}</title>
 </head>
 <body>
-<h1>Web translator - {{proj_name}}</h1>
-<p>Web translator project page of {{proj_name}}.
-<p><strong>Website</strong>: <a href="http://example.org/website">website</a><br>
-<strong>Project owner</strong>: Someone<br>
-<strong>Number of strings</strong>: 11<br>
-<strong>Base language</strong>: UK English
-<p>
-Translations:
-<table border="1">
-<tr><th rowspan="2">Language<th colspan="5">Strings</tr>
-<tr><th>Missing<th>Invalid<th>Outdated<th>Correct<th>Total</tr>
-<tr><td><a href="/translation/{{proj_name}}/german">German</a><td>0<td>1<td>2<td>8<td>80%</tr>
-<tr><td><a href="/translation/{{proj_name}}/dutch">Dutch</a><td>1<td>4<td>0<td>7<td>70%</tr>
-</table>
-<p>Where <em>missing</em> means no translation could be found, <em>invalid</em>
-means a translation exists, but its string parameters do not match with the
-base language, <em>outdated</em> means a valid translation exists, but it needs
-review as a newer base language text exists, and <em>correct</em> means the
-string is technically correct and up to date.
+<h1>Overview of project {{pdata.name}}</h1>
+<p>Web translator project page of {{pdata.name}}.
+<p><strong>Number of languages</strong>: {{len(pdata.languages)}}<br>
+% if base_lng is None:
+    <strong>Base language</strong>: None
+% else:
+    <strong>Base language</strong>: {{base_lng.name}}<br>
+    <strong>Number of strings</strong>: {{len(base_lng.changes)}}
+% end
+% if len(pdata.languages) > 0:
+    <p>
+    <table border="1">
+    <tr><th>Language</tr>
+    <tr><td><a href="/translation/{{pdata.name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</tr>
+    % for lngname, lng in sorted(pdata.languages.items()):
+        % if lng != base_lng:
+            <tr><td><a href="/translation/{{lngname}}/{{lngname}}">{{lngname}}</a> (translation)</tr>
+        % end
+    %end
+    </table>
+    <p>Where <em>missing</em> means no translation could be found, <em>invalid</em>
+    means a translation exists, but its string parameters do not match with the
+    base language, <em>outdated</em> means a valid translation exists, but it needs
+    review as a newer base language text exists, and <em>correct</em> means the
+    string is technically correct and up to date.
+%end
 <p>
 <ul>
-<li><a href="/upload/{{proj_name}}">Upload language</a>
+<li><a href="/upload/{{pdata.name}}">Upload language</a>
 <li>Download language
 <li>Add translation language
 <li>Remove translation language
