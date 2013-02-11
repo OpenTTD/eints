@@ -36,6 +36,27 @@ def save_file(proj, fname):
     handle.write(doc.toprettyxml())
     handle.close()
 
+def get_newest_change(chgs, case):
+    """
+    Get the newest change matching the case.
+
+    @param chgs: Changes to select from.
+    @type  chgs: C{list} of L{Change}
+
+    @param case: Case to match.
+    @type  case: C{str} or C{None}
+
+    @return: The newest change, if available.
+    @rtype:  C{Change} or C{None}
+    """
+    best = None
+    for chg in chgs:
+        if chg.case != case: continue
+        if best is None or best.stamp < chg.stamp: best = chg
+
+    return best
+
+
 # {{{ class XmlLoader:
 class XmlLoader:
     """

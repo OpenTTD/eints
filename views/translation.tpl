@@ -1,18 +1,17 @@
 <html>
 <head>
-<title>Web translator - {{language}}</title>
+<title>{{language}} translation of "{{project}}"</title>
 </head>
 <body>
-<h1>{{language}} translation of {{project}}</h1>
-<p><a href="#missing">Missing entries</a><br>
-<a href="#invalid">Invalid entries</a><br>
-<a href="#outdated">Outdated entries</a><br>
-
-<h2><a link="missing">Missing entries</h2>
-There are no missing entries.
-
-<h2><a link="invalid">Invalid entries</h2>
-There are no invalid entries.
-
-<h2><a link="outdated">Outdated entries</h2>
-There are no outdated entries.
+<h1>Translation of {{blng.name}} to {{language}} in "{{project}}"</h1>
+% for sname, bchg, case_lst in strings:
+    <h3>{{sname}}</h3>
+    <table border="1">
+    <tr><th>State<th>Case<th>Text</tr>
+    % for cname, state, chg in case_lst:
+        <tr><td>{{state}}<td>{{cname}}<td>{{'-' if chg is None else chg.new_text.text}}</tr>
+    % end
+    </table>
+% end
+</body>
+</html>

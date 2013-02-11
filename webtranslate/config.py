@@ -37,7 +37,7 @@ def convert_num(txt, default):
     """
     m = re.match("\\d+$", txt)
     if not m: return default
-    return int(txt)
+    return int(txt, 10)
 
 
 class Config:
@@ -249,12 +249,12 @@ class ProjectMetaData:
         backup_files = []
         for fname in glob.glob(base_path + ".*"):
             extname = fname[bpl:]
-            if extname.startswith == "bup":
+            if extname.startswith("bup"):
                 num = convert_num(extname[3:], None)
                 if num is not None: backup_files.append((num, fname))
         backup_files.sort()
         if len(backup_files) > 0:
-            new_num = backup_files[-1][0] % 100
+            new_num = (backup_files[-1][0] % 100) + 1
         else:
             new_num = 0
         if cfg.num_backup_files > 0: backup_files = backup_files[:-cfg.num_backup_files]

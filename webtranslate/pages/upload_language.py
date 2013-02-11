@@ -104,9 +104,11 @@ def page_post(proj_name):
             return
 
         for sv in ng_data.strings:
-            base_text = get_newest_text(sv.name, base_language)
-            if base_text is None: continue # Nothing to base against.
-
+            chgs = base_language.changes.get(sv.name)
+            if chgs is None: continue # Translation has a string not in the base language
+            chg = data.get_newest_change(chgs, None)
+            if chg is None: continue # Nothing to base against.
+            base_text = chg.base_text
             lng_chg  = get_best_change(sv, lng, base_text, True, True)
             if lng_chg is None: # It's a new text or new case.
                 lng_text = data.Text(sv.text, sv.case, stamp)
@@ -124,30 +126,6 @@ def page_post(proj_name):
 
     config.cache.save_pmd(pmd)
     return template('upload_ok', proj_name = proj_name)
-
-def get_newest_text(sname, lng):
-    """
-    Get the newest version of the given string name in 'lng' (which should be a base language).
-
-    @param sname: String name.
-    @type  sname: C{str}
-
-    @param lng: Language to examine.
-    @type  lng: L{Language}
-
-    @return: The newest entry if it exists.
-    @rtype:  C{None} or C{Text}
-    """
-    chgs = lng.changes.get(sname)
-    if chgs is None or len(chgs) == 0: return None
-
-    best = None
-    for chg in chgs:
-        if chg.case is not None: continue
-        if best is None or best.stamp < chg.stamp: best = chg
-
-    if best is None: return best
-    return best.base_text
 
 
 def get_best_change(sv, lng, base_text, check_case, search_new):

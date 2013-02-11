@@ -15,5 +15,5 @@ def project(proj_name):
 
     pdata = pmd.pdata
     base_lng = pdata.get_base_language()
-    return template('project', pdata = pdata, base_lng = base_lng)
+    return template('project', proj_name = proj_name, pdata = pdata, base_lng = base_lng)
 

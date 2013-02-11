@@ -16,10 +16,10 @@
     <p>
     <table border="1">
     <tr><th>Language</tr>
-    <tr><td><a href="/translation/{{pdata.name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</tr>
+    <tr><td><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</tr>
     % for lngname, lng in sorted(pdata.languages.items()):
         % if lng != base_lng:
-            <tr><td><a href="/translation/{{lngname}}/{{lngname}}">{{lngname}}</a> (translation)</tr>
+            <tr><td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)</tr>
         % end
     %end
     </table>
@@ -31,7 +31,7 @@
 %end
 <p>
 <ul>
-<li><a href="/upload/{{pdata.name}}">Upload language</a>
+<li><a href="/upload/{{proj_name}}">Upload language</a>
 <li>Download language
 <li>Add translation language
 <li>Remove translation language
