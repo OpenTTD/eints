@@ -222,6 +222,17 @@ class Project:
 
         self.skeleton = []
 
+    def get_base_language(self):
+        """
+        Get the base language of the project.
+
+        @return: The base language of the project, if it exists.
+        @rtype:  L{Language} or C{None}
+        """
+        if self.base_language is None: return None
+        return self.languages.get(self.base_language)
+
+
 def load_project(xloader, node):
     """
     Load a project node from the Xml file.
@@ -303,8 +314,9 @@ def save_project(xsaver, proj):
     """
     node = xsaver.doc.createElement('project')
     node.setAttribute('name', proj.name)
-    if proj.base_language is not None:
-        node.setAttribute('baselang', proj.base_language)
+    blng = proj.get_base_language()
+    if blng is not None:
+        node.setAttribute('baselang', blng.name)
 
     for lang in proj.languages.values():
         lnode = save_language(xsaver, lang)

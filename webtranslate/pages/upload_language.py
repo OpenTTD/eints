@@ -36,11 +36,7 @@ def page_post(proj_name):
         abort(404, "Missing language file")
         return
 
-    # Get the base language of the project.
-    if pdata.base_language is not None and pdata.base_language in pdata.languages:
-        base_language = pdata.languages[pdata.base_language]
-    else:
-        base_language = None
+    base_language = pdata.get_base_language()
 
     # Cannot download a translation without base language.
     if not is_base and base_language is None:

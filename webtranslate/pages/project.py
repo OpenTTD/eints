@@ -14,10 +14,6 @@ def project(proj_name):
         return
 
     pdata = pmd.pdata
-    if pdata.base_language is None:
-        base_lng = None
-    else:
-        base_lng = pdata.languages[pdata.base_language]
-
+    base_lng = pdata.get_base_language()
     return template('project', pdata = pdata, base_lng = base_lng)
 
