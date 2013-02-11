@@ -44,4 +44,4 @@ def project(project, language):
             cstrs.append((c, 'unknown', tc[0]))
         strings.append((sname, bchg, cstrs))
 
-    return template('translation', project = project, language = language, blng = blng, strings = strings)
+    return template('translation', proj_name = project, pdata = pdata, language = language, blng = blng, strings = strings)
