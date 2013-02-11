@@ -9,7 +9,7 @@
     <table border="1">
     <tr><th>State<th>Case<th>Text</tr>
     % for cname, state, chg in case_lst:
-        <tr><td>{{state}}<td>{{cname}}<td>{{'-' if chg is None else chg.new_text.text}}</tr>
+        <tr><td>{{state}}<td>{{'none' if not cname else cname}}<td>{{'-' if chg is None else chg.new_text.text}}</tr>
     % end
     </table>
 % end

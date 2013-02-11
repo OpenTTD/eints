@@ -199,7 +199,7 @@ def add_new_language(ng_data, pdata, base_lang):
     lng.grflangid = ng_data.grflangid
     lng.plural = ng_data.plural
     lng.gender = ng_data.gender
-    lng.cases  = ng_data.case
+    lng.case   = ng_data.case
     lng.changes = {}
     pdata.languages[lng.name] = lng
 

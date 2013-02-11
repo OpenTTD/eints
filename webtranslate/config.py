@@ -184,7 +184,7 @@ class ProjectCache:
         while size >= self.cache_size and i >= 0:
             # XXX If project is locked, skip it.
             assert self.lru[i].pdata is not None
-            print("Dropping project " + self.lru[i].pdata.path)
+            print("Dropping project " + self.lru[i].path)
             self.lru[i].unload()
             self.lru[i] = None
             size = size - 1

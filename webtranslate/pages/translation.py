@@ -30,8 +30,7 @@ def project(project, language):
 
         # Get the newest version in the translation, for all cases.
         cases = {}
-        if len(lng.case) > 0:
-            cases = dict((c, [None]) for c in lng.case)
+        if len(lng.case) > 0: cases = dict((c, [None]) for c in lng.case)
         cases[None] = [None]
 
         for chg in lng.changes.get(sname, []):
@@ -39,9 +38,10 @@ def project(project, language):
             if tc[0] is None or tc[0].stamp < chg.stamp: tc[0] = chg
 
         cstrs = []
-        for c, tc in sorted(cases.items()):
-            if c is None: c = 'none'
+        for c, tc in cases.items():
+            if c is None: c = ''
             cstrs.append((c, 'unknown', tc[0]))
+        cstrs.sort()
         strings.append((sname, bchg, cstrs))
 
     return template('translation', proj_name = project, pdata = pdata, language = language, blng = blng, strings = strings)
