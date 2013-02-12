@@ -5,6 +5,7 @@ import time
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from webtranslate import loader
+from webtranslate.newgrf import language_file
 
 def load_file(fname):
     """
@@ -55,6 +56,98 @@ def get_newest_change(chgs, case):
         if best is None or best.stamp < chg.stamp: best = chg
 
     return best
+
+
+def get_all_newest_changes(chgs, cases):
+    """
+    Get the newest changes for all cases.
+
+    @param chgs: Changes to select from.
+    @type  chgs: C{list} of L{Change}
+
+    @param cases: Available cases.
+    @type  cases: C{list} of C{str}
+
+    @return: Newest change for each case (for as far as it exists in the given L{chgs}).
+    @rtype:  C{dict} of C{str} to (L{Change} or C{None}
+    """
+    cases = dict((c, None) for c in cases)
+    cases[''] = None
+
+    for chg in chgs:
+        if chg.case is None:
+            cc = ''
+        else:
+            cc = chg.case
+
+        if cc in cases:
+            if cases[cc] is None or cases[cc].stamp < chg.stamp:
+                cases[cc] = chg
+    return cases
+
+MISSING_OK =  0 # String is missing, but that's allowed (non-default case string).
+UP_TO_DATE =  1 # String is newer than the base string.
+OUT_OF_DATE = 2 # String is older than the base string.
+INVALID =     3 # String is invalid relative to the base string.
+MISSING =     4 # The default case string is missing.
+
+def get_base_string_info(text):
+    """
+    Get the newgrf string information about the given text.
+    Assume the string is from the base language.
+
+    @param text: String to examine.
+    @type  text: C{str}
+
+    @return: String information.
+    @rtype:  L{NewGrfStringInfo}
+    """
+    return language_file.get_base_string_info(text)
+
+
+def decide_all_string_status(base_chg, lng_chgs, lng, base_string_info = None):
+    """
+    Decide the state of all the cases of the string based on the information of L{base_chg} and
+    the L{lng_chgs}.
+
+    @param base_chg: Newest version of the string in the base language.
+    @type  base_chg: L{Change}
+
+    @param lng_chgs: Newest version of the string in the translation, for all cases.
+    @type  lng_chgs: C{dict} of C{str} to (L{Change} or C{None}
+
+    @param lng: Language.
+    @type  lng: L{Language}
+
+    @param base_string_info: Optional string information of the base language.
+                             Use L{get_base_string_info} to get the information.
+    @type  base_string_info: C{None} or L{NewGrfStringInfo}
+
+    @return: Info about each case.
+    @rtype:  C{dict} of C{str} to C{int})
+    """
+    base_text = base_chg.base_text
+
+    results = {}
+    for case, chg in lng_chgs.items():
+        if chg is None:
+            results[case] = MISSING if case == '' else MISSING_OK
+            continue
+
+        if chg.new_text != base_text and chg.stamp < base_text.stamp:
+            state = OUT_OF_DATE
+        else:
+            state = UP_TO_DATE
+
+        if base_string_info is None:
+            base_string_info = get_base_string_info(base_text.text)
+        lng_string_info = language_file.get_translation_string_info(chg.new_text.text, lng)
+        if not language_file.compare_info(base_string_info, lng_string_info):
+            state = INVALID
+
+        results[case] = state
+
+    return results
 
 
 # {{{ class XmlLoader:
@@ -220,6 +313,12 @@ class Project:
 
     @ivar name: Project name.
     @type name: C{str}
+
+    @ivar statistics: Statistics for all strings in all languages. Managed by the project
+                      meta-data, not stored in the project.
+                      Mapping of language name to string name to list of case and state, where
+                      the state is UP_TO_DATE, OUT_OF_DATE, INVALID, MISSING_OK, or MISSING.
+    @type statistics: C{dict} of C{str} to C{dict} of C{str} to C{list} of (C{str}, C{int})
 
     @ivar languages: Languages of the project ordered by name (isocode).
     @type languages: C{dict} of C{str} to L{Language}

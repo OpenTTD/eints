@@ -14,6 +14,7 @@ gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
 argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 
+# {{{ class StringValue:
 class StringValue:
     """
     Value of a string.
@@ -189,7 +190,8 @@ class StringValue:
             errors.append((ERROR, self.lnum, "Unknown {...} command found in the string"))
             return False
 
-
+# }}}
+# {{{ class NewGrfData:
 class NewGrfData:
     """
     Data of a NewGRF language.
@@ -249,7 +251,8 @@ class NewGrfData:
         while len(self.skeleton) > 0 and self.skeleton[0][0] == 'literal' and self.skeleton[0][1] == '': del self.skeleton[0]
         while len(self.skeleton) > 0 and self.skeleton[-1][0] == 'literal' and self.skeleton[-1][1] == '': del self.skeleton[-1]
 
-
+# }}}
+# {{{ def handle_pragma(lnum, line, data, errors):
 def handle_pragma(lnum, line, data, errors):
     """
     Handle a pragma line.
@@ -324,11 +327,12 @@ def handle_pragma(lnum, line, data, errors):
 
     errors.append((ERROR, lnum, "Unknown pragma '{}'".format(line[0])))
     return
-
+# }}}
 
 string_pat = re.compile('^([A-Za-z_0-9]+)(.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
 bom = codecs.BOM_UTF8.decode('utf-8')
 
+# {{{ def load_language_file(handle, max_size, errors):
 def load_language_file(handle, max_size, errors):
     """
     Load a language file.
@@ -406,6 +410,8 @@ def load_language_file(handle, max_size, errors):
     data.cleanup_skeleton()
     return data
 
+# }}}
+# {{{ PARAMETERS
 ParameterInfo = collections.namedtuple('ParameterInfo', 'literal arg_count')
 
 _PARAMETERS = [
@@ -457,3 +463,50 @@ _PARAMETERS = [
 ]
 
 PARAMETERS = dict((x.literal, x) for x in _PARAMETERS)
+
+# }}}
+
+def get_base_string_info(text):
+    """
+    Get the information about the used parameters from a string in the base language.
+
+    @param text: String to examine.
+    @type  text: C{str}
+
+    @return: Information about the used string parameters.
+    @rtype:  L{NewGrfStringInfo}
+    """
+    # XXX Implement me
+    return None
+
+def get_translation_string_info(text, lng):
+    """
+    Get the information about the used parameters from a string in a translation.
+
+    @param text: String to examine.
+    @type  text: C{str}
+
+    @param lng: Language containing the string.
+    @type  lng: L{Language}
+
+    @return: Information about the used string parameters.
+    @rtype:  L{NewGrfStringInfo}
+    """
+    # XXX Implement me
+    return None
+
+def compare_info(base_info, lng_info):
+    """
+    Compare both string uses with each other.
+
+    @param base_info: Information about string parameters from the base language.
+    @type  base_info: L{NewGrfStringInfo}
+
+    @param lng_info: Information about string parameters from the translation.
+    @type  lng_info: L{NewGrfStringInfo}
+
+    @return: Whether both parameter uses are compatible.
+    @rtype:  C{bool}
+    """
+    return True # XXX Implement me
+

@@ -148,6 +148,7 @@ class ProjectCache:
         pmd = ProjectMetaData(path, proj_name)
         self.projects[disk_name] = pmd
         pmd.pdata = data.Project(proj_name)
+        pmd.create_statistics()
         self.lru.append(pmd)
         self.save_pmd(pmd)
         return None
@@ -199,6 +200,7 @@ class ProjectCache:
         self.lru = lru
 
         pmd.load()
+        pmd.create_statistics()
         print("Loading project " + pmd.path)
         return pmd
 
@@ -212,7 +214,6 @@ class ProjectCache:
         pmd.save()
 
 
-
 class ProjectMetaData:
     """
     Some project meta data for the translation service.
@@ -223,6 +224,9 @@ class ProjectMetaData:
     @ivar name: Name of the project (basename).
     @type name: C{str}
 
+    @ivar overview: Overview of the state of the strings in each language, ordered by language name.
+    @type overview: C{dict} of C{str} to [#UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
+
     @ivar proj_name: Project name for humans.
     @type proj_name: C{str}
 
@@ -232,6 +236,7 @@ class ProjectMetaData:
     def __init__(self, path, name):
         self.pdata = None
         self.name = name
+        self.overview = {}
         self.proj_name = name # Temporary
         self.path = path
 
@@ -267,6 +272,71 @@ class ProjectMetaData:
             print("Save project to " + self.path + " (renaming to {:02d})".format(new_num))
             os.rename(base_path, self.path + ".xml.bup{:02d}".format(new_num))
         os.rename(self.path + ".xml.new", base_path)
+
+    def create_statistics(self, parm_lng = None):
+        """
+        Construct overview statistics of the project.
+
+        @param parm_lng: If specified only update the provided language. Otherwise, update all translations.
+        @type  parm_lng: C{Language} or C{None}
+        """
+        pdata = self.pdata
+
+        blng = pdata.get_base_language()
+        if blng is None:
+            pdata.statistics = {}
+            return
+
+        # First construct detailed information in the project
+        if parm_lng is None or parm_lng is blng: # Update all languages.
+            pdata.statistics = {}
+
+        for sname, bchgs in blng.changes.items():
+            bchg = data.get_newest_change(bchgs, None)
+            binfo = data.get_base_string_info(bchg.base_text.text)
+
+            if parm_lng is None or parm_lng is blng: # Update all languages.
+                lngs = pdata.languages.items()
+            else:
+                lngs = [parm_lng.name, parm_lng] # Update just 'parm_lng'
+
+            for lname, lng in lngs:
+                if lng is blng: continue
+                # Get the pdata.statistics[lname][sname] list.
+                lstat = pdata.statistics.get(lname)
+                if lstat is None:
+                    lstat = {}
+                    pdata.statistics[lname] = lstat
+                sstat = lstat.get(sname)
+                if sstat is None:
+                    sstat = []
+                    lstat[sname] = sstat
+
+                chgs = lng.changes.get(sname)
+                if chgs is None: # No translation at all
+                    sstat[:] = [('', data.MISSING)]
+                    continue
+
+                chgs = data.get_all_newest_changes(chgs, lng.case)
+                detailed_state = data.decide_all_string_status(bchg, chgs, lng, binfo)
+                sstat[:] = sorted(detailed_state.items())
+
+        # Construct overview statistics for each language.
+        up_to_date = data.UP_TO_DATE
+        if parm_lng is None or parm_lng is blng: # Update all languages.
+            lngs = pdata.languages.items()
+            self.overview = {}
+        else:
+            lngs = [parm_lng.name, parm_lng] # Update just 'parm_lng'
+
+        for lname, lng in lngs:
+            if lng is blng: continue
+            counts = [0, 0, 0, 0] # UP_TO_DATE, OUT_OF_DATE, INVALID, MISSING
+            for sname in blng.changes:
+                state = max(s[1] for s in pdata.statistics[lname][sname])
+                if state >= up_to_date: counts[state - up_to_date] = counts[state - up_to_date] + 1
+            self.overview[lname] = counts
+
 
 
 cfg = None

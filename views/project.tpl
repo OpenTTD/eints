@@ -11,16 +11,14 @@
 % else:
     <strong>Base language</strong>: {{base_lng.name}}<br>
     <strong>Number of strings</strong>: {{len(base_lng.changes)}}
-% end
-% if len(pdata.languages) > 0:
+
     <p>
     <table border="1">
-    <tr><th>Language</tr>
-    <tr><td><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</tr>
-    % for lngname, lng in sorted(pdata.languages.items()):
-        % if lng != base_lng:
-            <tr><td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)</tr>
-        % end
+    <tr><th colspan="5">Language</tr>
+    <tr><td colspan="5"><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</tr>
+    % for lngname, counts in transl:
+        <tr><td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)
+            <td>{{counts[0]}}<td>{{counts[1]}}<td>{{counts[2]}}<td>{{counts[3]}}</tr>
     %end
     </table>
     <p>Where <em>missing</em> means no translation could be found, <em>invalid</em>

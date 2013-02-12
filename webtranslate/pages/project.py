@@ -15,5 +15,18 @@ def project(proj_name):
 
     pdata = pmd.pdata
     base_lng = pdata.get_base_language()
-    return template('project', proj_name = proj_name, pdata = pdata, base_lng = base_lng)
+    transl = []
+    for lname, lng in pdata.languages.items():
+        if lng is base_lng: continue
+
+        counts =  pmd.overview.get(lname)
+        if counts is not None:
+            counts = [str(n) for n in counts]
+        else:
+            counts = ['?', '?', '?', '?']
+
+        transl.append((lname, counts))
+
+    transl.sort()
+    return template('project', proj_name = proj_name, pdata = pdata, transl = transl, base_lng = base_lng)
 
