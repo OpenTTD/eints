@@ -86,12 +86,13 @@ def get_all_newest_changes(chgs, cases):
     return cases
 
 MISSING_OK =  0 # String is missing, but that's allowed (non-default case string).
-UP_TO_DATE =  1 # String is newer than the base string.
-OUT_OF_DATE = 2 # String is older than the base string.
-INVALID =     3 # String is invalid relative to the base string.
-MISSING =     4 # The default case string is missing.
+UNKNOWN =     1 # String has unknown state.
+UP_TO_DATE =  2 # String is newer than the base string.
+OUT_OF_DATE = 3 # String is older than the base string.
+INVALID =     4 # String is invalid relative to the base string.
+MISSING =     5 # The default case string is missing.
 
-def get_base_string_info(text):
+def get_base_string_info(text, lng):
     """
     Get the newgrf string information about the given text.
     Assume the string is from the base language.
@@ -99,13 +100,19 @@ def get_base_string_info(text):
     @param text: String to examine.
     @type  text: C{str}
 
+    @param lng: Language.
+    @type  lng: L{Language}
+
     @return: String information.
     @rtype:  L{NewGrfStringInfo}
     """
-    return language_file.get_base_string_info(text)
+    errors = []
+    result = language_file.get_base_string_info(text, lng, errors)
+    assert (errors and not result) or (not errors and result) # Either we get an error or we get a result
+    return result
 
 
-def decide_all_string_status(base_chg, lng_chgs, lng, base_string_info = None):
+def decide_all_string_status(base_chg, lng_chgs, lng, base_string_info):
     """
     Decide the state of all the cases of the string based on the information of L{base_chg} and
     the L{lng_chgs}.
@@ -119,9 +126,9 @@ def decide_all_string_status(base_chg, lng_chgs, lng, base_string_info = None):
     @param lng: Language.
     @type  lng: L{Language}
 
-    @param base_string_info: Optional string information of the base language.
-                             Use L{get_base_string_info} to get the information.
-    @type  base_string_info: C{None} or L{NewGrfStringInfo}
+    @param base_string_info: String information of the base language
+                             (obtained from L{get_base_string_info}).
+    @type  base_string_info: L{NewGrfStringInfo}
 
     @return: Info about each case.
     @rtype:  C{dict} of C{str} to C{int})
@@ -139,9 +146,9 @@ def decide_all_string_status(base_chg, lng_chgs, lng, base_string_info = None):
         else:
             state = UP_TO_DATE
 
-        if base_string_info is None:
-            base_string_info = get_base_string_info(base_text.text)
-        lng_string_info = language_file.get_translation_string_info(chg.new_text.text, lng)
+        errors = []
+        lng_string_info = language_file.get_translation_string_info(chg.new_text.text, case, base_string_info.extra_commands, lng, errors)
+        assert (not errors and lng_string_info) or (errors and not lng_string_info)
         if not language_file.compare_info(base_string_info, lng_string_info):
             state = INVALID
 
@@ -337,6 +344,7 @@ class Project:
     """
     def __init__(self, name):
         self.name = name
+        self.statistics = {}
         self.languages = {}
         self.base_language = None
 

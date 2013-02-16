@@ -79,8 +79,8 @@ def page_post(proj_name):
                     chgs.append(chg)
             else:
                 if override: # Don't mind other changes at all.
-                    found.stamp = chg.stamp
-                    found.user = chg.user
+                    chg.stamp = sv.stamp
+                    chg.user = sv.user
 
 
         pdata.skeleton = ng_data.skeleton # Use the new skeleton file.

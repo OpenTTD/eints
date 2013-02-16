@@ -273,6 +273,7 @@ class ProjectMetaData:
             os.rename(base_path, self.path + ".xml.bup{:02d}".format(new_num))
         os.rename(self.path + ".xml.new", base_path)
 
+
     def create_statistics(self, parm_lng = None):
         """
         Construct overview statistics of the project.
@@ -283,17 +284,26 @@ class ProjectMetaData:
         pdata = self.pdata
 
         blng = pdata.get_base_language()
-        if blng is None:
-            pdata.statistics = {}
-            return
+        if blng is None: return
 
-        # First construct detailed information in the project
+
         if parm_lng is None or parm_lng is blng: # Update all languages.
             pdata.statistics = {}
 
+        # Get the pdata.statistics[lname] map for the base language.
+        bstat = pdata.statistics.get(pdata.base_language)
+        if bstat is None:
+            bstat = {}
+            pdata.statistics[pdata.base_language] = bstat
+
+        # First construct detailed information in the project
         for sname, bchgs in blng.changes.items():
             bchg = data.get_newest_change(bchgs, None)
-            binfo = data.get_base_string_info(bchg.base_text.text)
+            binfo = data.get_base_string_info(bchg.base_text.text, blng)
+            if binfo:
+                bstat[sname] = [('', data.UP_TO_DATE)]
+            else:
+                bstat[sname] = [('', data.INVALID)]
 
             if parm_lng is None or parm_lng is blng: # Update all languages.
                 lngs = pdata.languages.items()
@@ -312,6 +322,10 @@ class ProjectMetaData:
                     sstat = []
                     lstat[sname] = sstat
 
+                if binfo is None: # Base string is broken, cannot judge translations.
+                    sstat[:] = [('', data.UNKNOWN)]
+                    continue
+
                 chgs = lng.changes.get(sname)
                 if chgs is None: # No translation at all
                     sstat[:] = [('', data.MISSING)]
@@ -322,7 +336,7 @@ class ProjectMetaData:
                 sstat[:] = sorted(detailed_state.items())
 
         # Construct overview statistics for each language.
-        up_to_date = data.UP_TO_DATE
+        unknown = data.UNKNOWN
         if parm_lng is None or parm_lng is blng: # Update all languages.
             lngs = pdata.languages.items()
             self.overview = {}
@@ -330,11 +344,11 @@ class ProjectMetaData:
             lngs = [parm_lng.name, parm_lng] # Update just 'parm_lng'
 
         for lname, lng in lngs:
-            if lng is blng: continue
-            counts = [0, 0, 0, 0] # UP_TO_DATE, OUT_OF_DATE, INVALID, MISSING
+            #if lng is blng: continue
+            counts = [0, 0, 0, 0, 0] # UNKNOWN, UP_TO_DATE, OUT_OF_DATE, INVALID, MISSING
             for sname in blng.changes:
                 state = max(s[1] for s in pdata.statistics[lname][sname])
-                if state >= up_to_date: counts[state - up_to_date] = counts[state - up_to_date] + 1
+                if state >= unknown: counts[state - unknown] = counts[state - unknown] + 1
             self.overview[lname] = counts
 
 

@@ -14,18 +14,21 @@
 
     <p>
     <table border="1">
-    <tr><th colspan="5">Language</tr>
-    <tr><td colspan="5"><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</tr>
+    <tr><th rowspan="2">Language<th colspan="5">Strings</tr>
+    <tr><th>Unknown<th>Correct<th>Outdated<th>Invalid<th>Missing</tr>
+    <tr><td><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)
+        <td>{{bcounts[0]}}<td>{{bcounts[1]}}<td>-<td>{{bcounts[3]}}<td>-</tr>
     % for lngname, counts in transl:
         <tr><td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)
-            <td>{{counts[0]}}<td>{{counts[1]}}<td>{{counts[2]}}<td>{{counts[3]}}</tr>
+            <td>{{counts[0]}}<td>{{counts[1]}}<td>{{counts[2]}}<td>{{counts[3]}}<td>{{counts[4]}}</tr>
     %end
     </table>
-    <p>Where <em>missing</em> means no translation could be found, <em>invalid</em>
-    means a translation exists, but its string parameters do not match with the
-    base language, <em>outdated</em> means a valid translation exists, but it needs
-    review as a newer base language text exists, and <em>correct</em> means the
-    string is technically correct and up to date.
+    <p>Where
+    <em>Unknown</em> means the state of the translation was not decidable,
+    <em>Correct</em> means the string is technically correct and up to date,
+    <em>Outdated</em> means a valid translation exists, but it needs review as a newer base language text exists,
+    <em>Invalid</em> means a translation exists, but its string parameters do not match with the base language, and
+    <em>Missing</em> means no translation could be found.
 %end
 <p>
 <ul>

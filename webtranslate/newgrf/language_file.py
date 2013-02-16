@@ -14,45 +14,206 @@ gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
 argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 
-# {{{ class StringValue:
-class StringValue:
+# {{{ def check_string(text, lnum , default_case, extra_commands, plural_count, gender, errors):
+def check_string(text, lnum, default_case, extra_commands, plural_count, gender, errors):
     """
-    Value of a string.
+    Check the contents of a single string.
 
-    @ivar lnum: Line number (0-based).
-    @type lnum: C{int}
+    @param text: String text.
+    @type  text: C{str}
 
-    @ivar name: Name of the string.
-    @type name: C{str}
+    @param lnum: Line number (0-based)
+    @type  lnum: C{int} or C{None}
 
-    @ivar case: Case of the string, if any.
-    @type case: C{str} or C{None}
+    @param default_case: This string is the default case.
+    @type  default_case: C{bool}
 
-    @ivar text: Actual text of the string.
-    @type text: C{str}
+    @param extra_commands: Extra commands that are allowed, if supplied.
+    @type  extra_commands: C{None} if any extra commands are allowed,
+                           C{set} of C{str} if a specific set of extra commands is allowed.
+
+    @param plural_count: Number of plural forms.
+    @type  plural_count: C{int}
+
+    @param gender: Names of the gender forms.
+    @type  gender: C{list} of C{str}
+
+    @param errors: Errors found so far, list of line numbers + message.
+    @type  errors: C{list} of ((C{ERROR} or C{WARNING}, C{int} or C{None}), C{str})
+
+    @return: String parameter information if the string was correct, else C{None}
+    @rtype:  C{NewGrfStringInfo} or C{None}
     """
-    def __init__(self, lnum, name, case, text):
-        self.lnum = lnum
-        self.name = name
-        self.case = case
-        self.text = text
+    string_info = NewGrfStringInfo()
+    pos = 0 # String parameter number.
+    idx = 0 # Text string index.
+    while idx < len(text):
+        i = text.find('{', idx)
+        if i == -1: break
+        if i > 0: idx = i
 
-    def check_string(self, data, errors):
-        """
-        Check the contents of a single string.
+        # text[idx] == '{', now find matching '}'
+        if text.startswith('{}', idx):
+            string_info.add_string_command(None, '', errors, lnum)
+            idx = idx + 2
+            continue
 
-        @param data: Language properties.
-        @type  data: L{NewGrfData}
+        if text.startswith('{{}', idx):
+            string_info.add_string_command(None, '{', errors, lnum)
+            idx = idx + 3
+            continue
 
-        @param errors: Errors found so far, list of line numbers + message.
-        @type  errors: C{list} of ((C{ERROR} or C{WARNING}, C{int} or C{None}), C{str})
+        m = param_pat.match(text, idx)
+        if m:
+            if m.group(1) is None:
+                argnum = None
+            else:
+                argnum = int(m.group(1)[:-1], 10)
 
-        @return: Whether the string was correct.
-        @rtype:  C{bool}
-        """
-        result = check_string(self.text, self.lnum, self.case is None, data, errors)
-        if result is None: return False
-        return True
+            entry = PARAMETERS.get(m.group(2))
+            if entry is None or entry.takes_param == 0:
+                if argnum is not None:
+                    errors.append((ERROR, lnum, "String command {} does not take an argument count".format(m.group(2))))
+                    return None
+
+            if entry is None:
+                if extra_commands is None: # Allow any additional command.
+                    string_info.extra_commands.add(m.group(2))
+                elif m.group(2) not in extra_commands: # Verify against set of supplied extra commands.
+                    errors.append((ERROR, lnum, "Unknown string command {} found".format("{" + m.group(2) + "}")))
+                    return None
+
+            if entry is None or entry.takes_param == 0:
+                string_info.add_string_command(None, m.group(2), errors, lnum)
+            else:
+                if argnum is not None: pos = argnum
+                string_info.add_string_command(pos, m.group(2), errors, lnum)
+                pos = pos + 1
+
+            idx = m.end()
+            continue
+
+        if text.startswith('{P ', idx):
+            args = get_arguments(text, lnum, 'P', idx + 2, errors)
+            if args is None: return None
+
+            args, idx = args
+            expected = plural_count
+            num = None
+            if expected == 0:
+                errors.append((ERROR, lnum, "{P ..} cannot be used without defining the plural type with ##plural"))
+                return None
+            elif len(args) == expected:
+                num = pos - 1
+            elif len(args) == expected + 1:
+                # Extra argument, is the first argument a number?
+                try:
+                    num = int(args[0], 10)
+                except ValueError:
+                    pass
+                    # Fall through to the general error
+
+            if num is None:
+                errors.append((ERROR, lnum, "Expected {} string arguments for {{P ..}}, found {} arguments".format(expected, len(args))))
+                return None
+
+            string_info.add_plural(num)
+            continue
+
+
+        # {G=...}
+        m = gender_assign_pat.match(text, idx)
+        if m:
+            if idx != 0:
+                errors.append((ERROR, lnum, "{} may only be used at the start of a string".format(m.group(0))))
+                return None
+            if not default_case:
+                errors.append((ERROR, lnum, '{G=..} may only be used for the default string (that is, without case extension)'))
+                return None
+            if m.group(1) not in gender:
+                errors.append((ERROR, lnum, "Gender {} is not listed in ##gender".format(m.group(1))))
+                return None
+
+            idx = m.end()
+            continue
+
+        if text.startswith('{G ', idx):
+            assert text[idx:idx+2] != '{G='
+            args = get_arguments(text, lnum, 'G', idx + 2, errors)
+            if args is None: return None
+
+            args, idx = args
+            expected = len(gender)
+            num = None
+            if expected == 0:
+                errors.append((ERROR, lnum, "{G ..} cannot be used without defining the genders with ##gender"))
+                return None
+            elif len(args) == expected:
+                num = pos
+            elif len(args) == expected + 1:
+                # Extra argument, is the first argument a number?
+                try:
+                    num = int(args[0], 10)
+                except ValueError:
+                    pass
+                    # Fall through to the general error
+
+            if num is None:
+                errors.append((ERROR, lnum, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
+                return None
+
+            string_info.add_gender(num)
+            continue
+
+
+        errors.append((ERROR, lnum, "Unknown {...} command found in the string"))
+        return None
+
+    if string_info.check_sanity(errors, lnum): return string_info
+    return None
+
+# {{{ def get_arguments(text, lnum, cmd, idx, errors):
+def get_arguments(text, lnum, cmd, idx, errors):
+    """
+    Get arguments of a C{"{P"} or C{"{G"}.
+
+    @param text: String text.
+    @type  text: C{str}
+
+    @param lnum: Line number (0-based)
+    @type  lnum: C{int} or C{None}
+
+    @param cmd: Command being parsed ('P' or 'G').
+    @type  cmd: C{str}
+
+    @param idx: Index in the text to start searching.
+    @type  idx: C{int}
+
+    @param errors: Errors found so far, list of line numbers + message.
+    @type  errors: C{list} of ((C{int} or C{None}), C{str})
+
+    @return: Found arguments and new index, or C{None} if an error was found.
+    @rtype:  (C{list} of C{str}, C{int}) or C{None}
+    """
+    args = []
+    while idx < len(text):
+        m = end_argument_pat.match(text, idx)
+        if m:
+            return args, m.end()
+        m = argument_pat.match(text, idx)
+        if m:
+            arg = m.group(1)
+            if arg[0] == '"' and arg[1] == '"': # Strip quotes
+                arg = arg[1:-1]
+            args.append(arg)
+            idx = m.end()
+            continue
+
+        errors.append((ERROR, lnum, "Error while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
+        return None
+
+    errors.append((ERROR, lnum, "Missing the terminating '}}' while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
+    return None
 
 # }}}
 # {{{ class NewGrfStringInfo:
@@ -66,12 +227,28 @@ class NewGrfStringInfo:
 
     @ivar commands: String commands at each position.
     @type commands: C{list} of C{str}
+
+    @ivar non_positionals: Mapping of commands without position to their count.
+    @type non_positionals: C{dict} of C{str} to C{int}
+
+    @ivar extra_commands: Found extra commands.
+    @type extra_commands: C{set} of C{str}
     """
     def __init__(self):
         self.genders  = []
         self.plurals  = []
         self.commands = []
+        self.non_positionals = {}
+        self.extra_commands = set()
 
+    def __str__(self):
+        rv = []
+        if len(self.genders) > 0: rv.append("gender=" + str(self.genders))
+        if len(self.plurals) > 0: rv.append("plural=" + str(self.plurals))
+        if len(self.commands) > 0: rv.append("commands=" + str(self.commands))
+        if len(self.non_positionals) > 0: rv.append("non-pos=" + str(self.non_positionals))
+        if len(self.extra_commands) > 0: rv.append("extra=" + str(self.extra_commands))
+        return "**strinfo(" + ", ".join(rv) + ")"
 
     def add_gender(self, pos):
         """
@@ -97,8 +274,8 @@ class NewGrfStringInfo:
         """
         Add a string command at the stated position.
 
-        @param pos: String parameter number.
-        @type  pos: C{int}
+        @param pos: String parameter number if required (else C{None}.
+        @type  pos: C{int}, or C{None}
 
         @param cmd: String command used at the stated position.
         @type  cmd: C{str}
@@ -109,8 +286,13 @@ class NewGrfStringInfo:
         @return: Whether the command was correct.
         @rtype:  C{bool}
         """
+        if pos is None:
+            cnt = self.non_positionals.get(cmd, 0)
+            self.non_positionals[cmd] = cnt + 1
+            return True
+
         if pos < len(self.commands):
-            if self.command[pos] != cmd:
+            if self.commands[pos] != cmd:
                 errors.append((ERROR, lnum, "String parameter {} has more than one string command".format(pos)))
                 return False
             return True
@@ -163,194 +345,86 @@ class NewGrfStringInfo:
         return ok
 
 # }}}
-# {{{ def check_string(text, lnum, default_case, data, errors):
-def check_string(text, lnum, default_case, data, errors):
-    """
-    Check the contents of a single string.
+# {{{ PARAMETERS
+ParameterInfo = collections.namedtuple('ParameterInfo', 'literal takes_param use_plural use_gender')
 
-    @param text: String text.
-    @type  text: C{str}
+_PARAMETERS = [
+    ParameterInfo("NBSP",           False, False, False),
+    ParameterInfo("COPYRIGHT",      False, False, False),
+    ParameterInfo("TRAIN",          False, False, False),
+    ParameterInfo("LORRY",          False, False, False),
+    ParameterInfo("BUS",            False, False, False),
+    ParameterInfo("PLANE",          False, False, False),
+    ParameterInfo("SHIP",           False, False, False),
+    ParameterInfo("TINYFONT",       False, False, False),
+    ParameterInfo("BIGFONT",        False, False, False),
+    ParameterInfo("BLUE",           False, False, False),
+    ParameterInfo("SILVER",         False, False, False),
+    ParameterInfo("GOLD",           False, False, False),
+    ParameterInfo("RED",            False, False, False),
+    ParameterInfo("PURPLE",         False, False, False),
+    ParameterInfo("LTBROWN",        False, False, False),
+    ParameterInfo("ORANGE",         False, False, False),
+    ParameterInfo("GREEN",          False, False, False),
+    ParameterInfo("YELLOW",         False, False, False),
+    ParameterInfo("DKGREEN",        False, False, False),
+    ParameterInfo("CREAM",          False, False, False),
+    ParameterInfo("BROWN",          False, False, False),
+    ParameterInfo("WHITE",          False, False, False),
+    ParameterInfo("LTBLUE",         False, False, False),
+    ParameterInfo("GRAY",           False, False, False),
+    ParameterInfo("DKBLUE",         False, False, False),
+    ParameterInfo("BLACK",          False, False, False),
 
-    @param lnum: Line number (0-based)
-    @type  lnum: C{int} or C{None}
+    ParameterInfo("COMMA",          True,  True,  False),
+    ParameterInfo("SIGNED_WORD",    True,  True,  False),
+    ParameterInfo("UNSIGNED_WORD",  True,  True,  False),
+    ParameterInfo("CURRENCY",       True,  False, False),
+    ParameterInfo("VELOCITY",       True,  False, False),
+    ParameterInfo("VOLUME",         True,  False, False),
+    ParameterInfo("VOLUME_SHORT",   True,  False, False),
+    ParameterInfo("POWER",          True,  False, False),
+    ParameterInfo("WEIGHT",         True,  False, False),
+    ParameterInfo("WEIGHT_SHORT",   True,  False, False),
+    ParameterInfo("HEX",            True,  False, False),
+    ParameterInfo("STRING",         True,  False, True ),
+    ParameterInfo("DATE1920_LONG",  True,  False, False),
+    ParameterInfo("DATE1920_SHORT", True,  False, False),
+    ParameterInfo("DATE_LONG",      True,  False, False),
+    ParameterInfo("DATE_SHORT",     True,  False, False),
+    ParameterInfo("POP_WORD",       True,  False, False),
+    ParameterInfo("STATION",        True,  False, False),
+]
 
-    @param default_case: This string is the default case.
-    @type  default_case: C{bool}
-
-    @param data: Language properties.
-    @type  data: L{NewGrfData}
-
-    @param errors: Errors found so far, list of line numbers + message.
-    @type  errors: C{list} of ((C{ERROR} or C{WARNING}, C{int} or C{None}), C{str})
-
-    @return: String parameter information if the string was correct, else C{None}
-    @rtype:  C{NewGrfStringInfo} or C{None}
-    """
-    string_info = NewGrfStringInfo()
-    pos = 0 # String parameter number.
-    idx = 0 # Text string index.
-    while idx < len(text):
-        i = text.find('{', idx)
-        if i == -1:
-            if string_info.check_sanity(errors, lnum): return string_info
-            return None
-        if i > 0:
-            idx = i
-
-        # text[idx] == '{', now find matching '}'
-        if text.startswith('{}', idx):
-            idx = idx + 2
-            continue
-
-        if text.startswith('{{}', idx):
-            idx = idx + 3
-            continue
-
-        m = param_pat.match(text, idx)
-        if m:
-            if m.group(1) is None:
-                argnum = None
-            else:
-                argnum = int(m.group(1)[:-1], 10)
-
-            entry = PARAMETERS.get(m.group(2))
-            if entry is not None:
-                if entry.takes_param == 0:
-                    if argnum is not None:
-                        errors.append((ERROR, lnum, "String parameter {} does not take an argument count".format(entry.literal)))
-                        return None
-
-                    idx = m.end() # Silently ignore all parameter-less string commands.
-                    continue
-
-                if argnum is not None: pos = argnum
-                string_info.add_string_command(pos, m.group(2), errors, lnum)
-                pos = pos + 1
-
-                idx = m.end()
-                continue
-
-        if text.startswith('{P', idx):
-            args = get_arguments(text, lnum, 'P', idx + 2, errors)
-            if args is None: return None
-
-            args, idx = args
-            expected = data.get_plural_count()
-            num = None
-            if expected == 0:
-                errors.append((ERROR, lnum, "{P ..} cannot be used without defining the plural type with ##plural"))
-                return None
-            elif len(args) == expected:
-                num = pos - 1
-            elif len(args) == expected + 1:
-                # Extra argument, is the first argument a number?
-                try:
-                    num = int(args[0], 10)
-                except ValueError:
-                    pass
-                    # Fall through to the general error
-
-            if num is None:
-                errors.append((ERROR, lnum, "Expected {} string arguments for {{P ..}}, found {} arguments".format(expected, len(args))))
-                return None
-
-            string_info.add_plural(num)
-            continue
-
-
-        # {G=...}
-        m = gender_assign_pat.match(text, idx)
-        if m:
-            if idx != 0:
-                errors.append((ERROR, lnum, "{} may only be used at the start of a string".format(m.group(0))))
-                return None
-            if not default_case:
-                errors.append((ERROR, lnum, '{G=..} may only be used for the default string (that is, without case extension)'))
-                return None
-            if m.group(1) not in data.gender:
-                errors.append((ERROR, lnum, "Gender {} is not listed in ##gender".format(m.group(1))))
-                return None
-
-            idx = m.end()
-            continue
-
-        if text.startswith('{G', idx):
-            assert text[idx:idx+2] != '{G='
-            args = get_arguments(text, lnum, 'G', idx + 2, errors)
-            if args is None: return None
-
-            args, idx = args
-            expected = len(data.gender)
-            num = None
-            if expected == 0:
-                errors.append((ERROR, lnum, "{G ..} cannot be used without defining the genders with ##gender"))
-                return None
-            elif len(args) == expected:
-                num = pos
-            elif len(args) == expected + 1:
-                # Extra argument, is the first argument a number?
-                try:
-                    num = int(args[0], 10)
-                except ValueError:
-                    pass
-                    # Fall through to the general error
-
-            if num is None:
-                errors.append((ERROR, lnum, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
-                return None
-
-            string_info.add_gender(num)
-            continue
-
-
-        errors.append((ERROR, lnum, "Unknown {...} command found in the string"))
-        return None
-# }}}
-# {{{ def get_arguments(text, lnum, cmd, idx, errors):
-def get_arguments(text, lnum, cmd, idx, errors):
-    """
-    Get arguments of a C{"{P"} or C{"{G"}.
-
-    @param text: String text.
-    @type  text: C{str}
-
-    @param lnum: Line number (0-based)
-    @type  lnum: C{int} or C{None}
-
-    @param cmd: Command being parsed ('P' or 'G').
-    @type  cmd: C{str}
-
-    @param idx: Index in the text to start searching.
-    @type  idx: C{int}
-
-    @param errors: Errors found so far, list of line numbers + message.
-    @type  errors: C{list} of ((C{int} or C{None}), C{str})
-
-    @return: Found arguments and new index, or C{None} if an error was found.
-    @rtype:  (C{list} of C{str}, C{int}) or C{None}
-    """
-    args = []
-    while idx < len(text):
-        m = end_argument_pat.match(text, idx)
-        if m:
-            return args, m.end()
-        m = argument_pat.match(text, idx)
-        if m:
-            arg = m.group(1)
-            if arg[0] == '"' and arg[1] == '"': # Strip quotes
-                arg = arg[1:-1]
-            args.append(arg)
-            idx = m.end()
-            continue
-
-        errors.append((ERROR, lnum, "Error while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
-        return None
-
-    errors.append((ERROR, lnum, "Missing the terminating '}}' while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
-    return None
+PARAMETERS = dict((x.literal, x) for x in _PARAMETERS)
 
 # }}}
+# }}}
 
+# {{{ class StringValue:
+class StringValue:
+    """
+    Value of a string.
+
+    @ivar lnum: Line number (0-based).
+    @type lnum: C{int}
+
+    @ivar name: Name of the string.
+    @type name: C{str}
+
+    @ivar case: Case of the string, if any.
+    @type case: C{str} or C{None}
+
+    @ivar text: Actual text of the string.
+    @type text: C{str}
+    """
+    def __init__(self, lnum, name, case, text):
+        self.lnum = lnum
+        self.name = name
+        self.case = case
+        self.text = text
+
+# }}}
 # {{{ class NewGrfData:
 class NewGrfData:
     """
@@ -393,17 +467,6 @@ class NewGrfData:
         self.skeleton = []
         self.strings = []
 
-    def get_plural_count(self):
-        """
-        Get the number of plural forms to expect in a {P ..}.
-
-        @return: Number of plural forms to expect in a {P ..}.
-        @rtype:  C{int}
-        """
-        if self.plural is None:
-            return 0
-        return num_plurals[self.plural]
-
     def cleanup_skeleton(self):
         """
         Clean up the skeleton file, and ensure it has all language properties.
@@ -412,6 +475,22 @@ class NewGrfData:
         while len(self.skeleton) > 0 and self.skeleton[-1][0] == 'literal' and self.skeleton[-1][1] == '': del self.skeleton[-1]
 
 # }}}
+
+def get_plural_count(plural):
+    """
+    Get the number of plural forms to expect in a {P ..}.
+
+    @param plural: The plural number.
+    @type  plural: C{int}, or C{None} for no plurals.
+
+    @return: Number of plural forms to expect in a {P ..}.
+    @rtype:  C{int}
+    """
+    if plural is None:
+        return 0
+    return num_plurals[plural]
+
+# {{{ def load_language_file(handle, max_size, errors):
 # {{{ def handle_pragma(lnum, line, data, errors):
 def handle_pragma(lnum, line, data, errors):
     """
@@ -492,7 +571,6 @@ def handle_pragma(lnum, line, data, errors):
 string_pat = re.compile('^([A-Za-z_0-9]+)(.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
 bom = codecs.BOM_UTF8.decode('utf-8')
 
-# {{{ def load_language_file(handle, max_size, errors):
 def load_language_file(handle, max_size, errors):
     """
     Load a language file.
@@ -555,7 +633,6 @@ def load_language_file(handle, max_size, errors):
                     continue
                 skeleton_strings.add(m.group(1))
                 data.skeleton.append(('string', m.group(1)))
-            sv.check_string(data, errors)
             continue
 
         errors.append((ERROR, lnum, "Line not recognized"))
@@ -571,77 +648,10 @@ def load_language_file(handle, max_size, errors):
     return data
 
 # }}}
-# {{{ PARAMETERS
-ParameterInfo = collections.namedtuple('ParameterInfo', 'literal takes_param use_plural use_gender')
 
-_PARAMETERS = [
-    ParameterInfo("NBSP",           False, False, False),
-    ParameterInfo("COPYRIGHT",      False, False, False),
-    ParameterInfo("TRAIN",          False, False, False),
-    ParameterInfo("LORRY",          False, False, False),
-    ParameterInfo("BUS",            False, False, False),
-    ParameterInfo("PLANE",          False, False, False),
-    ParameterInfo("SHIP",           False, False, False),
-    ParameterInfo("TINYFONT",       False, False, False),
-    ParameterInfo("BIGFONT",        False, False, False),
-    ParameterInfo("BLUE",           False, False, False),
-    ParameterInfo("SILVER",         False, False, False),
-    ParameterInfo("GOLD",           False, False, False),
-    ParameterInfo("RED",            False, False, False),
-    ParameterInfo("PURPLE",         False, False, False),
-    ParameterInfo("LTBROWN",        False, False, False),
-    ParameterInfo("ORANGE",         False, False, False),
-    ParameterInfo("GREEN",          False, False, False),
-    ParameterInfo("YELLOW",         False, False, False),
-    ParameterInfo("DKGREEN",        False, False, False),
-    ParameterInfo("CREAM",          False, False, False),
-    ParameterInfo("BROWN",          False, False, False),
-    ParameterInfo("WHITE",          False, False, False),
-    ParameterInfo("LTBLUE",         False, False, False),
-    ParameterInfo("GRAY",           False, False, False),
-    ParameterInfo("DKBLUE",         False, False, False),
-    ParameterInfo("BLACK",          False, False, False),
-
-    ParameterInfo("COMMA",          True,  True,  False),
-    ParameterInfo("SIGNED_WORD",    True,  True,  False),
-    ParameterInfo("UNSIGNED_WORD",  True,  True,  False),
-    ParameterInfo("CURRENCY",       True,  False, False),
-    ParameterInfo("VELOCITY",       True,  False, False),
-    ParameterInfo("VOLUME",         True,  False, False),
-    ParameterInfo("VOLUME_SHORT",   True,  False, False),
-    ParameterInfo("POWER",          True,  False, False),
-    ParameterInfo("WEIGHT",         True,  False, False),
-    ParameterInfo("WEIGHT_SHORT",   True,  False, False),
-    ParameterInfo("HEX",            True,  False, False),
-    ParameterInfo("STRING",         True,  False, True ),
-    ParameterInfo("DATE1920_LONG",  True,  False, False),
-    ParameterInfo("DATE1920_SHORT", True,  False, False),
-    ParameterInfo("DATE_LONG",      True,  False, False),
-    ParameterInfo("DATE_SHORT",     True,  False, False),
-    ParameterInfo("POP_WORD",       True,  False, False),
-    ParameterInfo("STATION",        True,  False, False),
-]
-
-PARAMETERS = dict((x.literal, x) for x in _PARAMETERS)
-
-# }}}
-
-def get_base_string_info(text):
+def get_base_string_info(text, lng, errors):
     """
     Get the information about the used parameters from a string in the base language.
-
-    @param text: String to examine.
-    @type  text: C{str}
-
-    @return: Information about the used string parameters.
-    @rtype:  L{NewGrfStringInfo}
-    """
-    # XXX Implement me
-    return None
-
-def get_translation_string_info(text, lng):
-    """
-    Get the information about the used parameters from a string in a translation.
 
     @param text: String to examine.
     @type  text: C{str}
@@ -649,11 +659,37 @@ def get_translation_string_info(text, lng):
     @param lng: Language containing the string.
     @type  lng: L{Language}
 
+    @param errors: Errors found in the string are appended to this list.
+    @type  errors: C{list} of (C{str}, C{int} or C{None}, C{str})
+
     @return: Information about the used string parameters.
     @rtype:  L{NewGrfStringInfo}
     """
-    # XXX Implement me
-    return None
+    return check_string(text, None, True, None, get_plural_count(lng.plural), lng.gender, errors)
+
+def get_translation_string_info(text, case, extra_commands, lng, errors):
+    """
+    Get the information about the used parameters from a string in a translation.
+
+    @param text: String to examine.
+    @type  text: C{str}
+
+    @param case: Case of the string, if given.
+    @type  case: C{str} or C{None}
+
+    @param extra_commands: Extra commands that are allowed in the translation.
+    @type  extra_commands: C{set} of C{str}
+
+    @param lng: Language containing the string.
+    @type  lng: L{Language}
+
+    @param errors: Errors found in the string are appended to this list.
+    @type  errors: C{list} of (C{str}, C{int} or C{None}, C{str})
+
+    @return: Information about the used string parameters.
+    @rtype:  L{NewGrfStringInfo}
+    """
+    return check_string(text, None, case is None, extra_commands, get_plural_count(lng.plural), lng.gender, errors)
 
 def compare_info(base_info, lng_info):
     """
@@ -668,5 +704,16 @@ def compare_info(base_info, lng_info):
     @return: Whether both parameter uses are compatible.
     @rtype:  C{bool}
     """
-    return True # XXX Implement me
+    if base_info is None: return True # Cannot blame the translation when the base language is broken.
+    if lng_info is None: return False # Translation has more serious problems.
+
+    if base_info.commands != lng_info.commands: return False # Positional commands must match precisely.
+
+    # Non-positional commands must match in count only.
+    if len(base_info.non_positionals) != len(lng_info.non_positionals): return False
+    for bname, bcnt in base_info.non_positionals.items():
+        lcnt = lng_info.non_positionals.get(bname)
+        if lcnt is None or lcnt != bcnt: return False
+
+    return True
 
