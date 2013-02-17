@@ -448,12 +448,12 @@ class NewGrfData:
     @ivar skeleton: Skeleton file.
     @type skeleton: @type skeleton: C{list} of (C{str}, C{str}), where the first string is a
                     type:
-                    - 'literal'   Line literally copied
-                    - 'string'    Line with a text string (possibly many when there are cases)
-                    - 'grflangid' Line with the language id
-                    - 'plural'    Plural number
-                    - 'case'      Cases line
-                    - 'gender'    Gender line
+                     - 'literal':   Line literally copied
+                     - 'string':    Line with a text string (possibly many when there are cases)
+                     - 'grflangid': Line with the language id
+                     - 'plural':    Plural number
+                     - 'case':      Cases line
+                     - 'gender':    Gender line
 
     @ivar strings: Strings with their line number, name and text.
     @type strings: C{list} of L{StringValue}
@@ -691,7 +691,7 @@ def get_translation_string_info(text, case, extra_commands, lng, errors):
     """
     return check_string(text, None, case is None, extra_commands, get_plural_count(lng.plural), lng.gender, errors)
 
-def compare_info(base_info, lng_info):
+def compare_info(base_info, lng_info, errors):
     """
     Compare both string uses with each other.
 
@@ -701,19 +701,58 @@ def compare_info(base_info, lng_info):
     @param lng_info: Information about string parameters from the translation.
     @type  lng_info: L{NewGrfStringInfo}
 
+    @param errors: Errors found in the string are appended to this list.
+    @type  errors: C{list} of (C{str}, C{int} or C{None}, C{str})
+
     @return: Whether both parameter uses are compatible.
     @rtype:  C{bool}
     """
     if base_info is None: return True # Cannot blame the translation when the base language is broken.
     if lng_info is None: return False # Translation has more serious problems.
 
-    if base_info.commands != lng_info.commands: return False # Positional commands must match precisely.
+    if base_info.commands != lng_info.commands:
+        if len(base_info.commands) > len(lng_info.commands):
+            msg = 'String command for position {} (and further) is missing in the translation'
+            msg = msg.format(len(lng_info.commands))
+            errors.append((ERROR, None, msg))
+            return False
+        if len(base_info.commands) < len(lng_info.commands):
+            msg = 'String command for position {} (and further) is not used in the base language'
+            msg = msg.format(len(base_info.commands))
+            errors.append((ERROR, None, msg))
+            return False
 
-    # Non-positional commands must match in count only.
-    if len(base_info.non_positionals) != len(lng_info.non_positionals): return False
-    for bname, bcnt in base_info.non_positionals.items():
-        lcnt = lng_info.non_positionals.get(bname)
-        if lcnt is None or lcnt != bcnt: return False
+        for i in range(len(base_info.commands)):
+            if base_info.commands[i] != lng_info.commands[i]:
+                msg = 'String command for position {} is wrong, base language uses {}, the translation uses {}'
+                msg = msg.format(i, '{' + base_info.commands[i] + '}', '{' + lng_info.commands[i] + '}')
+                errors.append((ERROR, None, msg))
+                return False
+
+        assert False # Never reached
+
+    # Non-positional commands must match in count.
+    if base_info.non_positionals != lng_info.non_positionals:
+        for np in base_info.non_positionals:
+            if np not in lng_info.non_positionals:
+                msg = 'String command {} is missing in the translation'.format('{' + np + '}')
+                errors.append((ERROR, None, msg))
+                return False
+
+        for np in lng_info.non_positionals:
+            if np not in base_info.non_positionals:
+                msg = 'String command {} is not used in the base language'.format('{' + np + '}')
+                errors.append((ERROR, None, msg))
+                return False
+
+        for bname, bcnt in base_info.non_positionals.items():
+            if lng_info.non_positionals[bname] != bcnt:
+                msg = 'String command {} is used {} times in the base language, and {} times in the translation'
+                msg = msg.format(bname, bcnt, lng_info.non_positionals[bname])
+                errors.append((ERROR, None, msg))
+                return False
+
+        assert False # Never reached
 
     return True
 

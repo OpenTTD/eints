@@ -57,6 +57,37 @@ def get_newest_change(chgs, case):
 
     return best
 
+def get_all_changes(chgs, cases):
+    """
+    Get all changes ordered by case and time.
+
+    @param chgs: Changes to select from.
+    @type  chgs: C{list} of L{Change} (C{None} is also accepted)
+
+    @param cases: Available cases.
+    @type  cases: C{list} of C{str}
+
+    @return: Changes for each case, sorted from old to new.
+    @rtype:  C{dict} of C{str} to C{list} of L{Change}
+    """
+    cases = dict((c, []) for c in cases)
+    cases[''] = []
+
+    if chgs is not None:
+        for chg in chgs:
+            if chg.case is None:
+                cc = ''
+            else:
+                cc = chg.case
+
+            clist = cases.get(cc)
+            if clist is not None: clist.append(chg)
+
+    for clist in cases.values():
+        clist.sort()
+
+    return cases
+
 
 def get_all_newest_changes(chgs, cases):
     """
@@ -69,7 +100,7 @@ def get_all_newest_changes(chgs, cases):
     @type  cases: C{list} of C{str}
 
     @return: Newest change for each case (for as far as it exists in the given L{chgs}).
-    @rtype:  C{dict} of C{str} to (L{Change} or C{None}
+    @rtype:  C{dict} of C{str} to (L{Change} or C{None})
     """
     cases = dict((c, None) for c in cases)
     cases[''] = None
@@ -92,6 +123,9 @@ OUT_OF_DATE = 3 # String is older than the base string.
 INVALID =     4 # String is invalid relative to the base string.
 MISSING =     5 # The default case string is missing.
 
+STATE_MAP = {MISSING_OK:'not available', UNKNOWN:'unknown', UP_TO_DATE:'up-to-date',
+             OUT_OF_DATE:'out-of-date', INVALID:'invalid', MISSING:'missing'}
+
 def get_base_string_info(text, lng):
     """
     Get the newgrf string information about the given text.
@@ -112,7 +146,7 @@ def get_base_string_info(text, lng):
     return result
 
 
-def decide_all_string_status(base_chg, lng_chgs, lng, base_string_info):
+def decide_all_string_status(base_chg, lng_chgs, lng, binfo):
     """
     Decide the state of all the cases of the string based on the information of L{base_chg} and
     the L{lng_chgs}.
@@ -121,40 +155,66 @@ def decide_all_string_status(base_chg, lng_chgs, lng, base_string_info):
     @type  base_chg: L{Change}
 
     @param lng_chgs: Newest version of the string in the translation, for all cases.
-    @type  lng_chgs: C{dict} of C{str} to (L{Change} or C{None}
+    @type  lng_chgs: C{dict} of C{str} to (L{Change} or C{None})
 
     @param lng: Language.
     @type  lng: L{Language}
 
-    @param base_string_info: String information of the base language
-                             (obtained from L{get_base_string_info}).
-    @type  base_string_info: L{NewGrfStringInfo}
+    @param binfo: String information of the base language (obtained from L{get_base_string_info}).
+    @type  binfo: L{NewGrfStringInfo}
 
-    @return: Info about each case.
-    @rtype:  C{dict} of C{str} to C{int})
+    @return: Info about each case of the string in the translation, mapping of case to state value,
+             and a list of found errors.
+    @rtype:  C{dict} of C{str} to C{tuple} (C{int}, C{list} of C{tuple} (C{str}, C{None}, C{str}))
     """
     base_text = base_chg.base_text
 
     results = {}
     for case, chg in lng_chgs.items():
-        if chg is None:
-            results[case] = MISSING if case == '' else MISSING_OK
-            continue
-
-        if chg.new_text != base_text and chg.stamp < base_text.stamp:
-            state = OUT_OF_DATE
-        else:
-            state = UP_TO_DATE
-
-        errors = []
-        lng_string_info = language_file.get_translation_string_info(chg.new_text.text, case, base_string_info.extra_commands, lng, errors)
-        assert (not errors and lng_string_info) or (errors and not lng_string_info)
-        if not language_file.compare_info(base_string_info, lng_string_info):
-            state = INVALID
-
-        results[case] = state
-
+        results[case] = get_string_status(chg, case, lng, base_text, binfo)
     return results
+
+def get_string_status(lchg, case, lng, btext, binfo):
+    """
+    Get the status of a language string. Also collect its errors.
+
+    @param lchg: Translation language change to examine.
+    @type  lchg: L{Change}
+
+    @param case: Case of the change.
+    @type  case: C{str}
+
+    @param lng: Language.
+    @type  lng: L{Language}
+
+    @param btext: Current base text (may be different than C{lchg.base_text})
+    @type  btext: C{Text}
+
+    @param binfo: String information of the base language (obtained from L{get_base_string_info}).
+    @type  binfo: L{NewGrfStringInfo}
+
+    @return: State of the translated string and any errors.
+    @rtype:  C{tuple} (C{int}, C{list} of C{tuple} (C{str}, C{None}, C{str}))
+    """
+    if lchg is None:
+        if case == '':
+            return MISSING, []
+        else:
+            return MISSING_OK, []
+
+    if lchg.base_text != btext and lchg.stamp < btext.stamp:
+        state = OUT_OF_DATE
+    else:
+        state = UP_TO_DATE
+
+    errors = []
+    linfo = language_file.get_translation_string_info(lchg.new_text.text, lchg.case, binfo.extra_commands, lng, errors)
+    assert (not errors and linfo) or (errors and not linfo)
+    if not language_file.compare_info(binfo, linfo, errors):
+        state = INVALID
+
+    return state, errors
+
 
 
 # {{{ class XmlLoader:
@@ -163,10 +223,10 @@ class XmlLoader:
     Helper class to load a project from an XML file.
 
     @ivar stamps: Time stamps loaded so far, mapping of seconds and indices to L{Stamp}.
-    @type stamps: C{dict} of (C{int, C{int}) to L{Stamp}
+    @type stamps: C{dict} of (C{int}, C{int}) to L{Stamp}
 
-    @ivar: texts: Loaded texts, ordered by their reference.
-    @type  texts: C{dict} of C{str} to L{Text}
+    @ivar texts: Loaded texts, ordered by their reference.
+    @type texts: C{dict} of C{str} to L{Text}
     """
     def __init__(self):
         self.stamps = {}
@@ -244,7 +304,7 @@ class XmlSaver:
     Saver helper class, storing the top-level document, and the referenced texts.
 
     @ivar doc: Xml document node.
-    @type doc: L{xml.dom.minidom,Document}
+    @type doc: L{xml.dom.minidom.Document}
 
     @ivar texts_node: Node containing the texts.
     @type texts_node: L{xml.dom.minidom.Node}
@@ -619,6 +679,15 @@ class Change:
         self.new_text = new_text
         self.stamp = stamp
         self.user = user
+
+    def __lt__(self, other):
+        if not isinstance(other, Change): return False
+        return self.stamp < other.stamp
+
+    def __eq__(self, other):
+        if not isinstance(other, Change): return False
+        return self.stamp == other.stamp
+
 
 def save_change(xsaver, change):
     """

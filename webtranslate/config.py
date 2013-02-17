@@ -333,7 +333,7 @@ class ProjectMetaData:
 
                 chgs = data.get_all_newest_changes(chgs, lng.case)
                 detailed_state = data.decide_all_string_status(bchg, chgs, lng, binfo)
-                sstat[:] = sorted(detailed_state.items())
+                sstat[:] = sorted((c,se[0]) for c, se in detailed_state.items())
 
         # Construct overview statistics for each language.
         unknown = data.UNKNOWN

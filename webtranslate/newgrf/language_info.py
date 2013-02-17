@@ -1,3 +1,4 @@
+# vim: set fileencoding=utf-8
 """
 Meta information about languages.
 
