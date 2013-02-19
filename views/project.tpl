@@ -1,7 +1,7 @@
 %rebase main_template title='Web translator - ' + pdata.name
 <h1>Overview of project {{pdata.name}}</h1>
-<p>Web translator project page of {{pdata.name}}.
-<p><strong>Number of languages</strong>: {{len(pdata.languages)}}<br>
+<p>Web translator project page of {{pdata.name}}.</p>
+<strong>Number of languages</strong>: {{len(pdata.languages)}}<br>
 % if base_lng is None:
     <strong>Base language</strong>: None
 % else:
