@@ -3,3 +3,5 @@ syntax: glob
 *.swp
 __pycache__
 .hgignore
+
+*.pyc
