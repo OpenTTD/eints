@@ -1,8 +1,4 @@
-<html>
-<head>
-<title>Web translator projects</title>
-</head>
-<body>
+%rebase main_template title='Web translator projects'
 <h1>Projects available for translation</h1>
 % if len(projects) > 0:
     <ul>

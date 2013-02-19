@@ -1,8 +1,4 @@
-<html>
-<head>
-<title>{{language}} translation of {{proj_name}}</title>
-</head>
-<body>
+%rebase main_template title=language + ' translation of ' + proj_name
 <h1>Translation of {{blng.name}} to {{language}} in {{pdata.name}}</h1>
 % for sname, bchg, case_lst in strings:
     <h3><a href="/string/{{proj_name}}/{{language}}/{{sname}}">{{sname}}</a></h3>
@@ -13,5 +9,3 @@
     % end
     </table>
 % end
-</body>
-</html>

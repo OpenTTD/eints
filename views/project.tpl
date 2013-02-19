@@ -1,8 +1,4 @@
-<html>
-<head>
-<title>Web translator - {{pdata.name}}</title>
-</head>
-<body>
+%rebase main_template title='Web translator - ' + pdata.name
 <h1>Overview of project {{pdata.name}}</h1>
 <p>Web translator project page of {{pdata.name}}.
 <p><strong>Number of languages</strong>: {{len(pdata.languages)}}<br>
@@ -12,11 +8,10 @@
     <strong>Base language</strong>: {{base_lng.name}}<br>
     <strong>Number of strings</strong>: {{len(base_lng.changes)}}
 
-    <p>
     <table border="1">
-    <tr><th rowspan="2">Language<th colspan="5">Strings</tr>
-    <tr><th>Unknown<th>Correct<th>Outdated<th>Invalid<th>Missing</tr>
-    <tr><td><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)
+        <tr><th rowspan="2">Language<th colspan="5">Strings</tr>
+        <tr><th>Unknown<th>Correct<th>Outdated<th>Invalid<th>Missing</tr>
+        <tr><td><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)
         <td>{{bcounts[0]}}<td>{{bcounts[1]}}<td>-<td>{{bcounts[3]}}<td>-</tr>
     % for lngname, counts in transl:
         <tr><td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)
@@ -29,14 +24,12 @@
     <em>Outdated</em> means a valid translation exists, but it needs review as a newer base language text exists,
     <em>Invalid</em> means a translation exists, but its string parameters do not match with the base language, and
     <em>Missing</em> means no translation could be found.
+    </p>
 %end
-<p>
 <ul>
-<li><a href="/upload/{{proj_name}}">Upload language</a>
-<li>Download language
-<li>Add translation language
-<li>Remove translation language
-<li>Edit translators
+    <li><a href="/upload/{{proj_name}}">Upload language</a>
+    <li>Download language
+    <li>Add translation language
+    <li>Remove translation language
+    <li>Edit translators
 </ul>
-</body>
-</html>

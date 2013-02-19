@@ -1,8 +1,4 @@
-<html>
-<head>
-<title>Upload language for {{proj_name}}</title>
-</head>
-<body>
+%rebase main_template title='Upload language for ' + proj_name
 <h1>Upload language for {{proj_name}}</h1>
 The file that you uploaded contains errors:
 <p>
@@ -14,5 +10,3 @@ The file that you uploaded contains errors:
     % end
 % end
 Please fix your errors first.
-</body>
-</html>

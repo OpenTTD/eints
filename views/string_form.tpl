@@ -1,8 +1,4 @@
-<html>
-<head>
-<title>Editing {{sname}}</title>
-</head>
-<body>
+%rebase main_template title='Editing ' + sname
 <strong>Project</strong>: {{pdata.name}}<br>
 <strong>Translation language</strong>: {{lname}}<br>
 <strong>String name</strong>: {{sname}}
@@ -45,5 +41,3 @@
     <input type="reset" value="Reset all strings"/>
 % end
 </form>
-</body>
-</html>
