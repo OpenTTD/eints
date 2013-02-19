@@ -6,8 +6,8 @@
     <div>
         <ul>
             <li style="display:inline;"><a href="/">Web Translator</a> |
-            <li style="display:inline;"><a href="projects">List of projects</a> |
-            <li style="display:inline;"><a href="newproject">Start a new project</a>
+            <li style="display:inline;"><a href="/projects">List of projects</a> |
+            <li style="display:inline;"><a href="/newproject">Start a new project</a>
         </ul>
     </div>
 
