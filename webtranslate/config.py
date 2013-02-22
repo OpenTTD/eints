@@ -308,7 +308,7 @@ class ProjectMetaData:
             if parm_lng is None or parm_lng is blng: # Update all languages.
                 lngs = pdata.languages.items()
             else:
-                lngs = [parm_lng.name, parm_lng] # Update just 'parm_lng'
+                lngs = [(parm_lng.name, parm_lng)] # Update just 'parm_lng'
 
             for lname, lng in lngs:
                 if lng is blng: continue
