@@ -21,7 +21,7 @@
             <th>Missing
         </tr>
         <tr>
-            <td><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)
+            <td><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)
             <td>{{bcounts[0]}}
             <td>{{bcounts[1]}}
             <td>-
@@ -30,7 +30,7 @@
         </tr>
     % for lngname, counts in transl:
         <tr>
-            <td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)
+            <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)
             <td>{{counts[0]}}
             <td>{{counts[1]}}
             <td>{{counts[2]}}

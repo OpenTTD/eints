@@ -2,8 +2,8 @@ from webtranslate.bottle import route, template, abort
 from webtranslate.protect import protected
 from webtranslate import data, config
 
-@route('/translation/<project>/<language>', method = 'GET')
-@protected(['translation', 'project', 'language'])
+@route('/language/<project>/<language>', method = 'GET')
+@protected(['language', 'project', 'language'])
 def project(project, language):
     pmd = config.cache.get_pmd(project)
     if pmd is None:
@@ -44,4 +44,4 @@ def project(project, language):
         cstrs.sort()
         strings.append((sname, bchg, cstrs))
 
-    return template('translation', proj_name = project, pdata = pdata, language = language, blng = blng, strings = strings)
+    return template('language', proj_name = project, pdata = pdata, language = language, blng = blng, strings = strings)

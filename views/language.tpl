@@ -1,5 +1,5 @@
-%rebase main_template title=language + ' translation of ' + proj_name
-<h1>Translation of {{blng.name}} to {{language}} in {{pdata.name}}</h1>
+%rebase main_template title='language ' + language + ' in ' + proj_name
+<h1>Overview of the "{{language}}" language in {{pdata.name}}</h1>
 % for sname, bchg, case_lst in strings:
     <h3><a href="/string/{{proj_name}}/{{language}}/{{sname}}">{{sname}}</a></h3>
     <table border="1">
