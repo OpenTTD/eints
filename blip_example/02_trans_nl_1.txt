@@ -1,0 +1,11 @@
+##grflangid 0x1F
+##plural 0
+
+; STR_BEER has an incorrect colour code.
+; STR_EINTS is missing.
+; STR_DESCRIPTION is correct.
+; STR_UNKNOWN is an unknown string in the base language (and is discarded silently)
+
+STR_BEER        : {BLACK}We hebben {NUM} fles{P sen jes} bier nodig
+STR_DESCRIPTION :Het 'blip' voorbeeld project is bedoeld om eigenschappen van Eints te testen.
+STR_UNKNOWN     :Onbekende string

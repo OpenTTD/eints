@@ -1,0 +1,12 @@
+##grflangid 0x01
+##plural 0
+
+; STR_EINTS has been changed (invalidating the translation)
+; STR_BEER has disappeared
+; STR_WINE has been added
+
+STR_DESCRIPTION  :The blip example project intends to test features of Eints.
+STR_EINTS        :Eints Is a NewGrf Translator Service
+
+STR_WINE         :{YELLOW}{NUM} bottles of wine are needed
+
