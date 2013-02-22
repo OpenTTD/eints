@@ -3,7 +3,7 @@
 <p>Web translator project page of {{pdata.name}}.</p>
 <strong>Number of languages</strong>: {{len(pdata.languages)}}<br>
 % if base_lng is None:
-    <strong>Base language</strong>: None
+    <strong>Base language</strong>: None loaded
 % else:
     <strong>Base language</strong>: {{base_lng.name}}<br>
     <strong>Number of strings</strong>: {{len(base_lng.changes)}}

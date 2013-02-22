@@ -35,12 +35,16 @@ def project(proj_name):
     pdata = pmd.pdata
     base_lng = pdata.get_base_language()
     transl = []
-    for lname, lng in pdata.languages.items():
-        if lng is base_lng: continue
-        transl.append((lname, get_overview(pmd, lname)))
+    bcounts = None
+    if base_lng is not None:
+        for lname, lng in pdata.languages.items():
+            if lng is base_lng: continue
+            transl.append((lname, get_overview(pmd, lname)))
 
-    transl.sort()
+        transl.sort()
+
+        bcounts = get_overview(pmd, base_lng.name)
+
     return template('project', proj_name = proj_name, pdata = pdata,
-                    transl = transl, base_lng = base_lng,
-                    bcounts = get_overview(pmd, base_lng.name))
+                    transl = transl, base_lng = base_lng, bcounts = bcounts)
 
