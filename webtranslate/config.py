@@ -341,7 +341,7 @@ class ProjectMetaData:
             lngs = pdata.languages.items()
             self.overview = {}
         else:
-            lngs = [parm_lng.name, parm_lng] # Update just 'parm_lng'
+            lngs = [(parm_lng.name, parm_lng)] # Update just 'parm_lng'
 
         for lname, lng in lngs:
             #if lng is blng: continue
