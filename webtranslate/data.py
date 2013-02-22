@@ -57,7 +57,7 @@ def get_newest_change(chgs, case):
 
     return best
 
-def get_all_changes(chgs, cases):
+def get_all_changes(chgs, cases, bchg):
     """
     Get all changes ordered by case and time.
 
@@ -67,6 +67,9 @@ def get_all_changes(chgs, cases):
     @param cases: Available cases.
     @type  cases: C{list} of C{str}
 
+    @param bchg: If given, change must be relative to this base change.
+    @type  bchg: C{None} or L{Change}
+
     @return: Changes for each case, sorted from old to new.
     @rtype:  C{dict} of C{str} to C{list} of L{Change}
     """
@@ -75,6 +78,7 @@ def get_all_changes(chgs, cases):
 
     if chgs is not None:
         for chg in chgs:
+            if bchg is not None and chg.base_text != bchg.base_text: continue
             if chg.case is None:
                 cc = ''
             else:
@@ -506,8 +510,11 @@ def save_project(xsaver, proj):
     if blng is not None:
         node.setAttribute('baselang', blng.name)
 
-    for lang in proj.languages.values():
-        lnode = save_language(xsaver, lang)
+    # Save languages in alphabetical order
+    langs = list(proj.languages.items())
+    langs.sort()
+    for lang in langs:
+        lnode = save_language(xsaver, lang[1])
         node.appendChild(lnode)
 
     skelnode = save_skeleton(xsaver, proj.skeleton)
@@ -598,8 +605,12 @@ def save_language(xsaver, lang):
         node.setAttribute('gender', " ".join(lang.gender))
     if len(lang.case) > 0:
         node.setAttribute('cases', " ".join(lang.case))
-    for chgs in lang.changes.values():
-        for chg in chgs:
+    # Sort the strings of the language.
+    changes = list(lang.changes.items())
+    changes.sort()
+    for chgs in changes:
+        chgs[1].sort() # Sort changes
+        for chg in chgs[1]:
             cnode = save_change(xsaver, chg)
             node.appendChild(cnode)
     return node
@@ -669,8 +680,8 @@ class Change:
     @ivar stamp: Time stamp of the change.
     @type stamp: L{Stamp}
 
-    @ivar user: User making the change.
-    @type user: C{str}
+    @ivar user: User making the change, if known.
+    @type user: C{str} or C{None}
     """
     def __init__(self, string_name, case, base_text, new_text, stamp, user):
         self.string_name = string_name
