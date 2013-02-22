@@ -224,8 +224,10 @@ def str_post(proj_name, lname, sname):
 
         continue # Not really needed.
 
+    # XXX Remove old changes
+
     if stamp is not None:
-        pmd.save()
+        config.cache.save_pmd(pmd)
         pmd.create_statistics(lng)
 
     return "ok"

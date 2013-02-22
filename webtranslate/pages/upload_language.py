@@ -89,7 +89,7 @@ def page_post(proj_name):
         str_names = set(sv.name for sv in ng_data.strings)
         for lng in pdata.languages.values():
             not_seen = str_names.copy()
-            for sn in lng.changes.keys():
+            for sn in list(lng.changes.keys()):
                 not_seen.discard(sn)
                 if sn in str_names: continue # Name is kept.
                 del lng.changes[sn] # Old string, delete
@@ -122,9 +122,10 @@ def page_post(proj_name):
                 lng_chg.stamp = stamp
                 lng_chg.user = user
 
-    # XXX remove old stuff
+    # XXX remove old changes
 
     config.cache.save_pmd(pmd)
+    pmd.create_statistics(None) # Update all languages.
     return template('upload_ok', proj_name = proj_name)
 
 
