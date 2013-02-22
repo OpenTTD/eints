@@ -1,4 +1,4 @@
-from webtranslate.bottle import route, template, abort
+from webtranslate.bottle import route, template, abort, request
 from webtranslate.protect import protected
 from webtranslate import data, config
 
@@ -68,7 +68,7 @@ class TransLationCase:
 
 @route('/string/<proj_name>/<lname>/<sname>', method = 'GET')
 @protected(['string', 'proj_name', 'lname'])
-def project(proj_name, lname, sname):
+def str_form(proj_name, lname, sname):
     pmd = config.cache.get_pmd(proj_name)
     if pmd is None:
         abort(404, "Project does not exist")
@@ -97,7 +97,7 @@ def project(proj_name, lname, sname):
         abort(404, "String cannot be translated, its base language version is incorrect")
         return
 
-    case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case)
+    case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
 
     transl_cases = []
     for case in lng.case + ['']:
@@ -134,3 +134,98 @@ def project(proj_name, lname, sname):
 
     return template('string_form', proj_name = proj_name, pdata = pdata,
                     lname = lname, sname = sname, tcs = transl_cases)
+
+
+@route('/string/<proj_name>/<lname>/<sname>', method = 'POST')
+@protected(['string', 'proj_name', 'lname'])
+def str_post(proj_name, lname, sname):
+    pmd = config.cache.get_pmd(proj_name)
+    if pmd is None:
+        abort(404, "Project does not exist")
+        return
+
+    pdata = pmd.pdata
+    lng = pdata.languages.get(lname)
+    if lng is None:
+        abort(404, "Language does not exist in the project")
+        return
+
+    blng = pdata.get_base_language()
+    if blng == lng:
+        abort(404, "Language is not a translation")
+        return
+
+    bchgs = blng.changes.get(sname)
+    if bchgs is None or len(bchgs) == 0:
+        abort(404, "String does not exist in the project")
+        return
+
+    bchg = max(bchgs)
+    binfo = data.get_base_string_info(bchg.base_text.text, blng)
+    if binfo is None:
+        # XXX Add errors too
+        abort(404, "String cannot be translated, its base language version is incorrect")
+        return
+
+    base_str = request.forms.get('base') # Base text translated against in the form.
+    if base_str is None or base_str != bchg.base_text.text:
+        abort(404, "Base language has been changed, please translate the newer version instead")
+        return
+
+    # Get changes against bchg
+    case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, bchg)
+
+    user = None # XXX Fix user
+    stamp = None # Assigned a stamp object when a change is made in the translation.
+
+    for case in lng.case + ['']:
+        trl_str = request.forms.get('text_' + case) # Translation text in the form.
+        if trl_str is None: continue # It's missing from the form data.
+        # Check whether there is a match with a change in the translation.
+        trl_chg = None
+        for cchg in case_chgs[case]:
+            if cchg.new_text.text == trl_str:
+                trl_chg = cchg
+                break
+        if trl_chg is None:
+            # A new translation against bchg!
+            if stamp is None: stamp = data.make_stamp()
+            txt = data.Text(trl_str, case, stamp)
+            tchg = data.Change(sname, case, bchg.base_text, txt, stamp, user)
+            if sname in lng.changes:
+                lng.changes[sname].append(tchg)
+            else:
+                lng.changes[sname] = [tchg]
+
+            continue
+        # Found a match with an existing translation text
+        if case_chgs[case][0] == trl_chg:
+            # Latest translation.
+            if trl_chg.base_text == bchg.base_text: # And also the latest base language!
+                continue
+            state, _errors = data.get_string_status(trl_chg, case, lng, bchg.base_text, binfo)
+            if state == data.OUT_OF_DATE:
+                # We displayed a 'this string is correct' checkbox. Was it changed?
+                if request.forms.get('ok_' + case):
+                    # Move to latest base language text.
+                    if stamp is None: stamp = data.make_stamp()
+                    trl_chg.base_text = bchg.base_text
+                    trl_chg.stamp = stamp
+                    trl_chg.user = user
+            continue
+
+        # We got an older translation instead.
+        if stamp is None: stamp = data.make_stamp()
+        tchg = data.Change(sname, case, trl_chg.base_text, trl_chg.new_text, stamp, user)
+        if sname in lng.changes:
+            lng.changes[sname].append(tchg)
+        else:
+            lng.changes[sname] = [tchg]
+
+        continue # Not really needed.
+
+    if stamp is not None:
+        pmd.save()
+        pmd.create_statistics(lng)
+
+    return "ok"
