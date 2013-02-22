@@ -17,31 +17,24 @@ def project(project, language):
         return
 
     blng = pdata.get_base_language() # As above we established there is at least one language, this should work.
-    if blng == lng:
-        abort(404, "Language is not a translation")
+    stored = [[], [], [], [], []] # unknown, up-to-date, out-of-date, invalid, missing
+    sdict = pdata.statistics
+    sdict = sdict.get(language) # Statistics dict for the queried language.
+    if sdict is None:
+        abort(404, "Missing language statistics")
         return
 
-    # A translation!
-    strings = [] # list of triplets (string-name, base-change, list (case, state, lng-change))
-    for sname, chgs in sorted(blng.changes.items()):
-        # Get newest version in the base language.
-        bchg = data.get_newest_change(chgs, None)
-        if bchg is None: continue # String is not in the base language (should not happen).
+    unknown = data.UNKNOWN
+    for sname in blng.changes:
+        state = max(s[1] for s in sdict[sname])
+        if state >= unknown:
+            stored[state - unknown].append(sname)
 
-        # Get the newest version in the translation, for all cases.
-        cases = {}
-        if len(lng.case) > 0: cases = dict((c, [None]) for c in lng.case)
-        cases[None] = [None]
-
-        for chg in lng.changes.get(sname, []):
-            tc = cases.get(chg.case)
-            if tc[0] is None or tc[0].stamp < chg.stamp: tc[0] = chg
-
-        cstrs = []
-        for c, tc in cases.items():
-            if c is None: c = ''
-            cstrs.append((c, 'unknown', tc[0]))
-        cstrs.sort()
-        strings.append((sname, bchg, cstrs))
-
-    return template('language', proj_name = project, pdata = pdata, language = language, blng = blng, strings = strings)
+    strings = []
+    for i, strs in enumerate(stored, start = unknown):
+        strs.sort()
+        title = data.STATE_MAP[i]
+        title = title[0].upper() + title[1:]
+        strings.append((title, strs))
+    return template('language', proj_name = project, is_blng = (lng == blng),
+                    pdata = pdata, language = language, strings = strings)
