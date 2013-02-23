@@ -2,9 +2,12 @@
 
 /* bootstrap over-rides, not too many because it's a headache to maintain too many */
 
-/* bootstrap h1 is seriously too big, so over-ride it */
+/* bootstrap h1 and h2 are seriously too big, so over-ride them */
 h1 {
     font-size:28px;
+}
+h2 {
+    font-size:22px;
 }
 
 /* end of bootstrap over-rides */
