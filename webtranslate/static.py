@@ -1,4 +1,4 @@
-from webtranslate.bottle import Bottle, run, route, static_file, view, template, post, request, url
+from webtranslate.bottle import route, static_file, url
 
 @route('/static/:path#.+#', name='static')
 def static(path):
