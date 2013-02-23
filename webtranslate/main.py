@@ -1,7 +1,7 @@
 """
 Main program.
 """
-from webtranslate import bottle, protect, config
+from webtranslate import bottle, protect, config, static
 from webtranslate.pages import root
 from webtranslate.pages import projects
 from webtranslate.pages import project
@@ -18,4 +18,6 @@ def run():
     # Start the web service
     bottle.debug(True)
     bottle.run(host='localhost', port=8000)
+
+
 

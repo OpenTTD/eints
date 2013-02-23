@@ -1,6 +1,7 @@
 <html>
 <head>
   <title>{{title or 'No title'}}</title>
+  <link type="text/css" href="static/css/test.css" rel="stylesheet">
 </head>
 <body>
     <div>
