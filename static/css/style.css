@@ -9,6 +9,13 @@ h1 {
 h2 {
     font-size:22px;
 }
+h3 {
+    font-size:18px;
+}
+h4 {
+    font-size:16px;
+}
+
 
 /* end of bootstrap over-rides */
 
@@ -58,6 +65,9 @@ h2 {
 }
 .eint-icon-checklist {
     background-image:url('/static/img/woocons1/Document_Checklist.png');
+}
+.eint-icon-globe {
+    background-image:url('/static/img/woocons1/Globe_Active.png');
 }
 
 
