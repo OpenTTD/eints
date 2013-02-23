@@ -26,9 +26,13 @@
             </div>
         </div>
 
+        %if len(request.query.get('message', '')) > 0:
         <div id="message-slot" class="alert alert-info">
             {{request.query.get('message', '')}}
         </div>
+        %end
+
+        <!-- content from calling template -->
         %include
 
         <div class="footer">
