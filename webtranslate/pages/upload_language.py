@@ -1,9 +1,9 @@
 """
 Upload a language file.
 """
-from webtranslate.bottle import route, template, abort, request
+from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
-from webtranslate import config, data
+from webtranslate import config, data, utils
 from webtranslate.newgrf import language_file
 
 @route('/upload/<proj_name>', method = 'GET')
@@ -125,7 +125,9 @@ def page_post(proj_name):
 
     config.cache.save_pmd(pmd)
     pmd.create_statistics(None) # Update all languages.
-    return template('upload_ok', proj_name = proj_name)
+
+    message = "Successfully uploaded language '" + lng.name +"' " + utils.get_datetime_now_formatted()
+    redirect("/project/" + proj_name + '?message=' + message)
 
 
 def get_best_change(sv, lng, base_text, search_new):
