@@ -165,9 +165,9 @@ def get_best_change(sv, lng, base_text, check_case, search_new):
 
         if search_new:
             if base_text is not None and chg.base_text != base_text: continue
-            if chg.new_text is None or sv.text != chg.new_text: continue
+            if chg.new_text is None or sv.text != chg.new_text.text: continue
         else:
-            if sv.text != chg.base_text: continue
+            if sv.text != chg.base_text.text: continue
 
         if best is None or best.stamp < chg.stamp: best = chg
 
