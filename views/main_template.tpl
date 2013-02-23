@@ -2,6 +2,7 @@
 <head>
   <title>{{title or 'No title'}}</title>
   <link type="text/css" href="static/css/test.css" rel="stylesheet">
+  <link type="text/css" href="static/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div>
