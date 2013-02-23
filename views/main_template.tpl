@@ -10,11 +10,13 @@
             <li style="display:inline;"><a href="/newproject">Start a new project</a></li>
         </ul>
     </div>
+    <hr />
 
     %include
 
+    <hr />
     <div>
-        Footer
+        <a href="http://dev.openttdcoop.org/projects/eints">Project Home Page</a>
     </div>
 </body>
 </html>
