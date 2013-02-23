@@ -19,6 +19,15 @@ h2 {
 	margin-top:25px;
 }
 
+.eint-form-actions {
+    float:right;
+    margin:30px;
+}
+
+.eint-file-upload {
+    margin-left:-98px;
+}
+
 .footer {
     width:100%;
     margin:0;
