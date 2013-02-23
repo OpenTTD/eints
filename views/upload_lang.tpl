@@ -2,7 +2,7 @@
 <h1>Upload Language for {{proj_name}}</h1>
 <br />
 <form class="form-horizontal well" action="/upload/{{proj_name}}" method="post" enctype="multipart/form-data">
-    <fieldset style="margin-left:70px;">
+    <fieldset style="margin-left:100px;"><!-- center-weight the form - no harm doing this with inline style -->
         <br />
         <br />
         <div class="control-group">
@@ -13,11 +13,6 @@
         </div>
 
         <div class="control-group">
-            <div class="controls">
-                <label class="checkbox" for="is_existing" class="checkbox">
-                    <input type="checkbox" name="is_existing" id="is_existing" /> Language already exists in the project
-                </label>
-            </div>
             <div class="controls">
                  <label class="checkbox" for="override" class="checkbox">
                     <input type="checkbox" name="override" id="override" /> Override newer texts

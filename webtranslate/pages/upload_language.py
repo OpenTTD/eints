@@ -27,7 +27,6 @@ def page_post(proj_name):
     assert pdata is not None
 
     langfile    = request.files.langfile
-    is_existing = request.forms.is_existing
     override    = request.forms.override
     is_base     = request.forms.base_language
 
@@ -68,7 +67,7 @@ def page_post(proj_name):
 
         # Add strings as changes.
         for sv in ng_data.strings:
-            chg = get_best_change(sv, base_language, None, True, False)
+            chg = get_best_change(sv, base_language, None, False)
             if chg is None: # New change.
                 base_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, None, stamp, user)
@@ -109,7 +108,7 @@ def page_post(proj_name):
             chg = data.get_newest_change(chgs, None)
             if chg is None: continue # Nothing to base against.
             base_text = chg.base_text
-            lng_chg  = get_best_change(sv, lng, base_text, True, True)
+            lng_chg  = get_best_change(sv, lng, base_text, True)
             if lng_chg is None: # It's a new text or new case.
                 lng_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, user)
@@ -129,7 +128,7 @@ def page_post(proj_name):
     return template('upload_ok', proj_name = proj_name)
 
 
-def get_best_change(sv, lng, base_text, check_case, search_new):
+def get_best_change(sv, lng, base_text, search_new):
     """
     Get the best matching change in a language for a given string value.
     (string and case should match, and the newest time stamp)
@@ -143,9 +142,6 @@ def get_best_change(sv, lng, base_text, check_case, search_new):
     @param base_text: Base text to match (if set).
     @type  base_text: C{None} or C{Text}
 
-    @param check_case: If set, the case should match. If unset, the case must be C{None}
-    @type  check_case: C{bool}
-
     @param search_new: If set, search the 'new_text' field, else search the 'base_text' field of the changes.
     @type  search_new: C{bool}
 
@@ -158,16 +154,13 @@ def get_best_change(sv, lng, base_text, check_case, search_new):
 
     best = None
     for chg in chgs:
-        if check_case:
-            if sv.case != chg.case: continue
-        else:
-            if chg.case is not None: continue
+        if sv.case != chg.case: continue
 
         if search_new:
             if base_text is not None and chg.base_text != base_text: continue
-            if chg.new_text is None or sv.text != chg.new_text: continue
+            if chg.new_text is None or sv.text != chg.new_text.text: continue
         else:
-            if sv.text != chg.base_text: continue
+            if sv.text != chg.base_text.text: continue
 
         if best is None or best.stamp < chg.stamp: best = chg
 
