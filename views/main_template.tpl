@@ -1,5 +1,6 @@
 %from webtranslate.bottle import url
-<html>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
   <title>{{title or 'No title'}}</title>
   <link type="text/css" href="{{ url('static', path='css/test.css') }}" rel="stylesheet">
