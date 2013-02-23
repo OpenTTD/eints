@@ -17,7 +17,7 @@ def run():
 
     # Start the web service
     bottle.debug(True)
-    bottle.run(host='localhost', port=8000)
+    bottle.run(reloader=True, debug=True, host='localhost', port=8000)
 
 
 
