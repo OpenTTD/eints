@@ -5,6 +5,7 @@ import re
 from webtranslate.bottle import route, template, abort, request
 from webtranslate.protect import protected
 from webtranslate import config, data
+from webtranslate.pages import project
 
 @route('/newproject', method = 'GET')
 @protected(['newproject', '-', '-'])
@@ -25,5 +26,5 @@ def page_post():
         abort(404, error)
         return
 
-    return template('newproject_created', name = name, proj_name = name.lower())
-
+    #return template('project', name = name, proj_name = name.lower())
+    return project.project(name.lower())
