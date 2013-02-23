@@ -4,41 +4,50 @@
 <strong>String name</strong>: {{sname}}
 <form action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
 % for tc in tcs:
-    <hr>
+    <hr />
     <h2>{{tc.get_stringname(sname)}}</h2>
     <strong>Current base language text:</strong><br />{{tc.transl[0].current_base.text}}
     <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
     <p>
-    <strong>State of the translated string:</strong>{{tc.transl[0].state}}<br />
-    % if tc.transl[0].user is not None:
-        Created by "{{tc.transl[0].user}}", X days ago<br />
-    % end
+        <strong>State of the translated string:</strong>{{tc.transl[0].state}}<br />
+        % if tc.transl[0].user is not None:
+            Created by "{{tc.transl[0].user}}", X days ago<br />
+        % end
+    </p>
     <textarea name="text_{{tc.case}}" rows="4" cols="75">{{tc.transl[0].text.text}}</textarea><br />
     % if len(tc.transl[0].errors) == 0:
         % if tc.transl[0].state == 'out-of-date':
             The current translation is correct: <input type="checkbox" name="ok_{{tc.case}}"/>
         % end
     % else:
-       <p><strong>Errors:</strong>
+       <p><strong>Errors:</strong></p>
         % for err in tc.transl[0].errors:
             <br />{{err[0]}}: {{err[2]}}
         % end
     % end
     % if tc.transl[0].current_base != tc.transl[0].trans_base:
-        <p>
-        Previous base language text:<br />{{tc.transl[0].trans_base.text}}
+        <p>Previous base language text:<br />{{tc.transl[0].trans_base.text}}</p>
     % end
     % if len(tc.transl) > 1:
-        <p><strong>Previous translations:</strong><br />
+        <p><strong>Previous translations:</strong></p>
         <table border="1">
-        <tr><th>Who<th>When<th>Translation</tr>
-        % for tl in tc.transl[1:]:
-            <tr><td>{{tl.user}}<td>X ago<td>{{tl.text.text}}</tr>
-        % end
+            <tr>
+                <th>Who</th>
+                <th>When</th>
+                <th>Translation</th>
+            </tr>
+            % for tl in tc.transl[1:]:
+                <tr>
+                    <td>{{tl.user}}</td>
+                    <td>X ago</td>
+                    <td>{{tl.text.text}}</td>
+                </tr>
+            % end
         </table>
     % end
     <p>
-    <input type="submit" value="Send all strings (and go to next string)"/>
-    <input type="reset" value="Reset all strings"/>
+        <input type="submit" value="Send all strings (and go to next string)"/>
+        <input type="reset" value="Reset all strings"/>
+    </p>
 % end
 </form>
