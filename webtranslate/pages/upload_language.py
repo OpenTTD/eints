@@ -27,7 +27,6 @@ def page_post(proj_name):
     assert pdata is not None
 
     langfile    = request.files.langfile
-    is_existing = request.forms.is_existing
     override    = request.forms.override
     is_base     = request.forms.base_language
 
