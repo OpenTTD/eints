@@ -16,7 +16,7 @@
 
     <hr />
     <div>
-        <a href="http://dev.openttdcoop.org/projects/eints">Project Home Page</a>
+        <a href="http://dev.openttdcoop.org/projects/eints">Web Translator Project </a>
     </div>
 </body>
 </html>
