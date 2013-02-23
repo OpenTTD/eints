@@ -12,16 +12,20 @@
 <br />
 % for title, strs in strings:
     <h3 id="{{title}}">{{title}}</h3>
+    <div class="well">
     % if len(strs) == 0:
         No strings in this category
     % end
     % if len(strs) > 0:
+        <ul class="unstyled">
         % for sname in strs:
             % if is_blng:
-                {{sname}}<br />
+                <li>{{sname}}</li>
             % else:
-                <a href="/string/{{proj_name}}/{{language}}/{{sname}}">{{sname}}</a><br />
+                <li><a href="/string/{{proj_name}}/{{language}}/{{sname}}">{{sname}}</a></li>
             % end
         % end
+        </ul>
     % end
+    </div>
 % end
