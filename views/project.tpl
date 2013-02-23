@@ -49,7 +49,6 @@
 <ul>
     <li><a href="/upload/{{proj_name}}">Upload language</a>
     <li>Download language
-    <li>Add translation language
     <li>Remove translation language
     <li>Edit translators
 </ul>
