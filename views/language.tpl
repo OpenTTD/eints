@@ -6,9 +6,9 @@
         <h2>{{title}}</h2>
         % for sname in strs:
             % if is_blng:
-                {{sname}}<br>
+                {{sname}}<br />
             % else:
-                <a href="/string/{{proj_name}}/{{language}}/{{sname}}">{{sname}}</a><br>
+                <a href="/string/{{proj_name}}/{{language}}/{{sname}}">{{sname}}</a><br />
             % end
         % end
     % end
