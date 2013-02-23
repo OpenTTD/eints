@@ -4,4 +4,18 @@ syntax: glob
 __pycache__
 .hgignore
 
+# Ignore frequent development left-overs like
+# editor backups, patches, rejects etc. pp
+*.orig
+*.bak
+*.log
+*.rej
+*.diff
+
+# Don't add python .pyc and .pyo files
 *.pyc
+*.pyo
+
+# Files created by Mac image preview and file browser:
+.DS_Store
+Thumbs.db
