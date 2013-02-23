@@ -1,0 +1,8 @@
+.eint-navbar {
+	margin-top:25px;
+}
+
+/* bootstrap h1 is seriously too big, so over-ride it */
+h1 {
+    font-size:28px;
+}
