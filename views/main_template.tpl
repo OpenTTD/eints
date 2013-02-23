@@ -1,4 +1,4 @@
-%from webtranslate.bottle import url
+%from webtranslate.bottle import url, request
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -26,6 +26,9 @@
             </div>
         </div>
 
+        <div id="message-slot" class="alert alert-info">
+            {{request.query.get('message', '')}}
+        </div>
         %include
 
         <div class="footer">
