@@ -7,14 +7,15 @@
   <link type="text/css" href="{{ url('static', path='css/bootstrap.min.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div>
-        <ul>
-            <li style="display:inline;"><a href="/">Home</a> |</li>
-            <li style="display:inline;"><a href="/projects">Projects</a> |</li>
-            <li style="display:inline;"><a href="/newproject">New Project</a></li>
-        </ul>
+    <div class="navbar navbar-static-top">
+        <div class="navbar-inner">
+            <ul class="nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="/projects">Projects</a></li>
+                <li><a href="/newproject">New Project</a></li>
+            </ul>
+        </div>
     </div>
-    <hr />
 
     %include
 
