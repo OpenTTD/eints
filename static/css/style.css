@@ -4,7 +4,7 @@
 
 /* bootstrap h1 and h2 are seriously too big, so over-ride them */
 h1 {
-    font-size:28px;
+    font-size:30px;
 }
 h2 {
     font-size:22px;
@@ -41,5 +41,24 @@ h2 {
     color:#bbb;
     font-size:12px;
 }
+
+.eint-heading-icon {
+    padding-left:40px;
+    background-repeat:no-repeat;
+    background-position:0 4px;
+}
+.eint-icon-add {
+    background-image:url('/static/img/woocons1/File_Add.png');
+}
+.eint-icon-drawer-closed {
+    background-image:url('/static/img/woocons1/Drawer_Closed.png');
+}
+.eint-icon-drawer-open {
+    background-image:url('/static/img/woocons1/Drawer_Open.png');
+}
+.eint-icon-checklist {
+    background-image:url('/static/img/woocons1/Document_Checklist.png');
+}
+
 
 /* end of eint styles */
