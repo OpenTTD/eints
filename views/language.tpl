@@ -1,5 +1,5 @@
 %rebase main_template title='language ' + language + ' in ' + proj_name
-<h1>Overview of the "{{language}}" language in {{pdata.name}}</h1>
+<h1 class="eint-heading-icon eint-icon-checklist">Overview of the "{{language}}" language in {{pdata.name}}</h1>
 <a href="/download/{{proj_name}}/{{language}}">Download</a>
 % for title, strs in strings:
     % if len(strs) > 0:

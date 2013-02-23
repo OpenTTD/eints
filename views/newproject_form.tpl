@@ -1,5 +1,5 @@
 %rebase main_template title='Create a new translation project'
-<h1>Create a new translation project</h1>
+<h1 class="eint-heading-icon eint-icon-add">Create a new translation project</h1>
 <br />
 <form class="form-inline well" action="/newproject" method="post" enctype="multipart/form-data">
     <fieldset>
