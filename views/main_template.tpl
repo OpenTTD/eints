@@ -19,10 +19,9 @@
             </div>
         </div>
 
-            %include
+        %include
 
-        <hr />
-        <div>
+        <div class="footer">
             <a href="http://dev.openttdcoop.org/projects/eints">Web Translator</a> from <a href="http://dev.openttdcoop.org">#openttdcoop</a>
         </div>
     </div>

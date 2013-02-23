@@ -1,8 +1,31 @@
-.eint-navbar {
-	margin-top:25px;
-}
+/* bootstrap over-rides, not too many because it's a headache to maintain too many */
 
 /* bootstrap h1 is seriously too big, so over-ride it */
 h1 {
     font-size:28px;
 }
+
+/* end of bootstrap over-rides */
+
+
+/* eint styles */
+
+.eint-navbar {
+	margin-top:25px;
+}
+
+.footer {
+    width:100%;
+    margin:0;
+    margin-top:50px;
+    padding:6px 0;
+    clear:both;
+    float:left;
+    background-image:url('/static/img/footer_bg.png');
+    background-repeat:repeat-x;
+    text-align:center;
+    color:#bbb;
+    font-size:12px;
+}
+
+/* end of eint styles */
