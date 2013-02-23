@@ -5,9 +5,9 @@
 <body>
     <div>
         <ul>
-            <li style="display:inline;"><a href="/">Web Translator</a> |</li>
-            <li style="display:inline;"><a href="/projects">List of projects</a> |</li>
-            <li style="display:inline;"><a href="/newproject">Start a new project</a></li>
+            <li style="display:inline;"><a href="/">Home</a> |</li>
+            <li style="display:inline;"><a href="/projects">Projects</a> |</li>
+            <li style="display:inline;"><a href="/newproject">New Project</a></li>
         </ul>
     </div>
     <hr />
@@ -16,7 +16,7 @@
 
     <hr />
     <div>
-        <a href="http://dev.openttdcoop.org/projects/eints">Web Translator Project </a>
+        <a href="http://dev.openttdcoop.org/projects/eints">Web Translator</a> from <a href="http://dev.openttdcoop.org">#openttdcoop</a>
     </div>
 </body>
 </html>
