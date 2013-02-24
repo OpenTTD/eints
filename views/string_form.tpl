@@ -8,31 +8,39 @@
 <form class="form-horizontal well well-large" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
 % for tc in tcs:
     <fieldset class="well">
-        <h4>{{tc.get_stringname(sname)}}</h4>
-        <strong>Current base language text:</strong><br />{{tc.transl[0].current_base.text}}
-        <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
-        <p>
-            <strong>State of the translated string:</strong>{{tc.transl[0].state}}<br />
-            % if tc.transl[0].user is not None:
-                Created by "{{tc.transl[0].user}}", X days ago<br />
-            % end
-        </p>
+        <span class="pull-left">{{tc.get_stringname(sname)}}</span>
+        <div class="pull-right muted">
+            <span>Translation Status:</span>
+            <span>{{tc.transl[0].state}}</span>
+        </div>
+        <hr class="clearfix" style="margin-top:30px;"/><!-- an inline style per day keeps the doctor away -->
         <div class="control-group">
-            <label class="control-label">Translation: </label>
+            <span class="control-label">Base Lang String:</span>
+            <span class="eint-form-value-as-text span8"><strong>{{tc.transl[0].current_base.text}}</strong></span>
+            <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
+        </div>
+        <div class="control-group {{('error','')[len(tc.transl[0].errors) == 0]}}">
+            <label class="control-label">Translation:</label>
             <div class="controls">
-                <textarea class="input-xxlarge" name="text_{{tc.case}}" rows="4">{{tc.transl[0].text.text}}</textarea>
+                <textarea class="span8" name="text_{{tc.case}}" rows="4">{{tc.transl[0].text.text}}</textarea>
+                % if len(tc.transl[0].errors) == 0:
+                    % if tc.transl[0].state == 'out-of-date':
+                        The current translation is correct: <input type="checkbox" name="ok_{{tc.case}}"/><!-- !! this case not styled yet -->
+                    % end
+                % else:
+                    % for err in tc.transl[0].errors:
+                        <span class="help-block error">{{err[0]}}: {{err[2]}}</span>
+                    % end
+                % end
             </div>
         </div>
-        % if len(tc.transl[0].errors) == 0:
-            % if tc.transl[0].state == 'out-of-date':
-                The current translation is correct: <input type="checkbox" name="ok_{{tc.case}}"/>
-            % end
-        % else:
-           <p><strong>Errors:</strong></p>
-            % for err in tc.transl[0].errors:
-                <br />{{err[0]}}: {{err[2]}}
-            % end
-        % end
+        <div class="control-group">
+            <div class="controls">
+                % if tc.transl[0].user is not None:
+                    <span class="help-block">Translation created by "{{tc.transl[0].user}}", X days ago</span>
+                % end
+            </div>
+        </div>
         % if tc.transl[0].current_base != tc.transl[0].trans_base:
             <p>Previous base language text:<br />{{tc.transl[0].trans_base.text}}</p>
         % end
@@ -53,8 +61,11 @@
                 % end
             </table>
         % end
-        <input class="btn btn-danger" type="reset" value="Reset all strings"/>
-        <input class="btn btn-primary pull-right" type="submit" value="Send all strings (and go to next string)"/>
+        <br />
+        <div>
+            <input class="btn btn-danger" type="reset" value="Reset all strings"/>
+            <input class="btn btn-primary pull-right" type="submit" value="Send all strings (and go to next string)"/>
+        </div>
     </fieldset>
 % end
 </form>

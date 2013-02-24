@@ -33,9 +33,11 @@ h4 {
     margin:30px;
     float:right;
 }
-
 .eint-file-upload {
     margin-left:-98px;
+}
+.eint-form-value-as-text {
+    margin-top:5px;
 }
 
 .footer {
