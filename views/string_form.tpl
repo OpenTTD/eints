@@ -53,10 +53,8 @@
                 % end
             </table>
         % end
-        <p>
-            <input class="btn btn-danger" type="reset" value="Reset all strings"/>
-            <input class="btn btn-primary pull-right" type="submit" value="Send all strings (and go to next string)"/>
-        </p>
+        <input class="btn btn-danger" type="reset" value="Reset all strings"/>
+        <input class="btn btn-primary pull-right" type="submit" value="Send all strings (and go to next string)"/>
     </fieldset>
 % end
 </form>
