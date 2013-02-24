@@ -1,5 +1,5 @@
-%rebase main_template title='Upload language for ' + proj_name
-<h1>Upload Language for {{proj_name}}</h1>
+%rebase main_template title='Upload language for ' + pdata.name
+<h1>Upload Language for <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a></h1>
 <br />
 <form class="form-horizontal well" action="/upload/{{proj_name}}" method="post" enctype="multipart/form-data">
     <fieldset style="margin-left:100px;"><!-- center-weight the form - no harm doing this with inline style -->

@@ -10,10 +10,11 @@ from webtranslate.newgrf import language_file
 @protected(['upload', 'proj_name', '-'])
 def page_get(proj_name):
     proj = config.cache.projects.get(proj_name)
+    pdata = config.cache.get_pmd(proj_name).pdata
     if proj is None:
         abort(404, "Page not found")
         return
-    return template('upload_lang', proj_name = proj_name)
+    return template('upload_lang', proj_name = proj_name, pdata = pdata)
 
 @route('/upload/<proj_name>', method = 'POST')
 @protected(['upload', 'proj_name', '-'])
