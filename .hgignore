@@ -1,8 +1,10 @@
 syntax: glob
 
 *.swp
-__pycache__
 .hgignore
+
+# Ignore generated documentation
+docs/html
 
 # Ignore frequent development left-overs like
 # editor backups, patches, rejects etc. pp
@@ -13,6 +15,7 @@ __pycache__
 *.diff
 
 # Don't add python .pyc and .pyo files
+__pycache__
 *.pyc
 *.pyo
 
