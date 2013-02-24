@@ -3,11 +3,12 @@
 <hr />
 <h2>
     Lang: <a class="eint-header-link" href="/language/{{proj_name}}/{{lname}}">{{lname}}</a>
+    <span class="muted pull-right">String: {{sname}}</span>
 </h2>
 <form class="form-horizontal well well-large" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
 % for tc in tcs:
-    <fieldset>
-        <legend>{{tc.get_stringname(sname)}}</legend>
+    <fieldset class="well">
+        <h4>{{tc.get_stringname(sname)}}</h4>
         <strong>Current base language text:</strong><br />{{tc.transl[0].current_base.text}}
         <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
         <p>
@@ -16,7 +17,12 @@
                 Created by "{{tc.transl[0].user}}", X days ago<br />
             % end
         </p>
-        <textarea name="text_{{tc.case}}" rows="4" cols="75">{{tc.transl[0].text.text}}</textarea><br />
+        <div class="control-group">
+            <label class="control-label">Translation: </label>
+            <div class="controls">
+                <textarea class="input-xxlarge" name="text_{{tc.case}}" rows="4">{{tc.transl[0].text.text}}</textarea>
+            </div>
+        </div>
         % if len(tc.transl[0].errors) == 0:
             % if tc.transl[0].state == 'out-of-date':
                 The current translation is correct: <input type="checkbox" name="ok_{{tc.case}}"/>
@@ -48,8 +54,8 @@
             </table>
         % end
         <p>
-            <input type="submit" value="Send all strings (and go to next string)"/>
-            <input type="reset" value="Reset all strings"/>
+            <input class="btn btn-danger" type="reset" value="Reset all strings"/>
+            <input class="btn btn-primary pull-right" type="submit" value="Send all strings (and go to next string)"/>
         </p>
     </fieldset>
 % end
