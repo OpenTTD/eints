@@ -1,4 +1,5 @@
 %from webtranslate.bottle import url, request
+%from webtranslate import utils
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -26,7 +27,8 @@
             </div>
         </div>
 
-        %if len(request.query.get('message', '')) > 0:
+        %message = utils.get_message(request)
+        %if message is not None:
         <div id="message-slot" class="alert alert-info">
             {{request.query.get('message', '')}}
         </div>
