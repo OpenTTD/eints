@@ -27,12 +27,12 @@
             </div>
         </div>
 
-        %message = utils.get_message(request)
-        %if message is not None:
-        <div id="message-slot" class="alert alert-info">
-            {{request.query.get('message', '')}}
-        </div>
-        %end
+        %messages = utils.get_messages(request)
+        %if messages is not None:
+            <div id="message-slot" class="alert {{messages[0].get('class','alert-info')}}">
+                {{messages[0]['content']}}
+            </div>
+            %end
 
         <!-- content from calling template -->
         %include
