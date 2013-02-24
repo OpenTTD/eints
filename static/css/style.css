@@ -69,6 +69,9 @@ h4 {
 .eint-icon-checklist {
     background-image:url('/static/img/woocons1/Document_Checklist.png');
 }
+.eint-icon-lang-upload {
+    background-image:url('/static/img/woocons1/Document_1_Upload.png');
+}
 .eint-icon-globe {
     background-image:url('/static/img/woocons1/Globe_Active.png');
 }
