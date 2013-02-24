@@ -1,5 +1,5 @@
 %rebase main_template title='Editing ' + sname
-<h1 class="eint-heading-icon eint-icon-pencil">Edit String(s) for <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a></h1>
+<h1 class="eint-heading-icon eint-icon-document-1-edit">Edit String(s) for <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a></h1>
 <hr />
 <h2>
     Lang: <a class="eint-header-link" href="/language/{{proj_name}}/{{lname}}">{{lname}}</a>

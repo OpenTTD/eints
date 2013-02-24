@@ -1,6 +1,6 @@
 %rebase main_template title='language ' + language + ' in ' + proj_name
 <h1 class="eint-heading-icon eint-icon-checklist">
-    Strings for <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a>
+    Status of Strings for <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a>
 </h1>
 <hr />
 
