@@ -413,12 +413,13 @@ class StringValue:
     @type name: C{str}
 
     @ivar case: Case of the string, if any.
-    @type case: C{str} or C{None}
+    @type case: C{str}
 
     @ivar text: Actual text of the string.
     @type text: C{str}
     """
     def __init__(self, lnum, name, case, text):
+        assert case is not None # XXX
         self.lnum = lnum
         self.name = name
         self.case = case
@@ -463,7 +464,7 @@ class NewGrfData:
         self.language_data = None
         self.plural = None
         self.gender = []
-        self.case = []
+        self.case = ['']
         self.skeleton = []
         self.strings = []
 
@@ -561,7 +562,7 @@ def handle_pragma(lnum, line, data, errors):
         if len(line) == 1:
             errors.append((ERROR, lnum, "##case takes a non-empty list of case names"))
             return
-        data.case = line[1:]
+        data.case = [''] + line[1:]
         return
 
     errors.append((ERROR, lnum, "Unknown pragma '{}'".format(line[0])))
@@ -622,12 +623,12 @@ def load_language_file(handle, max_size, errors):
         if m:
             seen_strings = True # Disable processing of ## pragma lines
             if m.group(2) is None:
-                m2 = None
+                m2 = ''
             else:
                 m2 = m.group(2)[1:]
             sv = StringValue(lnum, m.group(1), m2, m.group(3))
             data.strings.append(sv)
-            if m2 is None:
+            if m2 is '':
                 if m.group(1) in skeleton_strings:
                     errors.append((ERROR, lnum, 'String name {} is already used.'.format(m.group(1))))
                     continue
@@ -675,7 +676,7 @@ def get_translation_string_info(text, case, extra_commands, lng, errors):
     @type  text: C{str}
 
     @param case: Case of the string, if given.
-    @type  case: C{str} or C{None}
+    @type  case: C{str}
 
     @param extra_commands: Extra commands that are allowed in the translation.
     @type  extra_commands: C{set} of C{str}
@@ -689,7 +690,8 @@ def get_translation_string_info(text, case, extra_commands, lng, errors):
     @return: Information about the used string parameters.
     @rtype:  L{NewGrfStringInfo}
     """
-    return check_string(text, None, case is None, extra_commands, get_plural_count(lng.plural), lng.gender, errors)
+    assert case is not None # XXX
+    return check_string(text, None, case == '', extra_commands, get_plural_count(lng.plural), lng.gender, errors)
 
 def compare_info(base_info, lng_info, errors):
     """

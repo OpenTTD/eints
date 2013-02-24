@@ -42,7 +42,7 @@ class Translation:
         else:
             self.user = 'none'
             self.trans_base = self.current_base
-            txt = data.Text('', None, None) # This breaks assumptions on the Text class.
+            txt = data.Text('', '', None) # This breaks assumptions on the Text class.
             self.text = txt
             self.stamp = None
 
@@ -58,6 +58,7 @@ class TransLationCase:
     @type transl: C{list} of L{Translation}
     """
     def __init__(self, case, transl):
+        assert case is not None # XXX
         self.case = case
         self.transl = transl
 
@@ -100,7 +101,8 @@ def str_form(proj_name, lname, sname):
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
 
     transl_cases = []
-    for case in lng.case + ['']:
+    assert '' in lng.case # XXX
+    for case in lng.case:
         tranls = []
         transl_cases.append(TransLationCase(case, tranls))
 
@@ -121,6 +123,7 @@ def str_form(proj_name, lname, sname):
             # No changes for this case, make a dummy one to display the base data.
             tra = Translation(bchg, None)
             tra.user = None
+            assert case is not None # XXX
             if case == '':
                 tra.errors = [('ERROR', None, 'String is missing')]
                 tra.state = data.STATE_MAP[data.MISSING]
@@ -173,12 +176,15 @@ def str_post(proj_name, lname, sname):
         return
 
     # Get changes against bchg
+    assert lng.case is not None # XXX
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, bchg)
 
     user = None # XXX Fix user
     stamp = None # Assigned a stamp object when a change is made in the translation.
 
-    for case in lng.case + ['']:
+    assert '' in lng.case # XXX
+    for case in lng.case:
+        assert case is not None # XXX
         trl_str = request.forms.get('text_' + case) # Translation text in the form.
         if trl_str is None: continue # It's missing from the form data.
         # Check whether there is a match with a change in the translation.

@@ -298,7 +298,7 @@ class ProjectMetaData:
 
         # First construct detailed information in the project
         for sname, bchgs in blng.changes.items():
-            bchg = data.get_newest_change(bchgs, None)
+            bchg = data.get_newest_change(bchgs, '')
             binfo = data.get_base_string_info(bchg.base_text.text, blng)
             if binfo:
                 bstat[sname] = [('', data.UP_TO_DATE)]

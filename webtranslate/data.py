@@ -45,11 +45,12 @@ def get_newest_change(chgs, case):
     @type  chgs: C{list} of L{Change}
 
     @param case: Case to match.
-    @type  case: C{str} or C{None}
+    @type  case: C{str}
 
     @return: The newest change, if available.
     @rtype:  C{Change} or C{None}
     """
+    assert case is not None # XXX
     best = None
     for chg in chgs:
         if chg.case != case: continue
@@ -73,18 +74,14 @@ def get_all_changes(chgs, cases, bchg):
     @return: Changes for each case, sorted from old to new.
     @rtype:  C{dict} of C{str} to C{list} of L{Change}
     """
+    assert '' in cases # XXX
     cases = dict((c, []) for c in cases)
-    cases[''] = []
 
     if chgs is not None:
         for chg in chgs:
             if bchg is not None and chg.base_text != bchg.base_text: continue
-            if chg.case is None:
-                cc = ''
-            else:
-                cc = chg.case
-
-            clist = cases.get(cc)
+            assert chg.case is not None # XXX
+            clist = cases.get(chg.case)
             if clist is not None: clist.append(chg)
 
     for clist in cases.values():
@@ -110,14 +107,10 @@ def get_all_newest_changes(chgs, cases):
     cases[''] = None
 
     for chg in chgs:
-        if chg.case is None:
-            cc = ''
-        else:
-            cc = chg.case
-
-        if cc in cases:
-            if cases[cc] is None or cases[cc].stamp < chg.stamp:
-                cases[cc] = chg
+        assert chg.case is not None # XXX
+        if chg.case in cases:
+            if cases[chg.case] is None or cases[chg.case].stamp < chg.stamp:
+                cases[chg.case] = chg
     return cases
 
 MISSING_OK =  0 # String is missing, but that's allowed (non-default case string).
@@ -200,6 +193,7 @@ def get_string_status(lchg, case, lng, btext, binfo):
     @return: State of the translated string and any errors.
     @rtype:  C{tuple} (C{int}, C{list} of C{tuple} (C{str}, C{None}, C{str}))
     """
+    assert case is not None # XXX
     if lchg is None:
         if case == '':
             return MISSING, []
@@ -282,7 +276,7 @@ class XmlLoader:
         if texts is not None:
             for node in loader.get_child_nodes(texts, 'string'):
                 ref = node.getAttribute('ref')
-                case = loader.get_opt_DOMattr(node, 'case', None)
+                case = loader.get_opt_DOMattr(node, 'case', '')
                 stamp = load_stamp(self, loader.get_single_child_node(node, 'stamp'))
                 txt = loader.get_single_child_node(node, 'text')
                 txt = loader.collect_text_DOM(txt)
@@ -359,7 +353,7 @@ class XmlSaver:
         if ref is not None: return ref
 
         node = self.doc.createElement('string')
-        if text.case is not None: node.setAttribute('case', text.case)
+        if text.case != '': node.setAttribute('case', text.case)
 
         ref = "text_{:04d}".format(self.number)
         self.number = self.number + 1
@@ -575,7 +569,7 @@ class Language:
         self.grflangid = 0x7F
         self.plural = 1
         self.gender = []
-        self.case  = []
+        self.case  = ['']
         self.changes = {}
 
 def save_language(xsaver, lang):
@@ -603,8 +597,9 @@ def save_language(xsaver, lang):
     node.setAttribute('plural', str(lang.plural))
     if len(lang.gender) > 0:
         node.setAttribute('gender', " ".join(lang.gender))
-    if len(lang.case) > 0:
-        node.setAttribute('cases', " ".join(lang.case))
+    cases = [c for c in lang.case if c != '']
+    if len(cases) > 0:
+        node.setAttribute('cases', " ".join(cases))
     # Sort the strings of the language.
     changes = list(lang.changes.items())
     changes.sort()
@@ -642,10 +637,10 @@ def load_language(xloader, node):
         lng.gender = gender.split(' ')
 
     case = loader.get_opt_DOMattr(node, 'cases', None)
-    if case is None:
-        lng.case = []
+    if case is None or case == '':
+        lng.case = ['']
     else:
-        lng.case = case.split(' ')
+        lng.case = case.split(' ') + ['']
 
     lng.changes = {}
     for ch_node in loader.get_child_nodes(node, 'change'):
@@ -668,7 +663,7 @@ class Change:
     @type string_name: C{str}
 
     @ivar case: Case of the string if available.
-    @type case: C{str} or C{None}
+    @type case: C{str}
 
     @ivar base_text: Used string in the base language.
     @type base_text: L{Text}
@@ -684,6 +679,7 @@ class Change:
     @type user: C{str} or C{None}
     """
     def __init__(self, string_name, case, base_text, new_text, stamp, user):
+        assert case is not None # XXX
         self.string_name = string_name
         self.case = case
         self.base_text = base_text
@@ -715,7 +711,7 @@ def save_change(xsaver, change):
     """
     node = xsaver.doc.createElement('change')
     node.setAttribute('strname', change.string_name)
-    if change.case is not None: node.setAttribute('case', change.case)
+    if change.case != '': node.setAttribute('case', change.case)
     if change.user is not None: node.setAttribute('user', change.user)
 
     node.setAttribute('basetext', make_ref_text(xsaver, change.base_text))
@@ -741,7 +737,7 @@ def load_change(xloader, node):
     """
     assert node.tagName == 'change'
     strname = node.getAttribute('strname')
-    case = loader.get_opt_DOMattr(node, 'case', None)
+    case = loader.get_opt_DOMattr(node, 'case', '')
     user = loader.get_opt_DOMattr(node, 'user', None)
     base_text = get_text(xloader, node.getAttribute('basetext'))
     new_text = loader.get_opt_DOMattr(node, 'newtext', None)
@@ -760,13 +756,14 @@ class Text:
     @ivar text: The actual text.
     @type text: C{str}
 
-    @ivar case: Case of this string, if available.
-    @type case: C{None} or C{str}
+    @ivar case: Case of this string.
+    @type case: C{str}
 
     @ivar stamp: Time stamp of creation of this text.
     @type stamp: L{Stamp}
     """
     def __init__(self, text, case, stamp):
+        assert case is not None # XXX
         self.text = text
         self.case = case
         self.stamp = stamp

@@ -30,10 +30,12 @@ def download(proj_name, language):
         if skel_type == 'string':
             chgs = lng.changes.get(skel_value)
             if chgs is not None:
-                for case in [None] + lng.case:
+                assert '' in lng.case # XXX
+                for case in lng.case:
+                    assert case is not None # XXX
                     chg = data.get_newest_change(chgs, case)
                     if chg is not None:
-                        if case is None:
+                        if case == '':
                             line = skel_value
                         else:
                             line = skel_value + "." + case
@@ -54,8 +56,9 @@ def download(proj_name, language):
             continue
 
         if skel_type == 'case':
-            if len(lng.case) > 0:
-                lines.append('##case ' + ' '.join(lng.gender))
+            cases = [c for c in lng.case if c != '']
+            if len(cases) > 0:
+                lines.append('##case ' + ' '.join(cases))
             continue
 
         if skel_type == 'gender':

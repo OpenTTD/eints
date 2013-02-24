@@ -105,7 +105,7 @@ def page_post(proj_name):
         for sv in ng_data.strings:
             chgs = base_language.changes.get(sv.name)
             if chgs is None: continue # Translation has a string not in the base language
-            chg = data.get_newest_change(chgs, None)
+            chg = data.get_newest_change(chgs, '')
             if chg is None: continue # Nothing to base against.
             base_text = chg.base_text
             lng_chg  = get_best_change(sv, lng, base_text, True)
