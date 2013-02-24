@@ -29,11 +29,12 @@
 
         %messages = utils.get_messages(request)
         %if messages is not None:
-            <div id="message-slot" class="alert {{messages[0].get('class','alert-info')}}">
-                {{messages[0]['content']}}
+            %for message in messages:
+            <div id="message-slot" class="alert {{message['class']}}">
+                {{message['content']}}
             </div>
             %end
-
+        %end
         <!-- content from calling template -->
         %include
 
