@@ -26,7 +26,7 @@
         </div>
 
         <div class="eint-form-actions">
-            <button class="btn btn-primary" type="submit">Upload</button>
+            <button class="btn btn-primary btn-large" type="submit">Upload</button>
         </div>
     </fieldset>
 </form>
