@@ -12,6 +12,7 @@
         <tr>
             <th rowspan="2">Language
             <th colspan="5">Strings
+            <th rowspan="2">Links
         </tr>
         <tr>
             <th>Unknown
@@ -27,6 +28,7 @@
             <td>-
             <td>{{bcounts[3]}}
             <td>-
+            <td>-
         </tr>
     % for lngname, counts in transl:
         <tr>
@@ -36,6 +38,7 @@
             <td>{{counts[2]}}
             <td>{{counts[3]}}
             <td>{{counts[4]}}
+            <td><a href="/fix/{{proj_name}}/{{lngname}}">Start fixing</a>
         </tr>
     %end
     </table>

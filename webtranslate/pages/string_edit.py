@@ -1,4 +1,5 @@
-from webtranslate.bottle import route, template, abort, request
+import random
+from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
 from webtranslate import data, config
 
@@ -65,6 +66,93 @@ class TransLationCase:
     def get_stringname(self, sname):
         if self.case == '': return sname
         return sname + '.' + self.case
+
+def find_string(pmd, lname, missing_prio, invalid_prio, outdated_prio):
+    """
+    Find a string to translate.
+    Collects the strings with the highest priority (the smallest number), and picks one at random.
+
+    @param pmd: Project meta data.
+    @type  pmd: L{ProjectMetaData}
+
+    @param lname: Language name.
+    @type  lname: C{str}
+
+    @param missing_prio: Priority of finding a missing string.
+    @type  missing_prio: C{int}
+
+    @param invalid_prio: Priority of finding an invalid string.
+    @type  invalid_prio: C{int}
+
+    @param outdated_prio: Priority of finding an outdated string.
+    @type  outdated_prio: C{int}
+
+    @return: Name of a string with a highest priority (lowest prio number), if available.
+    @rtype:  C{str} or C{None}
+    """
+    pdata = pmd.pdata
+    blng = pdata.get_base_language()
+    if blng is None: return None # No strings to translate without base language.
+    ldict = pdata.statistics.get(lname)
+    if ldict is None: return None # Unsupported language.
+
+    prio_map = {data.MISSING: missing_prio,
+                data.INVALID: invalid_prio,
+                data.OUT_OF_DATE: outdated_prio}
+
+    cur_prio = max(missing_prio, invalid_prio, outdated_prio) + 1
+    cur_strings = []
+    for sname in blng.changes:
+        state = max(s[1] for s in pdata.statistics[lname][sname])
+        state_prio = prio_map.get(state)
+        if state_prio is None: continue
+        if state_prio == cur_prio:
+            cur_strings.append(sname)
+            continue
+        if state_prio < cur_prio:
+            cur_prio = state_prio
+            cur_strings = [sname]
+            continue
+
+    if len(cur_strings) == 0: return None
+    return random.choice(cur_strings)
+
+@route('/fix/<proj_name>/<lname>', method = 'GET')
+@protected(['string', 'proj_name', 'lname'])
+def fix_string(proj_name, lname):
+    """
+    Fix a random string.
+
+    @param proj_name: Name of the project.
+    @type  proj_name: C{str}
+
+    @param lname: Language name.
+    @type  lname: C{str}
+    """
+    pmd = config.cache.get_pmd(proj_name)
+    if pmd is None:
+        abort(404, "Project does not exist")
+        return
+
+    pdata = pmd.pdata
+    lng = pdata.languages.get(lname)
+    if lng is None:
+        abort(404, "Language does not exist in the project")
+        return
+
+    blng = pdata.get_base_language()
+    if blng == lng:
+        abort(404, "Language is not a translation")
+        return
+
+    sname = find_string(pmd, lname, 1, 2, 3)
+    if sname is None:
+        message = "All strings are up-to-date, perhaps some translations need rewording?"
+        redirect('/language/{}/{}?message={}'.format(proj_name, lname, message))
+        return
+
+    redirect('/string/{}/{}/{}'.format(proj_name, lname, sname))
+    return
 
 
 @route('/string/<proj_name>/<lname>/<sname>', method = 'GET')
