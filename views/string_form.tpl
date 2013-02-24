@@ -1,11 +1,11 @@
 %rebase main_template title='Editing ' + sname
-<strong>Project</strong>: {{pdata.name}}<br />
-<strong>Translation language</strong>: {{lname}}<br />
+<h1 class="eint-heading-icon eint-icon-pencil">Edit String(s) for <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a></h1>
+<hr />
+<h2>Lang: {{lname}}</h2>
 <strong>String name</strong>: {{sname}}
-<form action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
+<form class="form-horizontal well" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
 % for tc in tcs:
-    <hr />
-    <h2>{{tc.get_stringname(sname)}}</h2>
+    <h3>{{tc.get_stringname(sname)}}</h3>
     <strong>Current base language text:</strong><br />{{tc.transl[0].current_base.text}}
     <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
     <p>

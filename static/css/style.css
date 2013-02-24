@@ -72,6 +72,9 @@ h4 {
 .eint-icon-globe {
     background-image:url('/static/img/woocons1/Globe_Active.png');
 }
+.eint-icon-pencil {
+    background-image:url('/static/img/woocons1/Pencil.png');
+}
 
 
 /* end of eint styles */
