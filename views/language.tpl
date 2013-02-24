@@ -1,7 +1,10 @@
 %rebase main_template title='language ' + language + ' in ' + proj_name
-<h1 class="eint-heading-icon eint-icon-checklist">{{pdata.name}}: <em>{{language}}</em></h1>
+<h1 class="eint-heading-icon eint-icon-checklist">
+    Strings for <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a>
+</h1>
 <hr />
-<h2>Strings</h2>
+
+<h2>Lang: {{language}}</h2>
 <a class="btn pull-right" href="/download/{{proj_name}}/{{language}}"><i class="icon-download"></i> Download Lang File</a>
 <div class="btn-group">
 % for title, strs in strings:

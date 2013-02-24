@@ -16,7 +16,6 @@ h4 {
     font-size:16px;
 }
 
-
 /* end of bootstrap over-rides */
 
 
@@ -24,6 +23,10 @@ h4 {
 
 .eint-navbar {
 	margin-top:25px;
+}
+
+.eint-header-link {
+    color:inherit;
 }
 
 .eint-form-actions {
