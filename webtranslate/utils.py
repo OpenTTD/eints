@@ -13,7 +13,10 @@ def get_messages(request):
     """
 
     # message classes map to bootstrap css alert style names. n.b. default bootstrap alert is yellow (warning), but our default is blue (info)
-    message_classes = {'info': 'alert-info', 'warning':'', 'success': 'alert-success', 'error': 'alert-error'}
+    message_classes = {'info': 'alert-info',
+                       'success': 'alert-success',
+                       'warning':'',
+                       'error': 'alert-error'}
 
     messages = []
     if len(request.query.get('message', '')) > 0:
