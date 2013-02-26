@@ -15,13 +15,14 @@ def get_overview(pmd, lang_name):
     @param lang_name: Name of the language.
     @type  lang_name: C{str}
 
-    @return: Statistics of the strings of the language.
-    @rtype:  C{list} of C{str}
+    @return: Statistics of the strings of the language, 'needs fixing' flag.
+    @rtype:  C{list} of C{str}, C{bool}
     """
-    counts =  pmd.overview.get(lang_name)
+    counts = pmd.overview.get(lang_name)
     if counts is not None:
-        return [str(n) for n in counts]
-    return ['?', '?', '?', '?', '?']
+        needs_fixing = counts[2] != 0 or counts[3] != 0 or counts[4] != 0
+        return [str(n) for n in counts], needs_fixing
+    return ['?', '?', '?', '?', '?'], False
 
 
 @route('/project/<proj_name>', method = 'GET')
@@ -39,11 +40,12 @@ def project(proj_name):
     if base_lng is not None:
         for lname, lng in pdata.languages.items():
             if lng is base_lng: continue
-            transl.append((lname, get_overview(pmd, lname)))
+            counts, needs_fixing = get_overview(pmd, lname)
+            transl.append((lname, counts, needs_fixing))
 
         transl.sort()
 
-        bcounts = get_overview(pmd, base_lng.name)
+        bcounts = get_overview(pmd, base_lng.name)[0]
 
     return template('project', proj_name = proj_name, pdata = pdata,
                     transl = transl, base_lng = base_lng, bcounts = bcounts)

@@ -225,7 +225,7 @@ class ProjectMetaData:
     @type name: C{str}
 
     @ivar overview: Overview of the state of the strings in each language, ordered by language name.
-    @type overview: C{dict} of C{str} to [#UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
+    @type overview: C{dict} of C{str} to [#UNKNOWN, #UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
 
     @ivar proj_name: Project name for humans.
     @type proj_name: C{str}

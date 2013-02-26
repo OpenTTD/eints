@@ -40,17 +40,21 @@
                 <td class="number"><strong>{{bcounts[3]}}</strong></td>
                 <td class="number"><strong>-</strong></td>
             </tr>
-        % for lngname, counts in transl:
+        % for lngname, counts, needs_fix in transl:
             <tr>
                 <td>
-                    % if counts[1] == bcounts[1]:
+                    % if not needs_fix:
                         <i class="icon-ok-circle"></i>
                     % else:
                         <i class="icon-exclamation-sign"></i>
                     % end
                 </td>
                 <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a></td>
-                <td><a href="/fix/{{proj_name}}/{{lngname}}">Start Fixing</a></td>
+                % if needs_fix:
+                    <td><a href="/fix/{{proj_name}}/{{lngname}}">Start Fixing</a></td>
+                % else:
+                    <td>Done!</td>
+                % end
                 <td>Delete</td>
                 <td>Download</td>
                 <td class="number">{{counts[0]}}</td>
