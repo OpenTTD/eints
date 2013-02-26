@@ -1,9 +1,9 @@
 %rebase main_template title='Web translator - ' + pdata.name
 <h1 class="eint-heading-icon eint-icon-drawer-open">{{pdata.name}}</h1>
 <hr />
-<div class="pull-right" style="padding-top:3px;">
-    <a class="btn" href="#"><i class="icon-user"></i> Edit Translators</a>
+<div class="btn-group pull-right" style="padding-top:3px;">
     <a class="btn" href="/upload/{{proj_name}}"><i class="icon-circle-arrow-up"></i> Upload Language</a></li>
+    <a class="btn" href="#"><i class="icon-user"></i> Edit Translators</a>
 </div>
 <h2>Project Overview</h2>
 % if base_lng is None:
@@ -44,12 +44,19 @@
         </tr>
     %end
     </table>
-    <p>Where
-    <em>Unknown</em> means the state of the translation was not decidable,
-    <em>Correct</em> means the string is technically correct and up to date,
-    <em>Outdated</em> means a valid translation exists, but it needs review as a newer base language text exists,
-    <em>Invalid</em> means a translation exists, but its string parameters do not match with the base language, and
-    <em>Missing</em> means no translation could be found.</p>
+    <br />
+    <dl>
+        <dt>Unknown</dt>
+        <dd>means the state of the translation was not decidable</dd>
+        <dt>Correct</dt>
+        <dd>means the string is technically correct and up to date</dd>
+        <dt>Outdated</dt>
+        <dd>means a valid translation exists, but it needs review as a newer base language text exists</dd>
+        <dt>Invalid</dt>
+        <dd>means a translation exists, but its string parameters do not match with the base language, and</dd>
+        <dt>Missing</dt>
+        <dd>means no translation could be found</dd>
+    </dl>
 %end
 
 </ul>
