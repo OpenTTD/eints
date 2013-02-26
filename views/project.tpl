@@ -49,17 +49,17 @@
         </tbody>
     </table>
     <br />
-    <dl>
+    <dl class="dl-horizontal">
         <dt>Unknown</dt>
-        <dd>means the state of the translation was not decidable</dd>
+        <dd>The state of the translation was not decidable</dd>
         <dt>Correct</dt>
-        <dd>means the string is technically correct and up to date</dd>
+        <dd>The string is technically correct and up to date</dd>
         <dt>Outdated</dt>
-        <dd>means a valid translation exists, but it needs review as a newer base language text exists</dd>
+        <dd>A valid translation exists, but it needs review as a newer base language text exists</dd>
         <dt>Invalid</dt>
-        <dd>means a translation exists, but its string parameters do not match with the base language, and</dd>
+        <dd>A translation exists, but its string parameters do not match with the base language</dd>
         <dt>Missing</dt>
-        <dd>means no translation could be found</dd>
+        <dd>No translation could be found</dd>
     </dl>
 %end
 
