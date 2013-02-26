@@ -51,18 +51,11 @@
     </table>
     <br />
 
-    {{utils.get_status_definition_strings()}}
     <dl class="dl-horizontal">
-        <dt>Unknown</dt>
-        <dd>The state of the translation was not decidable</dd>
-        <dt>Correct</dt>
-        <dd>The string is technically correct and up to date</dd>
-        <dt>Outdated</dt>
-        <dd>A valid translation exists, but it needs review as a newer base language text exists</dd>
-        <dt>Invalid</dt>
-        <dd>A translation exists, but its string parameters do not match with the base language</dd>
-        <dt>Missing</dt>
-        <dd>No translation could be found</dd>
+        % for status in utils.get_status_definition_strings().values():
+            <dt>{{status['title']}}</dt>
+            <dd>{{status['description']}}</dd>
+        % end
     </dl>
 %end
 

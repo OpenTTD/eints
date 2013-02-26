@@ -27,11 +27,10 @@ def get_messages(request):
     else:
         return None
 
-
 def get_status_definition_strings():
-    status_definitions = {'unknown': {'title': 'Unknown', 'description': 'The state of the translation was not decidable'},
-                          'correct': {'title': 'Correct', 'description': 'The string is technically correct and up to date'},
-                          'outdated': {'title': 'Outdated', 'description': 'A valid translation exists, but it needs review as a newer base language text exists'},
-                          'invalid': {'title': 'Invalid', 'description': 'A translation exists, but its string parameters do not match with the base language'},
-                          'missing': {'title': 'Missing', 'description': 'No translation could be found'}}
+    status_definitions = {'UNKNOWN': {'title': 'Unknown', 'description': 'The state of the translation was not decidable'},
+                          'UP_TO_DATE': {'title': 'Correct', 'description': 'The string is technically correct and up to date'},
+                          'OUT_OF_DATE': {'title': 'Outdated', 'description': 'A valid translation exists, but it needs review as a newer base language text exists'},
+                          'INVALID': {'title': 'Invalid', 'description': 'A translation exists, but its string parameters do not match with the base language'},
+                          'MISSING_OK': {'title': 'Missing', 'description': 'No translation could be found'}}
     return status_definitions
