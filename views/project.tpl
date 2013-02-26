@@ -1,4 +1,5 @@
 %rebase main_template title='Web translator - ' + pdata.name
+%from webtranslate import utils
 <h1 class="eint-heading-icon eint-icon-drawer-open">{{pdata.name}}</h1>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
@@ -49,6 +50,8 @@
         </tbody>
     </table>
     <br />
+
+    {{utils.get_status_definition_strings()}}
     <dl class="dl-horizontal">
         <dt>Unknown</dt>
         <dd>The state of the translation was not decidable</dd>
