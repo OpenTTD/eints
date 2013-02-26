@@ -1,17 +1,13 @@
 %rebase main_template title='Web translator - ' + pdata.name
 <h1 class="eint-heading-icon eint-icon-drawer-open">{{pdata.name}}</h1>
 <h3>Project Overview</h3>
-<strong>Number of languages</strong>: {{len(pdata.languages)}}<br />
 % if base_lng is None:
-    <strong>Base language</strong>: None loaded
+    <p class="alert alert-info"><strong>To get started, please <a href="/upload/{{proj_name}}">upload a lang file</a> to use as base language.</strong></p>
 % else:
-    <strong>Base language</strong>: {{base_lng.name}}<br />
-    <strong>Number of strings</strong>: {{len(base_lng.changes)}}
-
     <table border="1">
         <tr>
-            <th rowspan="2">Language
-            <th colspan="5">Strings
+            <th rowspan="2">Languages ({{len(pdata.languages)}})
+            <th colspan="5">Strings ({{len(base_lng.changes)}})
             <th rowspan="2">Links
         </tr>
         <tr>
@@ -22,13 +18,13 @@
             <th>Missing
         </tr>
         <tr>
-            <td><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)
-            <td>{{bcounts[0]}}
-            <td>{{bcounts[1]}}
-            <td>-
-            <td>{{bcounts[3]}}
-            <td>-
-            <td>-
+            <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</strong>
+            <td><strong>{{bcounts[0]}}</strong>
+            <td><strong>{{bcounts[1]}}</strong>
+            <td><strong>-</strong>
+            <td><strong>{{bcounts[3]}}</strong>
+            <td><strong>-</strong>
+            <td><strong>-</strong>
         </tr>
     % for lngname, counts in transl:
         <tr>
