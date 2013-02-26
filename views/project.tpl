@@ -3,7 +3,7 @@
 <h1 class="eint-heading-icon eint-icon-drawer-open">{{pdata.name}}</h1>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
-    <a class="btn" href="/upload/{{proj_name}}"><i class="icon-circle-arrow-up"></i> Upload Language</a></li>
+    <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a></li>
     <a class="btn" href="#"><i class="icon-user"></i> Edit Translators</a>
 </div>
 <h2>Project Overview</h2>
@@ -11,42 +11,55 @@
     <p class="alert alert-info"><strong>To get started, please <a href="/upload/{{proj_name}}">upload a lang file</a> to use as base language.</strong></p>
 % else:
     <br />
-    <table border="1">
+    <table class="table table-condensed table-striped table-hover">
         <thead>
             <tr>
-                <th rowspan="2">Languages ({{len(pdata.languages)}})</th>
-                <th colspan="5">Strings ({{len(base_lng.changes)}})</th>
-                <th rowspan="2">Actions</th>
+                <th colspan="2">Languages ({{len(pdata.languages)}})</th>
+                <th colspan="3" style="text-align:center;"><i class="icon-cog"></i> Actions</th>
+                <th colspan="5" style="text-align:center;">Strings ({{len(base_lng.changes)}})</th>
             </tr>
             <tr>
-                <th>Unknown</th>
-                <th>Correct</th>
-                <th>Outdated</th>
-                <th>Invalid</th>
-                <th>Missing</th>
+                <th colspan="5"></th>
+                <th class="number">Unknown</th>
+                <th class="number">Correct</th>
+                <th class="number">Outdated</th>
+                <th class="number">Invalid</th>
+                <th class="number">Missing</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</strong></td>
-                <td><strong>{{bcounts[0]}}</strong></td>
-                <td><strong>{{bcounts[1]}}</strong></td>
-                <td><strong>-</strong></td>
-                <td><strong>{{bcounts[3]}}</strong></td>
-                <td><strong>-</strong></td>
-                <td><strong>Delete | Download</strong></td>
+                <td><i class="icon-leaf"></i></td>
+                <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
+                <td><strong>(Base Language)</strong></td>
+                <td><strong>Delete</strong></td>
+                <td><strong>Download</strong></td>
+                <td class="number"><strong>{{bcounts[0]}}</strong></td>
+                <td class="number"><strong>{{bcounts[1]}}</strong></td>
+                <td class="number"><strong>-</strong></td>
+                <td class="number"><strong>{{bcounts[3]}}</strong></td>
+                <td class="number"><strong>-</strong></td>
             </tr>
         % for lngname, counts in transl:
             <tr>
-                <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)</td>
-                <td>{{counts[0]}}</td>
-                <td>{{counts[1]}}</td>
-                <td>{{counts[2]}}</td>
-                <td>{{counts[3]}}</td>
-                <td>{{counts[4]}}</td>
-                <td><a href="/fix/{{proj_name}}/{{lngname}}">Start fixing</a> | Delete | Download</td>
+                <td>
+                    % if counts[1] == bcounts[1]:
+                        <i class="icon-ok-circle"></i>
+                    % else:
+                        <i class="icon-exclamation-sign"></i>
+                    % end
+                </td>
+                <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a></td>
+                <td><a href="/fix/{{proj_name}}/{{lngname}}">Start Fixing</a></td>
+                <td>Delete</td>
+                <td>Download</td>
+                <td class="number">{{counts[0]}}</td>
+                <td class="number">{{counts[1]}}</td>
+                <td class="number">{{counts[2]}}</td>
+                <td class="number">{{counts[3]}}</td>
+                <td class="number">{{counts[4]}}</td>
             </tr>
-        %end
+        % end
         </tbody>
     </table>
     <br />

@@ -84,5 +84,9 @@ h4 {
     background-image:url('/static/img/woocons1/Pencil.png');
 }
 
+td.number, th.number {
+  	text-align:right;
+  	padding-right:10px;
+}
 
 /* end of eint styles */
