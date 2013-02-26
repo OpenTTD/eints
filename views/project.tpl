@@ -11,38 +11,42 @@
 % else:
     <br />
     <table border="1">
-        <tr>
-            <th rowspan="2">Languages ({{len(pdata.languages)}})</th>
-            <th colspan="5">Strings ({{len(base_lng.changes)}})</th>
-            <th rowspan="2">Actions</th>
-        </tr>
-        <tr>
-            <th>Unknown</th>
-            <th>Correct</th>
-            <th>Outdated</th>
-            <th>Invalid</th>
-            <th>Missing</th>
-        </tr>
-        <tr>
-            <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</strong></td>
-            <td><strong>{{bcounts[0]}}</strong></td>
-            <td><strong>{{bcounts[1]}}</strong></td>
-            <td><strong>-</strong></td>
-            <td><strong>{{bcounts[3]}}</strong></td>
-            <td><strong>-</strong></td>
-            <td><strong>Delete | Download</strong></td>
-        </tr>
-    % for lngname, counts in transl:
-        <tr>
-            <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)</td>
-            <td>{{counts[0]}}</td>
-            <td>{{counts[1]}}</td>
-            <td>{{counts[2]}}</td>
-            <td>{{counts[3]}}</td>
-            <td>{{counts[4]}}</td>
-            <td><a href="/fix/{{proj_name}}/{{lngname}}">Start fixing</a> | Delete | Download</td>
-        </tr>
-    %end
+        <thead>
+            <tr>
+                <th rowspan="2">Languages ({{len(pdata.languages)}})</th>
+                <th colspan="5">Strings ({{len(base_lng.changes)}})</th>
+                <th rowspan="2">Actions</th>
+            </tr>
+            <tr>
+                <th>Unknown</th>
+                <th>Correct</th>
+                <th>Outdated</th>
+                <th>Invalid</th>
+                <th>Missing</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</strong></td>
+                <td><strong>{{bcounts[0]}}</strong></td>
+                <td><strong>{{bcounts[1]}}</strong></td>
+                <td><strong>-</strong></td>
+                <td><strong>{{bcounts[3]}}</strong></td>
+                <td><strong>-</strong></td>
+                <td><strong>Delete | Download</strong></td>
+            </tr>
+        % for lngname, counts in transl:
+            <tr>
+                <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)</td>
+                <td>{{counts[0]}}</td>
+                <td>{{counts[1]}}</td>
+                <td>{{counts[2]}}</td>
+                <td>{{counts[3]}}</td>
+                <td>{{counts[4]}}</td>
+                <td><a href="/fix/{{proj_name}}/{{lngname}}">Start fixing</a> | Delete | Download</td>
+            </tr>
+        %end
+        </tbody>
     </table>
     <br />
     <dl>
