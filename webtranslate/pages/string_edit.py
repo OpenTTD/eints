@@ -382,6 +382,8 @@ def str_post(proj_name, lname, sname):
         continue # Not really needed.
 
     if len(new_state_errors) > 0:
+        request.query['message'] = 'There were error(s)'
+        request.query['message_class'] = 'error'
         return output_string_edit_page(bchg, binfo, lng, proj_name, pmd.pdata, lname, sname,
                                        new_state_errors)
 
