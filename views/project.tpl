@@ -6,34 +6,34 @@
 % else:
     <table border="1">
         <tr>
-            <th rowspan="2">Languages ({{len(pdata.languages)}})
-            <th colspan="5">Strings ({{len(base_lng.changes)}})
-            <th rowspan="2">Links
+            <th rowspan="2">Languages ({{len(pdata.languages)}})</th>
+            <th colspan="5">Strings ({{len(base_lng.changes)}})</th>
+            <th rowspan="2">Links</th>
         </tr>
         <tr>
-            <th>Unknown
-            <th>Correct
-            <th>Outdated
-            <th>Invalid
-            <th>Missing
+            <th>Unknown</th>
+            <th>Correct</th>
+            <th>Outdated</th>
+            <th>Invalid</th>
+            <th>Missing</th>
         </tr>
         <tr>
-            <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</strong>
-            <td><strong>{{bcounts[0]}}</strong>
-            <td><strong>{{bcounts[1]}}</strong>
-            <td><strong>-</strong>
-            <td><strong>{{bcounts[3]}}</strong>
-            <td><strong>-</strong>
-            <td><strong>-</strong>
+            <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a> (base language)</strong></td>
+            <td><strong>{{bcounts[0]}}</strong></td>
+            <td><strong>{{bcounts[1]}}</strong></td>
+            <td><strong>-</strong></td>
+            <td><strong>{{bcounts[3]}}</strong></td>
+            <td><strong>-</strong></td>
+            <td><strong>-</strong></td>
         </tr>
     % for lngname, counts in transl:
         <tr>
-            <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)
-            <td>{{counts[0]}}
-            <td>{{counts[1]}}
-            <td>{{counts[2]}}
-            <td>{{counts[3]}}
-            <td>{{counts[4]}}
+            <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a> (translation)</td>
+            <td>{{counts[0]}}</td>
+            <td>{{counts[1]}}</td>
+            <td>{{counts[2]}}</td>
+            <td>{{counts[3]}}</td>
+            <td>{{counts[4]}}</td>
             <td><a href="/fix/{{proj_name}}/{{lngname}}">Start fixing</a>
         </tr>
     %end
@@ -43,11 +43,11 @@
     <em>Correct</em> means the string is technically correct and up to date,
     <em>Outdated</em> means a valid translation exists, but it needs review as a newer base language text exists,
     <em>Invalid</em> means a translation exists, but its string parameters do not match with the base language, and
-    <em>Missing</em> means no translation could be found.
+    <em>Missing</em> means no translation could be found.</p>
 %end
 <ul>
-    <li><a href="/upload/{{proj_name}}">Upload language</a>
-    <li>Download language
-    <li>Remove translation language
-    <li>Edit translators
+    <li><a href="/upload/{{proj_name}}">Upload language</a></li>
+    <li>Download language</li>
+    <li>Remove translation language</li>
+    <li>Edit translators</li>
 </ul>
