@@ -145,6 +145,10 @@ def fix_string(proj_name, lname):
         abort(404, "Language is not a translation")
         return
 
+    return fix_string_page(pmd, proj_name, lname)
+
+
+def fix_string_page(pmd, proj_name, lname):
     sname = find_string(pmd, lname, 1, 2, 3)
     if sname is None:
         message = "All strings are up-to-date, perhaps some translations need rewording?"
@@ -154,60 +158,101 @@ def fix_string(proj_name, lname):
     redirect('/string/{}/{}/{}'.format(proj_name, lname, sname))
     return
 
+def check_page_parameters(proj_name, lname, sname):
+    """
+    Check whether the parameters make any sense and abort if not, else return the derived project data.
 
-@route('/string/<proj_name>/<lname>/<sname>', method = 'GET')
-@protected(['string', 'proj_name', 'lname'])
-def str_form(proj_name, lname, sname):
+    @param proj_name: Name of the project.
+    @type  proj_name: C{str}
+
+    @param lname: Name of the language.
+    @type  lname: C{str}
+
+    @param sname: Name of the string.
+    @type  sname: C{str}
+
+    @return: Nothing if the parameters don't make sense,
+             else the project meta data, base change, language, and base text info.
+    @rtype:  C{None} or tuple (L{ProjectMetaData}, L{Change}, L{Language}, L{NewGrfStringInfo}
+    """
     pmd = config.cache.get_pmd(proj_name)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     lng = pdata.languages.get(lname)
     if lng is None:
         abort(404, "Language does not exist in the project")
-        return
+        return None
 
     blng = pdata.get_base_language()
     if blng == lng:
         abort(404, "Language is not a translation")
-        return
+        return None
 
     bchgs = blng.changes.get(sname)
     if bchgs is None or len(bchgs) == 0:
         abort(404, "String does not exist in the project")
-        return
+        return None
 
     bchg = max(bchgs)
     binfo = data.get_base_string_info(bchg.base_text.text, blng)
     if binfo is None:
         # XXX Add errors too
         abort(404, "String cannot be translated, its base language version is incorrect")
-        return
+        return None
 
+    return pmd, bchg, lng, binfo
+
+def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, states = None):
+    """
+    Construct a page for editing a string.
+
+    @param bchg: Last version of the base language.
+    @type  bchg: L{Change}
+
+    @param binfo: Information about the state of the L{bchg} string.
+    @type  binfo: L{NewGrfStringInfo}
+
+    @param lng: Language being translated.
+    @type  lng: L{Language}
+
+
+    @param proj_name: System project name
+    @type  proj_name: C{str}
+
+    @param pdata: Project data.
+    @type  pdata: L{Project}
+
+    @param lname: Language name.
+    @type  lname: C{str}
+
+
+    @param sname: Name of the string.
+    @type  sname: C{str}
+
+    @param states: Changes, state and errors for (some of) the cases, omission of a case
+                   means the function should derive it from the language.
+    @type  states: C{dict} of C{str} to tuple (L{Change}, C{int}, C{list} of tuples (C{str}, C{None}, C{str})),
+                   use C{None} to derive all.
+
+    @return: Either an error, or an instantiated template.
+    @rtype:  C{None} or C{str}
+    """
+    if states is None: states = {}
+
+    assert '' in lng.case # XXX
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
 
     transl_cases = []
-    assert '' in lng.case # XXX
     for case in lng.case:
         tranls = []
-        transl_cases.append(TransLationCase(case, tranls))
 
         cchgs = case_chgs[case]
-        cchgs.reverse()
-        for idx, lchg in enumerate(cchgs):
-            tra = Translation(bchg, lchg)
-            if idx == 0:
-                state, errors = data.get_string_status(lchg, case, lng, bchg.base_text, binfo)
-                tra.errors = errors
-                tra.state = data.STATE_MAP[state]
-            else:
-                tra.errors = []
-                tra.state = data.STATE_MAP[data.MISSING_OK]
-            tranls.append(tra)
-
-        if len(tranls) == 0:
+        chg_err_state = states.get(case)
+        if chg_err_state is not None: cchgs.append(chg_err_state[0])
+        if len(cchgs) == 0:
             # No changes for this case, make a dummy one to display the base data.
             tra = Translation(bchg, None)
             tra.user = None
@@ -221,42 +266,51 @@ def str_form(proj_name, lname, sname):
 
             tranls.append(tra)
 
-    transl_cases.sort(key=lambda tc: tc.case)
+        else:
+            # Changes do exist, add them (in reverse chronological order).
+            cchgs.reverse()
+            for idx, lchg in enumerate(cchgs):
+                tra = Translation(bchg, lchg)
+                if idx == 0:
+                    # Newest string, add errors
+                    if chg_err_state is not None:
+                        state, errors = chg_err_state[1], chg_err_state[2]
+                    else:
+                        state, errors = data.get_string_status(lchg, case, lng, bchg.base_text, binfo)
 
+                    tra.errors = errors
+                    tra.state = data.STATE_MAP[state]
+                else:
+                    # For older translations, the errors and state are never displayed.
+                    tra.errors = []
+                    tra.state = data.STATE_MAP[data.MISSING_OK]
+
+                tranls.append(tra)
+
+        transl_cases.append(TransLationCase(case, tranls))
+
+    transl_cases.sort(key=lambda tc: tc.case)
     return template('string_form', proj_name = proj_name, pdata = pdata,
                     lname = lname, sname = sname, tcs = transl_cases)
+
+
+@route('/string/<proj_name>/<lname>/<sname>', method = 'GET')
+@protected(['string', 'proj_name', 'lname'])
+def str_form(proj_name, lname, sname):
+    parms = check_page_parameters(proj_name, lname, sname)
+    if parms is None: return
+
+    pmd, bchg, lng, binfo = parms
+    return output_string_edit_page(bchg, binfo, lng, proj_name, pmd.pdata, lname, sname, None)
 
 
 @route('/string/<proj_name>/<lname>/<sname>', method = 'POST')
 @protected(['string', 'proj_name', 'lname'])
 def str_post(proj_name, lname, sname):
-    pmd = config.cache.get_pmd(proj_name)
-    if pmd is None:
-        abort(404, "Project does not exist")
-        return
+    parms = check_page_parameters(proj_name, lname, sname)
+    if parms is None: return
 
-    pdata = pmd.pdata
-    lng = pdata.languages.get(lname)
-    if lng is None:
-        abort(404, "Language does not exist in the project")
-        return
-
-    blng = pdata.get_base_language()
-    if blng == lng:
-        abort(404, "Language is not a translation")
-        return
-
-    bchgs = blng.changes.get(sname)
-    if bchgs is None or len(bchgs) == 0:
-        abort(404, "String does not exist in the project")
-        return
-
-    bchg = max(bchgs)
-    binfo = data.get_base_string_info(bchg.base_text.text, blng)
-    if binfo is None:
-        # XXX Add errors too
-        abort(404, "String cannot be translated, its base language version is incorrect")
-        return
+    pmd, bchg, lng, binfo = parms
 
     base_str = request.forms.get('base') # Base text translated against in the form.
     if base_str is None or base_str != bchg.base_text.text:
@@ -270,30 +324,38 @@ def str_post(proj_name, lname, sname):
     user = None # XXX Fix user
     stamp = None # Assigned a stamp object when a change is made in the translation.
 
+    # Collected output data
+    new_changes = []
+    new_state_errors = {}
+
     assert '' in lng.case # XXX
     for case in lng.case:
         assert case is not None # XXX
         trl_str = request.forms.get('text_' + case) # Translation text in the form.
         if trl_str is None: continue # It's missing from the form data.
+
         # Check whether there is a match with a change in the translation.
         trl_chg = None
         for cchg in case_chgs[case]:
             if cchg.new_text.text == trl_str:
                 trl_chg = cchg
                 break
+
         if trl_chg is None:
             # A new translation against bchg!
             if stamp is None: stamp = data.make_stamp()
             txt = data.Text(trl_str, case, stamp)
             tchg = data.Change(sname, case, bchg.base_text, txt, stamp, user)
-            if sname in lng.changes:
-                lng.changes[sname].append(tchg)
+            state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
+            if state == data.MISSING or state == data.INVALID:
+                new_state_errors[case] = (tchg, state, errors)
             else:
-                lng.changes[sname] = [tchg]
+                new_changes.append(tchg)
 
             continue
+
         # Found a match with an existing translation text
-        if case_chgs[case][0] == trl_chg:
+        if case_chgs[case][-1] == trl_chg:
             # Latest translation.
             if trl_chg.base_text == bchg.base_text: # And also the latest base language!
                 continue
@@ -310,13 +372,25 @@ def str_post(proj_name, lname, sname):
 
         # We got an older translation instead.
         if stamp is None: stamp = data.make_stamp()
-        tchg = data.Change(sname, case, trl_chg.base_text, trl_chg.new_text, stamp, user)
+        tchg = data.Change(sname, case, bchg.base_text, trl_chg.new_text, stamp, user)
+        state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
+        if state == data.MISSING or state == data.INVALID:
+            new_state_errors[case] = (tchg, state, errors)
+        else:
+            new_changes.append(tchg)
+
+        continue # Not really needed.
+
+    if len(new_state_errors) > 0:
+        return output_string_edit_page(bchg, binfo, lng, proj_name, pmd.pdata, lname, sname,
+                                       new_state_errors)
+
+    # No errors, store the changes.
+    for tchg in new_changes:
         if sname in lng.changes:
             lng.changes[sname].append(tchg)
         else:
             lng.changes[sname] = [tchg]
-
-        continue # Not really needed.
 
     # XXX Remove old changes
 
@@ -324,4 +398,4 @@ def str_post(proj_name, lname, sname):
         config.cache.save_pmd(pmd)
         pmd.create_statistics(lng)
 
-    return "ok"
+    return fix_string_page(pmd, proj_name, lname)

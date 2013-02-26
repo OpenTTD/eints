@@ -687,6 +687,9 @@ class Change:
         self.stamp = stamp
         self.user = user
 
+    def __str__(self):
+        return "Change('{}', base={}, new={})".format(self.string_name, str(self.base_text), str(self.new_text))
+
     def __lt__(self, other):
         if not isinstance(other, Change): return False
         return self.stamp < other.stamp
@@ -767,6 +770,9 @@ class Text:
         self.text = text
         self.case = case
         self.stamp = stamp
+
+    def __str__(self):
+        return "Text(text={!r}, case={!r})".format(self.text, self.case)
 
 def make_ref_text(xsaver, text):
     """

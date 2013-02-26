@@ -16,8 +16,5 @@ def run():
     config.cfg.load_fromxml()
 
     # Start the web service
-    bottle.debug(True)
-    bottle.run(reloader=True, debug=True, host='localhost', port=8000)
-
-
+    bottle.run(reloader=False, debug=True, host='localhost', port=8000)
 
