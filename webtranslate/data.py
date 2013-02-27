@@ -829,6 +829,9 @@ class Stamp:
         if not isinstance(other, Stamp): return False
         return self.seconds == other.seconds and self.number == other.number
 
+    def __str__(self):
+        return time.asctime(time.gmtime(self.seconds))
+
 last_stamp = 0 # A loooooong time ago.
 last_index = -1
 

@@ -1,8 +1,15 @@
-from datetime import datetime
+from webtranslate import data
 
 def get_datetime_now_formatted():
-    # useful for user messages when creating or updating objects
-    return datetime.now().strftime('%c')
+    """
+    Output a string denoting 'now' in time,
+    useful for user messages when creating or updating objects
+
+    @return: A string denoting 'now' in time (in UTC).
+    @rtype:  C{str}
+    """
+    stamp = data.make_stamp()
+    return str(stamp)
 
 def get_messages(request):
     """
