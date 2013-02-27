@@ -37,7 +37,11 @@
         <div class="control-group">
             <div class="controls">
                 % if tc.transl[0].user is not None:
-                    <span class="help-block">Translation created by "{{tc.transl[0].user}}", X days ago</span>
+                    <span class="help-block">Translation created by "{{tc.transl[0].user}}"
+                    % if tc.transl[0].stamp_desc is not None:
+                        ({{tc.transl[0].stamp_desc}} ago)
+                    % end
+                    </span>
                 % end
             </div>
         </div>
@@ -55,7 +59,7 @@
                 % for tl in tc.transl[1:]:
                     <tr>
                         <td>{{tl.user}}</td>
-                        <td>X ago</td>
+                        <td>{{tl.stamp_desc}} ago</td>
                         <td>{{tl.text.text}}</td>
                     </tr>
                 % end

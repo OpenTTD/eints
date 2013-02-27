@@ -1,7 +1,7 @@
 import random
 from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
-from webtranslate import data, config
+from webtranslate import data, config, utils
 
 class Translation:
     """
@@ -25,10 +25,25 @@ class Translation:
     @ivar user: User that created the translation. C{None} means it is a fake change.
     @type user: C{str} or C{None}
 
+    @ivar stamp_desc: Short description of the time stamp.
+    @type stamp_desc: C{str} or C{None}
+
     @ivar stamp: Time stamp of the translation.
-    @type stamp: L{Stamp} or C{None}
+    @type stamp: C{str} or C{None}
     """
-    def __init__(self, bchg, lchg):
+    def __init__(self, bchg, lchg, now):
+        """
+        Constructor.
+
+        @param bchg: Change in the base language, if available.
+        @type  bchg: L{Change} or C{None}
+
+        @param lchg: Change in the translation, if available.
+        @type  lchg: L{Change} or C{None}
+
+        @param now: The current moment in time, if available.
+        @type  now: L{Stamp} or C{None}
+        """
         self.current_base = bchg.base_text
         self.state = None
         self.errors = []
@@ -39,12 +54,14 @@ class Translation:
             self.user = user
             self.trans_base = lchg.base_text
             self.text = lchg.new_text
-            self.stamp = lchg.stamp
+            self.stamp_desc = utils.get_relative_time(lchg.stamp, now)
+            self.stamp = str(lchg.stamp)
         else:
             self.user = 'none'
             self.trans_base = self.current_base
             txt = data.Text('', '', None) # This breaks assumptions on the Text class.
             self.text = txt
+            self.stamp_desc = None
             self.stamp = None
 
 
@@ -244,6 +261,7 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
 
     assert '' in lng.case # XXX
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
+    now = data.make_stamp()
 
     transl_cases = []
     for case in lng.case:
@@ -254,8 +272,7 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
         if chg_err_state is not None: cchgs.append(chg_err_state[0])
         if len(cchgs) == 0:
             # No changes for this case, make a dummy one to display the base data.
-            tra = Translation(bchg, None)
-            tra.user = None
+            tra = Translation(bchg, None, now)
             assert case is not None # XXX
             if case == '':
                 tra.errors = [('ERROR', None, 'String is missing')]
@@ -270,7 +287,7 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
             # Changes do exist, add them (in reverse chronological order).
             cchgs.reverse()
             for idx, lchg in enumerate(cchgs):
-                tra = Translation(bchg, lchg)
+                tra = Translation(bchg, lchg, now)
                 if idx == 0:
                     # Newest string, add errors
                     if chg_err_state is not None:
