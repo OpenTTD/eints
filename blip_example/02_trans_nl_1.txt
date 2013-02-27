@@ -6,6 +6,6 @@
 ; STR_DESCRIPTION is correct.
 ; STR_UNKNOWN is an unknown string in the base language (and is discarded silently)
 
-STR_BEER        : {BLACK}We hebben {NUM} fles{P sen jes} bier nodig
+STR_BEER        : {BLACK}We hebben {COMMA} fles{P sen jes} bier nodig
 STR_DESCRIPTION :Het 'blip' voorbeeld project is bedoeld om eigenschappen van Eints te testen.
 STR_UNKNOWN     :Onbekende string

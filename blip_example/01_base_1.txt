@@ -4,5 +4,5 @@
 STR_DESCRIPTION  :The blip example project intends to test features of Eints.
 STR_EINTS        :Experimental Internet NewGrf Translation Service
 
-STR_BEER         :{YELLOW}{NUM} bottles of beer are needed
+STR_BEER         :{YELLOW}{COMMA} bottles of beer are needed
 

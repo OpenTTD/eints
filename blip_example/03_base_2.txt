@@ -8,5 +8,5 @@
 STR_DESCRIPTION  :The blip example project intends to test features of Eints.
 STR_EINTS        :Eints Is a NewGrf Translator Service
 
-STR_WINE         :{YELLOW}{NUM} bottles of wine are needed
+STR_WINE         :{YELLOW}{COMMA} bottles of wine are needed
 
