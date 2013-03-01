@@ -1,2 +1,3 @@
 #!/bin/sh
 epydoc -v --html "--exclude=.*bottle" -o docs/html webtranslate
+find . -name "*.pyc" -exec rm "{}" ";"
