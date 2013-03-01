@@ -52,19 +52,29 @@ class Config:
 
     @ivar num_backup_files: Number of backup files kept for a project.
     @type num_backup_files: C{int}
+
+    @ivar max_number_changes: Maximum number of changes that should be kept for a string in a translation.
+    @type max_number_changes: C{int}
+
+    @ivar min_number_changes: Minimum number of changes that should be kept for a string in a translation.
+    @type min_number_changes: C{int}
+
+    @ivar change_stabilizing_time: Amount of seconds needed before a change can be considered old enough to discard.
+    @type change_stabilizing_time: C{int}
     """
     def __init__(self, config_path):
         self.config_path = config_path
         self.language_file_size = 10000
         self.project_root = None
         self.num_backup_files = 5
+        self.max_number_changes = 5
+        self.min_number_changes = 1
+        self.change_stabilizing_time = 1000000 # 11 days, 13 hours, 46 minutes, and 40 seconds.
 
     def load_fromxml(self):
         if not os.path.isfile(self.config_path):
             print("Cannot find configuration file " + self.config_path)
             return
-
-        # XXX Flush project cache too (when starting, the cache is still empty).
 
         data = loader.load_dom(self.config_path)
         cfg = loader.get_single_child_node(data, 'config')
@@ -78,7 +88,12 @@ class Config:
         self.num_backup_files   = convert_num(get_subnode_text(cfg, 'num-backup-files'),   self.num_backup_files)
         if self.num_backup_files > 100: self.num_backup_files = 100 # To limit it two numbers in backup files.
 
-        cache_size = convert_num(get_subnode_text(cfg, 'project-cache'), 1)
+        self.max_number_changes = convert_num(get_subnode_text(cfg, 'max-num-changes'), self.max_number_changes)
+        self.min_number_changes = convert_num(get_subnode_text(cfg, 'min-num-changes'), self.min_number_changes)
+        if self.min_number_changes < 1: self.min_number_changes = 1 # You do want to keep the latest version.
+        self.change_stabilizing_time = convert_num(get_subnode_text(cfg, 'change-stable-age'), self.change_stabilizing_time)
+
+        cache_size = convert_num(get_subnode_text(cfg, 'project-cache'), 10)
         cache.init(self.project_root, cache_size)
 
 

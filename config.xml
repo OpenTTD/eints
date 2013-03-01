@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <config>
+	<!-- Root directory of the project xml files. -->
 	<project-root>root_dir</project-root>
+
+	<!-- Number of projects that can be loaded at the same time in the cache. -->
 	<project-cache>1</project-cache>
-	<language-file-size>100000</language-file-size>
+
+	<!-- Maximum size of a language file in bytes (longer files are not fully loaded). -->
+	<language-file-size>100000</language-file-size> <!-- about 100K -->
+	<!-- Number of backup files to keep. -->
 	<num-backup-files>5</num-backup-files>
+
+	<!-- Maximum number of changes to keep for a single string in a language. -->
+	<max-num-changes>5</max-num-changes>
+	<!-- Minimum number of changes to keep for a single string in a language (1 is the lowest sane value). -->
+	<min-num-changes>1</min-num-changes>
+	<!-- Minimal age of changes (in seconds) before they can be thrown away if above 'min-num-changes'. -->
+	<change-stable-age>3456000</change-stable-age> <!-- 40 days -->
 </config>
