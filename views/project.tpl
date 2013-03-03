@@ -32,8 +32,8 @@
                 <td><i class="icon-leaf"></i></td>
                 <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
                 <td><strong>(Base Language)</strong></td>
-                <td><strong>Delete</strong></td>
-                <td><strong>Download</strong></td>
+                <td>-</td>
+                <td><a class="btn pull-right" href="/download/{{proj_name}}/{{base_lng.name}}"><i class="icon-download"></i> <strong>Download</strong></a></td>
                 <td class="number"><strong>{{bcounts[0]}}</strong></td>
                 <td class="number"><strong>{{bcounts[1]}}</strong></td>
                 <td class="number"><strong>-</strong></td>
@@ -56,7 +56,7 @@
                     <td>Done!</td>
                 % end
                 <td>Delete</td>
-                <td>Download</td>
+                <td><a class="btn pull-right" href="/download/{{proj_name}}/{{lngname}}"><i class="icon-download"></i> Download</a></td>
                 <td class="number">{{counts[0]}}</td>
                 <td class="number">{{counts[1]}}</td>
                 <td class="number">{{counts[2]}}</td>
