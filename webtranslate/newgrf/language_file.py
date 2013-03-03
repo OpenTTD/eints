@@ -596,7 +596,6 @@ def load_language_file(handle, max_size, errors):
     data.skeleton.append(('plural', ''))
     data.skeleton.append(('gender', ''))
     data.skeleton.append(('case', ''))
-    data.skeleton.append(('literal', ''))
 
     # Read file, and process the lines.
     text = handle.read(max_size)
