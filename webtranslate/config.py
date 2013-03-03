@@ -280,8 +280,7 @@ class ProjectMetaData:
             new_num = 0
         if cfg.num_backup_files > 0: backup_files = backup_files[:-cfg.num_backup_files]
         for num, fname in backup_files:
-            print("unlink " + fname)
-            #os.unlink(fname)
+            os.unlink(fname)
 
         data.save_file(self.pdata, self.path + ".xml.new")
         if os.path.exists(base_path):
