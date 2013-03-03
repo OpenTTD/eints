@@ -449,7 +449,7 @@ class NewGrfData:
     @type skeleton: @type skeleton: C{list} of (C{str}, C{str}), where the first string is a
                     type:
                      - 'literal':   Line literally copied
-                     - 'string':    Line with a text string (possibly many when there are cases)
+                     - 'string':    Column with ':', and line with a text string (possibly many when there are cases)
                      - 'grflangid': Line with the language id
                      - 'plural':    Plural number
                      - 'case':      Cases line
@@ -631,7 +631,7 @@ def load_language_file(handle, max_size, errors):
                     errors.append((ERROR, lnum, 'String name {} is already used.'.format(m.group(1))))
                     continue
                 skeleton_strings.add(m.group(1))
-                data.skeleton.append(('string', m.group(1)))
+                data.skeleton.append(('string', (line.find(':'), m.group(1))))
             continue
 
         errors.append((ERROR, lnum, "Line not recognized"))

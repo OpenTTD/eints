@@ -1,7 +1,7 @@
 """
 Project data.
 """
-import time
+import time, re
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from webtranslate import loader
@@ -207,7 +207,23 @@ def get_string_status(lchg, case, lng, btext, binfo):
 
     return state, errors
 
+def convert_num(txt, default):
+    """
+    Convert the number given in L{txt} to a numeric form.
 
+    @param txt: Text containing the number.
+    @type  txt: C{str} or C{None}
+
+    @param default: Default value, in case the L{txt} is not a number.
+    @type  default: C{int} or C{None}
+
+    @return: The numeric value of the number if it is convertable.
+    @rtype:  C{int} or the provided default
+    """
+    if txt is None: return default
+    m = re.match("\\d+$", txt)
+    if not m: return default
+    return int(txt, 10)
 
 # {{{ class XmlLoader:
 class XmlLoader:
@@ -389,7 +405,7 @@ class Project:
     @ivar skeleton: Skeleton of a language file, one tuple for each line.
     @type skeleton: C{list} of (C{str}, C{str}), where the first string is a type:
                     - 'literal'   Line literally copied
-                    - 'string'    Line with a text string (possibly many when there are cases)
+                    - 'string'    Column with ':', and line with a text string (possibly many when there are cases)
                     - 'grflangid' Line with the language id
                     - 'plural'    Plural number
                     - 'case'      Cases line
@@ -474,8 +490,9 @@ def load_skeleton(xloader, node):
             text = loader.collect_text_DOM(lnode)
             skeleton.append(('literal', text))
         elif lnode.tagName == 'string':
+            column = convert_num(loader.get_opt_DOMattr(lnode, 'column', '40'), 40)
             name = lnode.getAttribute('name')
-            if name is not None: skeleton.append(('string', name))
+            if name is not None: skeleton.append(('string', (column, name)))
         elif lnode.tagName in ('grflangid', 'plural', 'case', 'gender'):
             skeleton.append((lnode.tagName, ''))
     return skeleton
@@ -530,7 +547,9 @@ def save_skeleton(xsaver, skel):
             txt = xsaver.doc.createTextNode(sparm)
             node.appendChild(txt)
         elif stp == 'string':
-            node.setAttribute('name', sparm)
+            column, sname = sparm
+            node.setAttribute('name', sname)
+            node.setAttribute('column', str(column))
 
         root.appendChild(node)
     return root

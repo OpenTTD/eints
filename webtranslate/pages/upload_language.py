@@ -209,7 +209,7 @@ def add_new_language(ng_data, pdata, base_lang):
 
     # Add the current string names to the new language.
     for stp, sparam in pdata.skeleton:
-        if stp == 'string': lng.changes[sparam] = []
+        if stp == 'string': lng.changes[sparam[1]] = []
 
     return (True, lng)
 

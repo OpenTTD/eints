@@ -28,21 +28,25 @@ def download(proj_name, language):
             lines.append(skel_value)
             continue
         if skel_type == 'string':
-            chgs = lng.changes.get(skel_value)
+            column, sname = skel_value
+            chgs = lng.changes.get(sname)
             if chgs is not None:
                 for case in lng.case:
                     chg = data.get_newest_change(chgs, case)
                     if chg is not None:
                         if case == '':
-                            line = skel_value
+                            line = sname
                         else:
-                            line = skel_value + "." + case
+                            line = sname + "." + case
 
                         if lng == base_lng:
-                            line = '{:<39} :{}'.format(line, chg.base_text.text)
+                            text = chg.base_text.text
                         else:
-                            line = '{:<39} :{}'.format(line, chg.new_text.text)
-                        lines.append(line)
+                            text = chg.new_text.text
+
+                        length = column - len(line)
+                        if length < 1: length = 1
+                        lines.append(line + (' ' * length) + ':' + text)
             continue
 
         if skel_type == 'grflangid':

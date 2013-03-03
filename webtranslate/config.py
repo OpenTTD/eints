@@ -1,7 +1,7 @@
 """
 Configuration and global routines of the translator service.
 """
-import os, sys, re, glob
+import os, sys, glob
 from webtranslate import data, loader
 
 def get_subnode_text(node, tag):
@@ -21,24 +21,6 @@ def get_subnode_text(node, tag):
     if child is None:
         return ""
     return loader.collect_text_DOM(child)
-
-def convert_num(txt, default):
-    """
-    Convert the number given in L{txt} to a numeric form.
-
-    @param txt: Text containing the number.
-    @type  txt: C{str}
-
-    @param default: Default value, in case the L{txt} is not a number.
-    @type  default: C{int} or C{None}
-
-    @return: The numeric value of the number if it is convertable.
-    @rtype:  C{int} or the provided default
-    """
-    m = re.match("\\d+$", txt)
-    if not m: return default
-    return int(txt, 10)
-
 
 class Config:
     """
@@ -76,24 +58,24 @@ class Config:
             print("Cannot find configuration file " + self.config_path)
             return
 
-        data = loader.load_dom(self.config_path)
-        cfg = loader.get_single_child_node(data, 'config')
+        cfg = loader.load_dom(self.config_path)
+        cfg = loader.get_single_child_node(cfg, 'config')
 
         self.project_root = get_subnode_text(cfg, 'project-root')
         if self.project_root is None or self.project_root == "":
             print("No project root found, aborting!")
             sys.exit(1)
 
-        self.language_file_size = convert_num(get_subnode_text(cfg, 'language-file-size'), self.language_file_size)
-        self.num_backup_files   = convert_num(get_subnode_text(cfg, 'num-backup-files'),   self.num_backup_files)
+        self.language_file_size = data.convert_num(get_subnode_text(cfg, 'language-file-size'), self.language_file_size)
+        self.num_backup_files   = data.convert_num(get_subnode_text(cfg, 'num-backup-files'),   self.num_backup_files)
         if self.num_backup_files > 100: self.num_backup_files = 100 # To limit it two numbers in backup files.
 
-        self.max_number_changes = convert_num(get_subnode_text(cfg, 'max-num-changes'), self.max_number_changes)
-        self.min_number_changes = convert_num(get_subnode_text(cfg, 'min-num-changes'), self.min_number_changes)
+        self.max_number_changes = data.convert_num(get_subnode_text(cfg, 'max-num-changes'), self.max_number_changes)
+        self.min_number_changes = data.convert_num(get_subnode_text(cfg, 'min-num-changes'), self.min_number_changes)
         if self.min_number_changes < 1: self.min_number_changes = 1 # You do want to keep the latest version.
-        self.change_stabilizing_time = convert_num(get_subnode_text(cfg, 'change-stable-age'), self.change_stabilizing_time)
+        self.change_stabilizing_time = data.convert_num(get_subnode_text(cfg, 'change-stable-age'), self.change_stabilizing_time)
 
-        cache_size = convert_num(get_subnode_text(cfg, 'project-cache'), 10)
+        cache_size = data.convert_num(get_subnode_text(cfg, 'project-cache'), 10)
         cache.init(self.project_root, cache_size)
 
 
@@ -271,7 +253,7 @@ class ProjectMetaData:
         for fname in glob.glob(base_path + ".*"):
             extname = fname[bpl:]
             if extname.startswith("bup"):
-                num = convert_num(extname[3:], None)
+                num = data.convert_num(extname[3:], None)
                 if num is not None: backup_files.append((num, fname))
         backup_files.sort()
         if len(backup_files) > 0:
