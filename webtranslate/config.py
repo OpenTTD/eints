@@ -421,8 +421,6 @@ def process_project_changes(pdata):
         for chgs in lng.changes.values():
             nchgs = process_changes(chgs, lng.case, stamp, used_basetexts)
             if len(nchgs) != len(chgs):
-                print("** CHANGED TRANSLATION: {}\n\tto {}".format([c.new_text.text for c in chgs],
-                    [c.new_text.text for c in nchgs]))
                 chgs[:] = nchgs
                 modified = True
 
@@ -441,8 +439,6 @@ def process_project_changes(pdata):
                 changed = True
 
         if changed:
-            print("** CHANGED TRANSLATION: {}\n\tto {}".format([c.base_text.text for c in chgs],
-                [c.base_text.text for c in nchgs]))
             chgs[:] = nchgs
             modified = True
 
