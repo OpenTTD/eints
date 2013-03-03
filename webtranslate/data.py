@@ -50,7 +50,6 @@ def get_newest_change(chgs, case):
     @return: The newest change, if available.
     @rtype:  C{Change} or C{None}
     """
-    assert case is not None # XXX
     best = None
     for chg in chgs:
         if chg.case != case: continue
@@ -74,13 +73,11 @@ def get_all_changes(chgs, cases, bchg):
     @return: Changes for each case, sorted from old to new.
     @rtype:  C{dict} of C{str} to C{list} of L{Change}
     """
-    assert '' in cases # XXX
     cases = dict((c, []) for c in cases)
 
     if chgs is not None:
         for chg in chgs:
             if bchg is not None and chg.base_text != bchg.base_text: continue
-            assert chg.case is not None # XXX
             clist = cases.get(chg.case)
             if clist is not None: clist.append(chg)
 
@@ -103,11 +100,9 @@ def get_all_newest_changes(chgs, cases):
     @rtype:  C{dict} of C{str} to (L{Change} or C{None})
     """
     cases = dict((c, None) for c in cases)
-    assert '' in cases # XXX
     cases[''] = None
 
     for chg in chgs:
-        assert chg.case is not None # XXX
         if chg.case in cases:
             if cases[chg.case] is None or cases[chg.case].stamp < chg.stamp:
                 cases[chg.case] = chg
@@ -193,7 +188,6 @@ def get_string_status(lchg, case, lng, btext, binfo):
     @return: State of the translated string and any errors.
     @rtype:  C{tuple} (C{int}, C{list} of C{tuple} (C{str}, C{None}, C{str}))
     """
-    assert case is not None # XXX
     if lchg is None:
         if case == '':
             return MISSING, []
@@ -679,7 +673,6 @@ class Change:
     @type user: C{str} or C{None}
     """
     def __init__(self, string_name, case, base_text, new_text, stamp, user):
-        assert case is not None # XXX
         self.string_name = string_name
         self.case = case
         self.base_text = base_text
@@ -766,7 +759,6 @@ class Text:
     @type stamp: L{Stamp}
     """
     def __init__(self, text, case, stamp):
-        assert case is not None # XXX
         self.text = text
         self.case = case
         self.stamp = stamp

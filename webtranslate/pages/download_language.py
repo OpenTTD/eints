@@ -30,9 +30,7 @@ def download(proj_name, language):
         if skel_type == 'string':
             chgs = lng.changes.get(skel_value)
             if chgs is not None:
-                assert '' in lng.case # XXX
                 for case in lng.case:
-                    assert case is not None # XXX
                     chg = data.get_newest_change(chgs, case)
                     if chg is not None:
                         if case == '':

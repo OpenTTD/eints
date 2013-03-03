@@ -76,7 +76,6 @@ class TransLationCase:
     @type transl: C{list} of L{Translation}
     """
     def __init__(self, case, transl):
-        assert case is not None # XXX
         self.case = case
         self.transl = transl
 
@@ -259,7 +258,6 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
     """
     if states is None: states = {}
 
-    assert '' in lng.case # XXX
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
     now = data.make_stamp()
 
@@ -273,7 +271,6 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
         if len(cchgs) == 0:
             # No changes for this case, make a dummy one to display the base data.
             tra = Translation(bchg, None, now)
-            assert case is not None # XXX
             if case == '':
                 tra.errors = [('ERROR', None, 'String is missing')]
                 tra.state = data.STATE_MAP[data.MISSING]
@@ -335,7 +332,6 @@ def str_post(proj_name, lname, sname):
         return
 
     # Get changes against bchg
-    assert lng.case is not None # XXX
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, bchg)
 
     user = None # XXX Fix user
@@ -345,9 +341,7 @@ def str_post(proj_name, lname, sname):
     new_changes = []
     new_state_errors = {}
 
-    assert '' in lng.case # XXX
     for case in lng.case:
-        assert case is not None # XXX
         trl_str = request.forms.get('text_' + case) # Translation text in the form.
         if trl_str is None: continue # It's missing from the form data.
 

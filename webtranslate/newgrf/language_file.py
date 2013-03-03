@@ -419,7 +419,6 @@ class StringValue:
     @type text: C{str}
     """
     def __init__(self, lnum, name, case, text):
-        assert case is not None # XXX
         self.lnum = lnum
         self.name = name
         self.case = case
@@ -690,7 +689,6 @@ def get_translation_string_info(text, case, extra_commands, lng, errors):
     @return: Information about the used string parameters.
     @rtype:  L{NewGrfStringInfo}
     """
-    assert case is not None # XXX
     return check_string(text, None, case == '', extra_commands, get_plural_count(lng.plural), lng.gender, errors)
 
 def compare_info(base_info, lng_info, errors):
