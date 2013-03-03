@@ -70,7 +70,8 @@ def page_post(proj_name):
         for sv in ng_data.strings:
             chg = get_best_change(sv, base_language, None, False)
             if chg is None: # New change.
-                base_text = data.Text(sv.text, sv.case, stamp)
+                txt = language_file.sanitize_text(sv.text)
+                base_text = data.Text(txt, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, None, stamp, user)
                 chgs = base_language.changes.get(sv.name)
                 if chgs is None:
@@ -111,7 +112,8 @@ def page_post(proj_name):
             base_text = chg.base_text
             lng_chg  = get_best_change(sv, lng, base_text, True)
             if lng_chg is None: # It's a new text or new case.
-                lng_text = data.Text(sv.text, sv.case, stamp)
+                txt = language_file.sanitize_text(sv.text)
+                lng_text = data.Text(txt, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, user)
                 chgs = lng.changes.get(sv.name)
                 if chgs is None:

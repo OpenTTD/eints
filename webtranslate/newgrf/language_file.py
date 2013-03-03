@@ -649,6 +649,29 @@ def load_language_file(handle, max_size, errors):
 
 # }}}
 
+def sanitize_text(txt):
+    """
+    Perform some small safe normalizations on the text of a string.
+
+    @param txt: Text to sanitize.
+    @type  txt: C{str}
+
+    @return: The sanitized text.
+    @rtype:  C{str}
+    """
+    # Strip trailing white space.
+    txt = txt.rstrip()
+
+    # Strip \n and \r from the string.
+    txt = txt.replace('\n', '')
+    txt = txt.replace('\r', '')
+
+    # Strip white space in front of {}
+    txt = re.sub(' +{}', '{}', txt)
+    return txt
+
+# Get string information
+# {{{ def get_base_string_info(text, lng, errors):
 def get_base_string_info(text, lng, errors):
     """
     Get the information about the used parameters from a string in the base language.
@@ -666,7 +689,8 @@ def get_base_string_info(text, lng, errors):
     @rtype:  L{NewGrfStringInfo}
     """
     return check_string(text, None, True, None, get_plural_count(lng.plural), lng.gender, errors)
-
+# }}}
+# {{{ def get_translation_string_info(text, case, extra_commands, lng, errors):
 def get_translation_string_info(text, case, extra_commands, lng, errors):
     """
     Get the information about the used parameters from a string in a translation.
@@ -690,7 +714,8 @@ def get_translation_string_info(text, case, extra_commands, lng, errors):
     @rtype:  L{NewGrfStringInfo}
     """
     return check_string(text, None, case == '', extra_commands, get_plural_count(lng.plural), lng.gender, errors)
-
+# }}}
+# {{{ def compare_info(base_info, lng_info, errors):
 def compare_info(base_info, lng_info, errors):
     """
     Compare both string uses with each other.
@@ -755,4 +780,4 @@ def compare_info(base_info, lng_info, errors):
         assert False # Never reached
 
     return True
-
+# }}}

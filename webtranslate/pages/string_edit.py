@@ -2,6 +2,7 @@ import random
 from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
 from webtranslate import data, config, utils
+from webtranslate.newgrf import language_file
 
 class Translation:
     """
@@ -355,7 +356,8 @@ def str_post(proj_name, lname, sname):
         if trl_chg is None:
             # A new translation against bchg!
             if stamp is None: stamp = data.make_stamp()
-            txt = data.Text(trl_str, case, stamp)
+            txt = language_file.sanitize_text(trl_str)
+            txt = data.Text(txt, case, stamp)
             tchg = data.Change(sname, case, bchg.base_text, txt, stamp, user)
             state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
             if state == data.MISSING or state == data.INVALID:

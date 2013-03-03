@@ -274,6 +274,7 @@ class XmlLoader:
                 stamp = load_stamp(self, loader.get_single_child_node(node, 'stamp'))
                 txt = loader.get_single_child_node(node, 'text')
                 txt = loader.collect_text_DOM(txt)
+                txt = language_file.sanitize_text(txt)
                 self.texts[ref] = Text(txt, case, stamp)
 
         return load_project(self, pnode)
