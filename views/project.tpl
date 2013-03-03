@@ -55,7 +55,7 @@
                 % else:
                     <td>Done!</td>
                 % end
-                <td>Delete</td>
+                <td><a class="btn pull-right" href="/delete/{{proj_name}}/{{lngname}}"><i class="icon-download"></i> Delete</a></td>
                 <td><a class="btn pull-right" href="/download/{{proj_name}}/{{lngname}}"><i class="icon-download"></i> Download</a></td>
                 <td class="number">{{counts[0]}}</td>
                 <td class="number">{{counts[1]}}</td>
