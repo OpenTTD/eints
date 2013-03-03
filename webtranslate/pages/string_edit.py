@@ -411,9 +411,8 @@ def str_post(proj_name, lname, sname):
         else:
             lng.changes[sname] = [tchg]
 
-    # XXX Remove old changes
-
-    if stamp is not None:
+    modified = config.process_project_changes(pmd.pdata) # Update changes of the project.
+    if modified or stamp is not None:
         config.cache.save_pmd(pmd)
         pmd.create_statistics(lng)
 

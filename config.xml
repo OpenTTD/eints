@@ -17,5 +17,5 @@
 	<!-- Minimum number of changes to keep for a single string in a language (1 is the lowest sane value). -->
 	<min-num-changes>1</min-num-changes>
 	<!-- Minimal age of changes (in seconds) before they can be thrown away if above 'min-num-changes'. -->
-	<change-stable-age>3456000</change-stable-age> <!-- 40 days -->
+	<change-stable-age>600</change-stable-age> <!-- 10 minutes -->
 </config>

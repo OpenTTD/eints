@@ -89,7 +89,6 @@ def get_all_changes(chgs, cases, bchg):
 
     return cases
 
-
 def get_all_newest_changes(chgs, cases):
     """
     Get the newest changes for all cases.
@@ -104,6 +103,7 @@ def get_all_newest_changes(chgs, cases):
     @rtype:  C{dict} of C{str} to (L{Change} or C{None})
     """
     cases = dict((c, None) for c in cases)
+    assert '' in cases # XXX
     cases[''] = None
 
     for chg in chgs:
@@ -662,7 +662,7 @@ class Change:
     @ivar string_name: String name of the string that was changed.
     @type string_name: C{str}
 
-    @ivar case: Case of the string if available.
+    @ivar case: Case of the string.
     @type case: C{str}
 
     @ivar base_text: Used string in the base language.

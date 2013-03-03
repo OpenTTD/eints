@@ -258,6 +258,7 @@ class ProjectMetaData:
     def load(self):
         assert self.pdata is None
         self.pdata = data.load_file(self.path + ".xml")
+        process_project_changes(self.pdata)
 
     def unload(self):
         # XXX Unlink the data
@@ -366,6 +367,87 @@ class ProjectMetaData:
                 if state >= unknown: counts[state - unknown] = counts[state - unknown] + 1
             self.overview[lname] = counts
 
+
+def process_changes(lchgs, cases, stamp, used_basetexts):
+    """
+    Check whether the changes should all still be kept.
+
+    @param lchgs: Language changes of a string.
+    @type  lchgs: C{list} of L{Change}
+
+    @param cases: Cases of the language.
+    @type  cases: C{list} of C{str}
+
+    @param stamp: Current moment in time.
+    @type  stamp: L{Stamp}
+
+    @param used_basetexts: Collected base texts in the kept language changes.
+    @type  used_basetexts: C{set} of L{Text}
+
+    @return: Updated changes. If the length has not changed, they are still the same.
+    @rtype:  C{list} of L{Change}
+    """
+    lchgs.sort()
+    cases = dict((c, 0) for c in cases)
+    newchgs = []
+    for chg in reversed(lchgs):
+        n = cases[chg.case]
+        if n < cfg.min_number_changes or \
+                (stamp.seconds - chg.stamp.seconds < cfg.change_stabilizing_time and n <= cfg.max_number_changes):
+            # Not enough changes collected yet for this case.
+            # Not old enough, and not enough to throw them away.
+            newchgs.append(chg)
+            cases[chg.case] = n + 1
+            used_basetexts.add(chg.base_text)
+
+    return newchgs
+
+def process_project_changes(pdata):
+    """
+    Update the changes of the texts in the project.
+
+    @param pdata: Project data to examine and change.
+    @type  pdata: L{Project}
+
+    @return: Changes were changed.
+    @rtype:  C{bool}
+    """
+    used_basetexts = set()
+    stamp = data.make_stamp()
+    modified = False
+    if pdata.base_language is None: return # No base language -> nothing to do.
+    # Update translation changes.
+    for lname, lng in pdata.languages.items():
+        if lname == pdata.base_language: continue
+        for chgs in lng.changes.values():
+            nchgs = process_changes(chgs, lng.case, stamp, used_basetexts)
+            if len(nchgs) != len(chgs):
+                print("** CHANGED TRANSLATION: {}\n\tto {}".format([c.new_text.text for c in chgs],
+                    [c.new_text.text for c in nchgs]))
+                chgs[:] = nchgs
+                modified = True
+
+    # Update base language changes.
+    blng = pdata.languages[pdata.base_language]
+    for chgs in blng.changes.values():
+        chgs.sort()
+        nchgs = []
+        changed = False
+        first = True
+        for chg in reversed(chgs):
+            if first or chg.base_text in used_basetexts:
+                nchgs.append(chg)
+                first = False
+            else:
+                changed = True
+
+        if changed:
+            print("** CHANGED TRANSLATION: {}\n\tto {}".format([c.base_text.text for c in chgs],
+                [c.base_text.text for c in nchgs]))
+            chgs[:] = nchgs
+            modified = True
+
+    return modified
 
 
 cfg = None

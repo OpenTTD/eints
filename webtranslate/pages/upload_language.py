@@ -74,7 +74,7 @@ def page_post(proj_name):
                 chg = data.Change(sv.name, sv.case, base_text, None, stamp, user)
                 chgs = base_language.changes.get(sv.name)
                 if chgs is None:
-                     base_language.changes[sv.name] = [chg]
+                    base_language.changes[sv.name] = [chg]
                 else:
                     chgs.append(chg)
             else:
