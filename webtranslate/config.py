@@ -247,28 +247,44 @@ class ProjectMetaData:
         self.pdata = None
 
     def save(self):
+        """
+        Save project data into an xml file, and manage the backup files.
+        """
         base_path = self.path + ".xml"
         bpl = len(base_path) + 1 # "projname.xml." + "<something>"
-        backup_files = []
+
+        # Find current set of data files.
+        data_files = {}
+        if os.path.exists(base_path):
+            data_files[None] = base_path
+
         for fname in glob.glob(base_path + ".*"):
             extname = fname[bpl:]
             if extname.startswith("bup"):
                 num = data.convert_num(extname[3:], None)
-                if num is not None: backup_files.append((num, fname))
-        backup_files.sort()
-        if len(backup_files) > 0:
-            new_num = (backup_files[-1][0] % 100) + 1
-        else:
-            new_num = 0
-        if cfg.num_backup_files > 0: backup_files = backup_files[:-cfg.num_backup_files]
-        for num, fname in backup_files:
-            os.unlink(fname)
+                if num is not None: data_files[num] = fname
 
         data.save_file(self.pdata, self.path + ".xml.new")
-        if os.path.exists(base_path):
-            print("Save project to " + self.path + " (renaming to {:02d})".format(new_num))
-            os.rename(base_path, self.path + ".xml.bup{:02d}".format(new_num))
-        os.rename(self.path + ".xml.new", base_path)
+
+        # Generate mv and rm commands for the data files.
+        cmds = [('mv', self.path + ".xml.new", base_path)]
+        last, num = None, 1
+        while num <= cfg.num_backup_files and num < 100 and last in data_files:
+            new_name = base_path + ".bup{:02d}".format(num)
+            cmds.append(('mv', data_files[last], new_name))
+            del data_files[last]
+            last = num
+            num = num + 1
+        for fname in data_files.values():
+            cmds.append(('rm', fname))
+
+        # Execute the commands.
+        cmds.reverse()
+        for cmd in cmds:
+            if cmd[0] == 'mv':
+                os.rename(cmd[1], cmd[2])
+            elif cmd[0] == 'rm':
+                os.unlink(cmd[1])
 
 
     def create_statistics(self, parm_lng = None):
