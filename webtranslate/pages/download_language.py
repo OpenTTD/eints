@@ -21,7 +21,7 @@ def download(proj_name, language):
         abort(404, "Language does not exist")
         return
 
-    response.content_type = 'text/plain; charset=UTF8'
+    response.content_type = 'text/plain; charset=UTF-8'
     lines = []
     for skel_type, skel_value in pdata.skeleton:
         if skel_type == 'literal':

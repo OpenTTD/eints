@@ -327,7 +327,9 @@ def str_post(proj_name, lname, sname):
 
     pmd, bchg, lng, binfo = parms
 
-    base_str = request.forms.get('base') # Base text translated against in the form.
+    request_forms = request.forms.decode() # Convert dict to Unicode.
+
+    base_str = request_forms.get('base') # Base text translated against in the form.
     if base_str is None or base_str != bchg.base_text.text:
         abort(404, "Base language has been changed, please translate the newer version instead")
         return
@@ -343,7 +345,7 @@ def str_post(proj_name, lname, sname):
     new_state_errors = {}
 
     for case in lng.case:
-        trl_str = request.forms.get('text_' + case) # Translation text in the form.
+        trl_str = request_forms.get('text_' + case) # Translation text in the form.
         if trl_str is None: continue # It's missing from the form data.
 
         # Check whether there is a match with a change in the translation.
@@ -375,7 +377,7 @@ def str_post(proj_name, lname, sname):
             state, _errors = data.get_string_status(trl_chg, case, lng, bchg.base_text, binfo)
             if state == data.OUT_OF_DATE:
                 # We displayed a 'this string is correct' checkbox. Was it changed?
-                if request.forms.get('ok_' + case):
+                if request.forms_get('ok_' + case):
                     # Move to latest base language text.
                     if stamp is None: stamp = data.make_stamp()
                     trl_chg.base_text = bchg.base_text
