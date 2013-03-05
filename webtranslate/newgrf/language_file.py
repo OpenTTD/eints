@@ -772,7 +772,7 @@ def compare_info(base_info, lng_info, errors):
         for bname, bcnt in base_info.non_positionals.items():
             if lng_info.non_positionals[bname] != bcnt:
                 msg = 'String command {} is used {} times in the base language, and {} times in the translation'
-                msg = msg.format(bname, bcnt, lng_info.non_positionals[bname])
+                msg = msg.format('{' + bname + '}', bcnt, lng_info.non_positionals[bname])
                 errors.append((ERROR, None, msg))
                 return False
 
