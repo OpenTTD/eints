@@ -20,15 +20,18 @@
         No strings in this category
     % end
     % if len(strs) > 0:
-        <ul class="unstyled">
-        % for sname in strs:
+        % for sdd in strs:
+            <dl>
             % if is_blng:
-                <li>{{sname}}</li>
+                <dt>{{sdd.sname}}</dt>
             % else:
-                <li><a href="/string/{{proj_name}}/{{language}}/{{sname}}">{{sname}}</a></li>
+                <li><a href="/string/{{proj_name}}/{{language}}/{{sdd.sname}}">{{sdd.sname}}</a></li>
             % end
+            % for cdd in sdd.cases:
+                <dd>({{cdd.state}}) <strong>{{cdd.get_str_casename(sdd.sname)}}</strong> :{{cdd.text}}</dd>
+            % end
+            </dl>
         % end
-        </ul>
     % end
     </div>
 % end
