@@ -50,7 +50,7 @@ class StringDisplayData:
 
 @route('/language/<project>/<language>', method = 'GET')
 @protected(['language', 'project', 'language'])
-def project(project, language):
+def project(user, project, language):
     pmd = config.cache.get_pmd(project)
     if pmd is None:
         abort(404, "Project does not exist")

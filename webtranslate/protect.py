@@ -20,6 +20,7 @@ def protected(page_name):
 #            pname = [ka.get(p, p) for p in page_name]
 #            if not users.may_access(pname, request.path, request.method, user, password):
 #                abort(401, "Access denied")
-            return func(*a, **ka)
+            user = 'unknown'
+            return func(user, *a, **ka)
         return wrapper
     return decorator

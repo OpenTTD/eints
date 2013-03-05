@@ -136,7 +136,7 @@ def find_string(pmd, lname, missing_prio, invalid_prio, outdated_prio):
 
 @route('/fix/<proj_name>/<lname>', method = 'GET')
 @protected(['string', 'proj_name', 'lname'])
-def fix_string(proj_name, lname):
+def fix_string(user, proj_name, lname):
     """
     Fix a random string.
 
@@ -311,7 +311,7 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
 
 @route('/string/<proj_name>/<lname>/<sname>', method = 'GET')
 @protected(['string', 'proj_name', 'lname'])
-def str_form(proj_name, lname, sname):
+def str_form(user, proj_name, lname, sname):
     parms = check_page_parameters(proj_name, lname, sname)
     if parms is None: return
 
@@ -321,7 +321,7 @@ def str_form(proj_name, lname, sname):
 
 @route('/string/<proj_name>/<lname>/<sname>', method = 'POST')
 @protected(['string', 'proj_name', 'lname'])
-def str_post(proj_name, lname, sname):
+def str_post(user, proj_name, lname, sname):
     parms = check_page_parameters(proj_name, lname, sname)
     if parms is None: return
 
@@ -337,7 +337,6 @@ def str_post(proj_name, lname, sname):
     # Get changes against bchg
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, bchg)
 
-    user = None # XXX Fix user
     stamp = None # Assigned a stamp object when a change is made in the translation.
 
     # Collected output data

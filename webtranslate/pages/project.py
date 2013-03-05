@@ -27,7 +27,7 @@ def get_overview(pmd, lang_name):
 
 @route('/project/<proj_name>', method = 'GET')
 @protected(['project', 'proj_name', '-'])
-def project(proj_name):
+def project(user, proj_name):
     pmd = config.cache.get_pmd(proj_name)
     if pmd is None:
         abort(404, "Page not found")

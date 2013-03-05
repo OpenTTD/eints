@@ -8,7 +8,7 @@ from webtranslate.newgrf import language_file
 
 @route('/upload/<proj_name>', method = 'GET')
 @protected(['upload', 'proj_name', '-'])
-def page_get(proj_name):
+def page_get(user, proj_name):
     proj = config.cache.projects.get(proj_name)
     pdata = config.cache.get_pmd(proj_name).pdata
     if proj is None:
@@ -18,7 +18,7 @@ def page_get(proj_name):
 
 @route('/upload/<proj_name>', method = 'POST')
 @protected(['upload', 'proj_name', '-'])
-def page_post(proj_name):
+def page_post(user, proj_name):
     pmd = config.cache.get_pmd(proj_name)
     if pmd is None:
         abort(404, "Page not found")
@@ -49,7 +49,6 @@ def page_post(proj_name):
     if len(errors) > 0:
         return template('upload_errors', proj_name = proj_name, errors = errors)
 
-    user = None # XXX Get user
     stamp = data.make_stamp()
 
     lng = pdata.languages.get(ng_data.language_data.isocode)
@@ -123,8 +122,6 @@ def page_post(proj_name):
             elif override: # Override existing entry.
                 lng_chg.stamp = stamp
                 lng_chg.user = user
-
-    # XXX remove old changes
 
     config.cache.save_pmd(pmd)
     pmd.create_statistics(None) # Update all languages.
