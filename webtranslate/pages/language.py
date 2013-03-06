@@ -48,16 +48,16 @@ class StringDisplayData:
         return self.sname == other.sname
 
 
-@route('/language/<prjname>/<language>', method = 'GET')
-@protected(['language', 'prjname', 'language'])
-def project(user, prjname, language):
+@route('/language/<prjname>/<lngname>', method = 'GET')
+@protected(['language', 'prjname', 'lngname'])
+def project(user, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
 
     pdata = pmd.pdata
-    lng = pdata.languages.get(language)
+    lng = pdata.languages.get(lngname)
     if lng is None:
         abort(404, "Language does not exist in the project")
         return
@@ -65,7 +65,7 @@ def project(user, prjname, language):
     blng = pdata.get_base_language() # As above we established there is at least one language, this should work.
     stored = [[], [], [], [], []] # unknown, up-to-date, out-of-date, invalid, missing
     sdict = pdata.statistics
-    sdict = sdict.get(language) # Statistics dict for the queried language.
+    sdict = sdict.get(lngname) # Statistics dict for the queried language.
     if sdict is None:
         abort(404, "Missing language statistics")
         return
@@ -95,4 +95,4 @@ def project(user, prjname, language):
         title = title[0].upper() + title[1:]
         strings.append((title, strs))
     return template('language', proj_name = prjname, is_blng = (lng == blng),
-                    pdata = pdata, language = language, strings = strings)
+                    pdata = pdata, language = lngname, strings = strings)
