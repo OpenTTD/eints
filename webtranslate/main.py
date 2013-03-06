@@ -1,7 +1,7 @@
 """
 Main program.
 """
-from webtranslate import bottle, protect, config, static
+from webtranslate import bottle, protect, config, static, users
 from webtranslate.pages import root
 from webtranslate.pages import projects
 from webtranslate.pages import project
@@ -15,6 +15,8 @@ from webtranslate.pages import delete
 def run():
     config.cfg = config.Config('config.xml')
     config.cfg.load_fromxml()
+
+    users.init()
 
     # Start the web service
     bottle.run(reloader=False, debug=True, host='localhost', port=8000)

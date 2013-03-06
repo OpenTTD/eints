@@ -25,10 +25,10 @@ def get_overview(pmd, lang_name):
     return ['?', '?', '?', '?', '?'], False
 
 
-@route('/project/<proj_name>', method = 'GET')
-@protected(['project', 'proj_name', '-'])
-def project(user, proj_name):
-    pmd = config.cache.get_pmd(proj_name)
+@route('/project/<prjname>', method = 'GET')
+@protected(['project', 'prjname', '-'])
+def project(user, prjname):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")
         return
@@ -47,6 +47,6 @@ def project(user, proj_name):
 
         bcounts = get_overview(pmd, base_lng.name)[0]
 
-    return template('project', proj_name = proj_name, pdata = pdata,
+    return template('project', proj_name = prjname, pdata = pdata,
                     transl = transl, base_lng = base_lng, bcounts = bcounts)
 

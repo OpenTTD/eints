@@ -48,10 +48,10 @@ class StringDisplayData:
         return self.sname == other.sname
 
 
-@route('/language/<project>/<language>', method = 'GET')
-@protected(['language', 'project', 'language'])
-def project(user, project, language):
-    pmd = config.cache.get_pmd(project)
+@route('/language/<prjname>/<language>', method = 'GET')
+@protected(['language', 'prjname', 'language'])
+def project(user, prjname, language):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
@@ -94,5 +94,5 @@ def project(user, project, language):
         title = data.STATE_MAP[i]
         title = title[0].upper() + title[1:]
         strings.append((title, strs))
-    return template('language', proj_name = project, is_blng = (lng == blng),
+    return template('language', proj_name = prjname, is_blng = (lng == blng),
                     pdata = pdata, language = language, strings = strings)

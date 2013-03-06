@@ -6,20 +6,20 @@ from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_file
 
-@route('/upload/<proj_name>', method = 'GET')
-@protected(['upload', 'proj_name', '-'])
-def page_get(user, proj_name):
-    proj = config.cache.projects.get(proj_name)
-    pdata = config.cache.get_pmd(proj_name).pdata
+@route('/upload/<prjname>', method = 'GET')
+@protected(['upload', 'prjname', '-'])
+def page_get(user, prjname):
+    proj = config.cache.projects.get(prjname)
+    pdata = config.cache.get_pmd(prjname).pdata
     if proj is None:
         abort(404, "Page not found")
         return
-    return template('upload_lang', proj_name = proj_name, pdata = pdata)
+    return template('upload_lang', proj_name = prjname, pdata = pdata)
 
-@route('/upload/<proj_name>', method = 'POST')
-@protected(['upload', 'proj_name', '-'])
-def page_post(user, proj_name):
-    pmd = config.cache.get_pmd(proj_name)
+@route('/upload/<prjname>', method = 'POST')
+@protected(['upload', 'prjname', '-'])
+def page_post(user, prjname):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")
         return
@@ -47,7 +47,7 @@ def page_post(user, proj_name):
     errors = []
     ng_data = language_file.load_language_file(langfile.file, config.cfg.language_file_size, errors)
     if len(errors) > 0:
-        return template('upload_errors', proj_name = proj_name, errors = errors)
+        return template('upload_errors', proj_name = prjname, errors = errors)
 
     stamp = data.make_stamp()
 
@@ -127,7 +127,7 @@ def page_post(user, proj_name):
     pmd.create_statistics(None) # Update all languages.
 
     message = "Successfully uploaded language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-    redirect("/project/" + proj_name + '?message=' + message)
+    redirect("/project/" + prjname + '?message=' + message)
 
 
 def get_best_change(sv, lng, base_text, search_new):

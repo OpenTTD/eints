@@ -5,10 +5,10 @@ from webtranslate.bottle import route, template, abort, response
 from webtranslate.protect import protected
 from webtranslate import config, data
 
-@route('/download/<proj_name>/<language>', method = 'GET')
-@protected(['download', 'proj_name', 'language'])
-def download(user, proj_name, language):
-    pmd = config.cache.get_pmd(proj_name)
+@route('/download/<prjname>/<language>', method = 'GET')
+@protected(['download', 'prjname', 'language'])
+def download(user, prjname, language):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")
         return

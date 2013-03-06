@@ -2,10 +2,10 @@ from webtranslate.bottle import route, template, abort, redirect
 from webtranslate.protect import protected
 from webtranslate import data, config
 
-@route('/delete/<project>/<language>', method = 'GET')
-@protected(['delete', 'project', 'language'])
-def delete_form(user, project, language):
-    pmd = config.cache.get_pmd(project)
+@route('/delete/<prjname>/<language>', method = 'GET')
+@protected(['delete', 'prjname', 'language'])
+def delete_form(user, prjname, language):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
@@ -20,12 +20,12 @@ def delete_form(user, project, language):
         abort(404, "Cannot delete base language!")
         return
 
-    return template("delete_translation", pdata = pdata, lname = language, proj_name = project)
+    return template("delete_translation", pdata = pdata, lname = language, proj_name = prjname)
 
-@route('/really_delete/<project>/<language>', method = 'POST')
-@protected(['delete', 'project', 'language'])
-def delete_submit(user, project, language):
-    pmd = config.cache.get_pmd(project)
+@route('/really_delete/<prjname>/<language>', method = 'POST')
+@protected(['delete', 'prjname', 'language'])
+def delete_submit(user, prjname, language):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
@@ -48,5 +48,5 @@ def delete_submit(user, project, language):
     config.cache.save_pmd(pmd)
 
     msg = "Language " + language + " is deleted"
-    redirect('/project/{}?message={}'.format(project, msg))
+    redirect('/project/{}?message={}'.format(prjname, msg))
     return

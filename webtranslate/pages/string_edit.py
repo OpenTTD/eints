@@ -134,19 +134,19 @@ def find_string(pmd, lname, missing_prio, invalid_prio, outdated_prio):
     if len(cur_strings) == 0: return None
     return random.choice(cur_strings)
 
-@route('/fix/<proj_name>/<lname>', method = 'GET')
-@protected(['string', 'proj_name', 'lname'])
-def fix_string(user, proj_name, lname):
+@route('/fix/<prjname>/<lname>', method = 'GET')
+@protected(['string', 'prjname', 'lname'])
+def fix_string(user, prjname, lname):
     """
     Fix a random string.
 
-    @param proj_name: Name of the project.
-    @type  proj_name: C{str}
+    @param prjname: Name of the project.
+    @type  prjname: C{str}
 
     @param lname: Language name.
     @type  lname: C{str}
     """
-    pmd = config.cache.get_pmd(proj_name)
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
@@ -162,25 +162,25 @@ def fix_string(user, proj_name, lname):
         abort(404, "Language is not a translation")
         return
 
-    return fix_string_page(pmd, proj_name, lname)
+    return fix_string_page(pmd, prjname, lname)
 
 
-def fix_string_page(pmd, proj_name, lname):
+def fix_string_page(pmd, prjname, lname):
     sname = find_string(pmd, lname, 1, 2, 3)
     if sname is None:
         message = "All strings are up-to-date, perhaps some translations need rewording?"
-        redirect('/language/{}/{}?message={}'.format(proj_name, lname, message))
+        redirect('/language/{}/{}?message={}'.format(prjname, lname, message))
         return
 
-    redirect('/string/{}/{}/{}'.format(proj_name, lname, sname))
+    redirect('/string/{}/{}/{}'.format(prjname, lname, sname))
     return
 
-def check_page_parameters(proj_name, lname, sname):
+def check_page_parameters(prjname, lname, sname):
     """
     Check whether the parameters make any sense and abort if not, else return the derived project data.
 
-    @param proj_name: Name of the project.
-    @type  proj_name: C{str}
+    @param prjname: Name of the project.
+    @type  prjname: C{str}
 
     @param lname: Name of the language.
     @type  lname: C{str}
@@ -192,7 +192,7 @@ def check_page_parameters(proj_name, lname, sname):
              else the project meta data, base change, language, and base text info.
     @rtype:  C{None} or tuple (L{ProjectMetaData}, L{Change}, L{Language}, L{NewGrfStringInfo}
     """
-    pmd = config.cache.get_pmd(proj_name)
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return None
@@ -222,7 +222,7 @@ def check_page_parameters(proj_name, lname, sname):
 
     return pmd, bchg, lng, binfo
 
-def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, states = None):
+def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lname, sname, states = None):
     """
     Construct a page for editing a string.
 
@@ -236,8 +236,8 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
     @type  lng: L{Language}
 
 
-    @param proj_name: System project name
-    @type  proj_name: C{str}
+    @param prjname: System project name
+    @type  prjname: C{str}
 
     @param pdata: Project data.
     @type  pdata: L{Project}
@@ -305,24 +305,24 @@ def output_string_edit_page(bchg, binfo, lng, proj_name, pdata, lname, sname, st
         transl_cases.append(TransLationCase(case, tranls))
 
     transl_cases.sort(key=lambda tc: tc.case)
-    return template('string_form', proj_name = proj_name, pdata = pdata,
+    return template('string_form', proj_name = prjname, pdata = pdata,
                     lname = lname, sname = sname, tcs = transl_cases)
 
 
-@route('/string/<proj_name>/<lname>/<sname>', method = 'GET')
-@protected(['string', 'proj_name', 'lname'])
-def str_form(user, proj_name, lname, sname):
-    parms = check_page_parameters(proj_name, lname, sname)
+@route('/string/<prjname>/<lname>/<sname>', method = 'GET')
+@protected(['string', 'prjname', 'lname'])
+def str_form(user, prjname, lname, sname):
+    parms = check_page_parameters(prjname, lname, sname)
     if parms is None: return
 
     pmd, bchg, lng, binfo = parms
-    return output_string_edit_page(bchg, binfo, lng, proj_name, pmd.pdata, lname, sname, None)
+    return output_string_edit_page(bchg, binfo, lng, prjname, pmd.pdata, lname, sname, None)
 
 
-@route('/string/<proj_name>/<lname>/<sname>', method = 'POST')
-@protected(['string', 'proj_name', 'lname'])
-def str_post(user, proj_name, lname, sname):
-    parms = check_page_parameters(proj_name, lname, sname)
+@route('/string/<prjname>/<lname>/<sname>', method = 'POST')
+@protected(['string', 'prjname', 'lname'])
+def str_post(user, prjname, lname, sname):
+    parms = check_page_parameters(prjname, lname, sname)
     if parms is None: return
 
     pmd, bchg, lng, binfo = parms
@@ -398,7 +398,7 @@ def str_post(user, proj_name, lname, sname):
     if len(new_state_errors) > 0:
         request.query['message'] = 'There were error(s)' # XXX Needs a better solution (pass message obj to template?)
         request.query['message_class'] = 'error'
-        return output_string_edit_page(bchg, binfo, lng, proj_name, pmd.pdata, lname, sname,
+        return output_string_edit_page(bchg, binfo, lng, prjname, pmd.pdata, lname, sname,
                                        new_state_errors)
 
     # No errors, store the changes.
@@ -413,4 +413,4 @@ def str_post(user, proj_name, lname, sname):
         config.cache.save_pmd(pmd)
         pmd.create_statistics(lng)
 
-    return fix_string_page(pmd, proj_name, lname)
+    return fix_string_page(pmd, prjname, lname)
