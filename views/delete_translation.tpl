@@ -1,6 +1,6 @@
 %from webtranslate.bottle import url, request
 %rebase main_template title='Remove translation language ' + lname
-<h1 class="eint-heading-icon eint-icon-document-1-remove">Remove Translation</h1>
+<h1 class="eint-heading-icon eint-icon-document-1-remove">Remove Translation From <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a></h1>
 <hr />
 <h2>Lang: {{lname}}</h2>
 <div class="alert">
