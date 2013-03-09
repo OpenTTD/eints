@@ -28,6 +28,8 @@ def init():
         if len(uname) == 0 or len(pwd) == 0: continue
         _users.add((uname, pwd))
 
+    handle.close()
+
 def authenticate(user, pwd):
     """
     Is the provided user and password combination valid?

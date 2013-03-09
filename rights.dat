@@ -1,0 +1,23 @@
+# Root is accessible by all
+* + /root/-/-/*
+
+# Unauthenticated users don't get any further
+SOMEONE - /*/*/*/*
+
+# 'admin' user can do anything
+admin + /*/*/*/*
+
+# Authenticated users can see the projects, see each project, download a
+# language, and get an overview of a language in a project.
+* + /projects/-/-/get
+* + /project/*/-/get
+* + /download/*/*/get
+* + /language/*/*/get
+
+# Strings editing
+OWNER      + /string/*/*/*
+TRANSLATOR + /string/*/*/*
+
+# Language file uploading, and language deletion
+OWNER + /upload/*/-/*
+OWNER + /delete/*/*/*
