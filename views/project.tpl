@@ -3,8 +3,7 @@
 <h1 class="eint-heading-icon eint-icon-drawer-open">{{pdata.name}}</h1>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
-    <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a></li>
-    <a class="btn" href="#"><i class="icon-user"></i> Edit Translators</a>
+    <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>
 </div>
 <h2>Project Overview</h2>
 % if base_lng is None:
