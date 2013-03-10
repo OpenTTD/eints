@@ -68,8 +68,7 @@ class UserRightRule:
         """
         if len(path) != len(self.path): return False
         for p, sp in zip(path, self.path):
-            if p == sp: continue
-            if p != '-' and sp == '*': continue
+            if p == sp or sp == '*': continue
             return False
         return True
 
