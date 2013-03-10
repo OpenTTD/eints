@@ -18,6 +18,7 @@ def init():
 
     handle = open(FILENAME, "r")
     for line in handle:
+        line = line.rstrip()
         if len(line) == 0 or line[0] == '#': continue
         i = line.find(':')
         if i < 0: continue

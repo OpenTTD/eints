@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+
+import os, sys, getopt, random, string
+
+_data = None
+
+FILENAME = "users.dat"
+
+def init():
+    global _data
+
+    _data = []
+    names = set()
+    if not os.path.isfile(FILENAME): return
+
+    handle = open(FILENAME, 'r')
+    for line in handle:
+        line = line.rstrip()
+        if len(line) == 0 or line[0] == '#':
+            _data.append(('text', line))
+            continue
+        i = line.find(':')
+        if i < 0: continue
+        j = line.find(':', i + 1)
+        if j < 0: continue
+        uname, pwd = line[:i].strip(), line[i+1:j]
+        if uname in names: continue
+        _data.append(('user', uname, pwd))
+        names.add(uname)
+
+    handle.close()
+
+def usage():
+    print("editsilly [options] username...")
+    print("with options:")
+    print("    -h, --help  Output this online help.")
+    print("    -d, --delete Delete users instead of adding them.")
+
+def make_pwd():
+    """
+    Construct a non-pronounceable word.
+
+    THIS IS NOT SECURE, DO NOT USE IN PRODUCTION.
+    """
+    text = string.ascii_letters + string.digits
+    text = text + ''.join(p for p in string.punctuation if p not in ':#')
+    pwd = []
+    for i in range(20):
+        pwd.append(text[random.randrange(len(text))])
+    return ''.join(pwd)
+
+def check_uname(name):
+    has_lower = False
+
+    # First must be a letter
+    if name[0] in string.ascii_lowercase:
+        has_lower = True
+    elif name[0] in string.ascii_uppercase:
+        return False
+
+    for a in name[1:]:
+        if a in string.ascii_lowercase:
+            has_lower = True
+        elif a in string.ascii_uppercase:
+            pass
+        elif a in string.digits:
+            pass
+        else:
+            return False
+
+    if len(name) < 3 or not has_lower: return False
+    return True
+
+
+def main():
+    global _data
+
+    init()
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hd", ["help", "delete"])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        print(err) # will print something like "option -a not recognized"
+        usage()
+        sys.exit(2)
+    delete = False
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+            sys.exit(0)
+        if opt in ('-d', '--delete'):
+            delete = True
+            continue
+
+        raise ValueError("Unexpected option value {} encountered".format(repr(opt)))
+
+    for arg in args:
+        if delete:
+            _data = [line for line in _data if line[0] != 'user' or line[1] != arg]
+        else:
+            if not check_uname(arg):
+                msg = ("Username \"{}\" is not acceptable (only letters and digits, " +
+                       "length at least 3, and at least one lower case letter).")
+                msg = msg.format(arg)
+                print(msg)
+                sys.exit(1)
+
+            _data = [line for line in _data if line[0] != 'user' or line[1] != arg]
+            pwd = make_pwd()
+            _data.append(('user', arg, pwd))
+            print("Username: " + arg)
+            print("Password: " + pwd)
+            print()
+
+    handle = open(FILENAME, 'w')
+    for line in _data:
+        if line[0] == 'text':
+            line = line[1]
+            if len(line) != 0 and line[0] != '#': line = '#' + line
+            handle.write(line + '\n')
+        elif line[0] == 'user':
+            handle.write(line[1] + ':' +line[2] + ':\n')
+    handle.close()
+
+    print(" ******************************************")
+    print(" * THIS SYSTEM USES UNENCRYPTED PASSWORDS *")
+    print(" * USE AT YOUR OWN RISK                   *")
+    print(" ******************************************")
+
+main()
