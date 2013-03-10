@@ -7,7 +7,7 @@ Special user roles:
 - TRANSLATOR: Translator of a language in a project
 - *:          Always matches
 """
-import re
+import re, configparser
 
 class UserRightRule:
     """
@@ -33,26 +33,42 @@ class UserRightRule:
             s = s + " - /"
         return s + "/".join(self.path)
 
-    def match_user(self, user):
+    def match_user(self, user, prjname, lngname):
         """
         Does the given user name match with the user name stored in the rule?
 
         @param user: Name of the user, or 'unknown'.
         @type  user: C{str}
 
+        @param prjname: Name of the project, if available.
+        @type  prjname: C{str} or C{None}
+
+        @param lngname: Name of the language, if available.
+        @type  lngname: C{str} or C{None}
+
         @return: Whether the user matches.
         @rtype:  C{bool}
         """
+        global _projects
+
         if self.user == '*':
             return True
         elif self.user == 'SOMEONE':
             return user == 'unknown'
-        elif user == 'unknown':
+        elif user == 'unknown': # 'unknown' users will never match below.
             return False
         elif self.user == 'OWNER':
-            return False # XXX
+            if prjname is None or prjname not in _projects: return False
+            p = _projects[prjname]
+            if 'owner' not in p or user not in p['owner']: return False
+            return True
         elif self.user == 'TRANSLATOR':
-            return False # XXX
+            if prjname is None or lngname is None or prjname not in _projects: return False
+            p = _projects[prjname]
+            # Owners are also allowed access
+            if 'owner' not in p or user not in p['owner']: return False
+            if lngname not in p or user not in p[lngname]: return False
+            return True
         else:
             return user == self.user
 
@@ -75,9 +91,13 @@ class UserRightRule:
 
 # Table with rights.
 _table = []
-
+# Table with project user data.
+# Mapping of project names to key/values.
+# C{dict} of C{str} to C{dict} of C{str} to C{set} of C{str}
+_projects = {}
 
 FILENAME = "rights.dat"
+PROJECTSFILE = "projects.dat"
 
 rights_pat = re.compile('\\s*(\\S+)\\s+([-+])\\s+/([^/]+)/([^/]+)/([^/]+)/([^/]+)\\s*$')
 
@@ -103,8 +123,24 @@ def init():
 
     handle.close()
 
+    # Read projects user data.
+    cfg = configparser.ConfigParser()
+    cfg.read(PROJECTSFILE)
+    _projects = {}
+    for pn in cfg.sections():
+        ps = cfg[pn]
+        values = {}
+        for k, ns in ps.items():
+            names = set()
+            for ns2 in ns.split(','):
+                for ns3 in ns2.split(' '):
+                    ns3 = ns3.strip()
+                    if len(ns3) < 3: continue # User names are longer-equal to 3
+                    names.add(ns3)
+            values[k] = names
+        _projects[pn] = values
 
-def may_access(page, user):
+def may_access(page, prjname, lngname, user):
     """
     May the given user be given access?
 
@@ -116,7 +152,7 @@ def may_access(page, user):
     """
     global _table
     for urr in _table:
-        if not urr.match_path(page) or not urr.match_user(user): continue
+        if not urr.match_path(page) or not urr.match_user(user, prjname, lngname): continue
         return urr.grant_access
 
     return False

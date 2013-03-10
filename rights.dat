@@ -9,10 +9,10 @@ admin + /*/*/*/*
 
 # Authenticated users can see the projects, see each project, download a
 # language, and get an overview of a language in a project.
-* + /projects/-/-/get
-* + /project/*/-/get
-* + /download/*/*/get
-* + /language/*/*/get
+* + /projects/-/-/read
+* + /project/*/-/read
+* + /download/*/*/read
+* + /language/*/*/read
 
 # Strings editing
 OWNER      + /string/*/*/*
