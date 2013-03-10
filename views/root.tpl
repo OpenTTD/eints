@@ -4,6 +4,4 @@
 <ul>
     <li><a href="projects">List of projects</a></li>
     <li><a href="newproject">Start a new project</a></li>
-    <li>Your projects (not implemented)</li>
-    <li>Register as user (not implemented)</li>
 </ul>
