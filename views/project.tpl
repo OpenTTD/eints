@@ -32,36 +32,42 @@
                 <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
                 <td><strong>(Base Language)</strong></td>
                 <td>-</td>
-                <td><a class="btn btn-link pull-right" href="/download/{{proj_name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
+                <td><a class="pull-right" href="/download/{{proj_name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
                 <td class="number"><strong>{{bcounts[0]}}</strong></td>
                 <td class="number"><strong>{{bcounts[1]}}</strong></td>
                 <td class="number"><strong>-</strong></td>
                 <td class="number"><strong>{{bcounts[3]}}</strong></td>
                 <td class="number"><strong>-</strong></td>
             </tr>
-        % for lngname, counts, needs_fix in transl:
+        % if len(transl) == 0:
             <tr>
-                <td>
-                    % if not needs_fix:
-                        <i class="icon-ok-circle"></i>
-                    % else:
-                        <i class="icon-exclamation-sign"></i>
-                    % end
-                </td>
-                <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a></td>
-                % if needs_fix:
-                    <td><a href="/fix/{{proj_name}}/{{lngname}}">Start Fixing</a></td>
-                % else:
-                    <td>Done!</td>
-                % end
-                <td><a class="btn btn-link pull-right" href="/delete/{{proj_name}}/{{lngname}}"><i class="icon-remove-circle"></i> Delete</a></td>
-                <td><a class="btn btn-link pull-right" href="/download/{{proj_name}}/{{lngname}}"><i class="icon-download"></i> Download</a></td>
-                <td class="number">{{counts[0]}}</td>
-                <td class="number">{{counts[1]}}</td>
-                <td class="number">{{counts[2]}}</td>
-                <td class="number">{{counts[3]}}</td>
-                <td class="number">{{counts[4]}}</td>
+                <td colspan="10" class="alert alert-info">To get started with translation, upload a language file</td>
             </tr>
+        % else:
+            % for lngname, counts, needs_fix in transl:
+                <tr>
+                    <td>
+                        % if not needs_fix:
+                            <i class="icon-ok-circle"></i>
+                        % else:
+                            <i class="icon-exclamation-sign"></i>
+                        % end
+                    </td>
+                    <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a></td>
+                    % if needs_fix:
+                        <td><a href="/fix/{{proj_name}}/{{lngname}}">Start Fixing</a></td>
+                    % else:
+                        <td>Done!</td>
+                    % end
+                    <td><a class="pull-right" href="/delete/{{proj_name}}/{{lngname}}"><i class="icon-remove-circle"></i> Delete</a></td>
+                    <td><a class="pull-right" href="/download/{{proj_name}}/{{lngname}}"><i class="icon-download"></i> Download</a></td>
+                    <td class="number">{{counts[0]}}</td>
+                    <td class="number">{{counts[1]}}</td>
+                    <td class="number">{{counts[2]}}</td>
+                    <td class="number">{{counts[3]}}</td>
+                    <td class="number">{{counts[4]}}</td>
+                </tr>
+            % end
         % end
         </tbody>
     </table>
