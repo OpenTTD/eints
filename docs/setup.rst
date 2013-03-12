@@ -9,11 +9,12 @@ production use), nothing else is needed.
 
 Internally, it uses:
 - Bottle_, a Python framework for writing web applications.
-- **Write about the other stuff**
-
+- Twitter Boostrap_, a CSS and JS library for web application user interfaces.
+- WooCons #1_, an icon library.
 
 .. _Bottle: http://bottlepy.org/
-
+.. _Twitter Boostrap: http://twitter.github.com/bootstrap/
+.. _WooCons #1: http://www.woothemes.com/2010/08/woocons1/
 
 Setup
 =====
