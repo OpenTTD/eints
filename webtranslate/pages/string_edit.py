@@ -274,10 +274,10 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
             tra = Translation(bchg, None, now)
             if case == '':
                 tra.errors = [('ERROR', None, 'String is missing')]
-                tra.state = data.STATE_MAP[data.MISSING]
+                tra.state = data.STATE_MAP[data.MISSING].name
             else:
                 tra.errors = []
-                tra.state = data.STATE_MAP[data.MISSING_OK]
+                tra.state = data.STATE_MAP[data.MISSING_OK].name
 
             tranls.append(tra)
 
@@ -294,11 +294,11 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
                         state, errors = data.get_string_status(lchg, case, lng, bchg.base_text, binfo)
 
                     tra.errors = errors
-                    tra.state = data.STATE_MAP[state]
+                    tra.state = data.STATE_MAP[state].name
                 else:
                     # For older translations, the errors and state are never displayed.
                     tra.errors = []
-                    tra.state = data.STATE_MAP[data.MISSING_OK]
+                    tra.state = data.STATE_MAP[data.MISSING_OK].name
 
                 tranls.append(tra)
 

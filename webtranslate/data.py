@@ -108,6 +108,25 @@ def get_all_newest_changes(chgs, cases):
                 cases[chg.case] = chg
     return cases
 
+class StatusDefinition:
+    """
+    Description of a string status.
+
+    @ivar code: Numeric code of the string status.
+    @type code: C{int}
+
+    @ivar name: One-word name of the status.
+    @type name: C{str}
+
+    @ivar description: Description of the string status definition.
+    @type description: C{str}
+    """
+    def __init__(self, code, name, description):
+        self.code = code
+        self.name = name
+        self.description = description
+
+
 MISSING_OK =  0 # String is missing, but that's allowed (non-default case string).
 UNKNOWN =     1 # String has unknown state.
 UP_TO_DATE =  2 # String is newer than the base string.
@@ -115,8 +134,15 @@ OUT_OF_DATE = 3 # String is older than the base string.
 INVALID =     4 # String is invalid relative to the base string.
 MISSING =     5 # The default case string is missing.
 
-STATE_MAP = {MISSING_OK:'not available', UNKNOWN:'unknown', UP_TO_DATE:'up-to-date',
-             OUT_OF_DATE:'out-of-date', INVALID:'invalid', MISSING:'missing'}
+STATUSES = [StatusDefinition(MISSING_OK,  'Omitted',  'The case was not needed in the translation'),
+            StatusDefinition(UNKNOWN,     'Unknown',  'The state of the translation was not decidable'),
+            StatusDefinition(UP_TO_DATE,  'Correct',  'The string is technically correct and up to date'),
+            StatusDefinition(OUT_OF_DATE, 'Outdated', 'A valid translation exists, but it needs review as a newer base language text is available'),
+            StatusDefinition(INVALID,     'Invalid',  'A translation exists, but its string parameters do not match with the base language'),
+            StatusDefinition(MISSING,     'Missing',  'No translation could be found'),]
+
+STATE_MAP = dict((sd.code, sd) for sd in STATUSES)
+
 
 def get_base_string_info(text, lng):
     """

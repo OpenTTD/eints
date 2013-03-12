@@ -74,10 +74,9 @@
     <br />
 
     <dl class="dl-horizontal">
-        % status_descriptions = utils.get_status_definition_strings()
-        % for i in ('UNKNOWN','UP_TO_DATE','OUT_OF_DATE','INVALID','MISSING_OK'):
-            <dt>{{status_descriptions[i]['title']}}</dt>
-            <dd>{{status_descriptions[i]['description']}}</dd>
+        % for sd in utils.get_status_definition_strings():
+            <dt>{{sd.name}}</dt>
+            <dd>{{sd.description}}</dd>
         % end
     </dl>
 %end

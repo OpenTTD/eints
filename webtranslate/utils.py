@@ -109,9 +109,10 @@ def get_messages(request):
         return None
 
 def get_status_definition_strings():
-    status_definitions = {'UNKNOWN': {'title': 'Unknown', 'description': 'The state of the translation was not decidable'},
-                          'UP_TO_DATE': {'title': 'Correct', 'description': 'The string is technically correct and up to date'},
-                          'OUT_OF_DATE': {'title': 'Outdated', 'description': 'A valid translation exists, but it needs review as a newer base language text exists'},
-                          'INVALID': {'title': 'Invalid', 'description': 'A translation exists, but its string parameters do not match with the base language'},
-                          'MISSING_OK': {'title': 'Missing', 'description': 'No translation could be found'}}
-    return status_definitions
+    """
+    Get the string status descriptions.
+
+    @return: The string status description of the project overview.
+    @rtype:  C{list} of L{StatusDefinition}
+    """
+    return [data.STATE_MAP[code] for code in [data.UNKNOWN, data.UP_TO_DATE, data.OUT_OF_DATE, data.INVALID, data.MISSING]]

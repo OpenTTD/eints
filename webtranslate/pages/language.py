@@ -83,7 +83,7 @@ def project(user, prjname, lngname):
                 for case, cstate in cstates:
                     chg = cases[case]
                     if chg is not None:
-                        cdd = CaseDisplayData(case, data.STATE_MAP[cstate], chg.new_text.text)
+                        cdd = CaseDisplayData(case, data.STATE_MAP[cstate].name, chg.new_text.text)
                         sdd.cases.append(cdd)
 
             stored[state - unknown].append(sdd)
@@ -91,8 +91,7 @@ def project(user, prjname, lngname):
     strings = []
     for i, strs in enumerate(stored, start = unknown):
         strs.sort()
-        title = data.STATE_MAP[i]
-        title = title[0].upper() + title[1:]
+        title = data.STATE_MAP[i].name
         strings.append((title, strs))
     return template('language', proj_name = prjname, is_blng = (lng == blng),
                     pdata = pdata, language = lngname, strings = strings)
