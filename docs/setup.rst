@@ -10,15 +10,16 @@ production use), nothing else is needed.
 Internally, it uses:
 
 - `Bottle <http://bottlepy.org/>`_, a Python framework for writing web applications.
+    - Location: webtranslate/bottle.py
+    - Licensed under `MIT License <http://bottlepy.org/docs/dev/#license>`_
 - `Twitter Boostrap <http://twitter.github.com/bootstrap/>`_, a CSS, JS and glyphicon framework for web application user interfaces.
+    - Locations: static/css static/img static/js
+    - Code licensed under `Apache License v2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_,
+    - Documentation licensed under `CC BY 3.0 <http://creativecommons.org/licenses/by/3.0/>`_.
+    - Glyphicons Free licensed under `CC BY 3.0 <http://creativecommons.org/licenses/by/3.0/>`_.
 - `WooCons #1 <http://www.woothemes.com/2010/08/woocons1/>`_, an icon library.
-
-Twitter Bootstrap code licensed under `Apache License v2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_,
-documentation under `CC BY 3.0 <http://creativecommons.org/licenses/by/3.0/>`_.
-
-Glyphicons Free licensed under `CC BY 3.0 <http://creativecommons.org/licenses/by/3.0/>`_.
-
-WooCons #1 licensed under `GPL v3 <http://www.gnu.org/licenses/gpl.html>`_
+    - Location: static/img/woocons1
+    - Licensed under `GPL v3 <http://www.gnu.org/licenses/gpl.html>`_
 
 Setup
 =====
