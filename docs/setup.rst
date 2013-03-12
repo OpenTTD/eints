@@ -8,13 +8,10 @@ Eints is written in Python 3. In its default setup (which is not intended for
 production use), nothing else is needed.
 
 Internally, it uses:
-- Bottle_, a Python framework for writing web applications.
-- Twitter Boostrap_, a CSS and JS library for web application user interfaces.
-- WooCons #1_, an icon library.
 
-.. _Bottle: http://bottlepy.org/
-.. _Twitter Boostrap: http://twitter.github.com/bootstrap/
-.. _WooCons #1: http://www.woothemes.com/2010/08/woocons1/
+- `Bottle <http://bottlepy.org/>`_, a Python framework for writing web applications.
+- `Twitter Boostrap <http://twitter.github.com/bootstrap/>`_, a CSS and JS library for web application user interfaces.
+- `WooCons #1 <http://www.woothemes.com/2010/08/woocons1/>`_, an icon library.
 
 Setup
 =====
