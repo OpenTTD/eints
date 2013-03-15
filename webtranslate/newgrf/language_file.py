@@ -408,7 +408,7 @@ _PARAMETERS = [
     ParameterInfo("POWER",          True,  False, False, True ),
     ParameterInfo("WEIGHT",         True,  False, False, True ),
     ParameterInfo("WEIGHT_SHORT",   True,  False, False, True ),
-    ParameterInfo("HEX",            True,  False, False, True ),
+    ParameterInfo("HEX",            True,  True,  False, True ),
     ParameterInfo("STRING",         True,  False, True , True ),
     ParameterInfo("DATE1920_LONG",  True,  False, False, True ),
     ParameterInfo("DATE1920_SHORT", True,  False, False, True ),
