@@ -54,7 +54,8 @@ def download(user, prjname, lngname):
             continue
 
         if skel_type == 'plural':
-            lines.append('##plural {:d}'.format(lng.plural))
+            if lng.plural is not None:
+                lines.append('##plural {:d}'.format(lng.plural))
             continue
 
         if skel_type == 'case':

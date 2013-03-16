@@ -592,8 +592,8 @@ class Language:
     @ivar grflangid: Language id.
     @type grflangid: C{int}
 
-    @ivar plural: Plural number of the language.
-    @type plural: C{int}
+    @ivar plural: Plural number of the language, if specified.
+    @type plural: C{int} or C{None}
 
     @ivar gender: Genders of the language.
     @type gender: C{list} of C{str}
@@ -607,7 +607,7 @@ class Language:
     def __init__(self, name):
         self.name = name
         self.grflangid = 0x7F
-        self.plural = 1
+        self.plural = None
         self.gender = []
         self.case  = ['']
         self.changes = {}
@@ -634,7 +634,8 @@ def save_language(xsaver, lang):
     node = xsaver.doc.createElement('language')
     node.setAttribute('name', lang.name)
     node.setAttribute('langid', str(lang.grflangid))
-    node.setAttribute('plural', str(lang.plural))
+    if lang.plural is not None:
+        node.setAttribute('plural', str(lang.plural))
     if len(lang.gender) > 0:
         node.setAttribute('gender', " ".join(lang.gender))
     cases = [c for c in lang.case if c != '']
@@ -668,7 +669,10 @@ def load_language(xloader, node):
 
     lng = Language(name)
     lng.grflangid = int(node.getAttribute('langid'), 10)
-    lng.plural = int(node.getAttribute('plural'), 10)
+    plural = loader.get_opt_DOMattr(node, 'plural', None)
+    if plural is not None:
+        plural = int(plural, 10)
+    lng.plural = plural
 
     gender = loader.get_opt_DOMattr(node, 'gender', None)
     if gender is None:
