@@ -83,7 +83,11 @@ def project(user, prjname, lngname):
                 for case, cstate in cstates:
                     chg = cases[case]
                     if chg is not None:
-                        cdd = CaseDisplayData(case, data.STATE_MAP[cstate].name, chg.new_text.text)
+                        if lng is blng:
+                            text = chg.base_text.text
+                        else:
+                            text = chg.new_text.text
+                        cdd = CaseDisplayData(case, data.STATE_MAP[cstate].name, text)
                         sdd.cases.append(cdd)
 
             stored[state - unknown].append(sdd)
