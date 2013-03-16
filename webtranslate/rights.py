@@ -2,10 +2,10 @@
 Get the rights of users.
 
 Special user roles:
-- SOMEONE:    Unauthenticated user
-- OWNER:      Owner of a project
-- TRANSLATOR: Translator of a language in a project
-- *:          Always matches
+ - SOMEONE:    Unauthenticated user
+ - OWNER:      Owner of a project
+ - TRANSLATOR: Translator of a language in a project
+ - *:          Always matches
 """
 import re, configparser
 

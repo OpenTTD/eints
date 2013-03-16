@@ -85,9 +85,11 @@ def get_relative_time(old_stamp, now):
 def get_messages(request):
     """
     Can return an arbitrary number of messages from this method, passed via a number of methods.
-    1. Query string can pass one message.
-    2. UNFINISHED. Pass via template (number of messages unknown).
-    Messages can have optional classes, which changes appearance
+
+     1. Query string can pass one message.
+     2. UNFINISHED. Pass via template (number of messages unknown).
+
+    Messages can have optional classes, which changes appearance.
     """
 
     # message classes map to bootstrap css alert style names. n.b. default bootstrap alert is yellow (warning), but our default is blue (info)
