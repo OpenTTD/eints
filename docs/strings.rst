@@ -21,6 +21,7 @@ document, only some technical properties of languages are explained, to make
 the discussion about strings more understandable.
 
 A language has
+
 - a *name*. Actually, a language has several names. Eints uses a rather
   technical name ``<lang-name>_<region>``, where ``<lang-name>`` are two lower
   case letters and ``<region>`` are two upper case letters, for example
@@ -116,28 +117,28 @@ This would display the word 'Eints' in a silver colour, and the other text in
 black. A second set of commands inserts numbers or other text into the string.
 These commands are called *positional commands*. Below is the list:
 
-=================== ====== ====== =======================================
-Command             Plural Gender Effect
-=================== ====== ====== =======================================
-``{COMMA}``          yes     no   Insert number into the text
-``{SIGNED_WORD}``    yes     no   Insert number into the text
-``{UNSIGNED_WORD}``  yes     no   Insert positive number into the text
-``{HEX}``            yes     no   Insert hexadecimal number into the text
-``{STRING}``          no    yes   Insert a string into the text
-``{CURRENCY}``        no     no   Insert an amount into the text
-``{VELOCITY}``        no     no   Insert a speed into the text
-``{VOLUME}``          no     no   Insert a volume into the text
-``{VOLUME_SHORT}``    no     no   Insert a volume into the text
-``{POWER}``           no     no   Insert an horse-power into the text
-``{WEIGHT}``          no     no   Insert a weight into the text
-``{WEIGHT_SHORT}``    no     no   Insert a weight into the text
-``{STATION}``         no     no   Insert a station name into the text
-``{DATE1920_LONG}``   no     no   Insert a date into the text
-``{DATE1920_SHORT}``  no     no   Insert a weight into the text
-``{DATE_LONG}``       no     no   Insert a weight into the text
-``{DATE_SHORT}``      no     no   Insert a weight into the text
-``{POP_WORD}``        no     no   Insert nothing (and drop an argument)
-=================== ====== ====== =======================================
+==================== ====== ====== =======================================
+Command              Plural Gender Effect
+==================== ====== ====== =======================================
+``{COMMA}``           yes     no   Insert number into the text
+``{SIGNED_WORD}``     yes     no   Insert number into the text
+``{UNSIGNED_WORD}``   yes     no   Insert positive number into the text
+``{HEX}``             yes     no   Insert hexadecimal number into the text
+``{STRING}``           no    yes   Insert a string into the text
+``{CURRENCY}``         no     no   Insert an amount into the text
+``{VELOCITY}``         no     no   Insert a speed into the text
+``{VOLUME}``           no     no   Insert a volume into the text
+``{VOLUME_SHORT}``     no     no   Insert a volume into the text
+``{POWER}``            no     no   Insert an horse-power into the text
+``{WEIGHT}``           no     no   Insert a weight into the text
+``{WEIGHT_SHORT}``     no     no   Insert a weight into the text
+``{STATION}``          no     no   Insert a station name into the text
+``{DATE1920_LONG}``    no     no   Insert a date into the text
+``{DATE1920_SHORT}``   no     no   Insert a weight into the text
+``{DATE_LONG}``        no     no   Insert a weight into the text
+``{DATE_SHORT}``       no     no   Insert a weight into the text
+``{POP_WORD}``         no     no   Insert nothing (and drop an argument)
+==================== ====== ====== =======================================
 
 An (not so good, but they'll get improved later) example::
 

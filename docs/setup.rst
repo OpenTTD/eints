@@ -1,5 +1,3 @@
-Author: alberth and andythenorth
-Date:   March 2013
 
 ======================
 Installation and setup
@@ -23,40 +21,54 @@ Internally, it uses:
 
 Setup
 =====
-After unpacking, Eints needs to be configured.
+After unpacking, Eints needs to be configured. Below are the details.
+
+Server parameters
+-----------------
+By default, the server starts in debug mode, and at port 8000 of
+``localhost``. For a real server, this are not good settings.
+To fix them, edit the following line in ``webtranslate/main.py``::
+
+        bottle.run(reloader=False, debug=True, host='localhost', port=8000)
+
+Set the ``debug`` parameter to ``False``, and set a different host name port
+to bind to.
+
+Note that Eints is not thread-safe, trying to use it with multiple threads
+will fail to work properly.
 
 Global configuration
 --------------------
 The global configuration settings are in ``config.xml``. It has the following
 entries:
 
-project-root
+*project-root*
   Root directory of the data files for each project, including the backup
   files.
 
-project-cache
+*project-cache*
   Eints loads project data files when needed. To reduce memory requirements,
   this setting controls how many data files it may keep in memory.
 
-language-file-size
+*language-file-size*
   Eints can download NML language files. This setting control the maximum size
   of such files.
 
-num-backup-files
+*num-backup-files*
   When the data of a project is changed, Eints writes a new copy of the
   project data to disk. This setting controls how many previous versions are
   kept.
 
-max-num-changes
+*max-num-changes*
   Eints enables changing of strings in translations. For reference purposes, a
   number of previous texts for each string (in each language in each project)
   are kept. This setting controls how many can exist at most.
 
-min-num-changes
+*min-num-changes*
   Controls the minimum number of texts to keep for each string. Should be at
   least ``1``.
 
-change-stable-age
+*change-stable-age*
   When a string is being changed, the change is 'unstable', and will be kept
   for a while. This setting controls when such a change is sufficiently old to
   consider again for deletion (if the change count is above
@@ -80,6 +92,7 @@ For readability, the file can also have empty lines, and comment lines (a line
 starting with ``#`` in the first column).
 
 A ``<user>`` can be
+
 - A literal username,
 - The ``*`` wildcard, matching everybody,
 - ``SOMEONE``, matching unauthenticated users,
@@ -97,6 +110,7 @@ value does not exist).
 
 The *action* is the same as the first component in the URI, except that the
 root page uses ``root`` as action. The following actions exist:
+
 - ``root``, the root page,
 - ``projects``, the overview page containing all projects,
 - ``project``, the overview page of a single project,
