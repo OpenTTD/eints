@@ -69,8 +69,8 @@
         % end
         <br />
         <div>
-            <input class="btn btn-danger" type="reset" value="Reset all strings"/>
-            <input class="btn btn-primary pull-right" type="submit" value="Send all strings (and go to next string)"/>
+            <input class="btn btn-danger" type="reset" value="Reset All Strings"/>
+            <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
         </div>
     </fieldset>
 % end
