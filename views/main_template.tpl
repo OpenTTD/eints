@@ -20,9 +20,9 @@
         <div class="navbar eint-navbar">
             <div class="navbar-inner">
                 <ul class="nav">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/projects">Projects</a></li>
-                    <li><a href="/newproject">New Project</a></li>
+                    <li><a href="/"><i class="icon-home"></i> Home</a></li>
+                    <li><a href="/projects"><i class="icon-list-alt"></i> Projects</a></li>
+                    <li><a href="/newproject"><i class="icon-plus-sign"></i> New Project</a></li>
                 </ul>
             </div>
         </div>
