@@ -1,11 +1,11 @@
 %rebase main_template title='Web translator - ' + pdata.name
 %from webtranslate import utils
-<h1 class="eint-heading-icon eint-icon-drawer-open">{{pdata.name}}</h1>
+<h1>{{pdata.name}}</h1>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
     <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>
 </div>
-<h2>Project Overview</h2>
+<h2 class="eint-heading-icon eint-icon-drawer-open">Project Overview</h2>
 % if base_lng is None:
     <p class="alert alert-info"><strong>To get started, please <a href="/upload/{{proj_name}}">upload a lang file</a> to use as base language.</strong></p>
 % else:
