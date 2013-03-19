@@ -232,9 +232,9 @@ class ProjectMetaData:
     """
     def __init__(self, path, name):
         self.pdata = None
-        self.name = name
+        self.name = name.lower()
         self.overview = {}
-        self.proj_name = name # Temporary
+        self.proj_name = name
         self.path = path
 
     def load(self):
