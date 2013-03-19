@@ -14,13 +14,15 @@ def page_get(user):
 @route('/newproject', method = 'POST')
 @protected(['newproject', '-', '-'])
 def page_post(user):
-    name = request.forms.name
-
-    if not name or not re.match('[A-Za-z][A-Za-z0-9]*$', name):
-        abort(404, "Name missing or incorrect")
+    proj_name = request.forms.name
+    name = ''.join(proj_name.lower().split())
+    if not name:
+        abort(404, "Name missing")
+    if not re.match('[A-Za-z][A-Za-z0-9]*$', name):
+        abort(404, "Name can only contain characters A-Z a-z 0-9")
         return
 
-    error = config.cache.create_project(name.lower(), name)
+    error = config.cache.create_project(name, proj_name)
     if error is not None:
         abort(404, error)
         return

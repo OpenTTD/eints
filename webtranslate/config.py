@@ -111,6 +111,7 @@ class ProjectCache:
             if not name.endswith('.xml'): continue
             name = name[:-4]
             path = os.path.join(self.project_root, name)
+            print(name)
             pmd = ProjectMetaData(path, name)
             assert name not in self.projects
             self.projects[name] = pmd
@@ -142,7 +143,7 @@ class ProjectCache:
             return "A project file named \"{}\" already exists".format(disk_name)
 
         # Construct a new project from scratch.
-        pmd = ProjectMetaData(path, proj_name)
+        pmd = ProjectMetaData(path, disk_name, proj_name)
         self.projects[disk_name] = pmd
         pmd.pdata = data.Project(proj_name)
         pmd.create_statistics()
@@ -230,11 +231,14 @@ class ProjectMetaData:
     @ivar path: Path of the project file at disk (without extension.
     @type path: C{str}
     """
-    def __init__(self, path, name):
+    def __init__(self, path, disk_name, proj_name=None):
         self.pdata = None
-        self.name = name.lower()
+        self.name = disk_name
         self.overview = {}
-        self.proj_name = name
+        if proj_name is not None: # this is all wrong afaict
+            self.proj_name = proj_name
+        else:
+            self.proj_name = disk_name
         self.path = path
 
     def load(self):
