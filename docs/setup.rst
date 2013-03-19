@@ -1,4 +1,6 @@
 
+.. contents::
+
 ======================
 Installation and setup
 ======================
@@ -158,7 +160,7 @@ Note that by default, Eints defines no users at all. ``admin`` will thus not
 work without creating such a user first.
 
 Project owners and translators
-------------------------------
+------------------------------.. contents::
 In the above section, user categories ``OWNER`` and ``TRANSLATOR`` may be used to
 define who can access certain pages.
 Membership of a user in these categories is decided in the ``projects.dat``
@@ -187,7 +189,15 @@ user data base. How to do that should be defined in
 ``webtranslate/users/__init__.py``. By default a simple user system called
 ``silly`` is provided, **aimed at testing only**.
 It *stores users and their passwords in plain text* (in ``users.dat``). The
-``editsilly`` program can add, update, and remove users from the file.
+``editsilly`` program can add, update, and remove users from the file, for
+example
+
+::
+
+        ./editsilly admin
+
+would create or change the ``admin`` account.
+
 
 Currently, Eints does not provide interfaces to other user administration
 systems. They will have to be programmed in the above mentioned Python file.

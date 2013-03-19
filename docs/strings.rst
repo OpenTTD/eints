@@ -1,3 +1,6 @@
+
+.. contents::
+
 =====================
 Strings and languages
 =====================

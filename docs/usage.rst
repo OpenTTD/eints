@@ -1,5 +1,8 @@
-Author: alberth and andythenorth
-Date: March 2013
+:Author: alberth and andythenorth
+:Date: March 2013
+
+.. contents::
+
 
 ===========================
 Usage of the Web translator
