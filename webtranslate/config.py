@@ -122,7 +122,7 @@ class ProjectCache:
 
             pmd.proj_name = pd.name
 
-    def create_project(self, disk_name, proj_name):
+    def create_project(self, disk_name, proj_name, url):
         """
         Create a new project.
 
@@ -145,7 +145,7 @@ class ProjectCache:
         # Construct a new project from scratch.
         pmd = ProjectMetaData(path, disk_name, proj_name)
         self.projects[disk_name] = pmd
-        pmd.pdata = data.Project(proj_name)
+        pmd.pdata = data.Project(proj_name, url)
         pmd.create_statistics()
         self.lru.append(pmd)
         self.save_pmd(pmd)

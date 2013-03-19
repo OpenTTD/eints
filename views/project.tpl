@@ -1,6 +1,7 @@
 %rebase main_template title='Web translator - ' + pdata.name
 %from webtranslate import utils
 <h1>{{pdata.name}}</h1>
+<div style="float:right; margin-top:-40px;"><a href="{{pdata.url}}">Project Homepage</a></div>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
     <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>

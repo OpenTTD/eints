@@ -22,7 +22,9 @@ def page_post(user):
         abort(404, "Name can only contain characters A-Z a-z 0-9")
         return
 
-    error = config.cache.create_project(name, proj_name)
+    url = request.forms.url
+
+    error = config.cache.create_project(name, proj_name, url)
     if error is not None:
         abort(404, error)
         return

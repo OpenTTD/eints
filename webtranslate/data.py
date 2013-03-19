@@ -416,6 +416,9 @@ class Project:
     @ivar name: Project name.
     @type name: C{str}
 
+    @ivar url: URL to Project Home Page (somewhere on the internet).
+    @type url: C{str}
+
     @ivar statistics: Statistics for all strings in all languages. Managed by the project
                       meta-data, not stored in the project.
                       Mapping of language name to string name to list of case and state, where
@@ -437,8 +440,9 @@ class Project:
                     - 'case'      Cases line
                     - 'gender'    Gender line
     """
-    def __init__(self, name):
+    def __init__(self, name, url=''):
         self.name = name
+        self.url = url
         self.statistics = {}
         self.languages = {}
         self.base_language = None
@@ -471,7 +475,8 @@ def load_project(xloader, node):
     """
     assert node.tagName == 'project'
     name = node.getAttribute('name')
-    project = Project(name)
+    url = node.getAttribute('url')
+    project = Project(name, url)
 
     langnodes = loader.get_child_nodes(node, 'language')
     project.languages = {}
@@ -538,6 +543,7 @@ def save_project(xsaver, proj):
     """
     node = xsaver.doc.createElement('project')
     node.setAttribute('name', proj.name)
+    node.setAttribute('url', proj.url)
     blng = proj.get_base_language()
     if blng is not None:
         node.setAttribute('baselang', blng.name)
