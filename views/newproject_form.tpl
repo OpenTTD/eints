@@ -9,8 +9,9 @@
         <span class="help-block">Only characters A-Z, a-z, 0-9 and spaces allowed</span>
         <br />
         <br />
-        <label for="url">URL for Project Homepage (Optional)</label>
+        <label for="url">Project Website (Optional)</label>
         <input class="input-xxlarge" type="text" id="url" name="url"/>
+        <span class="help-block">A url to a website somewhere else, not here, including 'http://'</span>
         <br />
         <br />
         <div class="eint-form-actions">

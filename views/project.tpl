@@ -2,7 +2,7 @@
 %from webtranslate import utils
 <h1>{{pdata.name}}</h1>
 % if pdata.url is not '':
-    <div style="float:right; margin-top:-40px;"><a href="{{pdata.url}}">Project Homepage</a></div>
+    <div style="float:right; margin-top:-40px;"><a href="{{pdata.url}}">Project Website</a></div>
 % end
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
