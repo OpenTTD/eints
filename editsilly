@@ -31,7 +31,8 @@ def init():
     handle.close()
 
 def usage():
-    print("editsilly [options] username...")
+    print()
+    print("Usage: editsilly [options] username...")
     print("with options:")
     print("    -h, --help  Output this online help.")
     print("    -d, --delete Delete users instead of adding them.")
@@ -81,7 +82,7 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], "hd", ["help", "delete"])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(err) # will print something like "option -a not recognized"
+        print("ERROR: " + str(err))
         usage()
         sys.exit(2)
     delete = False
@@ -94,6 +95,12 @@ def main():
             continue
 
         raise ValueError("Unexpected option value {} encountered".format(repr(opt)))
+
+    if len(args) == 0:
+        print("ERROR: Missing username argument")
+        usage()
+        sys.exit(1)
+
 
     for arg in args:
         if delete:
