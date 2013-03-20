@@ -1,6 +1,6 @@
 %rebase main_template title='Editing ' + sname
 <h1>
-    <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a>
+    <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
 </h1>
 <hr />
 <h2 class="eint-heading-icon eint-icon-document-1-edit">

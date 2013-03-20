@@ -1,6 +1,6 @@
 %rebase main_template title='language ' + language + ' in ' + proj_name
 <h1>
-    <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.name}}</a>
+    <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
 </h1>
 <hr />
 

@@ -3,7 +3,7 @@
 % if len(projects) > 0:
     <ul>
     % for p in projects:
-        <li><a href="project/{{p.name}}">{{p.proj_name}}</a></li>
+        <li><a href="project/{{p.name}}">{{p.human_name}}</a></li>
     % end
     </ul>
 % else:

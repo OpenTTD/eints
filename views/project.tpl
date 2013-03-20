@@ -1,6 +1,6 @@
-%rebase main_template title='Web translator - ' + pdata.name
+%rebase main_template title='Web translator - ' + pdata.human_name
 %from webtranslate import utils
-<h1>{{pdata.name}}</h1>
+<h1>{{pdata.human_name}}</h1>
 % if pdata.url is not '':
     <div style="float:right; margin-top:-40px;"><a href="{{pdata.url}}">Project Website</a></div>
 % end
