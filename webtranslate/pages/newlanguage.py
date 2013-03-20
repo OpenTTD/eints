@@ -59,12 +59,12 @@ def new_language_post(user, proj_name):
             lng.case = lang.case
             lng.plural = lang.plural
 
-            pdata.languages[lng.isocode] = lng
+            pdata.languages[lng.name] = lng
 
             config.cache.save_pmd(pmd)
             pmd.create_statistics(lng)
 
-            msg = "Language \"" + lng.isocode + "\" is created"
+            msg = "Successfully created language '" + lng.name +"' " + utils.get_datetime_now_formatted()
             redirect("/project/{}?message={}".format(proj_name, msg))
             return
 
