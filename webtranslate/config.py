@@ -111,7 +111,6 @@ class ProjectCache:
             if not name.endswith('.xml'): continue
             name = name[:-4]
             path = os.path.join(self.project_root, name)
-            print(name)
             pmd = ProjectMetaData(path, name)
             assert name not in self.projects
             self.projects[name] = pmd
