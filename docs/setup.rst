@@ -152,15 +152,16 @@ For reference purposes, below is an example access rights file::
         OWNER      + /string/*/*/*
         TRANSLATOR + /string/*/*/*
 
-        # Language file uploading, and language deletion
+        # Language file uploading, and language deletion and creation
         OWNER + /upload/*/-/*
         OWNER + /delete/*/*/*
+        OWNER + /newlanguage/*/-/*
 
 Note that by default, Eints defines no users at all. ``admin`` will thus not
 work without creating such a user first.
 
 Project owners and translators
-------------------------------.. contents::
+------------------------------
 In the above section, user categories ``OWNER`` and ``TRANSLATOR`` may be used to
 define who can access certain pages.
 Membership of a user in these categories is decided in the ``projects.dat``

@@ -18,6 +18,7 @@ admin + /*/*/*/*
 OWNER      + /string/*/*/*
 TRANSLATOR + /string/*/*/*
 
-# Language file uploading, and language deletion
+# Language file uploading, language deletion and creation
 OWNER + /upload/*/-/*
 OWNER + /delete/*/*/*
+OWNER + /newlanguage/*/-/*
