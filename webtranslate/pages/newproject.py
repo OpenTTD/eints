@@ -18,6 +18,7 @@ def page_post(user):
     name = ''.join(proj_name.lower().split())
     if not name:
         abort(404, "Name missing")
+        return
     if not re.match('[A-Za-z][A-Za-z0-9]*$', name):
         abort(404, "Name can only contain characters A-Z a-z 0-9")
         return
