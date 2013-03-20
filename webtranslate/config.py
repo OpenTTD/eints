@@ -119,17 +119,15 @@ class ProjectCache:
             assert pd is pmd
             pd = pd.pdata
 
-            pmd.proj_name = pd.name
-
-    def create_project(self, disk_name, proj_name, url):
+    def create_project(self, disk_name, human_name, url):
         """
         Create a new project.
 
         @param disk_name: Base name of the project at the disk.
         @type  disk_name: C{str}
 
-        @param proj_name: Project name.
-        @type  proj_name: C{str}
+        @param human_name: Project name for humans.
+        @type  human_name: C{str}
 
         @return: Error description, or nothing if creation succeeded.
         @rtype:  C{str} or C{None}
@@ -142,9 +140,9 @@ class ProjectCache:
             return "A project file named \"{}\" already exists".format(disk_name)
 
         # Construct a new project from scratch.
-        pmd = ProjectMetaData(path, disk_name, proj_name)
+        pmd = ProjectMetaData(path, disk_name, human_name)
         self.projects[disk_name] = pmd
-        pmd.pdata = data.Project(proj_name, url)
+        pmd.pdata = data.Project(human_name, url)
         pmd.create_statistics()
         self.lru.append(pmd)
         self.save_pmd(pmd)
@@ -224,26 +222,28 @@ class ProjectMetaData:
     @ivar overview: Overview of the state of the strings in each language, ordered by language name.
     @type overview: C{dict} of C{str} to [#UNKNOWN, #UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
 
-    @ivar proj_name: Project name for humans.
-    @type proj_name: C{str}
+    @ivar human_name: Project name for humans.
+    @type human_name: C{str}
 
     @ivar path: Path of the project file at disk (without extension.
     @type path: C{str}
     """
-    def __init__(self, path, disk_name, proj_name=None):
+    def __init__(self, path, disk_name, human_name=None):
         self.pdata = None
         self.name = disk_name
         self.overview = {}
-        if proj_name is not None: # this is all wrong afaict
-            self.proj_name = proj_name
+        if human_name is not None:
+            self.human_name = human_name
         else:
-            self.proj_name = disk_name
+            # The project has the actual human-readable name, and will be stored here on first load.
+            self.human_name = disk_name
         self.path = path
 
     def load(self):
         assert self.pdata is None
         self.pdata = data.load_file(self.path + ".xml")
         process_project_changes(self.pdata)
+        self.human_name = self.pdata.human_name # Copy the human-readable name from the project data.
 
     def unload(self):
         # XXX Unlink the data
