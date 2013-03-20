@@ -14,8 +14,8 @@ def page_get(user):
 @route('/newproject', method = 'POST')
 @protected(['newproject', '-', '-'])
 def page_post(user):
-    proj_name = request.forms.name
-    name = ''.join(proj_name.lower().split())
+    human_name = request.forms.name
+    name = ''.join(human_name.lower().split())
     if not name:
         abort(404, "Name missing")
         return
@@ -25,7 +25,7 @@ def page_post(user):
 
     url = request.forms.url
 
-    error = config.cache.create_project(name, proj_name, url)
+    error = config.cache.create_project(name, human_name, url)
     if error is not None:
         abort(404, error)
         return
