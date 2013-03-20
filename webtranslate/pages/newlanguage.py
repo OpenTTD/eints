@@ -1,11 +1,11 @@
-from webtranslate.bottle import route, template, abort
+from webtranslate.bottle import route, template, abort, redirect, request
 from webtranslate.protect import protected
-from webtranslate import config
+from webtranslate import config, data
 from webtranslate.newgrf import language_info
 
 @route('/newlanguage/<proj_name>', method = 'GET')
 @protected(['newlanguage', 'proj_name', '-'])
-def new_language(user, proj_name):
+def new_language_get(user, proj_name):
     """
     Form to add another language to the project.
     """
@@ -36,7 +36,7 @@ def new_language(user, proj_name):
 
 @route('/newlanguage/<proj_name>', method = 'POST')
 @protected(['newlanguage', 'proj_name', '-'])
-def new_language(user, proj_name):
+def new_language_post(user, proj_name):
     """
     Construct the requested language.
     """
