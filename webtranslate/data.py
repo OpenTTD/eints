@@ -413,8 +413,8 @@ class Project:
     """
     Project object.
 
-    @ivar name: Project name.
-    @type name: C{str}
+    @ivar human_name: Project name for humans.
+    @type human_name: C{str}
 
     @ivar url: URL to Project Home Page (somewhere on the internet).
     @type url: C{str}
@@ -440,8 +440,8 @@ class Project:
                     - 'case'      Cases line
                     - 'gender'    Gender line
     """
-    def __init__(self, name, url=''):
-        self.name = name
+    def __init__(self, human_name, url=''):
+        self.human_name = human_name
         self.url = url
         self.statistics = {}
         self.languages = {}
@@ -474,9 +474,9 @@ def load_project(xloader, node):
     @rtype:  L{Project}
     """
     assert node.tagName == 'project'
-    name = node.getAttribute('name')
+    human_name = node.getAttribute('name')
     url = node.getAttribute('url')
-    project = Project(name, url)
+    project = Project(human_name, url)
 
     langnodes = loader.get_child_nodes(node, 'language')
     project.languages = {}
@@ -488,7 +488,7 @@ def load_project(xloader, node):
     if baselang is None or baselang not in project.languages:
         baselang = None
         if len(project.languages) > 0:
-            print("Project \"" + project.name + "\" has no base language, dropping all translations")
+            print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
             project.languages = {}
             return project # Also skip loading the skeleton.
     project.base_language = baselang
@@ -542,7 +542,7 @@ def save_project(xsaver, proj):
     @rtype:  L{xml.dom.minidom.Node}
     """
     node = xsaver.doc.createElement('project')
-    node.setAttribute('name', proj.name)
+    node.setAttribute('name', proj.human_name)
     node.setAttribute('url', proj.url)
     blng = proj.get_base_language()
     if blng is not None:
