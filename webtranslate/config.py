@@ -171,7 +171,6 @@ class ProjectCache:
                 if p != pmd: lru.append(p)
             assert len(lru) == len(self.lru)
             self.lru = lru
-            print("Retrieving project " + pmd.path + " from cache")
             return pmd
 
         # Load the data, first make some room.
@@ -180,7 +179,6 @@ class ProjectCache:
         while size >= self.cache_size and i >= 0:
             # XXX If project is locked, skip it.
             assert self.lru[i].pdata is not None
-            print("Dropping project " + self.lru[i].path)
             self.lru[i].unload()
             self.lru[i] = None
             size = size - 1
@@ -196,7 +194,6 @@ class ProjectCache:
 
         pmd.load()
         pmd.create_statistics()
-        print("Loading project " + pmd.path)
         return pmd
 
     def save_pmd(self, pmd):
