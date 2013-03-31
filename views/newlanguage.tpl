@@ -13,13 +13,12 @@ Available languages:<br />
 <form class="form-inline well" action="/newlanguage/{{proj_name}}" method="post" enctype="multipart/form-data">
     <fieldset>
         <div class="control-group">
-            % for lang in can_be_added:
-                <div class="controls">
-                    <label class="checkbox" for="override" class="checkbox">
-                        <input type="checkbox" name="{{lang.isocode}}" id="{{lang.isocode}}" /> {{lang.isocode}} ({{lang.name}})
-                    </label>
-                </div>
-            % end
+            <select name="language_select">
+                <option selected value="none">Select a new language</option>
+                % for lang in can_be_added:
+                    <option value="{{lang.isocode}}">{{lang.isocode}} ({{lang.name}})</option>
+                % end
+            </select>
         </div>
 
         <div class="pull-right">

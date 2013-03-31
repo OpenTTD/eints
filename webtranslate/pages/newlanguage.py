@@ -1,6 +1,6 @@
 from webtranslate.bottle import route, template, abort, redirect, request
 from webtranslate.protect import protected
-from webtranslate import config, data
+from webtranslate import config, data, utils
 from webtranslate.newgrf import language_info
 
 @route('/newlanguage/<proj_name>', method = 'GET')
@@ -46,8 +46,9 @@ def new_language_post(user, proj_name):
         return
 
     pdata = pmd.pdata
+    new_iso = request.forms.language_select
     for lang in language_info.all_languages:
-        if request.forms.get(lang.isocode):
+        if lang.isocode == new_iso:
             if lang.isocode in pdata.languages:
                 abort(404, "Language \"{}\" already exists".format(lang.isocode))
                 return
