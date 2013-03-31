@@ -38,7 +38,7 @@
         </div>
         <div class="control-group">
             <div class="controls">
-                % if tc.transl[0].user is not None:
+                % if tc.transl[0].saved and tc.transl[0].user is not None:
                     <span class="help-block">Translation created by "{{tc.transl[0].user}}"
                     % if tc.transl[0].stamp_desc is not None:
                         ({{tc.transl[0].stamp_desc}} ago)

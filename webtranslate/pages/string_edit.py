@@ -31,8 +31,11 @@ class Translation:
 
     @ivar stamp: Time stamp of the translation.
     @type stamp: C{str} or C{None}
+
+    @ivar saved: Translation is saved in the project data (strings being edited but having errors are not saved).
+    @type saved: C{bool}
     """
-    def __init__(self, bchg, lchg, now):
+    def __init__(self, bchg, lchg, now, saved):
         """
         Constructor.
 
@@ -44,10 +47,14 @@ class Translation:
 
         @param now: The current moment in time, if available.
         @type  now: L{Stamp} or C{None}
+
+        @param saved: Translation comes from the project data (instead of a result of a user editing the string).
+        @type  saved: C{bool}
         """
         self.current_base = bchg.base_text
         self.state = None
         self.errors = []
+        self.saved = saved
 
         if lchg is not None:
             user = lchg.user
@@ -55,8 +62,12 @@ class Translation:
             self.user = user
             self.trans_base = lchg.base_text
             self.text = lchg.new_text
-            self.stamp_desc = utils.get_relative_time(lchg.stamp, now)
-            self.stamp = str(lchg.stamp)
+            if saved:
+                self.stamp_desc = utils.get_relative_time(lchg.stamp, now)
+                self.stamp = str(lchg.stamp)
+            else:
+                self.stamp_desc = None
+                self.stamp = None
         else:
             self.user = 'none'
             self.trans_base = self.current_base
@@ -266,12 +277,12 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     for case in lng.case:
         tranls = []
 
-        cchgs = case_chgs[case]
+        cchgs = [(cchg, True) for cchg in case_chgs[case]] # Tuples (case-change, 'saved translation')
         chg_err_state = states.get(case)
-        if chg_err_state is not None: cchgs.append(chg_err_state[0])
+        if chg_err_state is not None: cchgs.append((chg_err_state[0], False))
         if len(cchgs) == 0:
             # No changes for this case, make a dummy one to display the base data.
-            tra = Translation(bchg, None, now)
+            tra = Translation(bchg, None, now, False)
             if case == '':
                 tra.errors = [('ERROR', None, 'String is missing')]
                 tra.state = data.STATE_MAP[data.MISSING].name
@@ -284,8 +295,8 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
         else:
             # Changes do exist, add them (in reverse chronological order).
             cchgs.reverse()
-            for idx, lchg in enumerate(cchgs):
-                tra = Translation(bchg, lchg, now)
+            for idx, (lchg, saved) in enumerate(cchgs):
+                tra = Translation(bchg, lchg, now, saved)
                 if idx == 0:
                     # Newest string, add errors
                     if chg_err_state is not None:
