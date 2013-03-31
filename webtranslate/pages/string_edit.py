@@ -173,17 +173,20 @@ def fix_string(user, prjname, lngname):
         abort(404, "Language is not a translation")
         return
 
-    return fix_string_page(pmd, prjname, lngname)
+    return fix_string_page(pmd, prjname, lngname, None)
 
 
-def fix_string_page(pmd, prjname, lngname):
+def fix_string_page(pmd, prjname, lngname, message):
     sname = find_string(pmd, lngname, 1, 2, 3)
     if sname is None:
-        message = "All strings are up-to-date, perhaps some translations need rewording?"
+        if message is None: message = "All strings are up-to-date, perhaps some translations need rewording?"
         redirect('/language/{}/{}?message={}'.format(prjname, lngname, message))
         return
 
-    redirect('/string/{}/{}/{}'.format(prjname, lngname, sname))
+    if message is None:
+        redirect('/string/{}/{}/{}'.format(prjname, lngname, sname))
+    else:
+        redirect('/string/{}/{}/{}?message={}'.format(prjname, lngname, sname, message))
     return
 
 def check_page_parameters(prjname, lngname, sname):
@@ -424,4 +427,9 @@ def str_post(user, prjname, lngname, sname):
         config.cache.save_pmd(pmd)
         pmd.create_statistics(lng)
 
-    return fix_string_page(pmd, prjname, lngname)
+    # Construct a message that the string is changed.
+    if len(new_changes) > 0:
+        message = "Successfully updated string '" + sname +"' " + utils.get_datetime_now_formatted()
+    else:
+        message = None
+    return fix_string_page(pmd, prjname, lngname, message)
