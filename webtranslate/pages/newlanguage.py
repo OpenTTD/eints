@@ -31,7 +31,7 @@ def new_language_get(user, proj_name):
     translations.sort(key=lambda x: x.isocode)
     can_be_added.sort(key=lambda x: x.isocode)
 
-    return template('newlanguage', proj_name = proj_name, base_langs = base_langs,
+    return template('newlanguage', proj_name = proj_name, pdata = pdata, base_langs = base_langs,
                     translations = translations, can_be_added = can_be_added)
 
 @route('/newlanguage/<proj_name>', method = 'POST')
@@ -66,7 +66,7 @@ def new_language_post(user, proj_name):
             pmd.create_statistics(lng)
 
             msg = "Successfully created language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-            redirect("/project/{}?message={}".format(proj_name, msg))
+            redirect("/language/{}/{}?message={}".format(proj_name, lng.name, msg))
             return
 
     msg = "No language found that should be created"
