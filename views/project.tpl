@@ -6,13 +6,13 @@
 % if pdata.url is not '':
     <a class="btn" href="{{pdata.url}}">&#187; Project Website</a> |
 % end
-    <!--<a class="btn" href="#"><i class="icon-cog"></i> Project Settings</a>-->
-    <a class="btn btn-info" href="/upload/{{proj_name}}"><i class="icon-upload icon-white"></i> Upload Language</a>
+    <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>
 </div>
 <h2 class="eint-heading-icon eint-icon-drawer-open">Project Overview</h2>
 % if base_lng is None:
     <p class="alert alert-info"><strong>To get started, please <a href="/upload/{{proj_name}}">upload a lang file</a> to use as base language.</strong></p>
 % else:
+    <br />
     <br />
     <table class="table table-condensed table-striped table-hover">
         <thead>
@@ -76,7 +76,6 @@
         </tbody>
     </table>
     <br />
-
     <dl class="dl-horizontal">
         % for sd in utils.get_status_definition_strings():
             <dt>{{sd.name}}</dt>
@@ -86,3 +85,4 @@
 %end
 
 </ul>
+<!--<a class="btn btn-mini" href="#"><i class="icon-cog"></i> Project Settings</a>-->
