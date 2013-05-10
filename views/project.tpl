@@ -1,12 +1,13 @@
 %rebase main_template title='Web translator - ' + pdata.human_name
 %from webtranslate import utils
 <h1>{{pdata.human_name}}</h1>
-% if pdata.url is not '':
-    <div style="float:right; margin-top:-40px;"><a href="{{pdata.url}}">Project Website</a></div>
-% end
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
-    <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>
+% if pdata.url is not '':
+    <a class="btn" href="{{pdata.url}}">&#187; Project Website</a> |
+% end
+    <!--<a class="btn" href="#"><i class="icon-cog"></i> Project Settings</a>-->
+    <a class="btn btn-info" href="/upload/{{proj_name}}"><i class="icon-upload icon-white"></i> Upload Language</a>
 </div>
 <h2 class="eint-heading-icon eint-icon-drawer-open">Project Overview</h2>
 % if base_lng is None:
