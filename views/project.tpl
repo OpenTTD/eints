@@ -6,6 +6,7 @@
 % if pdata.url is not '':
     <a class="btn" href="{{pdata.url}}">&#187; Project Website</a> |
 % end
+    <a class="btn" href="/newlanguage/{{proj_name}}"><i class="icon-plus-sign"></i> Create Language</a>
     <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>
 </div>
 <h2 class="eint-heading-icon eint-icon-drawer-open">Project Overview</h2>
