@@ -86,6 +86,9 @@ h4 {
 .eint-icon-pencil {
     background-image:url('/static/img/woocons1/Pencil.png');
 }
+.eint-icon-settings {
+    background-image:url('/static/img/woocons1/Cog.png');
+}
 
 td.number, th.number {
   	text-align:right;
