@@ -12,12 +12,12 @@
     <fieldset class="well">
         <span class="pull-left">{{tc.get_stringname(sname)}}</span>
         <div class="pull-right muted">
-            <span>Translation Status:</span>
+            <span>Translation status:</span>
             <span>{{tc.transl[0].state}}</span>
         </div>
         <hr class="clearfix" style="margin-top:30px;"/><!-- an inline style per day keeps the doctor away -->
         <div class="control-group">
-            <span class="control-label">Base Lang String:</span>
+            <span class="control-label">Base lang string:</span>
             <span class="eint-form-value-as-text span8"><strong>{{tc.transl[0].current_base.text}}</strong></span>
             <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
         </div>
