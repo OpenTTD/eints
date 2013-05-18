@@ -95,6 +95,9 @@ class TransLationCase:
         if self.case == '': return sname
         return sname + '.' + self.case
 
+    def __repr__(self):
+        return "TransLationCase({}, {})".format(repr(self.case), repr(self.transl))
+
 def find_string(pmd, lngname, missing_prio, invalid_prio, outdated_prio):
     """
     Find a string to translate.
