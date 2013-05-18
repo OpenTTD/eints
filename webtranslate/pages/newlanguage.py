@@ -56,9 +56,9 @@ def new_language_post(user, proj_name):
             # Create the language.
             lng = data.Language(lang.isocode)
             lng.grflangid = lang.grflangid
+            lng.plural = lang.plural
             lng.gender = lang.gender
             lng.case = lang.case
-            lng.plural = lang.plural
 
             pdata.languages[lng.name] = lng
 
