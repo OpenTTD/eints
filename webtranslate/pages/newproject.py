@@ -27,6 +27,7 @@ def page_post(user):
         return
 
 
+    name = ''.join(human_name.lower().split())
     error = config.cache.create_project(name, human_name, url)
     if error is not None:
         abort(404, error)
