@@ -44,6 +44,7 @@ class LanguageData:
                  digitsepcur, decimalsep, winlangid, grflangid, gender=None, case=None):
         if gender is None: gender = []
         if case is None: case = []
+        if '' not in case: case.append('')
         self.name = name
         self.ownname = ownname
         self.isocode = isocode
