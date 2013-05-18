@@ -1,4 +1,5 @@
 from webtranslate import data
+import re
 
 def get_datetime_now_formatted():
     """
@@ -118,3 +119,34 @@ def get_status_definition_strings():
     @rtype:  C{list} of L{StatusDefinition}
     """
     return [data.STATE_MAP[code] for code in [data.UNKNOWN, data.UP_TO_DATE, data.OUT_OF_DATE, data.INVALID, data.MISSING]]
+
+def verify_name(human_name):
+    """
+    Check whether a provided human name is sane enough to accept as project name.
+
+    @param human_name: Proposed new project name.
+    @type  human_name: C{str}
+
+    @return: Whether the name is acceptable.
+    @rtype:  C{str} with an error description, or C{None} if all is well.
+    """
+    name = ''.join(human_name.lower().split())
+    if not name:
+        return "Name missing"
+    if not re.match('[A-Za-z][A-Za-z0-9]*$', name):
+        return "Name can only contain characters A-Z a-z 0-9"
+    return None
+
+def verify_url(url):
+    """
+    Check whether a provided URL is sane enough to accept as project reference.
+
+    @param url: Proposed new url.
+    @type  url: C{str}
+
+    @return: Whether the url is acceptable.
+    @rtype:  C{str} with an error description, or C{None} if all is well.
+
+    @todo: Improve project URL checking.
+    """
+    return None # XXX This is a bit too much trust perhaps.

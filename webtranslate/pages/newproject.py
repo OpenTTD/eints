@@ -15,15 +15,17 @@ def page_get(user):
 @protected(['newproject', '-', '-'])
 def page_post(user):
     human_name = request.forms.name
-    name = ''.join(human_name.lower().split())
-    if not name:
-        abort(404, "Name missing")
-        return
-    if not re.match('[A-Za-z][A-Za-z0-9]*$', name):
-        abort(404, "Name can only contain characters A-Z a-z 0-9")
+    acceptance = utils.verify_name(human_name)
+    if acceptance is not None:
+        abort(404, acceptance)
         return
 
     url = request.forms.url
+    acceptance = utils.verify_url(url)
+    if acceptance is not None:
+        abort(404, acceptance)
+        return
+
 
     error = config.cache.create_project(name, human_name, url)
     if error is not None:

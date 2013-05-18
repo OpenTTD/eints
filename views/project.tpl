@@ -86,4 +86,4 @@
 %end
 
 </ul>
-<!--<a class="btn btn-mini" href="#"><i class="icon-cog"></i> Project Settings</a>-->
+<a class="btn btn-mini" href="/projsettings/{{proj_name}}"><i class="icon-cog"></i> Project Settings</a>
