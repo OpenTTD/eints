@@ -91,23 +91,17 @@ class UserRightRule:
 
 # Table with rights.
 _table = []
-# Table with project user data.
-# Mapping of project names to key/values.
-# C{dict} of C{str} to C{dict} of C{str} to C{set} of C{str}
-_projects = {}
 
 FILENAME = "rights.dat"
-PROJECTSFILE = "projects.dat"
 
-rights_pat = re.compile('\\s*(\\S+)\\s+([-+])\\s+/([^/]+)/([^/]+)/([^/]+)/([^/]+)\\s*$')
-
-def init():
+def init_page_access():
     """
     Initialize the user rights table.
     """
     global _table
 
     _table = []
+    rights_pat = re.compile('\\s*(\\S+)\\s+([-+])\\s+/([^/]+)/([^/]+)/([^/]+)/([^/]+)\\s*$')
     handle = open(FILENAME, "r")
     for idx, line in enumerate(handle):
         line = line.rstrip()
@@ -123,6 +117,19 @@ def init():
 
     handle.close()
 
+# Table with project user data.
+# Mapping of project names to mapping of roles to users.
+# C{dict} of C{str} to C{dict} of C{str} to C{set} of C{str}
+_projects = {}
+
+PROJECTSFILE = "projects.dat"
+
+def init_projects():
+    """
+    Initialize the projects table (mapping of projects to mapping of roles to users).
+    """
+    global _projects
+
     # Read projects user data.
     cfg = configparser.ConfigParser()
     cfg.read(PROJECTSFILE)
@@ -135,7 +142,7 @@ def init():
             for ns2 in ns.split(','):
                 for ns3 in ns2.split(' '):
                     ns3 = ns3.strip()
-                    if len(ns3) < 3: continue # User names are longer-equal to 3
+                    if len(ns3) < 3: continue # User names are longer-equal to 3 characters.
                     names.add(ns3)
             values[k] = names
         _projects[pn] = values
@@ -146,6 +153,12 @@ def may_access(page, prjname, lngname, user):
 
     @param page: Page name being accessed.
     @type  page: C{list} of C{str}
+
+    @param prjname: Name of the project, if available.
+    @type  prjname: C{str} or C{None}
+
+    @param lngname: Name of the language, if available.
+    @type  lngname: C{str} or C{None}
 
     @param user: User name (login name or 'unknown').
     @type  user: C{str}

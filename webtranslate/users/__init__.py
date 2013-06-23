@@ -14,6 +14,8 @@ def init():
     Initialize the user admin system.
     """
     silly.init()
+    rights.init_page_access()
+    rights.init_projects()
 
 def may_access(user, pwd, pname, prjname, lngname):
     """
