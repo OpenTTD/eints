@@ -23,14 +23,14 @@ def protected(page_name):
     def decorator(func):
         def wrapper(*a, **ka):
             if request.auth is None:
-                user = 'unknown'
+                user, pwd = None, None
             else:
-                user, password = request.auth
-                if not users.authenticate(user, password): user = 'unknown'
+                user, pwd = request.auth
+
             pname = [ka.get(p, p) for p in page_name] + [METHODS.get(request.method, "-")]
             prjname = ka.get('prjname')
             lngname = ka.get('lngname')
-            if not rights.may_access(pname, prjname, lngname, user):
+            if not users.may_access(user, pwd, pname, prjname, lngname):
                 abort(401, "Access denied")
             return func(user, *a, **ka)
         return wrapper
