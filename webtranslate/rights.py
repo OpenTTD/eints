@@ -33,44 +33,54 @@ class UserRightRule:
             s = s + " - /"
         return s + "/".join(self.path)
 
-    def match_user(self, user, prjname, lngname):
+    def _update_entries(self, accesses, main_keys, other_keys, value):
         """
-        Does the given user name match with the user name stored in the rule?
+        Update the entry in L{main_keys} and if L{value} holds, also in L{other_keys}.
 
-        @param user: Name of the user, or 'unknown'.
+        @param accesses: Found access due to matched rules until now.
+        @type  accesses: Mapping of user types to C{None} (unknown), C{False} (no), or C{True} (yes)
+
+        @param main_keys: Entries to set unconditionally if not set already.
+        @type  main_keys: C{list} of user types.
+
+        @param other_keys: Entries to set if access is allowed.
+        @param other_keys: C{list} of user types.
+
+        @param value: Access value to set.
+        @type  value: C{bool}
+        """
+        for k in main_keys:
+            if accesses[k] is None:
+                accesses[k] = value
+
+        if value == True:
+            for k in other_keys:
+                if accesses[k] is None:
+                    accesses[k] = value
+
+    def update_matches(self, user, accesses):
+        """
+        Update the match information of the user types by this rule.
+
+        @param user: Name of the user.
         @type  user: C{str}
 
-        @param prjname: Name of the project, if available.
-        @type  prjname: C{str} or C{None}
+        @param accesses: User information of all user types.
+        @type  accesses: Mapping of user types to C{None} (unknown), C{False} (no), or C{True} (yes)
 
-        @param lngname: Name of the language, if available.
-        @type  lngname: C{str} or C{None}
-
-        @return: Whether the user matches.
-        @rtype:  C{bool}
+        @precond: The path of this rule matches.
         """
-        global _projects
-
-        if self.user == '*':
-            return True
+        if self.user == "*":
+            self._update_entries(accesses, [user, "OWNER", "TRANSLATOR", "SOMEONE"], [], self.grant_access)
         elif self.user == 'SOMEONE':
-            return user == 'unknown'
-        elif user == 'unknown': # 'unknown' users will never match below.
-            return False
-        elif self.user == 'OWNER':
-            if prjname is None or prjname not in _projects: return False
-            p = _projects[prjname]
-            if 'owner' not in p or user not in p['owner']: return False
-            return True
+            self._update_entries(accesses, ['SOMEONE'], [user, "OWNER", "TRANSLATOR"], self.grant_access)
         elif self.user == 'TRANSLATOR':
-            if prjname is None or lngname is None or prjname not in _projects: return False
-            p = _projects[prjname]
-            # Owners are also allowed access
-            if 'owner' not in p or user not in p['owner']: return False
-            if lngname not in p or user not in p[lngname]: return False
-            return True
-        else:
-            return user == self.user
+            self._update_entries(accesses, ['TRANSLATOR'], ["OWNER"], self.grant_access)
+        elif self.user == 'OWNER':
+            self._update_entries(accesses, ["OWNER"], [], self.grant_access)
+        elif user == self.user and user != "unknown":
+            self._update_entries(accesses, [user], [], self.grant_access)
+
 
     def match_path(self, path):
         """
@@ -147,6 +157,76 @@ def init_projects():
             values[k] = names
         _projects[pn] = values
 
+def get_accesses(page, user):
+    """
+    Get access rights for all user types.
+
+    @param page: Page name being accessed.
+    @type  page: C{list} of C{str}
+
+    @param user: User name (login name or 'unknown').
+    @type  user: C{str}
+
+    @return: User information of all user types.
+    @rtype:  Mapping of user types to C{None} or C{False} (no), or C{True} (yes)
+    """
+    global _table
+
+    # Mapping of all user types to status.
+    # Value 'None' means unknown, 'False' means no, 'True' means yes.
+    if user != "unknown":
+        user_access = None
+    else:
+        user_access = False
+    accesses = {user : user_access, "SOMEONE" : None, "OWNER" : None, "TRANSLATOR" : None}
+    for urr in _table:
+        if not urr.match_path(page): continue
+        urr.update_matches(user, accesses)
+    return accesses
+
+def reduce_roles(accesses, prjname, lngname, user):
+    """
+    Verify roles of the user in the project, and adapt roles in L{accesses}.
+
+    @param accesses: User information of all user types.
+    @type  accesses: Mapping of user types to C{None} (unknown), C{False} (no), or C{True} (yes)
+
+    @param prjname: Name of the project, if available.
+    @type  prjname: C{str} or C{None}
+
+    @param lngname: Name of the language, if available.
+    @type  lngname: C{str} or C{None}
+
+    @param user: User name (login name or 'unknown').
+    @type  user: C{str}
+    """
+    global _projects
+
+    if user == "unknown" or prjname is None or prjname not in _projects:
+        accesses["OWNER"] = False
+        accesses["TRANSLATOR"] = False
+        return
+
+    p = _projects[prjname]
+    if 'owner' not in p or user not in p['owner']:
+        accesses["OWNER"] = False
+    if lngname not in p or user not in p[lngname]:
+        accesses["TRANSLATOR"] = False
+
+def has_access(accesses):
+    """
+    Is access allowed based on the previous computations?
+
+    @param accesses: User information of all user types.
+    @type  accesses: Mapping of user types to C{None} (unknown), C{False} (no), or C{True} (yes)
+
+    @return: Whether access is allowed (C{True} means access is allowed).
+    @rtype:  C{bool}
+    """
+    for v in accesses.values():
+        if v == True: return True
+    return False
+
 def may_access(page, prjname, lngname, user):
     """
     May the given user be given access?
@@ -162,10 +242,10 @@ def may_access(page, prjname, lngname, user):
 
     @param user: User name (login name or 'unknown').
     @type  user: C{str}
-    """
-    global _table
-    for urr in _table:
-        if not urr.match_path(page) or not urr.match_user(user, prjname, lngname): continue
-        return urr.grant_access
 
-    return False
+    @return: Whether access is allowed (C{True} means access is allowed).
+    @rtype:  C{bool}
+    """
+    accesses = get_accesses(page, user)
+    reduce_roles(accesses, prjname, lngname, user)
+    return has_access(accesses)
