@@ -2,6 +2,7 @@ syntax: glob
 
 *.swp
 .hgignore
+config.xml
 
 # Ignore generated documentation
 docs/html
