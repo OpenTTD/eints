@@ -8,7 +8,7 @@ from webtranslate import config, utils
 
 @route('/projsettings/<proj_name>', method = 'GET')
 @protected(['projsettings', 'proj_name', '-'])
-def project(user, proj_name):
+def project_get(user, proj_name):
     pmd = config.cache.get_pmd(proj_name)
     if pmd is None:
         abort(404, "Page not found")
@@ -20,7 +20,7 @@ def project(user, proj_name):
 
 @route('/projsettings/<proj_name>', method = 'POST')
 @protected(['projsettings', 'proj_name', '-'])
-def project(user, proj_name):
+def project_post(user, proj_name):
     pmd = config.cache.get_pmd(proj_name)
     if pmd is None:
         abort(404, "Page not found")
