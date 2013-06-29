@@ -3,6 +3,7 @@ Configuration and global routines of the translator service.
 """
 import os, sys, glob
 from webtranslate import data, loader
+from webtranslate.newgrf import language_info
 
 def get_subnode_text(node, tag):
     """
@@ -20,7 +21,7 @@ def get_subnode_text(node, tag):
     child = loader.get_single_child_node(node, tag)
     if child is None:
         return ""
-    return loader.collect_text_DOM(child)
+    return loader.collect_text_DOM(child).strip()
 
 class Config:
     """
@@ -77,6 +78,59 @@ class Config:
 
         cache_size = data.convert_num(get_subnode_text(cfg, 'project-cache'), 10)
         cache.init(self.project_root, cache_size)
+
+        # Redmine configuration.
+        rm_node = loader.get_single_child_node(cfg, 'redmine', True)
+        if rm_node is not None:
+            from webtranslate.users import redmine
+            # Initialize the redmine fields.
+            redmine.db_type = None
+            redmine.db_schema = None
+            redmine.db_name = None
+            redmine.db_user = None
+            redmine.db_password = None
+            redmine.db_host = None
+            redmine.db_port = None
+            redmine.owner_role = None
+            redmine.translator_roles = {}
+
+            redmine.db_type = get_subnode_text(rm_node, 'db-type')
+            if redmine.db_type not in ('postgress', 'mysql', 'sqlite3'):
+                print("Unknown db type in config, aborting!")
+                sys.exit(1)
+            redmine.db_schema = get_subnode_text(rm_node, 'db-schema')
+            redmine.db_name = get_subnode_text(rm_node, 'db-name')
+            redmine.db_user = get_subnode_text(rm_node, 'db-user')
+            redmine.db_password = get_subnode_text(rm_node, 'db-password')
+            redmine.db_host = get_subnode_text(rm_node, 'db-host')
+            redmine.db_port = data.convert_num(get_subnode_text(rm_node, 'db-port'), None)
+            redmine.owner_role = get_subnode_text(rm_node, 'owner-role')
+
+            iso_codes = set(li.isocode for li in language_info.all_languages)
+            for node in loader.get_child_nodes(rm_node, 'translator-role'):
+                iso_code = node.getAttribute('language')
+                if iso_code not in iso_codes:
+                    print("Language \"" + iso_code + "\" in translator roles is not known, ignored the entry.")
+                    continue
+                if iso_code in redmine.translator_roles:
+                    print("Language \"" + iso_code + "\" in translator roles is already defined, ignoring the other entry.")
+                    continue
+                redmine.translator_roles[iso_code] = loader.collect_text_DOM(node).strip()
+
+            # Do some sanity checking.
+            if redmine.db_schema == "": redmine.db_schema = None
+            if redmine.db_name == "" or redmine.db_user == "" or redmine.db_host == "" or redmine.db_port == None or redmine.db_port == 0:
+                redmine.db_name = None
+                redmine.db_user = None
+                redmine.db_password = None
+                redmine.db_host = None
+                redmine.db_port = None
+
+            if redmine.owner_role == "": redmine.owner_role = None
+            for iso_code, role_name in list(redmine.translator_roles.items()):
+                if role_name == "": del redmine.translator_roles[iso_code]
+
+
 
 
 class ProjectCache:

@@ -18,4 +18,25 @@
 	<min-num-changes>1</min-num-changes>
 	<!-- Minimal age of changes (in seconds) before they can be thrown away if above 'min-num-changes'. -->
 	<change-stable-age>600</change-stable-age> <!-- 10 minutes -->
+
+	<redmine>
+		<db-type>postgress</db-type> <!-- Type of data base. Tested 'postgress', but 'mysql' and 'sqlite3' probably work too. -->
+		<db-schema></db-schema> <!-- Postgress may need a schema search path. -->
+
+		<db-name>redmine_default</db-name> <!-- Name of the data base. -->
+		<db-user>db-user</db-user> <!-- DB user to authenticate and query roles of users -->
+		<db-password> <!-- SET A PASSWORD HERE. --> </db-password> <!-- DB password to authenticate and query roles of users -->
+		<db-host>localhost</db-host> <!-- Hostname of the machine running the data base. -->
+		<db-port> <!-- SET A PORT NUMBER HERE. --> </db-port> <!-- Port number to access the data base at the host. -->
+
+		<!-- Redmine role name for owner of the project. -->
+		<owner-role>manager</owner-role>
+
+		<!-- Redmine role name for translator of the 'en_GB' language. -->
+		<translator-role language="en_GB">translator_en_GB</translator-role>
+
+		<!-- Roles not mentioned here are assumed not to exist.
+		  -  What that means for page access depends on the Eints page access configuration.
+		  -->
+	</redmine>
 </config>
