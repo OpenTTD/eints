@@ -32,6 +32,8 @@ def init():
     """
     global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
 
+    rights.init_page_access()
+
     db_connection = None
 
     if db_name is None or db_name == "": return
