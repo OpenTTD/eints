@@ -2,10 +2,10 @@ syntax: glob
 
 *.swp
 .hgignore
-config.xml
 
 # Ignore generated documentation
 docs/html
+docs/*.html
 
 # Ignore frequent development left-overs like
 # editor backups, patches, rejects etc. pp
@@ -19,6 +19,13 @@ docs/html
 __pycache__
 *.pyc
 *.pyo
+
+# Ignore deployment files and directories
+root_dir
+config.xml
+users.dat
+projects.dat
+rights.dat
 
 # Files created by Mac image preview and file browser:
 .DS_Store
