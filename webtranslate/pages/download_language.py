@@ -69,4 +69,4 @@ def download(user, prjname, lngname):
                 lines.append('##gender ' + ' '.join(lng.gender))
             continue
 
-    return '\n'.join(lines)
+    return '\n'.join(lines) + '\n'

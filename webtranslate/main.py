@@ -9,6 +9,7 @@ from webtranslate.pages import newproject
 from webtranslate.pages import language
 from webtranslate.pages import upload_language
 from webtranslate.pages import download_language
+from webtranslate.pages import download_list
 from webtranslate.pages import string_edit
 from webtranslate.pages import delete
 from webtranslate.pages import newlanguage
