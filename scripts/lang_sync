@@ -1,0 +1,349 @@
+#!/usr/bin/env python3
+"""
+Update language files from eints to the local file system.
+"""
+import http.client
+import urllib.parse
+import re, os, sys, getopt, codecs
+
+def get_url(url):
+    """
+    Get a file from Eints.
+
+    @param url: Url for the file to retrieve.
+    @type  url: C{str}
+
+    @param decode: If set (which is default), decode the read data from utf-8.
+    @type  decode: C{bool}
+
+    @return: Returns the retrieved file, if all went well.
+    @rtype:  C{str} or C{None}
+    """
+    presult = urllib.parse.urlsplit(url)
+    if presult.scheme != 'http' or presult.netloc == '' or presult.query != '' or presult.fragment != '':
+        return None
+
+    return get_file(presult.netloc, presult.path)
+
+
+def get_file(host, path):
+    """
+    Get a file from Eints.
+
+    @param host: Host part of the url to retrieve.
+    @type  host: C{str}
+
+    @param path: Path part of the url to retrieve.
+    @type  path: C{str}
+
+    @param decode: If set (which is default), decode the read data from utf-8.
+    @type  decode: C{bool}
+
+    @return: Returns the retrieved file, if all went well.
+    @rtype:  C{str} or C{None}
+    """
+    conn = http.client.HTTPConnection(host)
+    conn.request('GET', path)
+    resp = conn.getresponse()
+    if resp.status != 200:
+        conn.close()
+        return None
+
+    ctype = resp.getheader('Content-Type')
+    if ctype is None or ctype != 'text/plain; charset=UTF-8':
+        conn.close()
+        return None
+
+    data = resp.read().decode('utf-8')
+    conn.close()
+
+    return data
+
+
+class EintsLanguageInfo:
+    """
+    Language information received from Eints.
+
+    @ivar lang_name: Eints name of the of the language.
+    @type lang_name: C{str}
+
+    @ivar last_change: Last change of the language, if it exists.
+    @type last_change: C{None} or C{str}
+
+    @ivar grf_langid: Id of the language according to the NewGRF specification.
+    @type grf_langid: C{int}
+
+    @ivar download: Url to download the language file.
+    @type download: C{str}
+    """
+    def __init__(self, lang_name, last_change, grf_langid, download):
+        self.lang_name = lang_name
+        self.last_change = last_change
+        self.grf_langid = grf_langid
+        self.download = download
+
+
+def get_eints_languages(host, project, verbose):
+    """
+    Get the list of languages available in Eints.
+
+    @param host: Host specification running Eints.
+    @type  host: C{str}
+
+    @param project: Name of the project in Eints.
+    @type  project: C{str}
+
+    @param verbose: Output more information about the operation of the program.
+    @type  verbose: C{bool}
+
+    @return: Available language information for the project as returned by Eints.
+    @rtype:  C{list} of L{EintsLanguageInfo}
+    """
+    if verbose:
+        print("Verbose: Getting available language files from Eints.")
+    result = []
+    hex_pat = re.compile('0x[0-9A-Fa-f][0-9A-Fa-f]?$')
+    data = get_file(host, '/download-list/' + project)
+    for line in data.split('\n'):
+        parts = line.split(',')
+        if len(parts) != 4:
+            continue
+        m = hex_pat.match(parts[2])
+        if not m:
+            continue
+        # XXX Parse the last change data of parts[1]
+        el = EintsLanguageInfo(parts[0], None, int(parts[2], 16), parts[3])
+        if verbose:
+            msg = "    Verbose: Found Eints language \"{}\" with grf language id 0x{:02x} at \"{}\""
+            msg = msg.format(el.lang_name, el.grf_langid, el.download)
+            print(msg)
+        result.append(el)
+    if verbose and len(result) == 0:
+        print("    Verbose: No languages found in Eints.")
+    return result
+
+class LocalLanguageInfo:
+    """
+    Information about a local language file.
+
+    @ivar path_name: The path to the file.
+    @type path_name: C{str}
+
+    @ivar grf_langid: Id of the language according to the NewGRF specification.
+    @type grf_langid: C{int}
+    """
+    def __init__(self, path_name, grf_langid):
+        self.path_name = path_name
+        self.grf_langid = grf_langid
+
+utf8_bom = codecs.BOM_UTF8.decode('utf-8')
+
+def get_local_languages(root_dir, extension, verbose):
+    """
+    Get the list of available languages at the local file system.
+
+    @param root_dir: Directory to scan.
+    @type  root_dir: C{str}
+
+    @param extension: File extension used for language files.
+    @type  extension: C{str}
+
+    @return: Found language files.
+    @rtype:  C{list} of L{LocalLanguageInfo}
+    """
+    if verbose:
+        print("Verbose:")
+        print("Verbose: Getting available language files from the local file system.")
+    result = []
+    grflangid_pattern = re.compile('##grflangid\\s+0[xX]([0-9A-Fa-f][0-9A-Fa-f]?)\\s*$')
+    for fname in os.listdir(root_dir):
+        if not fname.endswith(extension):
+            continue
+        path = os.path.join(root_dir, fname)
+        verbose_msg = "    Verbose: File \"{}\" matches extension".format(path)
+        handle = open(path, 'r', encoding = 'utf-8')
+        for line in handle:
+            if line.startswith(utf8_bom):
+                line = line[len(utf8_bom):]
+            m = grflangid_pattern.match(line)
+            if m:
+                grfid = int(m.group(1), 16)
+                if verbose:
+                    msg = "    Verbose: Found local language file \"{}\" with grf language id 0x{:02x}"
+                    msg = msg.format(path, grfid)
+                    print(msg)
+                result.append(LocalLanguageInfo(path, grfid))
+                verbose_msg = None
+                break
+
+        handle.close()
+        if verbose and verbose_msg is not None:
+            verbose_msg = verbose_msg + ", but no ##grflangid 0x.. found."
+            print(verbose_msg)
+
+    if verbose and len(result) == 0:
+        print("    Verbose: No languages found locally.")
+    return result
+
+
+def update_files(eints_langs, local_langs, verbose, no_write):
+    """
+    Update the local languages with languages from Eints.
+
+    @param eints_langs: Languages available from Eints.
+    @ype   eints_langs: C{list} of L{EintsLanguageInfo}
+
+    @param local_langs: Languages available locally.
+    @type  local_langs: C{list} of L{LocalLanguageInfo}
+
+    @param verbose: Output more information about the operation of the program.
+    @type  verbose: C{bool}
+
+    @param no_write: Do not change any data at the file system.
+    @param no_write: C{bool}
+    """
+    if verbose:
+        print("Verbose:")
+        print("Verbose: Copying Eints language files to the local file system.")
+    eints_langs = [(el.grf_langid, el) for el in eints_langs]
+    eints_langs.sort()
+    local_langs = [(ll.grf_langid, ll) for ll in local_langs]
+    local_langs.sort()
+
+    last_grf = -1 # Last processed grf-id
+    eints_index = 0
+    local_index = 0
+    while True:
+        # Get next elements from both lists if available.
+        if eints_index < len(eints_langs):
+            el = eints_langs[eints_index][1]
+            egrfid = el.grf_langid
+        else:
+            el = None
+            egrfid = 0x10000
+
+        if local_index < len(local_langs):
+            ll = local_langs[local_index][1]
+            lgrfid = ll.grf_langid
+        else:
+            ll = None
+            lgrfid = 0x10000
+
+        if el is None and ll is None:
+            break # Both done, finished.
+
+        # Decide the smallest grf lang id, and remove elements that are different.
+        grfid = min(egrfid, lgrfid)
+        if grfid == egrfid:
+            eints_index = eints_index + 1
+        else:
+            el = None
+
+        if grfid == lgrfid:
+            local_index = local_index + 1
+        else:
+            ll = None
+
+        # Detect several language files with the same grf lang id.
+        if grfid == last_grf:
+            print("Error: Duplicate grfid 0x{:02x} found, aborting.".format(grfid))
+            sys.exit(1)
+        last_grf = grfid
+
+        # Process el and/or ll.
+        if el is None:
+            # Local language but not in eints.
+            msg = "Warning: File \"{}\" with grf language id 0x{:02x} is not available in Eints."
+            msg = msg.format(ll.path_name, ll.grf_langid)
+            print(msg)
+            continue
+
+        if ll is None:
+            # Eints has a language but not at the local file system.
+            msg = "Warning: Eints language \"{}\" with grf language id 0x{:02x} is not available locally."
+            msg = msg.format(el.lang_name, el.grf_langid)
+            print(msg)
+            continue
+
+        # Both el and ll.
+        if verbose:
+            print("    Verbose: Copy \"{}\" from Eints to \"{}\"".format(el.lang_name, ll.path_name))
+        data = get_url(el.download)
+        if no_write:
+            print("No write: Skipping writing of \"{}\"".format(ll.path_name))
+        else:
+            handle = open(ll.path_name, 'w', encoding = 'utf-8')
+            handle.write(data)
+            handle.close()
+        continue
+
+def usage():
+    """
+    Dump usage information to stdout.
+    """
+    print("lang_sync -- Synchronize Eints language changes back to the project.")
+    print("Usage:")
+    print()
+    print("  lang_sync --help|-h")
+    print("    Get this online help.")
+    print()
+    print("  lang_sync --host=<eints_hostname:opt_port> --project=<project_name> \\")
+    print("            --lang-dir=<language-files-directory> --extension=<language-file-extension> \\")
+    print("            [--verbose] [--no-write]")
+    print("    Synchronize Eints language files back to the project.")
+    print()
+
+
+def run():
+    """
+    Run the program (it was started from the command line).
+    """
+    try:
+        long_opts = ["help", "host=", "project=", "lang-dir=", "extension=", "verbose", "no-write"]
+        opts, args = getopt.getopt(sys.argv[1:], "h", long_opts)
+    except getopt.GetoptError as err:
+        print("lang_sync: " + str(err) + " (try \"lang_sync --help\")")
+        sys.exit(2)
+
+    verbose = False
+    no_write = False
+    host = 'localhost'
+    project = None
+    lang_dir = 'lang'
+    extension = '.lng'
+    for opt, val in opts:
+        if opt == '--help' or opt == '-h':
+            usage()
+            sys.exit(0)
+        elif opt == '--host':
+            host = val
+        elif opt == '--project':
+            project = val
+        elif opt == '--lang-dir':
+            lang_dir = val
+        elif opt == '--extension':
+            extension = val
+        elif opt == '--verbose':
+            verbose = True
+        elif opt == '--no-write':
+            no_write = True
+        else:
+            assert False # Should never happen.
+
+    if project is None:
+        print("Error: Missing the Eints project name.")
+        print("    add a \"--project=<myproject> option, or")
+        print("    try \"lang_sync --help\" for more help.")
+        sys.exit(1)
+    if len(args) > 0:
+        print("Error: Unexpected arguments, try \"lang_sync --help\" for more information.")
+        sys.exit(1)
+
+    eints_langs = get_eints_languages(host, project, verbose)
+    local_langs = get_local_languages(lang_dir, extension, verbose)
+    update_files(eints_langs, local_langs, verbose, no_write)
+
+
+if __name__ == '__main__':
+    run()
+
