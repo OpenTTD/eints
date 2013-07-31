@@ -15,6 +15,9 @@ from webtranslate.pages import delete
 from webtranslate.pages import newlanguage
 from webtranslate.pages import project_settings
 
+# Get template files from 'views' only.
+bottle.TEMPLATE_PATH = ['./views/']
+
 def run():
     config.cfg = config.Config('config.xml')
     config.cfg.load_fromxml()
