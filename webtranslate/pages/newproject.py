@@ -15,7 +15,7 @@ def page_get(user):
 @protected(['newproject', '-', '-'])
 def page_post(user):
     human_name = request.forms.name
-    acceptance = utils.verify_name(human_name)
+    acceptance = utils.verify_name(human_name, "Full project name")
     if acceptance is not None:
         abort(404, acceptance)
         return

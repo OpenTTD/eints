@@ -30,7 +30,7 @@ def project_post(user, proj_name):
 
     # Get and check the new project name.
     human_name = request.forms.name
-    acceptance = utils.verify_name(human_name)
+    acceptance = utils.verify_name(human_name, "Full project name")
     if acceptance is not None:
         abort(404, acceptance)
         return
