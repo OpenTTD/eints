@@ -156,7 +156,7 @@ class ProjectCache:
         self.lru = []
 
     def init(self, project_root, cache_size):
-        self.project_root = os.path.join(project_root, 'projects')
+        self.project_root = project_root
         self.cache_size = cache_size
         self.projects = {}
         self.lru = []
@@ -168,10 +168,30 @@ class ProjectCache:
             pmd = ProjectMetaData(path, name)
             assert name not in self.projects
             self.projects[name] = pmd
+            self.get_pmd(name)
 
-            pd = self.get_pmd(name)
-            assert pd is pmd
-            pd = pd.pdata
+        # Compatibility: Also, load from the 'projects' sub directory.
+        # XXX Delete this at some point.
+        old_root = os.path.join(self.project_root, 'projects')
+        if os.path.isdir(old_root):
+            msg = "Warning: Projects in \"{}\" should be moved to \"{}\" and the former directory should be deleted (but loading them now)"
+            msg = msg.format(old_root, self.project_root)
+            print(msg)
+
+            for name in os.listdir(old_root):
+                if not name.endswith('.xml'): continue
+                name = name[:-4]
+                path = os.path.join(old_root, name)
+                pmd = ProjectMetaData(path, name)
+                if name in self.projects:
+                    msg = "Warning: Skipping project file \"{}\" (is already loaded, perhaps you did not remove the 'projects' directory?)"
+                    msg = msg.format(path)
+                    print(msg)
+                    continue
+                self.projects[name] = pmd
+                self.get_pmd(name)
+
+
 
     def create_project(self, disk_name, human_name, url):
         """
