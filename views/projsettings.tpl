@@ -6,9 +6,9 @@
 <h2 class="eint-heading-icon eint-icon-settings">Project Settings</h2>
 <form class="form-horizontal well well-large" action="/projsettings/{{proj_name}}" method="post" enctype="multipart/form-data">
     <fieldset style="padding-left:160px;">
-        <label for="name">Project name</label>
+        <label for="name">Full project name (required)</label>
         <input class="input-xxlarge" type="text" id="name" name="name" value="{{human_name}}"/>
-        <span class="help-block">Only characters A-Z, a-z, 0-9 and spaces allowed</span>
+        <span class="help-block">Only characters A-Z, a-z, 0-9, dashes, and spaces allowed</span>
         <br />
         <br />
         <label for="url">Project website (optional)</label>

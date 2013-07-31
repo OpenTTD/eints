@@ -4,9 +4,9 @@
 <form class="form well" action="/newproject" method="post" enctype="multipart/form-data">
     <br />
     <fieldset style="padding-left:160px;">
-        <label for="name">Project name</label>
+        <label for="name">Project name (required)</label>
         <input class="input-xxlarge" type="text" id="name" name="name"/>
-        <span class="help-block">Only characters A-Z, a-z, 0-9 and spaces allowed</span>
+        <span class="help-block">Only characters A-Z, a-z, 0-9, dashes, and spaces allowed</span>
         <br />
         <br />
         <label for="url">Project website (optional)</label>

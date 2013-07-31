@@ -136,7 +136,7 @@ def verify_name(name, name_type):
     name = ''.join(name.lower().split())
     if not name:
         return "{} missing".format(name_type)
-    if not re.match('[A-Za-z][A-Za-z0-9]*$', name):
+    if not re.match('[A-Za-z][-A-Za-z0-9]*$', name):
         return "{} can only contain characters A-Z, a-z, 0-9, and dash (-)".format(name_type)
     return None
 
