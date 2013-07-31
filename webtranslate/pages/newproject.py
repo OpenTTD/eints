@@ -11,10 +11,33 @@ from webtranslate import config, data, utils
 def page_get(user):
     return template('newproject_form')
 
-@route('/newproject', method = 'POST')
-@protected(['newproject', '-', '-'])
+@route('/createproject', method = 'POST')
+@protected(['createproject', '-', '-'])
 def page_post(user):
-    human_name = request.forms.name
+    prjname = request.forms.name
+    prjname = ''.join(prjname.lower().split())
+    acceptance = utils.verify_name(prjname, "Project identifier")
+    if acceptance is not None:
+        abort(404, acceptance)
+        return
+
+    if prjname in config.cache.projects:
+        abort(404, "Project \"{}\" already exists".format(prjname))
+
+    return template('createproject_form', prjname = prjname)
+
+@route('/makeproject/<prjname>', method = 'POST')
+@protected(['makeproject', 'prjname', '-'])
+def create_project(user, prjname):
+    acceptance = utils.verify_name(prjname, "Project identifier")
+    if acceptance is not None:
+        abort(404, acceptance)
+        return
+
+    if prjname in config.cache.projects:
+        abort(404, "Project \"{}\" already exists".format(prjname))
+
+    human_name = request.forms.humanname
     acceptance = utils.verify_name(human_name, "Full project name")
     if acceptance is not None:
         abort(404, acceptance)
@@ -26,12 +49,10 @@ def page_post(user):
         abort(404, acceptance)
         return
 
-
-    name = ''.join(human_name.lower().split())
-    error = config.cache.create_project(name, human_name, url)
+    error = config.cache.create_project(prjname, human_name, url)
     if error is not None:
         abort(404, error)
         return
 
-    message = "Successfully created project '" + name +"' " + utils.get_datetime_now_formatted()
-    redirect("/project/" + name.lower() + '?message=' + message)
+    message = "Successfully created project '" + prjname +"' " + utils.get_datetime_now_formatted()
+    redirect("/project/" + prjname.lower() + '?message=' + message)
