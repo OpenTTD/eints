@@ -67,6 +67,17 @@
                 % end
             </table>
         % end
+        % if len(tc.related) > 0:
+            <p><strong>Related strings:</strong></p>
+            <table border="1">
+                % for rel in tc.related:
+                    <tr>
+                        <td><a href="/string/{{proj_name}}/{{lname}}/{{rel.sname}}">{{rel.sname}}</a></td>
+                        <td>{{rel.text.text}}</td>
+                    </tr>
+                % end
+            </table>
+        % end
         <br />
         <div>
             <input class="btn btn-danger" type="reset" value="Reset All Strings"/>

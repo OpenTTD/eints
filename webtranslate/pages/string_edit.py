@@ -76,6 +76,20 @@ class Translation:
             self.stamp_desc = None
             self.stamp = None
 
+class RelatedString:
+    """
+    Related string of a translation. Case of the string is implicit, it is the same as the
+    L{TransLationCase.case} field in the containing object.
+
+    @ivar sname: Name of the string.
+    @type sname: C{str}
+
+    @ivar text: Current text of the related string.
+    @type text: C{Text}
+    """
+    def __init__(self, sname, text):
+        self.sname = sname
+        self.text = text
 
 class TransLationCase:
     """
@@ -86,17 +100,21 @@ class TransLationCase:
 
     @ivar transl: Previous translations, sorted from new to old.
     @type transl: C{list} of L{Translation}
+
+    @ivar related: Related strings.
+    @type related: C{list} of L{RelatedString}
     """
-    def __init__(self, case, transl):
+    def __init__(self, case, transl, related):
         self.case = case
         self.transl = transl
+        self.related = related
 
     def get_stringname(self, sname):
         if self.case == '': return sname
         return sname + '.' + self.case
 
     def __repr__(self):
-        return "TransLationCase({}, {})".format(repr(self.case), repr(self.transl))
+        return "TransLationCase({}, {}, {})".format(repr(self.case), repr(self.transl), repr(self.related))
 
 def find_string(pmd, lngname, missing_prio, invalid_prio, outdated_prio):
     """
@@ -252,7 +270,6 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     @param lng: Language being translated.
     @type  lng: L{Language}
 
-
     @param prjname: System project name
     @type  prjname: C{str}
 
@@ -275,6 +292,15 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     @rtype:  C{None} or C{str}
     """
     if states is None: states = {}
+
+    # Mapping of case to list of related strings.
+    related_cases = dict((case, []) for case in lng.case)
+    for rel_sname in pdata.get_related_strings(sname):
+        rel_chgs = data.get_all_newest_changes(lng.changes.get(rel_sname), lng.case)
+        for case, chg in rel_chgs.items():
+            if chg is not None and chg.new_text is not None:
+                related_cases[case].append(RelatedString(rel_sname, chg.new_text))
+
 
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
     now = data.make_stamp()
@@ -319,7 +345,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
 
                 tranls.append(tra)
 
-        transl_cases.append(TransLationCase(case, tranls))
+        transl_cases.append(TransLationCase(case, tranls, related_cases[case]))
 
     transl_cases.sort(key=lambda tc: tc.case)
     return template('string_form', proj_name = prjname, pdata = pdata,

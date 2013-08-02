@@ -431,10 +431,19 @@ class Project:
     @ivar base_language: Base language of the project.
     @type base_language: C{str} or C{None}
 
+    @ivar normalized: Computed current base language words ordered by string name. Used to get
+                      related strings. (Created as a side-effect of setting up L{word_scores}.)
+    @type normalized: C{dict} of C{str} to C{list} of C{str}
+
+    @ivar word_scores: Computed mapping of string scores ordered by word. Built on demand by
+                       L{build_related_string_map}.
+    @type word_scores: C{dict} of C{str} to a C{dict} of C{str} to C{float}, or C{None}
+
     @ivar skeleton: Skeleton of a language file, one tuple for each line.
     @type skeleton: C{list} of (C{str}, C{str}), where the first string is a type:
                     - 'literal'   Line literally copied
-                    - 'string'    Column with ':', and line with a text string (possibly many when there are cases)
+                    - 'string'    Column with ':', and line with a text string
+                                  (possibly many when there are cases)
                     - 'grflangid' Line with the language id
                     - 'plural'    Plural number
                     - 'case'      Cases line
@@ -446,6 +455,8 @@ class Project:
         self.statistics = {}
         self.languages = {}
         self.base_language = None
+        self.normalized = None # Created while creating 'word_scores'
+        self.word_scores = None
 
         self.skeleton = []
 
@@ -459,6 +470,86 @@ class Project:
         if self.base_language is None: return None
         return self.languages.get(self.base_language)
 
+    def flush_related_cache(self):
+        """
+        Delete the cache of related strings. Will be rebuild when needed.
+        """
+        self.normalized = None
+        self.word_scores = None
+
+    def build_related_string_map(self):
+        """
+        Build the L{word_scores} variable.
+        """
+        if self.word_scores is not None: return
+        blng = self.get_base_language()
+        if blng is None: return
+
+        self.normalized = {} # Mapping of string name to its words.
+        for sname, chgs in blng.changes.items():
+            chg = get_newest_change(chgs, '')
+            assert chg is not None
+            line = re.sub('{([^}]*)}', " ", chg.base_text.text)
+            words = [word.lower() for word in re.split('\\W+', line) if len(word) > 3]
+            if len(words) > 0:
+                self.normalized[sname] = words
+
+        self.word_scores = {}
+        # For all words in each string, add the string to the word scores.
+        for sname, words in self.normalized.items():
+            for w in words:
+                scores = self.word_scores.get(w)
+                if scores is None:
+                    scores = {}
+                    self.word_scores[w] = scores
+                scores[sname] = 1.0 # The string has this word.
+
+        # To get rid of differences for singular vs plural forms, we also accept
+        # substrings of a word too, but at a lower score (namely the fraction of matching).
+        for w, scores in self.word_scores.items():
+            for w2, scores2 in self.word_scores.items():
+                if w != w2 and w in w2:
+                    # Add the longer words to the short word with a fractional score.
+                    for sname2 in scores2:
+                        if sname2 not in scores:
+                            scores[sname2] = len(w) / len(w2)
+
+    def get_related_strings(self, sname):
+        """
+        Get the names of the related strings for string L{sname}.
+
+        @param sname: Name of the string that needs related strings.
+        @type  sname: C{str}
+
+        @return: Related strings.
+        @rtype:  C{list} of C{str}
+        """
+        self.build_related_string_map()
+        if self.word_scores is None: return []
+
+        words = self.normalized.get(sname)
+        if words is None: return []
+
+        strings = {} # Mapping of other strings to cumulative score.
+        for word in words:
+            for sname2, score2 in self.word_scores[word].items():
+                if sname != sname2:
+                    val = strings.get(sname2, 0.0)
+                    strings[sname2] = val + score2
+        best = (None, 0.0)
+        best = [best, best, best, best, best]
+        for sname, score in strings.items():
+            i = 5 # Position of the entry is 'i'
+            while i > 0 and score > best[i - 1][1]:
+                i = i - 1
+            if i > 4:
+                continue
+            elif i == 4:
+                best[4] = (sname, score)
+            else:
+                best = best[:i] + [(sname, score)] + best[i:-1]
+
+        return [b[0] for b in best if b[0] is not None]
 
 def load_project(xloader, node):
     """
@@ -492,6 +583,7 @@ def load_project(xloader, node):
             project.languages = {}
             return project # Also skip loading the skeleton.
     project.base_language = baselang
+    project.flush_related_cache()
 
     skelnode = loader.get_single_child_node(node, 'skeleton')
     if skelnode is None:

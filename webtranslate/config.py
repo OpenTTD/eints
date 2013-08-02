@@ -513,6 +513,7 @@ def process_project_changes(pdata):
         if changed:
             chgs[:] = nchgs
             modified = True
+            pdata.flush_related_cache()
 
     return modified
 
