@@ -67,20 +67,20 @@ class EintsLanguageInfo:
     @ivar lang_name: Eints name of the of the language.
     @type lang_name: C{str}
 
+    @ivar parent_lang: Language followed by this language, if it exists.
+    @type parent_lang: C{str} or C{None} if it is the root language
+
     @ivar last_change: Last change of the language, if it exists.
     @type last_change: C{None} or C{str}
 
     @ivar grf_langid: Id of the language according to the NewGRF specification.
     @type grf_langid: C{int}
-
-    @ivar download: Url to download the language file.
-    @type download: C{str}
     """
-    def __init__(self, lang_name, last_change, grf_langid, download):
+    def __init__(self, lang_name, parent_lang, last_change, grf_langid):
         self.lang_name = lang_name
+        self.parent_lang = parent_lang
         self.last_change = last_change
         self.grf_langid = grf_langid
-        self.download = download
 
 
 def get_eints_languages(host, project, verbose):
@@ -108,11 +108,12 @@ def get_eints_languages(host, project, verbose):
         parts = line.split(',')
         if len(parts) != 4:
             continue
-        m = hex_pat.match(parts[2])
+        lname, plang, lstchg, langid = parts
+        m = hex_pat.match(langid)
         if not m:
             continue
-        # XXX Parse the last change data of parts[1]
-        el = EintsLanguageInfo(parts[0], None, int(parts[2], 16), parts[3])
+        # XXX Parse the last change data (lstchg)
+        el = EintsLanguageInfo(lname, plang, None, int(langid, 16))
         if verbose:
             msg = "    Verbose: Found Eints language \"{}\" with grf language id 0x{:02x} at \"{}\""
             msg = msg.format(el.lang_name, el.grf_langid, el.download)

@@ -34,9 +34,6 @@ def download_list(user, prjname):
         abort(404, "Page not found")
         return
 
-    #print("url=" + repr(request.url))
-    #print("urlparts=" + repr(request.urlparts))
-    #print("request=", request)
     pdata = pmd.pdata
     response.content_type = 'text/plain; charset=UTF-8'
     lines = []
@@ -46,9 +43,13 @@ def download_list(user, prjname):
             text = "--no-time-available--"
         else:
             text = data.encode_stamp(tstamp)
-        urlparts = request.urlparts
-        url = urlparts.scheme + "://" + urlparts.netloc + "/download/" + prjname + "/" + ldata.name
-        line = "{},{},0x{:02x},{}".format(ldata.name, text, ldata.grflangid, url)
+
+        if pdata.base_language == lng:
+            parent_lng = ''
+        else:
+            parent_lng = pdata.base_language
+
+        line = "{},{},{},0x{:02x}".format(ldata.name, parent_lng, text, ldata.grflangid)
         lines.append(line)
 
     return '\n'.join(lines) + '\n'
