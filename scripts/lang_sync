@@ -1,65 +1,258 @@
 #!/usr/bin/env python3
-"""
-Update language files from eints to the local file system.
-"""
-import http.client
-import urllib.parse
-import re, os, sys, getopt, codecs
 
-def get_url(url):
+import getopt, re, sys, getpass, codecs, os
+import urllib.request
+
+hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
+
+# Configuration.
+# {{{ class UserConfig:
+class UserConfig:
     """
-    Get a file from Eints.
+    Configuration and actions to do by the program.
+
+    @ivar filename: Name of the file containing authentication information, if available.
+    @type filename: C{str} or C{None} USED
+
+    @ivar user: User name to use, if available.
+    @type user: C{str} or C{None} USED
+
+    @ivar passwd: Password to use, if available.
+    @type passwd: C{str} or C{None} USED
+
+    @ivar interactive: Can the program ask for the password interactively? (Default: C{True}).
+    @type interactive: C{bool} USED
+
+    @ivar base_url: Base url of the authentication realm (the scheme + host), if available.
+    @type base_url: C{str} or C{None} USED
+
+    @ivar project: Project identifier of Eints, if available.
+    @type project: C{str} or C{None} USED
+
+    @ivar lang_dir: Directory containing the language files relative to the working directory.
+    @type lang_dir: C{str} USED
+
+    @ivar lang_ext: Extension used by language files.
+    @type lang_ext: C{str} USED
+
+    @ivar base_lang: Grf language id of the base language, if available.
+    @type base_lang: C{int} or C{None}
+
+    @ivar langfile_map: Name of the mapping file from language name to language base filename, if available.
+    @type langfile_map: C{str} or C{None}
+
+    @ivar verbose: Whether to be verbose in what actions the program performs.
+    @type verbose: C{bool} USED
+
+    @ivar no_write: Whether to skip writing data onto the disk.
+    @type no_write: C{bool}
+
+    @ivar operations: Upload and download actions to perform.
+    @type operations: C{list} of C{str}
+    """
+    def __init__(self):
+        self.filename = None
+        self.user = None
+        self.passwd = None
+        self.interactive = True
+        self.base_url = None
+        self.base_lang = None
+        self.langfile_map = None
+        self.project = None
+        self.lang_dir = "lang"
+        self.lang_ext = ".lng"
+        self.verbose = False
+        self.no_write = False
+        self.operations = []
+
+    def check(self):
+        """
+        Check whether enough information was provided to the program. If not,
+        fail with an error message.
+        """
+        if self.base_url is None:
+            print("Error: Missing base url to the Eints server (add it with --base-url=URL).")
+            sys.exit(1)
+        if self.project is None:
+            print("Error: Missing Eints project identifier (add it with --project=PROJ_ID).")
+            sys.exit(1)
+        if len(self.operations) == 0:
+            print("Warning: No operations to perform, finishing now.")
+            sys.exit(0)
+
+user_cfg = None #: Global user configuration.
+
+# }}}
+
+# Network access code.
+# {{{ def setup_auth():
+def setup_auth():
+    """
+    Setup the authentication for connecting to Eints.
+    """
+    global user_cfg
+
+    user, passwd = None, None
+
+    #Read the file if provided.
+    if user_cfg.filename is not None:
+        with open(user_cfg.filename, 'r', encoding = 'utf-8') as handle:
+            for line in handle:
+                line = line.strip()
+
+                # Check for a well-known prefix.
+                if line.startswith('username'):
+                    prefix = 'u'
+                    line = line[8:].lstrip()
+                elif line.startswith('user'):
+                    prefix = 'u'
+                    line = line[4:].lstrip()
+                elif line.startswith('password'):
+                    prefix = 'p'
+                    line = line[8:].lstrip()
+                elif line.startswith('pwd'):
+                    prefix = 'p'
+                    line = line[3:].lstrip()
+                else:
+                    continue # No match for user or password
+
+                # Silently drop the : or = delimiter.
+                if line[0] in ":=":
+                    line = line[1:].lstrip()
+
+                if len(line) > 0 and line[0] in ('"', "'") and line[0] == line[-1]:
+                    line = line[1:-1]
+
+                if prefix == 'u':
+                    user = prefix
+                else:
+                    passwd = prefix
+
+        # Close of the file is implicit.
+
+    if user is None:
+        user = user_cfg.user
+        if user is None:
+            user = getpass.getuser()
+
+    if passwd is None:
+        passwd = user_cfg.passwd
+        if passwd is None and user_cfg.interactive:
+            passwd = getpass.getpass()
+
+    if user is not None and passwd is not None:
+        # If both a user and a password, we can usefully setup authentication.
+        pwd_manager = urllib.request.HTTPPasswordMgr()
+        realm = 'Web translator'
+        pwd_manager.add_password(realm, user_cfg.base_url, user, passwd)
+        auth_handler = urllib.request.HTTPBasicAuthHandler(pwd_manager)
+        opener = urllib.request.build_opener(auth_handler)
+        urllib.request.install_opener(opener)
+
+        if user_cfg.verbose:
+            print("Installed authentication.")
+            print()
+        return
+
+    if user_cfg.verbose:
+        text = "Skipped installing authentication"
+        if user is None: text = text + ", user was not set"
+        if passwd is None: text = text + ", password was not set"
+        text = text + "."
+        print(text)
+        print()
+# }}}
+# {{{ def build_url(suffix):
+def build_url(suffix):
+    """
+    Extend the base url with the provided suffix.
+
+    @param suffix: Path to retrieve from, at L{UserConfig.base_url}
+    @type  suffix: C{str}
+    """
+    global user_cfg
+
+    assert suffix[0] == '/'
+    if user_cfg.base_url[-1] == '/':
+        return user_cfg.base_url + suffix[1:]
+    else:
+        return user_cfg.base_url + suffix
+# }}}
+# {{{ def get_data(url):
+def get_data(url):
+    """
+    Read and return the data read from the L{url}.
 
     @param url: Url for the file to retrieve.
     @type  url: C{str}
 
-    @param decode: If set (which is default), decode the read data from utf-8.
-    @type  decode: C{bool}
-
-    @return: Returns the retrieved file, if all went well.
+    @return: Data returned by the L{url} request, if all went well.
     @rtype:  C{str} or C{None}
     """
-    presult = urllib.parse.urlsplit(url)
-    if presult.scheme != 'http' or presult.netloc == '' or presult.query != '' or presult.fragment != '':
-        return None
+    with urllib.request.urlopen(url) as resp:
+        if resp.status != 200: return None
 
-    return get_file(presult.netloc, presult.path)
+        ctype = resp.getheader('Content-Type')
+        if ctype is None or ctype != 'text/plain; charset=UTF-8': return None
 
-
-def get_file(host, path):
+        data = resp.read().decode('utf-8')
+        return data
+# }}}
+# {{{ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
+def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
     """
-    Get a file from Eints.
+    Post the form with the uploaded files.
 
-    @param host: Host part of the url to retrieve.
-    @type  host: C{str}
+    @param form_data: Form data.
+    @type  form_data: C{dict} of C{str} to C{str}
 
-    @param path: Path part of the url to retrieve.
-    @type  path: C{str}
+    @param form_fentry: Form field of the file entry.
+    @type  form_fentry: C{str}
 
-    @param decode: If set (which is default), decode the read data from utf-8.
-    @type  decode: C{bool}
+    @param form_fname: Name of the file (mostly for extension).
+    @type  form_fname: C{str}
 
-    @return: Returns the retrieved file, if all went well.
-    @rtype:  C{str} or C{None}
+    @param fdata: File data.
+    @type  files: C{str}
+
+    @return: Whether posting was successful.
+    @rtype:  C{bool}
     """
-    conn = http.client.HTTPConnection(host)
-    conn.request('GET', path)
-    resp = conn.getresponse()
-    if resp.status != 200:
-        conn.close()
-        return None
+    boundary = "TheBoundaryOfFormDataEntries"
 
-    ctype = resp.getheader('Content-Type')
-    if ctype is None or ctype != 'text/plain; charset=UTF-8':
-        conn.close()
-        return None
+    data = []
+    for field, value in form_data.items():
+        data.append('--' + boundary)
+        data.append('Content-Disposition: form-data; name="{}"'.format(field))
+        data.append('')
+        data.append(value)
 
-    data = resp.read().decode('utf-8')
-    conn.close()
+    data.append('--' + boundary)
+    data.append('Content-Disposition: form-data; name="{}"; filename="{}"'.format(form_fentry, form_fname))
+    data.append('Content-Type: text/plain')
+    data.append('')
+    data.append(fdata)
+    if fdata[-1] != '\n':
+        data.append('') # Add a \n ourselves
 
-    return data
+    data.append('--' + boundary + "--\n")
 
+    # Send the data.
+    headers = {"Content-Type" : " multipart/form-data; charset=utf-8; boundary={}".format(boundary)}
+    data = '\n'.join(data).encode('utf-8')
+    req = urllib.request.Request(url, data, headers)
 
+    # Perform the request, and return the read data.
+    with urllib.request.urlopen(req) as resp:
+        if resp.status != 200:
+            return False
+
+        data = resp.read()
+        return True
+# }}}
+
+# Remote language files.
+# {{{ class EintsLanguageInfo:
 class EintsLanguageInfo:
     """
     Language information received from Eints.
@@ -81,48 +274,45 @@ class EintsLanguageInfo:
         self.parent_lang = parent_lang
         self.last_change = last_change
         self.grf_langid = grf_langid
-
-
-def get_eints_languages(host, project, verbose):
+# }}}
+# {{{ def get_eints_languages():
+def get_eints_languages():
     """
     Get the list of languages available in Eints.
-
-    @param host: Host specification running Eints.
-    @type  host: C{str}
-
-    @param project: Name of the project in Eints.
-    @type  project: C{str}
-
-    @param verbose: Output more information about the operation of the program.
-    @type  verbose: C{bool}
 
     @return: Available language information for the project as returned by Eints.
     @rtype:  C{list} of L{EintsLanguageInfo}
     """
-    if verbose:
-        print("Verbose: Getting available language files from Eints.")
+    global user_cfg
+
+    if user_cfg.verbose:
+        print("Getting available language files from Eints.")
     result = []
-    hex_pat = re.compile('0x[0-9A-Fa-f][0-9A-Fa-f]?$')
-    data = get_file(host, '/download-list/' + project)
+    data = get_data(build_url('/download-list/' + user_cfg.project))
     for line in data.split('\n'):
         parts = line.split(',')
         if len(parts) != 4:
             continue
         lname, plang, lstchg, langid = parts
+
+        plang = plang.strip()
+        if len(plang) == 0: plang = None
+
         m = hex_pat.match(langid)
         if not m:
             continue
+
         # XXX Parse the last change data (lstchg)
         el = EintsLanguageInfo(lname, plang, None, int(langid, 16))
-        if verbose:
-            msg = "    Verbose: Found Eints language \"{}\" with grf language id 0x{:02x} at \"{}\""
-            msg = msg.format(el.lang_name, el.grf_langid, el.download)
-            print(msg)
         result.append(el)
-    if verbose and len(result) == 0:
-        print("    Verbose: No languages found in Eints.")
+    if user_cfg.verbose and len(result) == 0:
+        print("No languages found in Eints.")
     return result
 
+# }}}
+
+# Local language files.
+# {{{ class LocalLanguageInfo:
 class LocalLanguageInfo:
     """
     Information about a local language file.
@@ -136,32 +326,31 @@ class LocalLanguageInfo:
     def __init__(self, path_name, grf_langid):
         self.path_name = path_name
         self.grf_langid = grf_langid
-
+# }}}
+# {{{ def get_local_languages():
 utf8_bom = codecs.BOM_UTF8.decode('utf-8')
 
-def get_local_languages(root_dir, extension, verbose):
+def get_local_languages():
     """
     Get the list of available languages at the local file system.
-
-    @param root_dir: Directory to scan.
-    @type  root_dir: C{str}
-
-    @param extension: File extension used for language files.
-    @type  extension: C{str}
 
     @return: Found language files.
     @rtype:  C{list} of L{LocalLanguageInfo}
     """
-    if verbose:
-        print("Verbose:")
-        print("Verbose: Getting available language files from the local file system.")
+    global user_cfg
+
+    if user_cfg.verbose:
+        print("Getting available language files from the local file system.")
     result = []
     grflangid_pattern = re.compile('##grflangid\\s+0[xX]([0-9A-Fa-f][0-9A-Fa-f]?)\\s*$')
-    for fname in os.listdir(root_dir):
-        if not fname.endswith(extension):
+    if not os.path.isdir(user_cfg.lang_dir):
+        print("Error: \"{}\" is not a directory. (Is the --lang-dir option correct?)".format(user_cfg.lang_dir))
+        sys.exit(1)
+    for fname in os.listdir(user_cfg.lang_dir):
+        if not fname.endswith(user_cfg.lang_ext):
             continue
-        path = os.path.join(root_dir, fname)
-        verbose_msg = "    Verbose: File \"{}\" matches extension".format(path)
+        path = os.path.join(user_cfg.lang_dir, fname)
+        verbose_msg = "File \"{}\" matches extension".format(path)
         handle = open(path, 'r', encoding = 'utf-8')
         for line in handle:
             if line.startswith(utf8_bom):
@@ -169,181 +358,471 @@ def get_local_languages(root_dir, extension, verbose):
             m = grflangid_pattern.match(line)
             if m:
                 grfid = int(m.group(1), 16)
-                if verbose:
-                    msg = "    Verbose: Found local language file \"{}\" with grf language id 0x{:02x}"
-                    msg = msg.format(path, grfid)
-                    print(msg)
                 result.append(LocalLanguageInfo(path, grfid))
                 verbose_msg = None
                 break
 
         handle.close()
-        if verbose and verbose_msg is not None:
+        if user_cfg.verbose and verbose_msg is not None:
             verbose_msg = verbose_msg + ", but no ##grflangid 0x.. found."
             print(verbose_msg)
 
-    if verbose and len(result) == 0:
-        print("    Verbose: No languages found locally.")
+    if user_cfg.verbose and len(result) == 0:
+        print("No languages found locally.")
     return result
+# }}}
 
-
-def update_files(eints_langs, local_langs, verbose, no_write):
+# {{{ def perform_operation(ll_files, el_files, op_type, lang_type):
+def perform_operation(ll_files, el_files, op_type, lang_type):
     """
-    Update the local languages with languages from Eints.
+    Perform a synchronization operation.
 
-    @param eints_langs: Languages available from Eints.
-    @ype   eints_langs: C{list} of L{EintsLanguageInfo}
+    @param ll_files: Locally available language files.
+    @type  ll_files: C{list} of L{LocalLanguageInfo}
 
-    @param local_langs: Languages available locally.
-    @type  local_langs: C{list} of L{LocalLanguageInfo}
+    @param el_files: Remotely available language files.
+    @type  el_files: C{list} of L{EintsLanguageInfo}
 
-    @param verbose: Output more information about the operation of the program.
-    @type  verbose: C{bool}
+    @param op_type: Type of operation, either C{"upload"} or C{"download"}.
+    @type  op_type: C{str}
 
-    @param no_write: Do not change any data at the file system.
-    @param no_write: C{bool}
+    @param lang_type: Type of languages involved, either C{"base"}, or C{"translations"}.
+    @type  lang_type: C{str}
     """
-    if verbose:
-        print("Verbose:")
-        print("Verbose: Copying Eints language files to the local file system.")
-    eints_langs = [(el.grf_langid, el) for el in eints_langs]
-    eints_langs.sort()
-    local_langs = [(ll.grf_langid, ll) for ll in local_langs]
-    local_langs.sort()
+    global user_cfg
 
-    last_grf = -1 # Last processed grf-id
-    eints_index = 0
-    local_index = 0
-    while True:
-        # Get next elements from both lists if available.
-        if eints_index < len(eints_langs):
-            el = eints_langs[eints_index][1]
-            egrfid = el.grf_langid
+    # Find out what the base language id is.
+    blng_grfid = user_cfg.base_lang
+    for el in el_files:
+        if el.parent_lang is None:
+            if blng_grfid is not None and blng_grfid != el.grf_langid:
+                text = "Error: grf language ids of the base language do not match, --base-lang claims {} while remote claims {}"
+                print(text.format(blng_grfid, el.grf_langid))
+                sys.exit(1)
+            blng_grfid = el.grf_langid
+            break
+
+    if blng_grfid is None:
+        print("Error: No grf language id of the base language found (neither from Eints nor given with --base-lang)")
+        sys.exit(1)
+
+    # Filter languages.
+    if lang_type == 'base':
+        ll_files = [ll for ll in ll_files if ll.grf_langid == blng_grfid]
+        el_files = [el for el in el_files if el.grf_langid == blng_grfid]
+    else:
+        ll_files = [ll for ll in ll_files if ll.grf_langid != blng_grfid]
+        el_files = [el for el in el_files if el.grf_langid != blng_grfid]
+
+    if op_type == 'upload':
+        perform_upload(ll_files, lang_type == 'base')
+    else:
+        perform_download(ll_files, el_files)
+# }}}
+# {{{ def perform_upload(ll_files, el_files):
+def perform_upload(ll_files, is_base):
+    """
+    Perform upload of local files to Eints.
+
+    @param ll_files: Local files to upload.
+    @type  ll_files: C{list} of L{LocalLanguageInfo}
+
+    @param is_base: Whether uploading the base language.
+    @type  is_base: C{bool}
+    """
+    if is_base:
+        blng_value = "on"
+    else:
+        blng_value = ""
+
+    url = build_url('/upload/' + user_cfg.project)
+    for ll in ll_files:
+        with open(ll.path_name, 'r', encoding = 'utf-8') as handle:
+            data = handle.read()
+
+        fields = {'override' : '',
+                  'base_language' : blng_value}
+        fname = os.path.basename(ll.path_name)
+        if user_cfg.no_write:
+            if user_cfg.verbose:
+                print("Skipped upload of \"{}\"".format(fname))
+            ok = True
         else:
-            el = None
-            egrfid = 0x10000
+            if user_cfg.verbose:
+                print("Uploaded \"{}\" to Eints".format(fname))
+            ok = post_form_upload(url, fields, 'langfile', fname, data)
 
-        if local_index < len(local_langs):
-            ll = local_langs[local_index][1]
-            lgrfid = ll.grf_langid
-        else:
-            ll = None
-            lgrfid = 0x10000
+        if not ok:
+            print("Error: Failed to upload \"{}\".".format(ll.path_name))
+# }}}
 
-        if el is None and ll is None:
-            break # Both done, finished.
+# {{{ def get_filename(grf_langid):
+langfile_map_cache = None #: Cache of the UserConfig.langfile_map file content.
 
-        # Decide the smallest grf lang id, and remove elements that are different.
-        grfid = min(egrfid, lgrfid)
-        if grfid == egrfid:
-            eints_index = eints_index + 1
-        else:
-            el = None
+# {{{ filename_table = ...
+filename_table = {
+    0x1b: "afrikaans", # Afrikaans
+    0x14: "arabic_egypt", # Arabic (Egypt)
+    0x21: "basque", # Basque
+    0x10: "belarusian", # Belarusian
+    0x37: "brazilian_portuguese", # Portuguese (Brazilian)
+    0x18: "bulgarian", # Bulgarian
+    0x22: "catalan", # Catalan
+    0x0b: "chuvash", # Chuvash
+    0x38: "croatian", # Croatian
+    0x15: "czech", # Czech
+    0x2d: "danish", # Danish
+    0x1f: "dutch", # Dutch
+    0x3d: "english_au", # English (AU)
+    0x01: "english", # English (UK)
+    0x00: "english_us", # English (US)
+    0x05: "esperanto", # Esperanto
+    0x34: "estonian", # Estonian
+    0x12: "faroese", # Faroese
+    0x35: "finnish", # Finnish
+    0x03: "french", # French
+    0x32: "frisian", # Frisian
+    0x31: "galician", # Galician
+    0x02: "german", # German
+    0x1e: "greek", # Greek
+    0x61: "hebrew", # Hebrew
+    0x24: "hungarian", # Hungarian
+    0x29: "icelandic", # Icelandic
+    0x06: "ido", # Ido
+    0x5a: "indonesian", # Indonesian
+    0x08: "irish", # Irish
+    0x27: "italian", # Italian
+    0x39: "japanese", # Japanese
+    0x3a: "korean", # Korean
+    0x2a: "latvian", # Latvian
+    0x2b: "lithuanian", # Lithuanian
+    0x23: "luxembourgish", # Luxembourgish
+    0x26: "macedonian", # Macedonian
+    0x3c: "malay", # Malay
+    0x09: "maltese", # Maltese
+    0x11: "marathi", # Marathi
+    0x2f: "norwegian_bokmal", # Norwegian (Bokmal)
+    0x0e: "norwegian_nynorsk", # Norwegian (Nynorsk)
+    0x62: "persian", # Persian
+    0x30: "polish", # Polish
+    0x36: "portuguese", # Portuguese
+    0x28: "romanian", # Romanian
+    0x07: "russian", # Russian
+    0x0d: "serbian", # Serbian
+    0x56: "simplified_chinese", # Chinese (Simplified)
+    0x16: "slovak", # Slovak
+    0x2c: "slovenian", # Slovenian
+    0x04: "spanish", # Spanish
+    0x2e: "swedish", # Swedish
+    0x0a: "tamil", # Tamil
+    0x42: "thai", # Thai
+    0x0c: "traditional_chinese", # Chinese (Traditional)
+    0x3e: "turkish", # Turkish
+    0x33: "ukrainian", # Ukrainian
+    0x54: "vietnamese", # Vietnamese
+    0x0f: "welsh", # Welsh
+    0x5c: "urdu", # Urdu
+    }
+# }}}
 
-        if grfid == lgrfid:
-            local_index = local_index + 1
-        else:
-            ll = None
+def get_filename(grf_langid):
+    """
+    Get a base filename for the language with the given lang id.
 
-        # Detect several language files with the same grf lang id.
-        if grfid == last_grf:
-            print("Error: Duplicate grfid 0x{:02x} found, aborting.".format(grfid))
+    @param grf_langid: Language id of data to store in the file.
+    @type  grf_langid: C{int}
+
+    @return: Base filename for the language file, if it can be found.
+    @rtype:  C{str} or C{None}
+    """
+    if langfile_map_cache is None:
+        langfile_map_cache = {}
+        if user_cfg.langfile_map is not None:
+            with open(user_cfg.langfile_map, 'r', encoding = 'utf-8') as handle:
+                for idx, line in handle:
+                    i = line.find('#')
+                    if i >= 0: line = line[:i]
+                    line = line.strip()
+                    if line == '': continue
+                    i = line.find(':')
+                    if i < 0:
+                        print("Error: Line {} of \"{}\" has no colon.".format(idx + 1, user_cfg.langfile_map))
+                        sys.exit(1)
+
+                    grfid = line[:i].rstrip()
+                    m = hex_pat.match(grfid)
+                    if not m:
+                        print("Error: Line {} of \"{}\" has no grf language id.".format(idx + 1, user_cfg.langfile_map))
+                        sys.exit(1)
+
+                    line = line[i+1:].lstrip()
+                    if len(line) == 0:
+                        print("Error: Line {} of \"{}\" has no base filename.".format(idx + 1, user_cfg.langfile_map))
+                        sys.exit(1)
+
+                    langfile_map_cache[int(m.group(1), 16)] = line
+
+    name = langfile_map_cache.get(grf_langid)
+    if name is not None: return name + user_cfg.lang_ext
+
+    name = filename_table.get(grf_langid)
+    if name is not None: return name + user_cfg.lang_ext
+
+    return None
+# }}}
+
+# {{{ def perform_download(ll_files, el_files):
+def perform_download(ll_files, el_files):
+    """
+    Download Eints files to local files.
+
+    @param ll_files: Local files to overwrite.
+    @type  ll_files: C{list} of L{LocalLanguageInfo}
+
+    @param el_files: Eints files to download.
+    @type  el_files: C{list} of L{EintsLanguageInfo}
+    """
+    local_files = dict((ll.grf_langid, ll) for ll in ll_files) # Mapping of grf lang id to local info.
+
+    for el in el_files:
+        url = build_url('/download/' + user_cfg.project + '/' + el.lang_name)
+        data = get_data(url)
+        if data is None:
+            print("Error: Could not download the {} language from Eints.".format(el.lang_name))
             sys.exit(1)
-        last_grf = grfid
-
-        # Process el and/or ll.
-        if el is None:
-            # Local language but not in eints.
-            msg = "Warning: File \"{}\" with grf language id 0x{:02x} is not available in Eints."
-            msg = msg.format(ll.path_name, ll.grf_langid)
-            print(msg)
-            continue
-
-        if ll is None:
-            # Eints has a language but not at the local file system.
-            msg = "Warning: Eints language \"{}\" with grf language id 0x{:02x} is not available locally."
-            msg = msg.format(el.lang_name, el.grf_langid)
-            print(msg)
-            continue
-
-        # Both el and ll.
-        if verbose:
-            print("    Verbose: Copy \"{}\" from Eints to \"{}\"".format(el.lang_name, ll.path_name))
-        data = get_url(el.download)
-        if no_write:
-            print("No write: Skipping writing of \"{}\"".format(ll.path_name))
+        ll = local_files.get(el.grf_langid)
+        if ll is not None:
+            path = ll.path_name
+            action = "Wrote"
         else:
-            handle = open(ll.path_name, 'w', encoding = 'utf-8')
-            handle.write(data)
-            handle.close()
-        continue
+            path = get_filename(el.grf_langid)
+            if path is None: path = el.lang_name
+            path = user_cfg.lang_dir + os.sep + path + user_cfg.lang_ext
+            action = "Created"
 
-def usage():
-    """
-    Dump usage information to stdout.
-    """
-    print("lang_sync -- Synchronize Eints language changes back to the project.")
-    print("Usage:")
-    print()
-    print("  lang_sync --help|-h")
-    print("    Get this online help.")
-    print()
-    print("  lang_sync --host=<eints_hostname:opt_port> --project=<project_name> \\")
-    print("            --lang-dir=<language-files-directory> --extension=<language-file-extension> \\")
-    print("            [--verbose] [--no-write]")
-    print("    Synchronize Eints language files back to the project.")
-    print()
+        if user_cfg.no_write:
+            action = "Skipped " + action.lower()
+        else:
+            with open(path, 'w', encoding = 'utf-8') as handle:
+                handle.write(data)
 
+        if user_cfg.verbose:
+            print("{} language file \"{}\"".format(action, path))
+# }}}
+# {{{ def run():
+# {{{ USAGE_TEXT = ...
+USAGE_TEXT = """\
+lang_sync -- Synchronize language files between the project and Eints.
+
+lang_sync <options> <operations>
+
+
+with <options>:
+
+
+General options:
+
+--help
+-h
+    Get this help text.
+
+--verbose
+    Show what the program is doing
+
+--no-write
+    Don't make actual changes to any file
+
+
+
+
+Getting the Eints user name and password information:
+
+--user-password-file=FILE
+    If given, FILE contains lines of the form "username: USERNAME" and/or
+    "password: PASSWORD".
+
+--user=USERNAME
+--password=PASSWORD
+    If no file is given, or it did not contain all information, these options
+    may be used to specify the user name and password at the command line.
+
+    At a multi-user system this is not secure, and should be avoided.
+
+--not-interactive
+    The last option to get the user name and password is using the standard
+    getpass module. This will ask for the password from the command-line.
+    This option prevents use of this fallback method, so lang_sync will not
+    become stuck at waiting for user input.
+
+
+
+
+Getting project information:
+
+--base-url=BASE_URL
+    The scheme and host name part of the Eints server urls. For example,
+    "https://eints.example.com/".
+
+--project=PROJECT_NAME
+    Name of the project in Eints
+
+--lang-dir=LANG_DIR
+    Path of the directory containing the language files at the local disc.
+    (Default: "lang")
+
+--lang-file-ext=LANG_EXT
+    Filename suffix used by the language files. (Default: ".lng")
+
+--base-language=BASE_LANG
+    In case Eints does not know the base language (mostly at initial import),
+    this option can be used to specify it manually. It must be the same number
+    as given at a ##grflangid line (0x[HEX][HEX].
+
+--language-file-mapping=FNAME
+    The program has a mapping between language names and base filenames. This
+    option can be used to override that, or provide additional languages.
+    Format of the file are lines of the form "0x[HEX][HEX]: basename", '#'
+    starts a line comment and empty lines are ignored.
+
+
+
+and <operations>:
+
+download-base
+    Download the base language file from Eints.
+
+download-translations
+    Download all the translations from Eints.
+
+upload-base
+    Upload the base language file to Eints.
+
+upload-translations
+    Upload all the translation files to Eints.
+
+You can give several operations at the command line, order is significant.
+"""
+# }}}
 
 def run():
     """
     Run the program (it was started from the command line).
     """
+    global user_cfg
+
     try:
-        long_opts = ["help", "host=", "project=", "lang-dir=", "extension=", "verbose", "no-write"]
+        long_opts = ["user-password-file=", "user=", "password=",
+                     "not-interactive", "base-url=", "project=", "lang-dir=",
+                     "base-language=", "language-file-mapping=",
+                     "lang-file-ext=", "help", "verbose", "no-write"]
+
         opts, args = getopt.getopt(sys.argv[1:], "h", long_opts)
     except getopt.GetoptError as err:
         print("lang_sync: " + str(err) + " (try \"lang_sync --help\")")
         sys.exit(2)
 
-    verbose = False
-    no_write = False
-    host = 'localhost'
-    project = None
-    lang_dir = 'lang'
-    extension = '.lng'
+    user_cfg = UserConfig()
     for opt, val in opts:
-        if opt == '--help' or opt == '-h':
-            usage()
+        if opt in ('--help', '-h'):
+            print(USAGE_TEXT)
             sys.exit(0)
-        elif opt == '--host':
-            host = val
-        elif opt == '--project':
-            project = val
-        elif opt == '--lang-dir':
-            lang_dir = val
-        elif opt == '--extension':
-            extension = val
-        elif opt == '--verbose':
-            verbose = True
-        elif opt == '--no-write':
-            no_write = True
+
+        if opt == "--verbose":
+            user_cfg.verbose = True
+            continue
+        if opt == "--no-write":
+            user_cfg.no_write = True
+            continue
+        if opt == '--base-language':
+            m = hex_pat.match(val)
+            if not m:
+                print("\"{}\" is not a grflangid of the form 0x[HEX][HEX].")
+                sys.exit(1)
+            user_cfg.base_lang = int(m.group(1), 16)
+            continue
+        if opt == '--language-file-mapping':
+            user_cfg.langfile_map = val
+            continue
+        if opt == '--lang-dir':
+            user_cfg.lang_dir = val
+            continue
+        if opt == '--lang-file-ext':
+            user_cfg.lang_ext = val
+            continue
+        if opt == '--base-url':
+            user_cfg.base_url = val
+            continue
+        if opt == '--project':
+            user_cfg.project = val
+            continue
+        if opt == '--user-password-file':
+            user_cfg.filename = val
+            continue
+        if opt == '--user':
+            user_cfg.user = val
+            continue
+        if opt == '--password':
+            user_cfg.passwd = val
+            continue
+        if opt == '--not-interactive':
+            user_cfg.interactive = False
+            continue
+
+        raise ValueError("Unknown option {} encountered.".format(opt))
+
+    user_cfg.operations = []
+    done_down_base = False
+    done_down_trans = False
+    for arg in args:
+        updown = None
+        if arg == "download-base":
+            done_down_base = True
+            user_cfg.operations.append(('download', 'base'))
+        elif arg == "download-translations":
+            done_down_trans = True
+            user_cfg.operations.append(('download', 'translations'))
+        elif arg == "upload-base":
+            if done_down_base:
+                print("Warning: Uploading the base language after downloading it does not copy local changes.")
+            user_cfg.operations.append(('upload', 'base'))
+        elif arg == "upload-translations":
+            if done_down_trans:
+                print("Warning: Uploading the translations after downloading them does not copy local changes.")
+            user_cfg.operations.append(('upload', 'translations'))
         else:
-            assert False # Should never happen.
+            text = "Argument \"{}\" is not a valid synchronization operation.  Try 'lang_sync --help' for more information."
+            text = text.format(arg)
+            print(text)
+            sys.exit(1)
+    user_cfg.check()
 
-    if project is None:
-        print("Error: Missing the Eints project name.")
-        print("    add a \"--project=<myproject> option, or")
-        print("    try \"lang_sync --help\" for more help.")
-        sys.exit(1)
-    if len(args) > 0:
-        print("Error: Unexpected arguments, try \"lang_sync --help\" for more information.")
-        sys.exit(1)
+    setup_auth()
 
-    eints_langs = get_eints_languages(host, project, verbose)
-    local_langs = get_local_languages(lang_dir, extension, verbose)
-    update_files(eints_langs, local_langs, verbose, no_write)
+    local_files = get_local_languages()
+    if user_cfg.verbose:
+        print("Found local language files:")
+        for ll in local_files:
+            print("\tlang-id: 0x{:02x}, path: {}".format(ll.grf_langid, ll.path_name))
+        print()
+    eints_files = get_eints_languages()
+    if user_cfg.verbose:
+        print("Found remote language files:")
+        for el in eints_files:
+            if el.parent_lang is None:
+                kind = "(base language)"
+            else:
+                kind = "(translation of {})".format(el.parent_lang)
+            print("\tlang-id: 0x{:02x}, lang-name: {} {}".format(el.grf_langid, el.lang_name, kind))
+        print()
 
+    for op_type, lng_type in user_cfg.operations:
+        if user_cfg.verbose:
+            print("Performing \"{}-{}\"".format(op_type, lng_type))
+        perform_operation(local_files, eints_files, op_type, lng_type)
+
+    sys.exit(0)
+
+# }}}
 
 if __name__ == '__main__':
     run()
