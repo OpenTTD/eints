@@ -1,7 +1,7 @@
 """
 Project data.
 """
-import time, re
+import time, re, calendar
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from webtranslate import loader
@@ -1030,6 +1030,48 @@ def save_stamp(xsaver, stamp):
     if stamp.number > 0:
         node.setAttribute('number', str(stamp.number))
     return node
+
+def encode_stamp(stamp):
+    """
+    Encode a time stamp to the normalized format (RFC 8601).
+
+    @param stamp: Time stamp to convert.
+    @type  stamp: L{Stamp}
+
+    @return: Encoded time stamp.
+    @rtype:  C{str}
+    """
+    elems = time.gmtime(stamp.seconds)
+    text = "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}"
+    text = text.format(elems.tm_year, elems.tm_mon, elems.tm_mday, elems.tm_hour, elems.tm_min, elems.tm_sec)
+    if stamp.number == 0:
+        return text + "Z"
+    return text + ".{:d}Z".format(stamp.number) # No comma, since the text is put into a CSV line.
+
+def decode_stamp(text):
+    """
+    Decode a text to its time stamp.
+
+    @param text: Text string containing the time stamp.
+    @type  text: C{str}
+
+    @return: Decode time stamp, if it could be decoded.
+    @rtype:  L{Stamp} or C{None}
+    """
+    m = re.search('\\.([0-9]+)Z$', text)
+    if m:
+        val =  int(m.group(1), 10)
+        text = text[:m.start(0)] + 'Z'
+    else:
+        val = 0
+
+    try:
+        elems = time.strptime(text, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return None
+
+    secs = calendar.timegm(elems)
+    return Stamp(secs, val)
 
 # }}}
 

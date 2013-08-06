@@ -43,9 +43,9 @@ def download_list(user, prjname):
     for lng, ldata in pdata.languages.items():
         tstamp = get_newest_change(ldata)
         if tstamp is None:
-            text = "????"
+            text = "--no-time-available--"
         else:
-            text = str(tstamp)
+            text = data.encode_stamp(tstamp)
         urlparts = request.urlparts
         url = urlparts.scheme + "://" + urlparts.netloc + "/download/" + prjname + "/" + ldata.name
         line = "{},{},0x{:02x},{}".format(ldata.name, text, ldata.grflangid, url)
