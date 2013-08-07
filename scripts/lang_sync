@@ -127,9 +127,9 @@ def setup_auth():
                     line = line[1:-1]
 
                 if prefix == 'u':
-                    user = prefix
+                    user = line
                 else:
-                    passwd = prefix
+                    passwd = line
 
         # Close of the file is implicit.
 
