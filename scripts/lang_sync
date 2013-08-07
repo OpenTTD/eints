@@ -96,6 +96,9 @@ def setup_auth():
 
     #Read the file if provided.
     if user_cfg.filename is not None:
+        if not os.path.isfile(user_cfg.filename):
+            print("Error: File \"{}\" does not exist or is not a file.".format(user_cfg.filename))
+            sys.exit(1)
         with open(user_cfg.filename, 'r', encoding = 'utf-8') as handle:
             for line in handle:
                 line = line.strip()
