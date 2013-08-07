@@ -152,4 +152,7 @@ def verify_url(url):
 
     @todo: Improve project URL checking.
     """
-    return None # XXX This is a bit too much trust perhaps.
+    if url.startswith('http://') or url.startswith('https://'):
+        return None # XXX This is a bit too much trust perhaps.
+
+    return "Incorrect url"
