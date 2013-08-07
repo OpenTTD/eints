@@ -288,7 +288,7 @@ def get_eints_languages():
     @return: Available language information for the project as returned by Eints.
     @rtype:  C{list} of L{EintsLanguageInfo}
     """
-    global user_cfg
+    global user_cfg, eints_files_cache
 
     if eints_files_cache is not None: return eints_files_cache
 
@@ -359,7 +359,7 @@ def get_local_languages():
     @return: Found language files.
     @rtype:  C{list} of L{LocalLanguageInfo}
     """
-    global user_cfg
+    global user_cfg, local_files_cache
 
     if local_files_cache is not None: return local_files_cache
 
