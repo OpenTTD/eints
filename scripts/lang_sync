@@ -6,6 +6,48 @@ import urllib.request
 hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
 
 # Configuration.
+# {{{ def check_project_name(name, allow_spaces):
+project_pat = re.compile('[A-Za-z][-A-Za-z0-9]*$')
+
+def check_project_name(name, allow_spaces):
+    """
+    Check whether L{name} can be a valid project name.
+
+    @param name: Name to verify.
+    @type  name: C{str}
+
+    @param allow_spaces: Whether spaces in the name are allowed.
+    @type  allow_spaces: C{bool}
+
+    @return: Whether the given name is valid.
+    @rtype:  C{bool}
+    """
+    if not allow_spaces:
+        parts = [name.strip()]
+    else:
+        parts = name.split()
+
+    for part in parts:
+        m = project_pat.match(part)
+        if not m: return False
+    return True
+# }}}
+# {{{ def check_project_url(url):
+def check_project_url(url):
+    """
+    Check whether the given L{url} is valid.
+
+    @param url: Url of the project, may be empty.
+    @type  url: C{str}
+
+    @return: Whether the provided url is valid.
+    @rtype:  C{bool}
+    """
+    if url == '': return True
+    if url.startswith('http://'): return True
+    if url.startswith('https://'): return True
+    return False
+# }}}
 # {{{ class UserConfig:
 class UserConfig:
     """
@@ -28,6 +70,12 @@ class UserConfig:
 
     @ivar project: Project identifier of Eints, if available.
     @type project: C{str} or C{None}
+
+    @ivar project_desc: Project description, if available.
+    @type project_desc: C{str} or C{None}
+
+    @ivar project_url: Project URL, may be empty.
+    @type project_url: C{str}
 
     @ivar lang_dir: Directory containing the language files relative to the working directory.
     @type lang_dir: C{str}
@@ -59,6 +107,8 @@ class UserConfig:
         self.base_lang = None
         self.langfile_map = None
         self.project = None
+        self.project_desc = None
+        self.project_url = ''
         self.lang_dir = "lang"
         self.lang_ext = ".lng"
         self.verbose = False
@@ -75,6 +125,15 @@ class UserConfig:
             sys.exit(1)
         if self.project is None:
             print("Error: Missing Eints project identifier (add it with --project=PROJ_ID).")
+            sys.exit(1)
+        if not check_project_name(self.project, False):
+            print("Error: Project identifier \"{}\" is not valid.".format(self.project))
+            sys.exit(1)
+        if self.project_desc is not None and not check_project_name(self.project_desc, True):
+            print("Error: Project description \"{}\" is not valid.".format(self.project_desc))
+            sys.exit(1)
+        if not check_project_url(self.project_url):
+            print("Error: Project url \"{}\" is not valid.".format(self.project_url))
             sys.exit(1)
         if len(self.operations) == 0:
             print("Warning: No operations to perform, finishing now.")
@@ -200,6 +259,32 @@ def get_data(url):
 
         data = resp.read().decode('utf-8')
         return data
+# }}}
+# {{{ def post_form(url, form_data):
+def post_form(url, form_data):
+    """
+    Post the form.
+
+    @param url: Url for the file to retrieve.
+    @type  url: C{str}
+
+    @param form_data: Form data.
+    @type  form_data: C{dict} of C{str} to C{str}
+
+    @return: Whether the from was posted correctly.
+    @rtype:  C{bool}
+    """
+    headers = {"Content-Type" : " application/x-www-form-urlencoded; charset=utf-8"}
+    form = urllib.parse.urlencode(form_data).encode('utf-8')
+    req = urllib.request.Request(url, form, headers)
+
+    # Perform the request, and read the returned data.
+    with urllib.request.urlopen(req) as resp:
+        if resp.status != 200:
+            return False
+
+        resp.read()
+        return True
 # }}}
 # {{{ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
 def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
@@ -411,14 +496,25 @@ def perform_operation(op_type, lang_type):
     """
     Perform a synchronization operation.
 
-    @param op_type: Type of operation, either C{"upload"} or C{"download"}.
+    @param op_type: Type of operation, either C{"upload"}, C{"download"}, or C{"create"}.
     @type  op_type: C{str}
 
-    @param lang_type: Type of languages involved, either C{"base"}, or C{"translations"}.
+    @param lang_type: Type of languages involved, either C{"base"}, C{"translations"}, or C{"project"}.
     @type  lang_type: C{str}
     """
     global user_cfg
 
+    if op_type == 'create':
+        assert lang_type == 'project'
+        # Project creation operation.
+        if user_cfg.project_desc is None:
+            print("Error: Missing project description (add it with --project-desc).")
+            sys.exit(1)
+
+        perform_create_project()
+        return
+
+    # Upload/download operations below.
     ll_files = get_local_languages()
     el_files = get_eints_languages()
 
@@ -449,6 +545,27 @@ def perform_operation(op_type, lang_type):
         perform_upload(ll_files, lang_type == 'base')
     else:
         perform_download(ll_files, el_files)
+# }}}
+# {{{ def perform_create_project():
+def perform_create_project():
+    """
+    Create a new project in Eints.
+    """
+    global user_cfg
+
+    assert user_cfg.project_desc is not None
+
+    fields = {'humanname' : user_cfg.project_desc,
+              'url' : user_cfg.project_url}
+    url = build_url('/makeproject/' + user_cfg.project)
+    if user_cfg.no_write:
+        print("Skipped creation of project \"{}\".".format(user_cfg.project))
+    else:
+        if not post_form(url, fields):
+            print("Project creation of \"{}\" failed.".format(user_cfg.project))
+            sys.exit(1)
+        if user_cfg.verbose:
+            print("Created project \"{}\".".format(user_cfg.project))
 # }}}
 # {{{ def perform_upload(ll_files, el_files):
 def perform_upload(ll_files, is_base):
@@ -694,7 +811,14 @@ Getting project information:
     "https://eints.example.com/".
 
 --project=PROJECT_NAME
-    Name of the project in Eints
+    Name of the project in Eints (may contain letters, digits, and dashes).
+
+--project-desc=PROJECT_DESCRIPTION
+    For project creation, a longer title of the project (may contain letters,
+    digits, dashes and spaces).
+
+--project-url=PROJECT_URL
+    For project creation, an optional website URL.
 
 --lang-dir=LANG_DIR
     Path of the directory containing the language files at the local disc.
@@ -730,6 +854,9 @@ upload-base
 upload-translations
     Upload all the translation files to Eints.
 
+create-project
+    Create a new project in Eints.
+
 You can give several operations at the command line, order is significant.
 """
 # }}}
@@ -742,7 +869,8 @@ def run():
 
     try:
         long_opts = ["user-password-file=", "user=", "password=",
-                     "not-interactive", "base-url=", "project=", "lang-dir=",
+                     "not-interactive", "base-url=", "project=",
+                     "project-desc=", "project-url=", "lang-dir=",
                      "base-language=", "language-file-mapping=",
                      "lang-file-ext=", "help", "verbose", "no-write"]
 
@@ -785,6 +913,12 @@ def run():
         if opt == '--project':
             user_cfg.project = val
             continue
+        if opt == '--project-desc':
+            user_cfg.project_desc = val
+            continue
+        if opt == '--project-url':
+            user_cfg.project_url = val
+            continue
         if opt == '--user-password-file':
             user_cfg.filename = val
             continue
@@ -819,6 +953,8 @@ def run():
             if done_down_trans:
                 print("Warning: Uploading the translations after downloading them does not copy local changes.")
             user_cfg.operations.append(('upload', 'translations'))
+        elif arg == "create-project":
+            user_cfg.operations.append(('create', 'project'))
         else:
             text = "Argument \"{}\" is not a valid synchronization operation.  Try 'lang_sync --help' for more information."
             text = text.format(arg)
