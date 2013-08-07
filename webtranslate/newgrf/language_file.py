@@ -782,10 +782,18 @@ def compare_info(base_info, lng_info, errors):
 
     # Non-positional commands must match in count.
     if base_info.non_positionals != lng_info.non_positionals:
-        for np in base_info.non_positionals:
-            if np not in lng_info.non_positionals:
-                msg = 'String command {} is missing in the translation'.format('{' + np + '}')
-                if is_critical_non_positional(np):
+        for bname, bcnt in base_info.non_positionals.items():
+            if bname not in lng_info.non_positionals:
+                msg = 'String command {} is missing in the translation'.format('{' + bname + '}')
+                if is_critical_non_positional(bname):
+                    errors.append((ERROR, None, msg))
+                    return False
+                else:
+                    errors.append((WARNING, None, msg))
+            elif lng_info.non_positionals[bname] != bcnt:
+                msg = 'String command {} is used {} times in the base language, and {} times in the translation'
+                msg = msg.format('{' + bname + '}', bcnt, lng_info.non_positionals[bname])
+                if is_critical_non_positional(bname):
                     errors.append((ERROR, None, msg))
                     return False
                 else:
@@ -795,16 +803,6 @@ def compare_info(base_info, lng_info, errors):
             if np not in base_info.non_positionals:
                 msg = 'String command {} is not used in the base language'.format('{' + np + '}')
                 if is_critical_non_positional(np):
-                    errors.append((ERROR, None, msg))
-                    return False
-                else:
-                    errors.append((WARNING, None, msg))
-
-        for bname, bcnt in base_info.non_positionals.items():
-            if lng_info.non_positionals[bname] != bcnt:
-                msg = 'String command {} is used {} times in the base language, and {} times in the translation'
-                msg = msg.format('{' + bname + '}', bcnt, lng_info.non_positionals[bname])
-                if is_critical_non_positional(bname):
                     errors.append((ERROR, None, msg))
                     return False
                 else:
