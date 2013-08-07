@@ -276,6 +276,8 @@ class EintsLanguageInfo:
         self.grf_langid = grf_langid
 # }}}
 # {{{ def get_eints_languages():
+eints_files_cache = None
+
 def get_eints_languages():
     """
     Get the list of languages available in Eints.
@@ -284,6 +286,8 @@ def get_eints_languages():
     @rtype:  C{list} of L{EintsLanguageInfo}
     """
     global user_cfg
+
+    if eints_files_cache is not None: return eints_files_cache
 
     if user_cfg.verbose:
         print("Getting available language files from Eints.")
@@ -305,9 +309,23 @@ def get_eints_languages():
         # XXX Parse the last change data (lstchg)
         el = EintsLanguageInfo(lname, plang, None, int(langid, 16))
         result.append(el)
-    if user_cfg.verbose and len(result) == 0:
-        print("No languages found in Eints.")
-    return result
+
+    eints_files_cache = result
+
+    if user_cfg.verbose:
+        if len(eints_files_cache) == 0:
+            print("No languages found in Eints.")
+        else:
+            print("Found remote language files:")
+            for el in eints_files_cache:
+                if el.parent_lang is None:
+                    kind = "(base language)"
+                else:
+                    kind = "(translation of {})".format(el.parent_lang)
+                print("\tlang-id: 0x{:02x}, lang-name: {} {}".format(el.grf_langid, el.lang_name, kind))
+            print()
+
+    return eints_files_cache
 
 # }}}
 
@@ -329,6 +347,7 @@ class LocalLanguageInfo:
 # }}}
 # {{{ def get_local_languages():
 utf8_bom = codecs.BOM_UTF8.decode('utf-8')
+local_files_cache = None
 
 def get_local_languages():
     """
@@ -338,6 +357,8 @@ def get_local_languages():
     @rtype:  C{list} of L{LocalLanguageInfo}
     """
     global user_cfg
+
+    if local_files_cache is not None: return local_files_cache
 
     if user_cfg.verbose:
         print("Getting available language files from the local file system.")
@@ -367,9 +388,18 @@ def get_local_languages():
             verbose_msg = verbose_msg + ", but no ##grflangid 0x.. found."
             print(verbose_msg)
 
-    if user_cfg.verbose and len(result) == 0:
-        print("No languages found locally.")
-    return result
+    local_files_cache = result
+
+    if user_cfg.verbose:
+        if len(local_files_cache) == 0:
+            print("No languages found locally.")
+        else:
+            print("Found local language files:")
+            for ll in local_files_cache:
+                print("\tlang-id: 0x{:02x}, path: {}".format(ll.grf_langid, ll.path_name))
+            print()
+
+    return local_files_cache
 # }}}
 
 # {{{ def perform_operation(ll_files, el_files, op_type, lang_type):
@@ -799,22 +829,7 @@ def run():
     setup_auth()
 
     local_files = get_local_languages()
-    if user_cfg.verbose:
-        print("Found local language files:")
-        for ll in local_files:
-            print("\tlang-id: 0x{:02x}, path: {}".format(ll.grf_langid, ll.path_name))
-        print()
     eints_files = get_eints_languages()
-    if user_cfg.verbose:
-        print("Found remote language files:")
-        for el in eints_files:
-            if el.parent_lang is None:
-                kind = "(base language)"
-            else:
-                kind = "(translation of {})".format(el.parent_lang)
-            print("\tlang-id: 0x{:02x}, lang-name: {} {}".format(el.grf_langid, el.lang_name, kind))
-        print()
-
     for op_type, lng_type in user_cfg.operations:
         if user_cfg.verbose:
             print("Performing \"{}-{}\"".format(op_type, lng_type))
