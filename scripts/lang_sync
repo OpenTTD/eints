@@ -12,37 +12,37 @@ class UserConfig:
     Configuration and actions to do by the program.
 
     @ivar filename: Name of the file containing authentication information, if available.
-    @type filename: C{str} or C{None} USED
+    @type filename: C{str} or C{None}
 
     @ivar user: User name to use, if available.
-    @type user: C{str} or C{None} USED
+    @type user: C{str} or C{None}
 
     @ivar passwd: Password to use, if available.
-    @type passwd: C{str} or C{None} USED
+    @type passwd: C{str} or C{None}
 
     @ivar interactive: Can the program ask for the password interactively? (Default: C{True}).
-    @type interactive: C{bool} USED
+    @type interactive: C{bool}
 
     @ivar base_url: Base url of the authentication realm (the scheme + host), if available.
-    @type base_url: C{str} or C{None} USED
+    @type base_url: C{str} or C{None}
 
     @ivar project: Project identifier of Eints, if available.
-    @type project: C{str} or C{None} USED
+    @type project: C{str} or C{None}
 
     @ivar lang_dir: Directory containing the language files relative to the working directory.
-    @type lang_dir: C{str} USED
+    @type lang_dir: C{str}
 
     @ivar lang_ext: Extension used by language files.
-    @type lang_ext: C{str} USED
+    @type lang_ext: C{str}
 
     @ivar base_lang: Grf language id of the base language, if available.
     @type base_lang: C{int} or C{None}
 
-    @ivar langfile_map: Name of the mapping file from language name to language base filename, if available.
+    @ivar langfile_map: Name of the mapping file from language grf id to base filename, if available.
     @type langfile_map: C{str} or C{None}
 
     @ivar verbose: Whether to be verbose in what actions the program performs.
-    @type verbose: C{bool} USED
+    @type verbose: C{bool}
 
     @ivar no_write: Whether to skip writing data onto the disk.
     @type no_write: C{bool}
@@ -402,6 +402,7 @@ def get_local_languages():
     return local_files_cache
 # }}}
 
+# Upload and download operations.
 # {{{ def perform_operation(op_type, lang_type):
 def perform_operation(op_type, lang_type):
     """
@@ -482,7 +483,6 @@ def perform_upload(ll_files, is_base):
         if not ok:
             print("Error: Failed to upload \"{}\".".format(ll.path_name))
 # }}}
-
 # {{{ def get_filename(grf_langid):
 langfile_map_cache = None #: Cache of the UserConfig.langfile_map file content.
 
@@ -597,7 +597,6 @@ def get_filename(grf_langid):
 
     return None
 # }}}
-
 # {{{ def perform_download(ll_files, el_files):
 def perform_download(ll_files, el_files):
     """
@@ -636,6 +635,7 @@ def perform_download(ll_files, el_files):
         if user_cfg.verbose:
             print("{} language file \"{}\"".format(action, path))
 # }}}
+
 # {{{ def run():
 # {{{ USAGE_TEXT = ...
 USAGE_TEXT = """\
