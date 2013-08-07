@@ -402,16 +402,10 @@ def get_local_languages():
     return local_files_cache
 # }}}
 
-# {{{ def perform_operation(ll_files, el_files, op_type, lang_type):
-def perform_operation(ll_files, el_files, op_type, lang_type):
+# {{{ def perform_operation(op_type, lang_type):
+def perform_operation(op_type, lang_type):
     """
     Perform a synchronization operation.
-
-    @param ll_files: Locally available language files.
-    @type  ll_files: C{list} of L{LocalLanguageInfo}
-
-    @param el_files: Remotely available language files.
-    @type  el_files: C{list} of L{EintsLanguageInfo}
 
     @param op_type: Type of operation, either C{"upload"} or C{"download"}.
     @type  op_type: C{str}
@@ -420,6 +414,9 @@ def perform_operation(ll_files, el_files, op_type, lang_type):
     @type  lang_type: C{str}
     """
     global user_cfg
+
+    ll_files = get_local_languages()
+    el_files = get_eints_languages()
 
     # Find out what the base language id is.
     blng_grfid = user_cfg.base_lang
@@ -828,12 +825,10 @@ def run():
 
     setup_auth()
 
-    local_files = get_local_languages()
-    eints_files = get_eints_languages()
     for op_type, lng_type in user_cfg.operations:
         if user_cfg.verbose:
             print("Performing \"{}-{}\"".format(op_type, lng_type))
-        perform_operation(local_files, eints_files, op_type, lng_type)
+        perform_operation(op_type, lng_type)
 
     sys.exit(0)
 
