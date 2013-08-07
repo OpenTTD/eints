@@ -1,7 +1,7 @@
 """
 Language file processing.
 """
-import re, codecs, collections
+import re, codecs
 from webtranslate.newgrf import language_info
 
 ERROR = 'Error'

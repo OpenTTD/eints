@@ -1,10 +1,9 @@
 """
 Create a new project.
 """
-import re
 from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
-from webtranslate import config, data, utils
+from webtranslate import config, utils
 
 @route('/newproject', method = 'GET')
 @protected(['newproject', '-', '-'])

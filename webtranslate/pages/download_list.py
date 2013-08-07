@@ -4,7 +4,7 @@ Example::
     en_UK,56767567,http://example.org/download/<prjname>/en_UK
 
 """
-from webtranslate.bottle import route, template, abort, response, request
+from webtranslate.bottle import route, abort, response
 from webtranslate.protect import protected
 from webtranslate import config, data
 

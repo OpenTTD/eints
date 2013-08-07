@@ -2,7 +2,7 @@
 Bottle authentication decorator.
 """
 from webtranslate.bottle import request, abort, error, response
-from webtranslate import users, rights
+from webtranslate import users
 
 @error(401)
 def handle401(error):

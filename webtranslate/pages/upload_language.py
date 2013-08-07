@@ -204,7 +204,7 @@ def add_new_language(ng_data, pdata, base_lang):
     if base_lang:
         pdata.base_language = lng.name
         pdata.skeleton = ng_data.skeleton
-        pdata.flush_related_cache();
+        pdata.flush_related_cache()
 
     # Add the current string names to the new language.
     for stp, sparam in pdata.skeleton:

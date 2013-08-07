@@ -1,7 +1,6 @@
 """
 Settings of a project.
 """
-import re
 from webtranslate.bottle import route, template, abort, request, redirect, request, redirect
 from webtranslate.protect import protected
 from webtranslate import config, utils
