@@ -9,11 +9,18 @@ Whatever system you make, it needs to deliver the following interface:
 
 from webtranslate.users import development, redmine
 
-# Currently there are two user management modules, 'development' and 'redmine'.
-# Uncomment the one you want.
+may_access = None
 
-module = development
-#module = redmine
+def init(auth):
+    """
+    Setup authentication.
+    """
+    global may_access
 
-init = module.init
-may_access = module.may_access
+    if auth == 'development':
+        may_access = development.may_access
+        development.init()
+    elif auth == 'redmine':
+        may_access = redmine.may_access
+        redmine.init()
+

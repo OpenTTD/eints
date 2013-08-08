@@ -1,25 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <config>
-	<!-- Root directory of the project xml files. -->
-	<project-root>root_dir</project-root>
+	<!-- Server setup
+	  -->
+	<server-mode>development</server-mode>
+	<server-host>localhost</server-host>
+	<server-port>8000</server-port>
 
-	<!-- Number of projects that can be loaded at the same time in the cache. -->
+	<authentication>development</authentication>
+
+
+	<!-- Project data
+	  -->
+	<project-root>root_dir</project-root>
 	<project-cache>1</project-cache>
 
-	<!-- Maximum size of a language file in bytes (longer files are not fully loaded). -->
 	<language-file-size>100000</language-file-size> <!-- about 100K -->
-	<!-- Number of backup files to keep. -->
 	<num-backup-files>5</num-backup-files>
 
-	<!-- Maximum number of changes to keep for a single string in a language. -->
 	<max-num-changes>5</max-num-changes>
-	<!-- Minimum number of changes to keep for a single string in a language (1 is the lowest sane value). -->
 	<min-num-changes>1</min-num-changes>
-	<!-- Minimal age of changes (in seconds) before they can be thrown away if above 'min-num-changes'. -->
 	<change-stable-age>600</change-stable-age> <!-- 10 minutes -->
 
 	<redmine>
+		<!-- Data base interfacing
+		  -->
 		<db-type>postgress</db-type> <!-- Type of data base. Tested 'postgress', but 'mysql' and 'sqlite3' probably work too. -->
 		<db-schema></db-schema> <!-- Postgress may need a schema search path. -->
 
@@ -29,7 +34,9 @@
 		<db-host>localhost</db-host> <!-- Hostname of the machine running the data base. -->
 		<db-port> <!-- SET A PORT NUMBER HERE. --> </db-port> <!-- Port number to access the data base at the host. -->
 
-		<!-- Redmine role name for owner of the project. -->
+		<!-- Role setup
+		  -->
+
 		<owner-role>manager</owner-role>
 
 		<!-- Redmine role name for translator of the 'en_GB' language. -->

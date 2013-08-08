@@ -22,8 +22,14 @@ def run():
     config.cfg = config.Config('config.xml')
     config.cfg.load_fromxml()
 
-    users.init()
+    users.init(config.cfg.authentication)
 
     # Start the web service
-    bottle.run(reloader=False, debug=True, host='localhost', port=8000)
+    debug = False
+    if config.cfg.server_mode == 'development': debug = True
+
+    bottle.run(reloader = False,
+               debug = debug,
+               host = config.cfg.server_host,
+               port = config.cfg.server_port)
 

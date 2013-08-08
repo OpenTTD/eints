@@ -27,6 +27,18 @@ class Config:
     """
     Service configuration.
 
+    @ivar server_mode: Mode of the server, either C{'development'} or C{'production'}.
+    @type server_mode: C{str}
+
+    @ivar server_host: Hostname of the server to bind to.
+    @type server_host: C{str}
+
+    @ivar server_port: Port number of the server host.
+    @type server_port: C{int}
+
+    @ivar authentication: Method of authentication, either C{'development'} or C{'redmine'}.
+    @type authentication: C{str}
+
     @ivar project_root: Root directory of the web translation service.
     @type project_root: C{str}
 
@@ -36,13 +48,16 @@ class Config:
     @ivar num_backup_files: Number of backup files kept for a project.
     @type num_backup_files: C{int}
 
-    @ivar max_number_changes: Maximum number of changes that should be kept for a string in a translation.
+    @ivar max_number_changes: Maximum number of changes that should be kept for
+                              a string in a translation.
     @type max_number_changes: C{int}
 
-    @ivar min_number_changes: Minimum number of changes that should be kept for a string in a translation.
+    @ivar min_number_changes: Minimum number of changes that should be kept for
+                              a string in a translation.
     @type min_number_changes: C{int}
 
-    @ivar change_stabilizing_time: Amount of seconds needed before a change can be considered old enough to discard.
+    @ivar change_stabilizing_time: Amount of seconds needed before a change
+                                   can be considered old enough to discard.
     @type change_stabilizing_time: C{int}
     """
     def __init__(self, config_path):
@@ -55,6 +70,10 @@ class Config:
         self.change_stabilizing_time = 1000000 # 11 days, 13 hours, 46 minutes, and 40 seconds.
 
     def load_fromxml(self):
+        """
+        Load the entire 'config.xml' file into the configuration, including the
+        'redmine' part if it exists.
+        """
         if not os.path.isfile(self.config_path):
             print("Cannot find configuration file " + self.config_path)
             return
@@ -62,19 +81,39 @@ class Config:
         cfg = loader.load_dom(self.config_path)
         cfg = loader.get_single_child_node(cfg, 'config')
 
+        self.server_mode = get_subnode_text(cfg, 'server-mode')
+        if self.server_mode not in ('development', 'production'):
+            print("Incorrect server-mode in the configuration, aborting!")
+            sys.exit(1)
+
+        self.server_host = get_subnode_text(cfg, 'server-host')
+        self.server_port = data.convert_num(get_subnode_text(cfg, 'server-port'), 80)
+        self.authentication = get_subnode_text(cfg, 'authentication')
+        if self.authentication not in ('development', 'redmine'):
+            print("Incorrect authentication in the configuration, aborting!")
+            sys.exit(1)
+
         self.project_root = get_subnode_text(cfg, 'project-root')
         if self.project_root is None or self.project_root == "":
             print("No project root found, aborting!")
             sys.exit(1)
 
-        self.language_file_size = data.convert_num(get_subnode_text(cfg, 'language-file-size'), self.language_file_size)
-        self.num_backup_files   = data.convert_num(get_subnode_text(cfg, 'num-backup-files'),   self.num_backup_files)
-        if self.num_backup_files > 100: self.num_backup_files = 100 # To limit it two numbers in backup files.
+        self.language_file_size = data.convert_num(get_subnode_text(cfg, 'language-file-size'),
+                                                   self.language_file_size)
+        self.num_backup_files   = data.convert_num(get_subnode_text(cfg, 'num-backup-files'),
+                                                   self.num_backup_files)
+        # To limit it two digits in backup files.
+        if self.num_backup_files > 100: self.num_backup_files = 100
 
-        self.max_number_changes = data.convert_num(get_subnode_text(cfg, 'max-num-changes'), self.max_number_changes)
-        self.min_number_changes = data.convert_num(get_subnode_text(cfg, 'min-num-changes'), self.min_number_changes)
-        if self.min_number_changes < 1: self.min_number_changes = 1 # You do want to keep the latest version.
-        self.change_stabilizing_time = data.convert_num(get_subnode_text(cfg, 'change-stable-age'), self.change_stabilizing_time)
+        self.max_number_changes = data.convert_num(get_subnode_text(cfg, 'max-num-changes'),
+                                                   self.max_number_changes)
+        self.min_number_changes = data.convert_num(get_subnode_text(cfg, 'min-num-changes'),
+                                                   self.min_number_changes)
+        # You do want to keep the latest version.
+        if self.min_number_changes < 1: self.min_number_changes = 1
+
+        self.change_stabilizing_time = data.convert_num(get_subnode_text(cfg, 'change-stable-age'),
+                                                        self.change_stabilizing_time)
 
         cache_size = data.convert_num(get_subnode_text(cfg, 'project-cache'), 10)
         cache.init(self.project_root, cache_size)
