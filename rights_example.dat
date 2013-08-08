@@ -1,22 +1,23 @@
 # Root, project overview, and download pages are readable by all
 * + /root/-/-/read
-* + /projects/-/-/read
-* + /download-list/*/*/read
-* + /download/*/*/read
-
-# First pages of project creation can be used by anyone.
-* + /newproject/-/-/read
-* + /createproject/-/-/add
 
 # Unauthenticated users don't get any further
 SOMEONE - /*/*/*/*
 
+# First pages of project creation can be used by anyone (these pages have no
+# project to authenticate against).
+* + /newproject/-/-/read
+* + /createproject/-/-/add
+
 # Only the owner can create a project.
 OWNER + /makeproject/*/-/add
 
-# Authenticated users (of the project) can see the projects, see each project, download a
+# Authenticated users (of a project) can see the projects, see each project, download a
 # language, and get an overview of a language in a project.
+* + /projects/-/-/read
 * + /project/*/-/read
+* + /download-list/*/*/read
+* + /download/*/*/read
 * + /language/*/*/read
 
 # Strings editing

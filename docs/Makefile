@@ -8,14 +8,6 @@ DEST_FILES=$(RST_FILES:.rst=.html)
 .SUFFIXES:
 .SUFFIXES: .html .rst
 
-manual: $(DEST_FILES)
+manual:
+	$(MAKE) -C manual html
 
-clean:
-	for i in $(DEST_FILES);\
-	do if test -f $$i;\
-	   then rm $$i;\
-	   fi;\
-	done
-
-%.html: %.rst
-	rst2html $< $@

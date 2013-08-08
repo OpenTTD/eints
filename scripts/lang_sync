@@ -801,14 +801,14 @@ Getting the Eints user name and password information:
     This option prevents use of this fallback method, so lang_sync will not
     become stuck at waiting for user input.
 
+--base-url=BASE_URL
+    The scheme and host name part of the Eints server urls. For example,
+    "https://eints.example.com/".
+
 
 
 
 Getting project information:
-
---base-url=BASE_URL
-    The scheme and host name part of the Eints server urls. For example,
-    "https://eints.example.com/".
 
 --project=PROJECT_NAME
     Name of the project in Eints (may contain letters, digits, and dashes).
@@ -830,7 +830,7 @@ Getting project information:
 --base-language=BASE_LANG
     In case Eints does not know the base language (mostly at initial import),
     this option can be used to specify it manually. It must be the same number
-    as given at a ##grflangid line (0x[HEX][HEX].
+    as given at a ##grflangid line (a string of the form "0x[HEX][HEX]".)
 
 --language-file-mapping=FNAME
     The program has a mapping between language names and base filenames. This

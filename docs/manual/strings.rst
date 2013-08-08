@@ -56,7 +56,8 @@ For example::
 
 The first word (``STR_EINTS``) is the name of this string, while all text
 behind the colon is the text of the string (the colon itself is *not* part of
-the text).
+the text). The ``STR_`` prefix is not required, but is often added by
+convention to distinguish the names from other name types.
 
 The name-part stays the same for this string in every language (it may get a
 case appended to it though, which will be explained later).
@@ -79,9 +80,9 @@ To start slowly, a list of commands for enhancing layout and colour are
 listed below. They are called *non-positional commands* for reasons that will
 become clear later.
 
-=============== ===========================================
+=============== ===========================================================
 Command         Effect
-=============== ===========================================
+=============== ===========================================================
 ``{}``          Continue at the next line
 ``{{}``         Output a ``{``
 ``{NBSP}``      Display a non-breaking space
@@ -110,14 +111,16 @@ Command         Effect
 ``{GRAY}``      Output following text in gray colour
 ``{DKBLUE}``    Output following text in dark blue colour
 ``{BLACK}``     Output following text in black colour
-=============== ===========================================
+=============== ===========================================================
 
 A string using the above commands can be::
 
         STR_EINTS     :{SILVER}Eints {BLACK}is a translator program.
 
 This would display the word 'Eints' in a silver colour, and the other text in
-black. A second set of commands inserts numbers or other text into the string.
+black.
+
+A second set of commands inserts numbers or other text into the string.
 These commands are called *positional commands*. Below is the list:
 
 ==================== ====== ====== =======================================
@@ -242,6 +245,27 @@ above example forces it to use the parameter at position ``0`` (that is, the
 Case
 ====
 
-TBD
+The English language does not have cases, which makes explaining a little
+artificial. For the purpose of discussing cases however, assume English has two
+moods, a normal one, and a super-happy one, which are encoded as cases.
+
+Cases can change wording in a very precise manner. Each string can be
+translated for each case, and string replacements can give the preferred case.
+An example::
+
+        STR_OK      :ok
+        STR_OK.fab  :super fabulous!
+
+This defines the ``STR_OK`` string in two cases. The first line define the
+default case, the second line defines the same string for the ``fab`` case.
+
+The desired case of a string replacement can be specified too::
+
+        STR_RESULT :The result is {STRING.fab}
+
+The ``{STRING.fab}`` in this text states it prefers to have the ``fab``
+translation for the first string parameter. If the NewGRF uses ``STR_OK`` at
+that position, the ``super fabulous!`` text will be used.
+If a string does not have the desired case, the default case is used instead.
 
 .. vim: tw=78 spell
