@@ -27,7 +27,8 @@ class Config:
     """
     Service configuration.
 
-    @ivar server_mode: Mode of the server, either C{'development'} or C{'production'}.
+    @ivar server_mode: Mode of the server, either C{'development'} or C{'production'}
+                       for the bottle server, or C{'mod_wsgi'} for mod_wsgi.
     @type server_mode: C{str}
 
     @ivar server_host: Hostname of the server to bind to.
@@ -82,7 +83,7 @@ class Config:
         cfg = loader.get_single_child_node(cfg, 'config')
 
         self.server_mode = get_subnode_text(cfg, 'server-mode')
-        if self.server_mode not in ('development', 'production'):
+        if self.server_mode not in ('development', 'production', 'mod_wsgi'):
             print("Incorrect server-mode in the configuration, aborting!")
             sys.exit(1)
 

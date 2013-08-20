@@ -59,9 +59,11 @@ Server setup
 The following configuration fields exist for the general server set up.
 
 *server-mode*
-    Mode of the server, must be either ``development`` or ``production``. In
+    Mode of the server, must be either ``development``, ``production`` or
+    ``mod_wsgi``. The former two will start a bottle web server. In
     *development* mode, errors that happen in the server process are copied into
-    the generated html page.
+    the generated html page. The latter allows deployment via apache's mod_wsgi.
+    See :ref:`apache_mod_wsgi` for an example configuration with mod_wsgi.
 
 *server-host*
     Name of the host that should provides the Eints service.
@@ -81,6 +83,40 @@ Eints service should be remotely accessible only through a secure connection.
 
 
 .. XXX links and references
+
+.. _apache_mod_wsgi:
+
+Server setup with apache's mod_wsgi
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Below is an example apache2 configuration assuming eints to reside
+in the directory ``/home/eints/eints``::
+
+    WSGIPythonPath /home/eints/eints
+    <VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+
+        WSGIDaemonProcess eints user=eints group=eints processes=1 threads=1 home=/home/eints/eints
+        WSGIScriptAlias / /home/eints/eints/app.wsgi
+        WSGIPassAuthorization On
+
+        DocumentRoot /var/www
+
+        <Directory /var/www/>
+            WSGIProcessGroup eints
+            WSGIApplicationGroup %{GLOBAL}
+            Order allow,deny
+            allow from all
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+    </VirtualHost>
+
 
 Project data setup
 ~~~~~~~~~~~~~~~~~~

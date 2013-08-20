@@ -28,8 +28,10 @@ def run():
     debug = False
     if config.cfg.server_mode == 'development': debug = True
 
-    bottle.run(reloader = False,
-               debug = debug,
-               host = config.cfg.server_host,
-               port = config.cfg.server_port)
+    # With 'mod_wsgi', application does not run from here.
+    if config.cfg.server_mode != 'mod_wsgi':
+        bottle.run(reloader = False,
+                   debug = debug,
+                   host = config.cfg.server_host,
+                   port = config.cfg.server_port)
 
