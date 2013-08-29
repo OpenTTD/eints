@@ -33,7 +33,7 @@ def save_file(proj, fname):
     xsaver = XmlSaver()
     doc = xsaver.save_project(proj)
 
-    handle = open(fname, 'w')
+    handle = open(fname, 'w', encoding = "utf-8")
     handle.write(doc.toprettyxml())
     handle.close()
 

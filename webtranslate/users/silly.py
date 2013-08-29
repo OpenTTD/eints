@@ -16,7 +16,7 @@ def init():
     _users = set()
     if not os.path.isfile(FILENAME): return
 
-    handle = open(FILENAME, "r")
+    handle = open(FILENAME, "r", encoding = "utf-8")
     for line in handle:
         line = line.rstrip()
         if len(line) == 0 or line[0] == '#': continue

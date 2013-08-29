@@ -112,7 +112,7 @@ def init_page_access():
 
     _table = []
     rights_pat = re.compile('\\s*(\\S+)\\s+([-+])\\s+/([^/]+)/([^/]+)/([^/]+)/([^/]+)\\s*$')
-    handle = open(FILENAME, "r")
+    handle = open(FILENAME, "r", encoding = "utf-8")
     for idx, line in enumerate(handle):
         line = line.rstrip()
         if len(line) == 0 or line[0] == '#': continue
