@@ -819,14 +819,22 @@ class Change:
 
     @ivar user: User making the change, if known.
     @type user: C{str} or C{None}
+
+    @ivar last_upload: This change was the last uploaded text (L{base_text} for
+                       the base language, and L{new_text} for the translations).
+    @type last_upload: C{bool}
+
+    @note: There is at most one L{last_upload} change for each string in each language.
     """
-    def __init__(self, string_name, case, base_text, new_text, stamp, user):
+    def __init__(self, string_name, case, base_text, new_text, stamp, user, last_upload = False):
+        assert string_name is not None
         self.string_name = string_name
         self.case = case
         self.base_text = base_text
         self.new_text = new_text
         self.stamp = stamp
         self.user = user
+        self.last_upload = last_upload
 
     def __str__(self):
         return "Change('{}', base={}, new={})".format(self.string_name, str(self.base_text), str(self.new_text))
@@ -855,6 +863,7 @@ def save_change(xsaver, change):
     """
     node = xsaver.doc.createElement('change')
     node.setAttribute('strname', change.string_name)
+    if change.last_upload: node.setAttribute('last_upload', 'true')
     if change.case != '': node.setAttribute('case', change.case)
     if change.user is not None: node.setAttribute('user', change.user)
 
@@ -881,6 +890,7 @@ def load_change(xloader, node):
     """
     assert node.tagName == 'change'
     strname = node.getAttribute('strname')
+    last_upload = loader.get_opt_DOMattr(node, 'last_upload', '')
     case = loader.get_opt_DOMattr(node, 'case', '')
     user = loader.get_opt_DOMattr(node, 'user', None)
     base_text = get_text(xloader, node.getAttribute('basetext'))
@@ -889,7 +899,7 @@ def load_change(xloader, node):
         new_text = get_text(xloader, new_text)
     stamp = loader.get_single_child_node(node, 'stamp')
     stamp = load_stamp(xloader, stamp)
-    return Change(strname, case, base_text, new_text, stamp, user)
+    return Change(strname, case, base_text, new_text, stamp, user, last_upload == 'true')
 
 # }}}
 # {{{ Text (references)

@@ -71,11 +71,13 @@ def page_post(user, prjname):
             if chg is None: # New change.
                 txt = language_file.sanitize_text(sv.text)
                 base_text = data.Text(txt, sv.case, stamp)
-                chg = data.Change(sv.name, sv.case, base_text, None, stamp, user)
+                chg = data.Change(sv.name, sv.case, base_text, None, stamp, user, True)
                 chgs = base_language.changes.get(sv.name)
                 if chgs is None:
                     base_language.changes[sv.name] = [chg]
                 else:
+                    for c in chgs:
+                        c.last_upload = False
                     chgs.append(chg)
             else:
                 if override: # Don't mind other changes at all.
@@ -114,11 +116,13 @@ def page_post(user, prjname):
             if lng_chg is None: # It's a new text or new case.
                 txt = language_file.sanitize_text(sv.text)
                 lng_text = data.Text(txt, sv.case, stamp)
-                chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, user)
+                chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, user, True)
                 chgs = lng.changes.get(sv.name)
                 if chgs is None:
                     lng.changes[sv.name] = [chg]
                 else:
+                    for c in chgs:
+                        c.last_upload = False
                     chgs.append(chg)
             elif override: # Override existing entry.
                 lng_chg.stamp = stamp

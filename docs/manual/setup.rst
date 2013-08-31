@@ -143,14 +143,14 @@ treated.
 *max-num-changes*
   Eints enables changing of strings in translations. For reference purposes, a
   number of previous texts for each string (in each language in each project)
-  are kept. This setting controls how many can exist at most.
-
-  This value should be sufficiently large to ensure the last uploaded string is
-  kept.
+  are kept. This setting controls how many can exist at most. Keep in mind
+  that the last uploaded string is always kept to allow comparing with the
+  next upload.
 
 *min-num-changes*
   Controls the minimum number of texts to keep for each string. Should be at
-  least ``1``.
+  least ``2``. (One for the last uploaded text, and one for the newest
+  translation.)
 
 *change-stable-age*
   When a string is being changed, the change is considered 'unstable', and will be kept

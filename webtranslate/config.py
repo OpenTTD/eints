@@ -499,16 +499,28 @@ def process_changes(lchgs, cases, stamp, used_basetexts):
     @rtype:  C{list} of L{Change}
     """
     lchgs.sort()
+    lchgs.reverse()
     cases = dict((c, 0) for c in cases)
     newchgs = []
-    for chg in reversed(lchgs):
-        n = cases[chg.case]
-        if n < cfg.min_number_changes or \
-                (stamp.seconds - chg.stamp.seconds < cfg.change_stabilizing_time and n <= cfg.max_number_changes):
-            # Not enough changes collected yet for this case.
-            # Not old enough, and not enough to throw them away.
+    done = set()
+    # First round, copy what cannot be thrown out.
+    for i in range(len(lchgs)):
+        chg = lchgs[i]
+        case_count = cases[chg.case]
+        if chg.last_upload or (stamp.seconds - chg.stamp.seconds < cfg.change_stabilizing_time and case_count <= cfg.max_number_changes):
+            # Last uploaded change, or still too young to throw away.
             newchgs.append(chg)
-            cases[chg.case] = n + 1
+            cases[chg.case] = case_count + 1
+            used_basetexts.add(chg.base_text)
+            done.add(i)
+    # Second round, copy more if there is room.
+    for i in range(len(lchgs)):
+        chg = lchgs[i]
+        if i in done: continue
+        case_count = cases[chg.case]
+        if case_count < cfg.min_number_changes:
+            newchgs.append(chg)
+            cases[chg.case] = case_count + 1
             used_basetexts.add(chg.base_text)
 
     return newchgs

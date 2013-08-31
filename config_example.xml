@@ -19,7 +19,7 @@
 	<num-backup-files>5</num-backup-files>
 
 	<max-num-changes>5</max-num-changes>
-	<min-num-changes>1</min-num-changes>
+	<min-num-changes>2</min-num-changes> <!-- 1 last uploaded string, and 1 translation. -->
 	<change-stable-age>600</change-stable-age> <!-- 10 minutes -->
 
 	<redmine>
