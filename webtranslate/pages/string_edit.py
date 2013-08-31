@@ -296,10 +296,12 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     # Mapping of case to list of related strings.
     related_cases = dict((case, []) for case in lng.case)
     for rel_sname in pdata.get_related_strings(sname):
-        rel_chgs = data.get_all_newest_changes(lng.changes.get(rel_sname), lng.case)
-        for case, chg in rel_chgs.items():
-            if chg is not None and chg.new_text is not None:
-                related_cases[case].append(RelatedString(rel_sname, chg.new_text))
+        rel_chgs = lng.changes.get(rel_sname)
+        if rel_chgs is not None:
+            rel_chgs = data.get_all_newest_changes(rel_chgs, lng.case)
+            for case, chg in rel_chgs.items():
+                if chg is not None and chg.new_text is not None:
+                    related_cases[case].append(RelatedString(rel_sname, chg.new_text))
 
 
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)

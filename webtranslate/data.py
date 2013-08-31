@@ -699,8 +699,9 @@ class Language:
     @ivar case: Cases of the language
     @type case: C{list} of C{str}
 
-    @ivar changes: Changes to this language ordered by string name.
-    @type changes: C{map} of C{str} to C{list} of L{Change}
+    @ivar changes: Changes to this language ordered by string name, for strings
+                   that exist in the language.
+    @type changes: C{map} of C{str} to (C{list} of L{Change} or C{None})
     """
     def __init__(self, name):
         self.name = name
