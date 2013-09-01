@@ -696,12 +696,15 @@ class Language:
     @ivar gender: Genders of the language.
     @type gender: C{list} of C{str}
 
-    @ivar case: Cases of the language
+    @ivar case: Cases of the language (sorted).
     @type case: C{list} of C{str}
 
     @ivar changes: Changes to this language ordered by string name, for strings
                    that exist in the language.
     @type changes: C{map} of C{str} to (C{list} of L{Change} or C{None})
+
+    @note: L{case} is sorted to make 'download language' output the default case first,
+           which NML more happy.
     """
     def __init__(self, name):
         self.name = name
@@ -784,6 +787,7 @@ def load_language(xloader, node):
         lng.case = ['']
     else:
         lng.case = case.split(' ') + ['']
+        lng.case.sort()
 
     lng.changes = {}
     for ch_node in loader.get_child_nodes(node, 'change'):

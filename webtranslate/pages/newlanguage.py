@@ -59,6 +59,7 @@ def new_language_post(user, proj_name):
             lng.plural = lang.plural
             lng.gender = lang.gender
             lng.case = lang.case
+            lng.case.sort()
 
             pdata.languages[lng.name] = lng
 

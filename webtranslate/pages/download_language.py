@@ -31,6 +31,7 @@ def download(user, prjname, lngname):
             column, sname = skel_value
             chgs = lng.changes.get(sname)
             if chgs is not None:
+                # Language has sorted cases, thus the default case comes first.
                 for case in lng.case:
                     chg = data.get_newest_change(chgs, case)
                     if chg is not None:
