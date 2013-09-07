@@ -9,6 +9,6 @@ from webtranslate import config
 @protected(['projects', '-', '-'])
 def root(user):
     # projs: C{list} of L{ProjectMetaData}
-    projs = sorted(config.cache.projects.values(), key=lambda p: p.name)
+    projs = sorted(config.cache.projects.values(), key=lambda p: p.human_name.lower())
     return template('projects', projects = projs)
 
