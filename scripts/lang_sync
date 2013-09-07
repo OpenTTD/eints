@@ -629,6 +629,7 @@ filename_table = {
     0x35: "finnish", # Finnish
     0x03: "french", # French
     0x32: "frisian", # Frisian
+    0x13: "gaelic", # Scottish Gaelic
     0x31: "galician", # Galician
     0x02: "german", # German
     0x1e: "greek", # Greek

@@ -2,7 +2,7 @@
 """
 Meta information about languages.
 
-Copied from OpenTTD at 20130203, r24956
+Copied from OpenTTD at 20130907, r25754
 """
 class LanguageData:
     """
@@ -183,6 +183,13 @@ galician = LanguageData(name="Galician", ownname="Galego", isocode="gl_ES",
                         digitsep=".", digitsepcur=".", decimalsep=",",
                         winlangid=0x0456, grflangid=0x31,
                         gender=['m','f','n'])
+
+gaelic = LanguageData(name="Scottish Gaelic", ownname="Gàidhlig", isocode="gd_GB",
+                      plural=13, textdir="ltr",
+                      digitsep=",", digitsepcur=",", decimalsep=".",
+                      winlangid=0x083c, grflangid=0x13,
+                      gender=['m','f'],
+                      case=['nom', 'gen', 'dat', 'voc'])
 
 german = LanguageData(name="German", ownname="Deutsch", isocode="de_DE",
                       plural=0, textdir="ltr",
@@ -413,7 +420,7 @@ all_languages = [afrikaans, arabic_egypt, basque, belarusian,
                  brazilian_portuguese, bulgarian, catalan, chuvash, croatian,
                  czech, danish, dutch, english_AU, english, english_US,
                  esperanto, estonian, faroese, finnish, french, frisian,
-                 galician, german, greek, hebrew, hungarian, icelandic, ido,
+                 galician, gaelic, german, greek, hebrew, hungarian, icelandic, ido,
                  indonesian, irish, italian, japanese, korean, latvian,
                  lithuanian, luxembourgish, macedonian, malay, maltese,
                  marathi, norwegian_bokmal, norwegian_nynorsk, persian,
