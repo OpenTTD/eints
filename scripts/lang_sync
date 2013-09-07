@@ -251,14 +251,18 @@ def get_data(url):
     @return: Data returned by the L{url} request, if all went well.
     @rtype:  C{str} or C{None}
     """
-    with urllib.request.urlopen(url) as resp:
-        if resp.status != 200: return None
+    try:
+        with urllib.request.urlopen(url) as resp:
+            if resp.status != 200: return None
 
-        ctype = resp.getheader('Content-Type')
-        if ctype is None or ctype != 'text/plain; charset=UTF-8': return None
+            ctype = resp.getheader('Content-Type')
+            if ctype is None or ctype != 'text/plain; charset=UTF-8': return None
 
-        data = resp.read().decode('utf-8')
-        return data
+            data = resp.read().decode('utf-8')
+            return data
+    except:
+        print("Error: Failing URL: {}".format(url))
+        return None
 # }}}
 # {{{ def post_form(url, form_data):
 def post_form(url, form_data):
@@ -381,6 +385,9 @@ def get_eints_languages():
         print("Getting available language files from Eints.")
     result = []
     data = get_data(build_url('/download-list/' + user_cfg.project))
+    if data is None:
+        print("Error: Could not download the list of languages from Eints.")
+        sys.exit(1)
     for line in data.split('\n'):
         parts = line.split(',')
         if len(parts) != 4:
@@ -736,7 +743,7 @@ def perform_download(ll_files, el_files):
         data = get_data(url)
         if data is None:
             print("Error: Could not download the {} language from Eints.".format(el.lang_name))
-            sys.exit(1)
+            continue
         ll = local_files.get(el.grf_langid)
         if ll is not None:
             path = ll.path_name
