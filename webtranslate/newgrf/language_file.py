@@ -292,6 +292,9 @@ class NewGrfStringInfo:
             return True
 
         if pos < len(self.commands):
+            if self.commands[pos] is None:
+                self.commands[pos] = cmd
+                return True
             if self.commands[pos] != cmd:
                 errors.append((ERROR, lnum, "String parameter {} has more than one string command".format(pos)))
                 return False
