@@ -67,7 +67,7 @@ def new_language_post(user, proj_name):
             pmd.create_statistics(lng)
 
             msg = "Successfully created language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-            redirect("/language/{}/{}?message={}".format(proj_name, lng.name, msg))
+            redirect("/translation/{}/{}?message={}".format(proj_name, lng.name, msg))
             return
 
     msg = "No language found that should be created"

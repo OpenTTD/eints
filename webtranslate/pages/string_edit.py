@@ -201,7 +201,7 @@ def fix_string_page(pmd, prjname, lngname, message):
     sname = find_string(pmd, lngname, 1, 2, 3)
     if sname is None:
         if message is None: message = "All strings are up-to-date, perhaps some translations need rewording?"
-        redirect('/language/{}/{}?message={}'.format(prjname, lngname, message))
+        redirect('/translation/{}/{}?message={}'.format(prjname, lngname, message))
         return
 
     if message is None:

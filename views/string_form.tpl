@@ -4,7 +4,7 @@
 </h1>
 <hr />
 <h2 class="eint-heading-icon eint-icon-document-1-edit">
-    <a class="eint-header-link" href="/language/{{proj_name}}/{{lname}}">{{lname}}</a> - Edit Strings
+    <a class="eint-header-link" href="/translation/{{proj_name}}/{{lname}}">{{lname}}</a> - Edit Strings
     <span class="muted pull-right">{{sname}}</span>
 </h2>
 <form class="form-horizontal well well-large" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">

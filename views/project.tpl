@@ -34,7 +34,7 @@
         <tbody>
             <tr>
                 <td><i class="icon-leaf"></i></td>
-                <td><strong><a href="/language/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
+                <td><strong><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
                 <td><strong>(Base Language)</strong></td>
                 <td>-</td>
                 <td><a class="pull-right" href="/download/{{proj_name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
@@ -58,7 +58,7 @@
                             <i class="icon-exclamation-sign"></i>
                         % end
                     </td>
-                    <td><a href="/language/{{proj_name}}/{{lngname}}">{{lngname}}</a></td>
+                    <td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a></td>
                     % if needs_fix:
                         <td><a href="/fix/{{proj_name}}/{{lngname}}">Start Fixing</a></td>
                     % else:

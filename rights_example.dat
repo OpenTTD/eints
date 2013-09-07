@@ -13,12 +13,12 @@ SOMEONE - /*/*/*/*
 OWNER + /makeproject/*/-/add
 
 # Authenticated users (of a project) can see the projects, see each project, download a
-# language, and get an overview of a language in a project.
+# language, and get an overview of a translation language in a project.
 * + /projects/-/-/read
 * + /project/*/-/read
 * + /download-list/*/*/read
 * + /download/*/*/read
-* + /language/*/*/read
+* + /translation/*/*/read
 
 # Strings editing
 OWNER      + /string/*/*/*

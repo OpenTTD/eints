@@ -48,8 +48,8 @@ class StringDisplayData:
         return self.sname == other.sname
 
 
-@route('/language/<prjname>/<lngname>', method = 'GET')
-@protected(['language', 'prjname', 'lngname'])
+@route('/translation/<prjname>/<lngname>', method = 'GET')
+@protected(['translation', 'prjname', 'lngname'])
 def project(user, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
