@@ -1,5 +1,7 @@
 # Root, project overview, and download pages are readable by all
 * + /root/-/-/read
+* + /languages/-/-/read
+* + /language/-/*/read
 
 # Unauthenticated users don't get any further
 SOMEONE - /*/*/*/*
