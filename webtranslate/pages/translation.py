@@ -97,5 +97,5 @@ def project(user, prjname, lngname):
         strs.sort()
         title = data.STATE_MAP[i].name
         strings.append((title, strs))
-    return template('language', proj_name = prjname, is_blng = (lng == blng),
+    return template('translation', proj_name = prjname, is_blng = (lng == blng),
                     pdata = pdata, language = lngname, strings = strings)
