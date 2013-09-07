@@ -7,7 +7,7 @@ hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
 
 # Configuration.
 # {{{ def check_project_name(name, allow_spaces):
-project_pat = re.compile('[A-Za-z][-A-Za-z0-9]*$')
+project_pat = re.compile('[A-Za-z][-A-Za-z0-9+]*$')
 
 def check_project_name(name, allow_spaces):
     """
