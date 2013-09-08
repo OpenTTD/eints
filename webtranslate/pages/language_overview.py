@@ -29,7 +29,9 @@ def language(user, lngname):
     for pmd in config.cache.projects.values():
         lstate = pmd.overview.get(lngname)
         if lstate is not None:
-            prjdata.append((pmd, lstate))
+            prjdata.append((pmd, True, lstate))
+        else:
+            prjdata.append((pmd, False, ["", "", "", "", pmd.blang_count]))
 
     prjdata.sort(key = lambda x: x[0].name)
     return template('language', lngname = lngname, prjdata = prjdata)

@@ -333,6 +333,12 @@ class ProjectMetaData:
     @ivar overview: Overview of the state of the strings in each language, ordered by language name.
     @type overview: C{dict} of C{str} to [#UNKNOWN, #UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
 
+    @ivar blang_name: Name of base language, if any.
+    @type blang_name: C{None} or C{str}
+
+    @ivar blang_count: Number of strings in base language.
+    @type blang_count: C{int}
+
     @ivar human_name: Project name for humans.
     @type human_name: C{str}
 
@@ -343,6 +349,8 @@ class ProjectMetaData:
         self.pdata = None
         self.name = disk_name
         self.overview = {}
+        self.blang_name = None
+        self.blang_count = 0
         if human_name is not None:
             self.human_name = human_name
         else:
@@ -413,6 +421,8 @@ class ProjectMetaData:
         blng = pdata.get_base_language()
         if blng is None: return
 
+        self.blang_name = blng.name
+        self.blang_count = len(blng.changes)
 
         if parm_lng is None or parm_lng is blng: # Update all languages.
             pdata.statistics = {}

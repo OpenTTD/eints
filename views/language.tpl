@@ -17,13 +17,24 @@
             </tr>
         </thead>
         <tbody>
-        % for pmd, lstate in prjdata:
+        % for pmd, exists, lstate in prjdata:
             <tr>
             <td><a href="/project/{{pmd.name}}">{{pmd.human_name}}</a></td>
-            % if lstate[2] > 0 or lstate[3] > 0 or lstate[4] > 0:
-              <td><a href="/translation/{{pmd.name}}/{{lngname}}">Start fixing</a></td>
+            % if exists:
+                % if lstate[2] > 0 or lstate[3] > 0 or lstate[4] > 0:
+                  <td><a href="/translation/{{pmd.name}}/{{lngname}}">Start fixing</a></td>
+                % else:
+                  <td>Done!</td>
+                % end
             % else:
-              <td>Done!</td>
+                <td>
+                    <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
+                        <fieldset>
+                            <input type="hidden" name="language_select" value="{{lngname}}"/>
+                            <button class="btn btn-mini" type="submit">Start new</button>
+                        </fieldset>
+                    </form>
+                </td>
             % end
             <td class="number">{{lstate[0]}}</td>
             <td class="number">{{lstate[1]}}</td>
