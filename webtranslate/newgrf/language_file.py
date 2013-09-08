@@ -7,7 +7,7 @@ from webtranslate.newgrf import language_info
 ERROR = 'Error'
 WARNING = 'Warning'
 
-num_plurals = {0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4}
+num_plurals = {0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4, 13: 4}
 
 param_pat = re.compile('{([0-9]+:)?([A-Z_0-9]*|{)}')
 gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
