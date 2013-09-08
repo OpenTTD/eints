@@ -142,6 +142,7 @@ def init_projects():
 
     # Read projects user data.
     cfg = configparser.ConfigParser()
+    cfg.optionxform = lambda option: option # Don't convert keys to lowercase.
     cfg.read(PROJECTSFILE)
     _projects = {}
     for pn in cfg.sections():
@@ -152,7 +153,10 @@ def init_projects():
             for ns2 in ns.split(','):
                 for ns3 in ns2.split(' '):
                     ns3 = ns3.strip()
-                    if len(ns3) < 3: continue # User names are longer-equal to 3 characters.
+                    if len(ns3) < 3:
+                        # User names should be longer-equal to 3 characters.
+                        print("Username {} ignored (too short)".format(ns3))
+                        continue
                     names.add(ns3)
             values[k] = names
         _projects[pn] = values
