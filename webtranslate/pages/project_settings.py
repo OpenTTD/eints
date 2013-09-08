@@ -28,10 +28,10 @@ def project_post(user, prjname):
     pdata = pmd.pdata
 
     # Get and check the new project name.
-    human_name = request.forms.name
-    acceptance = utils.verify_name(human_name, "Full project name")
+    human_name = request.forms.name.strip()
+    acceptance = utils.verify_name(human_name, "Full project name", False)
     if acceptance is not None:
-        abort(404, acceptance)
+        redirect('/projsettings/' + prjname + '?message=' + acceptance)
         return
 
     # Get and check the new url.

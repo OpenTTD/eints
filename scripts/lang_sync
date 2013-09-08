@@ -6,31 +6,35 @@ import urllib.request
 hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
 
 # Configuration.
-# {{{ def check_project_name(name, allow_spaces):
-project_pat = re.compile('[A-Za-z][-A-Za-z0-9+]*$')
+# {{{ def check_project_name(name):
+project_pat = re.compile('[A-Za-z][-A-Za-z0-9]*$')
 
-def check_project_name(name, allow_spaces):
+def check_project_name(name):
     """
     Check whether L{name} can be a valid project name.
 
     @param name: Name to verify.
     @type  name: C{str}
 
-    @param allow_spaces: Whether spaces in the name are allowed.
-    @type  allow_spaces: C{bool}
+    @return: Whether the given name is valid.
+    @rtype:  C{bool}
+    """
+    return project_pat.match(name.strip())
+# }}}
+# {{{ def check_project_name(name):
+human_pat = re.compile('[A-Za-z][-A-Za-z0-9+ ]*$')
+
+def check_human_name(name):
+    """
+    Check whether L{name} can be a valid human project name.
+
+    @param name: Name to verify.
+    @type  name: C{str}
 
     @return: Whether the given name is valid.
     @rtype:  C{bool}
     """
-    if not allow_spaces:
-        parts = [name.strip()]
-    else:
-        parts = name.split()
-
-    for part in parts:
-        m = project_pat.match(part)
-        if not m: return False
-    return True
+    return human_pat.match(name.strip())
 # }}}
 # {{{ def check_project_url(url):
 def check_project_url(url):
@@ -126,10 +130,10 @@ class UserConfig:
         if self.project is None:
             print("Error: Missing Eints project identifier (add it with --project=PROJ_ID).")
             sys.exit(1)
-        if not check_project_name(self.project, False):
+        if not check_project_name(self.project):
             print("Error: Project identifier \"{}\" is not valid.".format(self.project))
             sys.exit(1)
-        if self.project_desc is not None and not check_project_name(self.project_desc, True):
+        if self.project_desc is not None and not check_human_name(self.project_desc):
             print("Error: Project description \"{}\" is not valid.".format(self.project_desc))
             sys.exit(1)
         if not check_project_url(self.project_url):

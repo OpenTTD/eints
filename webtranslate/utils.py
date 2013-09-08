@@ -120,7 +120,7 @@ def get_status_definition_strings():
     """
     return [data.STATE_MAP[code] for code in [data.UNKNOWN, data.UP_TO_DATE, data.OUT_OF_DATE, data.INVALID, data.MISSING]]
 
-def verify_name(name, name_type):
+def verify_name(name, name_type, is_identifier):
     """
     Check whether a provided name is sane enough to accept as project name.
 
@@ -130,14 +130,20 @@ def verify_name(name, name_type):
     @param name_type: Type of name processed
     @type  name_type: C{str}
 
+    @param is_identifier: Whether the name shall be a valid identifier to be used in URLs.
+    @type  is_identifier: C{bool}
+
     @return: Whether the name is acceptable.
     @rtype:  C{str} with an error description, or C{None} if all is well.
     """
-    name = ''.join(name.lower().split())
     if not name:
         return "{} missing".format(name_type)
-    if not re.match('[A-Za-z][-A-Za-z0-9+]*$', name):
-        return "{} can only contain characters A-Z, a-z, 0-9, plus (+) and dash (-)".format(name_type)
+    if is_identifier:
+        if not re.match('[A-Za-z][-A-Za-z0-9]*$', name):
+            return "{} can only contain characters A-Z, a-z, 0-9 and dash (-)".format(name_type)
+    else:
+        if not re.match('[A-Za-z][-A-Za-z0-9+ ]*$', name):
+            return "{} can only contain characters A-Z, a-z, 0-9, plus (+), dash (-) and space ( )".format(name_type)
     return None
 
 def verify_url(url):

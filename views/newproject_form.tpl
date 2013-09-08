@@ -6,7 +6,7 @@
     <fieldset style="padding-left:160px;">
         <label for="name">Project identifier (required)</label>
         <input class="input-xxlarge" type="text" id="name" name="name"/>
-        <span class="help-block">Only characters A-Z, a-z, 0-9, dashes, and spaces allowed</span>
+        <span class="help-block">Only characters A-Z, a-z, 0-9 and dash (-) allowed</span>
         <br />
         <br />
         <div class="eint-form-actions">

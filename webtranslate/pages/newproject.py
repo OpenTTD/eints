@@ -13,33 +13,32 @@ def page_get(user):
 @route('/createproject', method = 'POST')
 @protected(['createproject', '-', '-'])
 def page_post(user):
-    prjname = request.forms.name
-    prjname = ''.join(prjname.lower().split())
-    acceptance = utils.verify_name(prjname, "Project identifier")
+    prjname = request.forms.name.lower().strip()
+    acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
-        abort(404, acceptance)
+        redirect('/newproject?message=' + acceptance)
         return
 
     if prjname in config.cache.projects:
-        abort(404, "Project \"{}\" already exists".format(prjname))
+        redirect('/newproject?message=' + "Project \"{}\" already exists".format(prjname))
 
     return template('createproject_form', prjname = prjname)
 
 @route('/makeproject/<prjname>', method = 'POST')
 @protected(['makeproject', 'prjname', '-'])
 def create_project(user, prjname):
-    acceptance = utils.verify_name(prjname, "Project identifier")
+    acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
-        abort(404, acceptance)
+        redirect('/newproject?message=' + acceptance)
         return
 
     if prjname in config.cache.projects:
-        abort(404, "Project \"{}\" already exists".format(prjname))
+        redirect('/newproject?message=' + "Project \"{}\" already exists".format(prjname))
 
-    human_name = request.forms.humanname
-    acceptance = utils.verify_name(human_name, "Full project name")
+    human_name = request.forms.humanname.strip()
+    acceptance = utils.verify_name(human_name, "Full project name", False)
     if acceptance is not None:
-        abort(404, acceptance)
+        redirect('/newproject?message=' + acceptance)
         return
 
     url = request.forms.url
@@ -54,4 +53,4 @@ def create_project(user, prjname):
         return
 
     message = "Successfully created project '" + prjname +"' " + utils.get_datetime_now_formatted()
-    redirect("/project/" + prjname.lower() + '?message=' + message)
+    redirect('/project/{}?message={}'.format(prjname.lower(), message))
