@@ -8,9 +8,11 @@
     <fieldset>
         <br />
         You are about to add the {{lngname}} language as translation language to the {{prjname}} project. Are you sure?
+        <br />
         <div style="width: 60%; margin-left:auto; margin-right:auto;">
         <div class="control-group">
-            <button class="btn btn-primary" type="submit">Select new language</button>
+            <button class="btn btn-primary" type="submit">Create language</button>
+            <a class="btn btn-primary" href="/project/{{prjname}}">Cancel</a>
         </div>
         </div>
     </fieldset>
