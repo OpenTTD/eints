@@ -6,6 +6,7 @@
 % if pdata.url is not '':
     <a class="btn" href="{{pdata.url}}">&#187; Project Website</a> |
 % end
+    <a class="btn" href="/projsettings/{{proj_name}}"><i class="icon-cog"></i> Project Settings</a>
     <a class="btn" href="/newlanguage/{{proj_name}}"><i class="icon-plus-sign"></i> Start New Translation</a>
     <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>
 </div>
@@ -84,6 +85,3 @@
         % end
     </dl>
 %end
-
-</ul>
-<a class="btn btn-mini" href="/projsettings/{{proj_name}}"><i class="icon-cog"></i> Project Settings</a>
