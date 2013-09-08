@@ -17,7 +17,7 @@
                 % end
             </select>
             &nbsp;
-            <button class="btn btn-primary" type="submit">Create Translation</button>
+            <button class="btn btn-primary" type="submit">Select new language</button>
         </div>
         </div>
     </fieldset>

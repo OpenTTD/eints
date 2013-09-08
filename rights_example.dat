@@ -30,4 +30,5 @@ TRANSLATOR + /string/*/*/*
 OWNER + /upload/*/-/*
 OWNER + /delete/*/*/*
 OWNER + /newlanguage/*/-/*
+OWNER + /makelanguage/*/*/add
 OWNER + /projsettings/*/-/*
