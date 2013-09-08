@@ -1,8 +1,8 @@
 """
 Bottle authentication decorator.
 """
-from webtranslate.bottle import request, abort, error, response
-from webtranslate import users
+from webtranslate.bottle import request, abort, error, response, redirect
+from webtranslate import users, config
 
 @error(401)
 def handle401(error):
@@ -31,7 +31,13 @@ def protected(page_name):
             prjname = ka.get('prjname')
             lngname = ka.get('lngname')
             if not users.may_access(user, pwd, pname, prjname, lngname):
-                abort(401, "Access denied")
+                if user is None:
+                    abort(401, "Access denied")
+                elif prjname is not None and prjname in config.cache.projects:
+                    redirect("/project/" + prjname.lower() + '?message=Access denied')
+                else:
+                    redirect("/projects?message=Access denied")
+                return;
             return func(user, *a, **ka)
         return wrapper
     return decorator
