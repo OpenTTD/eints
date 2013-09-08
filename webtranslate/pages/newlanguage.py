@@ -3,13 +3,13 @@ from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_info
 
-@route('/newlanguage/<proj_name>', method = 'GET')
-@protected(['newlanguage', 'proj_name', '-'])
-def new_language_get(user, proj_name):
+@route('/newlanguage/<prjname>', method = 'GET')
+@protected(['newlanguage', 'prjname', '-'])
+def new_language_get(user, prjname):
     """
     Form to add another language to the project.
     """
-    pmd = config.cache.get_pmd(proj_name)
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
@@ -31,16 +31,16 @@ def new_language_get(user, proj_name):
     translations.sort(key=lambda x: x.isocode)
     can_be_added.sort(key=lambda x: x.isocode)
 
-    return template('newlanguage', proj_name = proj_name, pdata = pdata, base_langs = base_langs,
+    return template('newlanguage', proj_name = prjname, pdata = pdata, base_langs = base_langs,
                     translations = translations, can_be_added = can_be_added)
 
-@route('/newlanguage/<proj_name>', method = 'POST')
-@protected(['newlanguage', 'proj_name', '-'])
-def new_language_post(user, proj_name):
+@route('/newlanguage/<prjname>', method = 'POST')
+@protected(['newlanguage', 'prjname', '-'])
+def new_language_post(user, prjname):
     """
     Construct the requested language.
     """
-    pmd = config.cache.get_pmd(proj_name)
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
@@ -67,7 +67,7 @@ def new_language_post(user, proj_name):
             pmd.create_statistics(lng)
 
             msg = "Successfully created language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-            redirect("/translation/{}/{}?message={}".format(proj_name, lng.name, msg))
+            redirect("/translation/{}/{}?message={}".format(prjname, lng.name, msg))
             return
 
     msg = "No language found that should be created"

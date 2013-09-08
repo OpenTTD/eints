@@ -5,22 +5,22 @@ from webtranslate.bottle import route, template, abort, request, redirect, reque
 from webtranslate.protect import protected
 from webtranslate import config, utils
 
-@route('/projsettings/<proj_name>', method = 'GET')
-@protected(['projsettings', 'proj_name', '-'])
-def project_get(user, proj_name):
-    pmd = config.cache.get_pmd(proj_name)
+@route('/projsettings/<prjname>', method = 'GET')
+@protected(['projsettings', 'prjname', '-'])
+def project_get(user, prjname):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")
         return
 
     pdata = pmd.pdata
-    return template('projsettings', proj_name = proj_name, human_name = pdata.human_name,
+    return template('projsettings', proj_name = prjname, human_name = pdata.human_name,
                     url = pdata.url)
 
-@route('/projsettings/<proj_name>', method = 'POST')
-@protected(['projsettings', 'proj_name', '-'])
-def project_post(user, proj_name):
-    pmd = config.cache.get_pmd(proj_name)
+@route('/projsettings/<prjname>', method = 'POST')
+@protected(['projsettings', 'prjname', '-'])
+def project_post(user, prjname):
+    pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")
         return
@@ -62,6 +62,6 @@ def project_post(user, proj_name):
 
         config.cache.save_pmd(pmd)
 
-    redirect("/project/" + proj_name.lower() + '?message=' + message)
+    redirect("/project/" + prjname.lower() + '?message=' + message)
 
 
