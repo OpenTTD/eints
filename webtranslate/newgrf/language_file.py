@@ -659,7 +659,11 @@ def load_language_file(handle, max_size, errors):
                     errors.append((ERROR, lnum, 'String name {} is already used.'.format(m.group(1))))
                     continue
                 skeleton_strings.add(m.group(1))
-                data.skeleton.append(('string', (line.find(':'), m.group(1))))
+                if '\t' in line:
+                    normalized_line = line.expandtabs()
+                else:
+                    normalized_line = line
+                data.skeleton.append(('string', (normalized_line.find(':'), m.group(1))))
             continue
 
         errors.append((ERROR, lnum, "Line not recognized"))
