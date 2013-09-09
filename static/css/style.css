@@ -89,6 +89,9 @@ h4 {
 .eint-icon-settings {
     background-image:url('/static/img/woocons1/Cog.png');
 }
+.eint-icon-warning {
+    background-image:url('/static/img/woocons1/Sign_Warning.png');
+}
 
 td.number, th.number {
   	text-align:right;

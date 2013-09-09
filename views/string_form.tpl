@@ -69,7 +69,7 @@
         % end
         % if len(tc.related) > 0:
             <p><strong>Related strings:</strong></p>
-            <table border="1">
+            <table border="0" class="table">
                 % for rel in tc.related:
                     <tr>
                         <td><a href="/string/{{proj_name}}/{{lname}}/{{rel.sname}}">{{rel.sname}}</a></td>

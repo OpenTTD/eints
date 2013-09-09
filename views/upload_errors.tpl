@@ -1,13 +1,13 @@
 %rebase main_template title='Upload language for ' + proj_name
-<h1>Upload language for {{proj_name}}</h1>
-The file that you uploaded contains errors:
-<p>
+<h1 class="eint-heading-icon eint-icon-warning">Upload Language for {{proj_name}}</h1>
+<p class="alert alert-error">The file that you uploaded contains errors</p>
+<ul>
 % for err in errors:
     % if err[1] is not None:
-        {{err[0]}} at line {{err[1] + 1}}: {{err[2]}}<br />
+        <li>{{err[0]}} at line {{err[1] + 1}}: {{err[2]}}</li>
     % else:
-        {{err[0]}}: {{err[2]}}<br />
+        <li>{{err[0]}}: {{err[2]}}</li>
     % end
 % end
-Please fix your errors first.
-</p>
+</ul>
+<p><strong>Please fix these errors and try again :)</strong></p>
