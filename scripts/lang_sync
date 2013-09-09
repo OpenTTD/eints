@@ -756,8 +756,8 @@ def perform_download(ll_files, el_files):
             action = "Wrote"
         else:
             path = get_filename(el.grf_langid)
-            if path is None: path = el.lang_name
-            path = user_cfg.lang_dir + os.sep + path + user_cfg.lang_ext
+            if path is None: path = el.lang_name + user_cfg.lang_ext
+            path = user_cfg.lang_dir + os.sep + path
             action = "Created"
 
         if user_cfg.no_write:
