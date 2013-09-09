@@ -26,21 +26,32 @@
                 % else:
                   <td>Done!</td>
                 % end
+                <td class="number">{{lstate[0]}}</td>
+                <td class="number">{{lstate[1]}}</td>
+                <td class="number">{{lstate[2]}}</td>
+                <td class="number">{{lstate[3]}}</td>
+                <td class="number">{{lstate[4]}}</td>
             % else:
                 <td>
-                    <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
-                        <fieldset>
-                            <input type="hidden" name="language_select" value="{{lngname}}"/>
-                            <button class="btn btn-mini" type="submit">Start new</button>
-                        </fieldset>
-                    </form>
+                    % if lstate[4] > 0:
+                        <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
+                            <fieldset>
+                                <input type="hidden" name="language_select" value="{{lngname}}"/>
+                                <button class="btn btn-mini" type="submit">Start new</button>
+                            </fieldset>
+                        </form>
+                    % end
                 </td>
+                <td class="number"></td>
+                <td class="number"></td>
+                <td class="number"></td>
+                <td class="number"></td>
+                % if lstate[4] > 0:
+                    <td class="number">{{lstate[4]}}</td>
+                % else:
+                    <td class="number"></td>
+                % end
             % end
-            <td class="number">{{lstate[0]}}</td>
-            <td class="number">{{lstate[1]}}</td>
-            <td class="number">{{lstate[2]}}</td>
-            <td class="number">{{lstate[3]}}</td>
-            <td class="number">{{lstate[4]}}</td>
             </tr>
         % end
         </tbody>
