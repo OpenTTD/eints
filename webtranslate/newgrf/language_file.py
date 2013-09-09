@@ -794,13 +794,11 @@ def compare_info(base_info, lng_info, errors):
                 else:
                     errors.append((WARNING, None, msg))
             elif lng_info.non_positionals[bname] != bcnt:
+                # Non-positional is used both in base language and in translation, but a different number of times.
+                # Requiring an exact match would give too much trouble, especially with ltr <-> rtl translations.
                 msg = 'String command {} is used {} times in the base language, and {} times in the translation'
                 msg = msg.format('{' + bname + '}', bcnt, lng_info.non_positionals[bname])
-                if is_critical_non_positional(bname):
-                    errors.append((ERROR, None, msg))
-                    return False
-                else:
-                    errors.append((WARNING, None, msg))
+                errors.append((WARNING, None, msg))
 
         for np in lng_info.non_positionals:
             if np not in base_info.non_positionals:
