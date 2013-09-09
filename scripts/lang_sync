@@ -694,6 +694,8 @@ def get_filename(grf_langid):
     @return: Base filename for the language file, if it can be found.
     @rtype:  C{str} or C{None}
     """
+    global langfile_map_cache
+
     if langfile_map_cache is None:
         langfile_map_cache = {}
         if user_cfg.langfile_map is not None:
