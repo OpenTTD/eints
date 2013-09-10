@@ -6,7 +6,7 @@
     <fieldset style="padding-left:160px;">
         <label for="name">Full project name (required)</label>
         <input class="input-xxlarge" type="text" id="humanname" name="humanname"/>
-        <span class="help-block">Only characters A-Z, a-z, 0-9, plus (+), dash (-), and space ( ) allowed</span>
+        <span class="help-block">Only characters A-Z, a-z, 0-9, plus (+), dash (-), dot (.), slash (/), and space ( ) allowed</span>
         <br />
         <br />
         <label for="url">Project website (optional)</label>
