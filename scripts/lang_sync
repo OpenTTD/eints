@@ -22,7 +22,7 @@ def check_project_name(name):
     return project_pat.match(name.strip())
 # }}}
 # {{{ def check_project_name(name):
-human_pat = re.compile('[A-Za-z][-A-Za-z0-9+ ]*$')
+human_pat = re.compile('[A-Za-z][-A-Za-z0-9+./ ]*$')
 
 def check_human_name(name):
     """
