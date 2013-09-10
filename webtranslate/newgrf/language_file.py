@@ -596,7 +596,7 @@ def handle_pragma(lnum, line, data, errors):
     return
 # }}}
 
-string_pat = re.compile('^([A-Za-z_0-9]+)(.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
+string_pat = re.compile('^([A-Za-z_0-9]+)(\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
 bom = codecs.BOM_UTF8.decode('utf-8')
 
 def load_language_file(handle, max_size, errors):
