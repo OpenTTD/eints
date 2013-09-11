@@ -3,7 +3,7 @@ from webtranslate.protect import protected
 from webtranslate import config
 import operator
 
-@route('/languages', methog = "GET")
+@route('/languages', method = "GET")
 @protected(['languages', '-', '-'])
 def languages(user):
     """
@@ -33,5 +33,5 @@ def language(user, lngname):
         else:
             prjdata.append((pmd, False, ["", "", "", "", pmd.blang_count]))
 
-    prjdata.sort(key = lambda x: x[0].name)
+    prjdata.sort(key = lambda p: p[0].human_name.lower())
     return template('language', lngname = lngname, prjdata = prjdata)
