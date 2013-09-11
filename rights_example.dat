@@ -6,6 +6,9 @@
 # Unauthenticated users don't get any further
 SOMEONE - /*/*/*/*
 
+# Authenticated users can access their personal profile
+* + /userprofile/-/-/*
+
 # First pages of project creation can be used by anyone (these pages have no
 # project to authenticate against).
 * + /newproject/-/-/read

@@ -25,6 +25,11 @@
                     <li><a href="/projects"><i class="icon-list-alt"></i> Projects</a></li>
                     <li><a href="/newproject"><i class="icon-plus-sign"></i> New Project</a></li>
                 </ul>
+                <ul class="nav pull-right">
+                    <li>
+                        <a href="/userprofile"><i class="icon-lock"></i> Profile</a>
+                    </li>
+                </ul>
             </div>
         </div>
 

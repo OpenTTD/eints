@@ -15,6 +15,7 @@ from webtranslate.pages import string_edit
 from webtranslate.pages import delete
 from webtranslate.pages import newlanguage
 from webtranslate.pages import project_settings
+from webtranslate.pages import user_profile
 
 # Get template files from 'views' only.
 bottle.TEMPLATE_PATH = ['./views/']
