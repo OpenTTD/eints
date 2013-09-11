@@ -3,8 +3,18 @@ User administration system to use during development.
 
 In particular the user management is very poor.
 """
-from webtranslate import rights
+from webtranslate import rights, userauth
 from webtranslate.users import silly
+
+class DevelopmentUserAuthentication(userauth.UserAuthentication):
+    """
+    Implementation of UserAuthentication for Development authentication system.
+    """
+    def __init__(self, is_auth, name):
+        super(DevelopmentUserAuthentication, self).__init__(is_auth, name)
+
+    def may_access(self, pname, prjname, lngname):
+        return rights.may_access(pname, prjname, lngname, self.name)
 
 def init():
     """
@@ -14,9 +24,9 @@ def init():
     rights.init_page_access()
     rights.init_projects()
 
-def may_access(user, pwd, pname, prjname, lngname):
+def get_authentication(user, pwd):
     """
-    May a user access a page?
+    Authenticate a user and return an authentication object.
 
     @param user: Name of the user, if provided (external data).
     @type  user: C{str} or C{None}
@@ -24,19 +34,10 @@ def may_access(user, pwd, pname, prjname, lngname):
     @param pwd: Password of the user, if provided (external data).
     @type  pwd: C{str} or C{None}
 
-    @param pname: Page name being accessed.
-    @type  pname: C{list} of C{str}
-
-    @param prjname: Project name of the page, if any.
-    @type  prjname: C{str} or C{None}
-
-    @param lngname: Language name of the page, if any.
-    @type  lngname: C{str} or C{None}
-
-    @return: Whether the user may access the page.
-    @rtype:  C{bool}
+    @return: UserAuthentication object to test accesses with.
+    @rtype: C{UserAuthentication}
     """
     if user is None or pwd is None or not silly.authenticate(user, pwd):
-        user = "unknown"
-
-    return rights.may_access(pname, prjname, lngname, user)
+        return DevelopmentUserAuthentication(False, "unknown")
+    else:
+        return DevelopmentUserAuthentication(True, user)

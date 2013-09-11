@@ -30,14 +30,23 @@ def protected(page_name):
             pname = [ka.get(p, p) for p in page_name] + [METHODS.get(request.method, "-")]
             prjname = ka.get('prjname')
             lngname = ka.get('lngname')
-            if not users.may_access(user, pwd, pname, prjname, lngname):
-                if user is None:
-                    abort(401, "Access denied")
-                elif prjname is not None and prjname in config.cache.projects:
-                    redirect("/project/" + prjname.lower() + '?message=Access denied')
-                else:
-                    redirect("/projects?message=Access denied")
-                return;
-            return func(user, *a, **ka)
+            userauth = users.get_authentication(user, pwd)
+            if userauth is None:
+                # No authentication backend.
+                abort(401, "Access denied")
+            elif userauth.may_access(pname, prjname, lngname):
+                # Access granted.
+                return func(userauth.name, *a, **ka)
+            elif not userauth.is_auth:
+                # Not logged in.
+                abort(401, "Access denied")
+            elif prjname is not None and prjname in config.cache.projects:
+                # Valid user, but insufficient permissions: Go to project page.
+                redirect("/project/" + prjname.lower() + '?message=Access denied')
+            else:
+                # Valid user, no project context: Go to project list.
+                redirect("/projects?message=Access denied")
+            return
+            
         return wrapper
     return decorator

@@ -10,7 +10,7 @@ A lot of the magic in this file has been copied from hgweb.py in https://bitbuck
 This code is not thread-safe!!
 """
 import hashlib
-from webtranslate import rights
+from webtranslate import rights, userauth
 
 # Also initialized in the config loader.
 db_type = None
@@ -25,6 +25,35 @@ owner_role = None
 translator_roles = {} # Mapping of iso language name to role name.
 
 db_connection = None
+
+class RedmineUserAuthentication(userauth.UserAuthentication):
+    """
+    Implementation of UserAuthentication for Redmine authentication system.
+    """
+    def __init__(self, is_auth, name, project_roles):
+        super(RedmineUserAuthentication, self).__init__(is_auth, name)
+        self.project_roles = project_roles
+
+    def may_access(self, pname, prjname, lngname):
+        # Get page access rights for all types of users.
+        accesses = rights.get_accesses(pname, self.name)
+        if accesses[self.name] == True or accesses['SOMEONE'] == True:
+            return True
+
+        # User must get access through a OWNER or TRANSLATOR role.
+        if prjname is None or self.name == "unknown": return False
+
+        roles = self.project_roles.get(prjname)
+        if roles is None: return False
+
+        if lngname is not None and accesses['TRANSLATOR'] == True:
+            rm_role = translator_roles.get(lngname)
+            if rm_role is not None and rm_role != "" and rm_role in roles: return True
+
+        if accesses['OWNER'] == True:  # 'prjname is not None' has been already established.
+            if owner_role is not None and owner_role != "" and owner_role in roles: return True
+
+        return False
 
 def init():
     """
@@ -69,9 +98,9 @@ def init():
         db_connection = None # There is no db connection.
 
 
-def may_access(user, pwd, pname, prjname, lngname):
+def get_authentication(user, pwd):
     """
-    May a user access a page?
+    Authenticate a user and return an authentication object.
 
     @param user: Name of the user, if provided (external data).
     @type  user: C{str} or C{None}
@@ -79,22 +108,13 @@ def may_access(user, pwd, pname, prjname, lngname):
     @param pwd: Password of the user, if provided (external data).
     @type  pwd: C{str} or C{None}
 
-    @param pname: Page name being accessed.
-    @type  pname: C{list} of C{str}
-
-    @param prjname: Project name of the page, if any.
-    @type  prjname: C{str} or C{None}
-
-    @param lngname: Language name of the page, if any.
-    @type  lngname: C{str} or C{None}
-
-    @return: Whether the user may access the page.
-    @rtype:  C{bool}
+    @return: UserAuthentication object to test accesses with.
+    @rtype: C{UserAuthentication}
     """
     global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
     global owner_role, translator_roles
 
-    if db_connection is None: return False  # No connection -> Always refuse.
+    if db_connection is None: return None  # No connection -> Always refuse.
 
     # Verify user.
     # Note that failure to authenticate is not fatal, it falls back to an 'unknown' user.
@@ -109,7 +129,7 @@ def may_access(user, pwd, pname, prjname, lngname):
             cur.execute("SELECT users.hashed_password, users.salt FROM users WHERE users.login=?", (user,))
             row = cur.fetchone()
         else:
-            return False
+            return None
 
         if not row:
             user = None
@@ -120,48 +140,24 @@ def may_access(user, pwd, pname, prjname, lngname):
             salted_hash = hashlib.sha1((result_salt + hashed_password).encode('ascii')).hexdigest()
             if salted_hash != result_hash:
                 user = None
-
-    # Get page access rights for all types of users.
-    if user is None or user == "":
-        user = "unknown"
-
-    accesses = rights.get_accesses(pname, user)
-    if accesses[user] == True or accesses['SOMEONE'] == True: return True
-
-    # User must get access through a OWNER or TRANSLATOR role.
-    if prjname is None or user == "unknown": return False
-
-    if db_type == 'postgress' or db_type == 'mysql':
-        cur = db_connection.cursor()
-        cur.execute("""SELECT roles.name FROM users, members, projects, member_roles, roles
-                       WHERE users.login=%s
-                         AND users.id = members.user_id
-                         AND projects.identifier=%s
-                         AND projects.id = members.project_id
-                         AND members.id = member_roles.member_id
-                         AND member_roles.role_id = roles.id""", (user, prjname))
-        rows = cur.fetchall()
-
-    elif db_type == 'sqlite3':
-        cur = db_connection.cursor()
-        cur.execute("""SELECT roles.name FROM users, members, projects, member_roles, roles
-                       WHERE users.login=?
-                         AND users.id = members.user_id
-                         AND projects.identifier=?
-                         AND projects.id = members.project_id
-                         AND members.id = member_roles.member_id
-                         AND member_roles.role_id = roles.id""", (user, prjname))
-        rows = cur.fetchall()
     else:
-        return False
+        user = None
 
-    roles = set(r[0] for r in rows)
-    if lngname is not None and accesses['TRANSLATOR'] == True:
-        rm_role = translator_roles.get(lngname)
-        if rm_role is not None and rm_role != "" and rm_role in roles: return True
+    if user is None: return RedmineUserAuthentication(False, "unknown", dict())
 
-    if accesses['OWNER'] == True:  # 'prjname is not None' has been already established.
-        if owner_role is not None and owner_role != "" and owner_role in roles: return True
+    # Fetch roles from database
+    cur = db_connection.cursor()
+    cur.execute("""SELECT projects.identifier, roles.name FROM users, members, projects, member_roles, roles
+                   WHERE users.login=%s
+                     AND users.id = members.user_id
+                     AND projects.id = members.project_id
+                     AND members.id = member_roles.member_id
+                     AND member_roles.role_id = roles.id""", (user,))
+    rows = cur.fetchall()
 
-    return False
+    roles = dict()
+    for r in rows:
+        prj = roles.setdefault(r[0], set())
+        prj.add(r[1])
 
+    return RedmineUserAuthentication(True, user, roles)
