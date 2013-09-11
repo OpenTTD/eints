@@ -392,6 +392,8 @@ def str_post(user, prjname, lngname, sname):
         trl_str = request_forms.get('text_' + case) # Translation text in the form.
         if trl_str is None: continue # It's missing from the form data.
 
+        trl_str = language_file.sanitize_text(trl_str)
+
         # Check whether there is a match with a change in the translation.
         trl_chg = None
         for cchg in case_chgs[case]:
@@ -400,10 +402,12 @@ def str_post(user, prjname, lngname, sname):
                 break
 
         if trl_chg is None:
+            if case != '' and trl_str == '' and len(case_chgs[case]) == 0:
+                continue # Skip adding empty non-base cases if there are no strings.
+
             # A new translation against bchg!
             if stamp is None: stamp = data.make_stamp()
-            txt = language_file.sanitize_text(trl_str)
-            txt = data.Text(txt, case, stamp)
+            txt = data.Text(trl_str, case, stamp)
             tchg = data.Change(sname, case, bchg.base_text, txt, stamp, user)
             state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
             if state == data.MISSING or state == data.INVALID:

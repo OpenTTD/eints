@@ -44,6 +44,9 @@ def download(user, prjname, lngname):
                             text = chg.base_text.text
                         else:
                             text = chg.new_text.text
+                            if case  != '' and text == '':
+                                # Suppress printing of empty non-default cases in translations.
+                                continue
 
                         length = column - len(line)
                         if length < 1: length = 1

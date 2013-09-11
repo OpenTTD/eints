@@ -214,11 +214,11 @@ def get_string_status(lchg, case, lng, btext, binfo):
     @return: State of the translated string and any errors.
     @rtype:  C{tuple} (C{int}, C{list} of C{tuple} (C{str}, C{None}, C{str}))
     """
-    if lchg is None:
-        if case == '':
+    if case == '':
+        if lchg is None:
             return MISSING, []
-        else:
-            return MISSING_OK, []
+    elif lchg is None or lchg.new_text.text == '':
+        return MISSING_OK, []
 
     if lchg.base_text != btext and lchg.stamp < btext.stamp:
         state = OUT_OF_DATE

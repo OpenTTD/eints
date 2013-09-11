@@ -87,6 +87,9 @@ def project(user, prjname, lngname):
                             text = chg.base_text.text
                         else:
                             text = chg.new_text.text
+                            if text == '' and case != '':
+                                # Suppress empty non-default case from translations.
+                                continue
                         cdd = CaseDisplayData(case, data.STATE_MAP[cstate].name, text)
                         sdd.cases.append(cdd)
 
