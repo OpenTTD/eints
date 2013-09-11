@@ -7,7 +7,7 @@ from webtranslate import config
 
 @route('/projects', method = 'GET')
 @protected(['projects', '-', '-'])
-def root(user):
+def root(userauth):
     # projs: C{list} of L{ProjectMetaData}
     projs = sorted(config.cache.projects.values(), key=lambda p: p.human_name.lower())
     return template('projects', projects = projs)

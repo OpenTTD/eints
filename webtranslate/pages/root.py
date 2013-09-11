@@ -6,6 +6,6 @@ from webtranslate.protect import protected
 
 @route('/', method = 'GET')
 @protected(['root', '-', '-'])
-def root(user):
+def root(userauth):
     return template('root')
 

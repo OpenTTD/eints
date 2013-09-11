@@ -4,7 +4,7 @@ from webtranslate import config
 
 @route('/delete/<prjname>/<lngname>', method = 'GET')
 @protected(['delete', 'prjname', 'lngname'])
-def delete_form(user, prjname, lngname):
+def delete_form(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
@@ -24,7 +24,7 @@ def delete_form(user, prjname, lngname):
 
 @route('/really_delete/<prjname>/<lngname>', method = 'POST')
 @protected(['delete', 'prjname', 'lngname'])
-def delete_submit(user, prjname, lngname):
+def delete_submit(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")

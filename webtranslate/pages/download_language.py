@@ -7,7 +7,7 @@ from webtranslate import config, data
 
 @route('/download/<prjname>/<lngname>', method = 'GET')
 @protected(['download', 'prjname', 'lngname'])
-def download(user, prjname, lngname):
+def download(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")

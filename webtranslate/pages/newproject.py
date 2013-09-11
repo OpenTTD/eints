@@ -7,12 +7,12 @@ from webtranslate import config, utils
 
 @route('/newproject', method = 'GET')
 @protected(['newproject', '-', '-'])
-def page_get(user):
+def page_get(userauth):
     return template('newproject_form')
 
 @route('/createproject', method = 'POST')
 @protected(['createproject', '-', '-'])
-def page_post(user):
+def page_post(userauth):
     prjname = request.forms.name.lower().strip()
     acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
@@ -26,7 +26,7 @@ def page_post(user):
 
 @route('/makeproject/<prjname>', method = 'POST')
 @protected(['makeproject', 'prjname', '-'])
-def create_project(user, prjname):
+def create_project(userauth, prjname):
     acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
         redirect('/newproject?message=' + acceptance)

@@ -168,7 +168,7 @@ def find_string(pmd, lngname, missing_prio, invalid_prio, outdated_prio):
 
 @route('/fix/<prjname>/<lngname>', method = 'GET')
 @protected(['string', 'prjname', 'lngname'])
-def fix_string(user, prjname, lngname):
+def fix_string(userauth, prjname, lngname):
     """
     Fix a random string.
 
@@ -356,7 +356,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
 
 @route('/string/<prjname>/<lngname>/<sname>', method = 'GET')
 @protected(['string', 'prjname', 'lngname'])
-def str_form(user, prjname, lngname, sname):
+def str_form(userauth, prjname, lngname, sname):
     parms = check_page_parameters(prjname, lngname, sname)
     if parms is None: return
 
@@ -366,7 +366,7 @@ def str_form(user, prjname, lngname, sname):
 
 @route('/string/<prjname>/<lngname>/<sname>', method = 'POST')
 @protected(['string', 'prjname', 'lngname'])
-def str_post(user, prjname, lngname, sname):
+def str_post(userauth, prjname, lngname, sname):
     parms = check_page_parameters(prjname, lngname, sname)
     if parms is None: return
 
@@ -408,7 +408,7 @@ def str_post(user, prjname, lngname, sname):
             # A new translation against bchg!
             if stamp is None: stamp = data.make_stamp()
             txt = data.Text(trl_str, case, stamp)
-            tchg = data.Change(sname, case, bchg.base_text, txt, stamp, user)
+            tchg = data.Change(sname, case, bchg.base_text, txt, stamp, userauth.name)
             state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
             if state == data.MISSING or state == data.INVALID:
                 new_state_errors[case] = (tchg, state, errors)
@@ -430,12 +430,12 @@ def str_post(user, prjname, lngname, sname):
                     if stamp is None: stamp = data.make_stamp()
                     trl_chg.base_text = bchg.base_text
                     trl_chg.stamp = stamp
-                    trl_chg.user = user
+                    trl_chg.user = userauth.name
             continue
 
         # We got an older translation instead.
         if stamp is None: stamp = data.make_stamp()
-        tchg = data.Change(sname, case, bchg.base_text, trl_chg.new_text, stamp, user)
+        tchg = data.Change(sname, case, bchg.base_text, trl_chg.new_text, stamp, userauth.name)
         state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
         if state == data.MISSING or state == data.INVALID:
             new_state_errors[case] = (tchg, state, errors)

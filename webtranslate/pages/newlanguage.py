@@ -5,7 +5,7 @@ from webtranslate.newgrf import language_info
 
 @route('/newlanguage/<prjname>', method = 'GET')
 @protected(['newlanguage', 'prjname', '-'])
-def new_language_get(user, prjname):
+def new_language_get(userauth, prjname):
     """
     Form to add another language to the project.
     """
@@ -36,7 +36,7 @@ def new_language_get(user, prjname):
 
 @route('/newlanguage/<prjname>', method = 'POST')
 @protected(['newlanguage', 'prjname', '-'])
-def new_language_post(user, prjname):
+def new_language_post(userauth, prjname):
     """
     Construct the requested language.
     """
@@ -76,7 +76,7 @@ def get_language(name):
 
 @route('/makelanguage/<prjname>/<lngname>', method = 'POST')
 @protected(['makelanguage', 'prjname', 'lngname'])
-def make_language_post(user, prjname, lngname):
+def make_language_post(userauth, prjname, lngname):
     """
     Create the requested language.
 

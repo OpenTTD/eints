@@ -5,7 +5,7 @@ import operator
 
 @route('/languages', method = "GET")
 @protected(['languages', '-', '-'])
-def languages(user):
+def languages(userauth):
     """
     Get an overview of used languages over all projects.
     """
@@ -18,7 +18,7 @@ def languages(user):
 
 @route('/language/<lngname>', method = 'GET')
 @protected(['language', '-', 'lngname'])
-def language(user, lngname):
+def language(userauth, lngname):
     """
     Get an overview of the state of the given language in every project.
 

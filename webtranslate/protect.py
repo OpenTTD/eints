@@ -36,7 +36,7 @@ def protected(page_name):
                 abort(401, "Access denied")
             elif userauth.may_access(pname, prjname, lngname):
                 # Access granted.
-                return func(userauth.name, *a, **ka)
+                return func(userauth, *a, **ka)
             elif not userauth.is_auth:
                 # Not logged in.
                 abort(401, "Access denied")

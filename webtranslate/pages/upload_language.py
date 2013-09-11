@@ -8,7 +8,7 @@ from webtranslate.newgrf import language_file
 
 @route('/upload/<prjname>', method = 'GET')
 @protected(['upload', 'prjname', '-'])
-def page_get(user, prjname):
+def page_get(userauth, prjname):
     proj = config.cache.projects.get(prjname)
     pdata = config.cache.get_pmd(prjname).pdata
     if proj is None:
@@ -18,7 +18,7 @@ def page_get(user, prjname):
 
 @route('/upload/<prjname>', method = 'POST')
 @protected(['upload', 'prjname', '-'])
-def page_post(user, prjname):
+def page_post(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")
@@ -71,7 +71,7 @@ def page_post(user, prjname):
             if chg is None: # New change.
                 txt = language_file.sanitize_text(sv.text)
                 base_text = data.Text(txt, sv.case, stamp)
-                chg = data.Change(sv.name, sv.case, base_text, None, stamp, user, True)
+                chg = data.Change(sv.name, sv.case, base_text, None, stamp, userauth.name, True)
                 chgs = base_language.changes.get(sv.name)
                 if chgs is None:
                     base_language.changes[sv.name] = [chg]
@@ -116,7 +116,7 @@ def page_post(user, prjname):
             if lng_chg is None: # It's a new text or new case.
                 txt = language_file.sanitize_text(sv.text)
                 lng_text = data.Text(txt, sv.case, stamp)
-                chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, user, True)
+                chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, userauth.name, True)
                 chgs = lng.changes.get(sv.name)
                 if chgs is None:
                     lng.changes[sv.name] = [chg]
@@ -126,7 +126,7 @@ def page_post(user, prjname):
                     chgs.append(chg)
             elif override: # Override existing entry.
                 lng_chg.stamp = stamp
-                lng_chg.user = user
+                lng_chg.user = userauth.name
 
     config.cache.save_pmd(pmd)
     pmd.create_statistics(None) # Update all languages.
