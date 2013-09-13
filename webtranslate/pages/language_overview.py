@@ -1,6 +1,7 @@
 from webtranslate.bottle import route, template
 from webtranslate.protect import protected
 from webtranslate import config
+from webtranslate.newgrf import language_info
 import operator
 
 @route('/languages', method = "GET")
@@ -9,11 +10,7 @@ def languages(userauth):
     """
     Get an overview of used languages over all projects.
     """
-    languages = set()
-    for pmd in config.cache.projects.values():
-        languages.update(pmd.overview)
-
-    languages = sorted(languages)
+    languages = sorted(language_info.all_languages, key = lambda l: l.isocode)
     return template('languages', lng_data = languages)
 
 @route('/language/<lngname>', method = 'GET')
