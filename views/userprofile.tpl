@@ -1,6 +1,6 @@
 %rebase main_template title='Web translator language overview'
 <h1 class="eint-heading-icon eint-icon-drawer-closed">Profile of user '{{userauth.name}}'</h1>
-% if len(prjdata) == 0:
+% if not is_owner and len(languages) == 0:
     Sorry, you have no access to any projects.
 % else:
     <table class="table table-condensed table-striped table-hover">
@@ -30,14 +30,14 @@
                 <td>
                 % lang = langs.get(lngname)
                 % if lang is not None:
-                    % if lang[0]:
-                        <a href="/translation/{{pmd.name}}/{{lngname}}">
+                    % if not lang[2]:
+                        No access
+                    % elif lang[0]:                        
                         % if lang[1][2] > 0 or lang[1][3] > 0 or lang[1][4] > 0:
-                            Start fixing
+                            <a href="/translation/{{pmd.name}}/{{lngname}}">Start fixing</a>
                         % else:
                             Done!
                         % end
-                        </a>
                     % elif lang[1][4] > 0:
                         <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
                             <fieldset>
