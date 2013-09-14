@@ -24,7 +24,14 @@
         <div class="control-group {{('error','')[len(tc.transl[0].errors) == 0]}}">
             <label class="control-label">Translation:</label>
             <div class="controls">
-                <textarea class="span8" name="text_{{tc.case}}" rows="4">{{tc.transl[0].text.text}}</textarea>
+                <textarea class="span8" name="text_{{tc.case}}" rows="4"
+                % if len(tc.case) == 0:
+                id="default_case" oninput="updatePlaceholder()"
+                % end
+                >{{tc.transl[0].text.text}}</textarea>
+                % if len(tc.case) != 0:
+                <p>Note: Leave the entry for cases empty, if they shall use the same translation as the default case.</p>
+                % end
                 % if len(tc.transl[0].errors) == 0:
                     % if tc.transl[0].state == 'out-of-date':
                         The current translation is correct: <input type="checkbox" name="ok_{{tc.case}}"/><!-- !! this case not styled yet -->
@@ -85,3 +92,15 @@
         <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
     </div>
 </form>
+<script type="text/javascript" onload="updatePlaceholder()">
+function updatePlaceholder() {
+    var def = document.getElementById("default_case");
+    var text = def.value;
+    var areas = document.getElementsByTagName("textarea");
+    for (i = 0; i < areas.length; i++) {
+        var child = areas[i];
+        if (child == def) continue;
+        child.placeholder = text;
+    }
+}
+</script>
