@@ -732,6 +732,69 @@ def get_filename(grf_langid):
     return None
 # }}}
 # {{{ def perform_download(ll_files, el_files):
+def parse_annotated_langfile(data):
+    """
+    Parse an annotated language file loaded from eints.
+
+    @param data: Downloaded data.
+    @type  data: C{str}
+
+    @return: Parsed annotated language file lines, a sequence of tuples (type, <data>).
+             The following parsed lines are returned:
+             - ('text', <text-to-copy>)
+             - ('string', <string-line>, <credits>), where <credits> may be C{None}
+    @rtype:  C{list} of (C{str}, C{str},  [C{str}])
+    """
+    parsed = []
+    string_text = None
+    for line in data.splitlines():
+        if string_text is not None:
+            if line.startswith('credits:'):
+                parsed.append(('string', string_text, line[8:]))
+                string_text = None
+                continue
+            parsed.append(('string', string_text, None))
+            string_text = None
+
+        if line.startswith('string:'):
+            string_text = line[7:] # Temporary store the string, to check for credits at the next line.
+            continue
+
+        if line.startswith('literal:'):
+            parsed.append(('text', line[8:]))
+            continue
+
+        if line.startswith('gender:') or line.startswith('plural:'):
+            parsed.append(('text', line[7:]))
+            continue
+
+        if line.startswith('case:'):
+            parsed.append(('text', line[5:]))
+            continue
+
+        if line.startswith('grflangid:'):
+            parsed.append(('text', line[10:]))
+            continue
+
+    if string_text is not None:
+        parsed.append(('string', string_text, None))
+
+    return parsed
+
+def write_parsed_lines(parsed, path):
+    """
+    Write a language file previously parsed into lines by L{parse_annotated_langfile} to the local disc.
+
+    @param parsed: Parsed lines of the annotated language file.
+    @type  parsed: C{list} of (C{str}, C{str},  C{str} or C{None})
+
+    @param path: Path of the file to write.
+    @type  path: C{str}
+    """
+    with open(path, 'w', encoding = 'utf-8') as handle:
+        handle.write('\n'.join(p[1] for p in parsed))
+        handle.write('\n')
+
 def perform_download(ll_files, el_files):
     """
     Download Eints files to local files.
@@ -745,7 +808,7 @@ def perform_download(ll_files, el_files):
     local_files = dict((ll.grf_langid, ll) for ll in ll_files) # Mapping of grf lang id to local info.
 
     for el in el_files:
-        url = build_url('/download/' + user_cfg.project + '/' + el.lang_name)
+        url = build_url('/annotate/' + user_cfg.project + '/' + el.lang_name)
         data = get_data(url)
         if data is None:
             print("Error: Could not download the {} language from Eints.".format(el.lang_name))
@@ -763,8 +826,8 @@ def perform_download(ll_files, el_files):
         if user_cfg.no_write:
             action = "Skipped " + action.lower()
         else:
-            with open(path, 'w', encoding = 'utf-8') as handle:
-                handle.write(data)
+            parsed = parse_annotated_langfile(data)
+            write_parsed_lines(parsed, path)
 
         if user_cfg.verbose:
             print("{} language file \"{}\"".format(action, path))
