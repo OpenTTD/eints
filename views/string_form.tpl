@@ -81,12 +81,14 @@
         % if len(tc.related) > 0:
             <h5>Related Strings</h5>
             <table border="0" class="table table-condensed">
+                <tbody>
                 % for rel in tc.related:
                     <tr>
                         <td><a href="/string/{{proj_name}}/{{lname}}/{{rel.sname}}">{{rel.sname}}</a></td>
                         <td>{{rel.text.text}}</td>
                     </tr>
                 % end
+                </tbody>
             </table>
         % end
     </fieldset>
