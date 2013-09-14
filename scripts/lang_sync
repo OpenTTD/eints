@@ -732,6 +732,45 @@ def get_filename(grf_langid):
     return None
 # }}}
 # {{{ def perform_download(ll_files, el_files):
+
+string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
+
+def parse_string(line):
+    """
+    Parse a string, and return its name and it text if parsing succeeds.
+
+    @param line: Line of text containing the string.
+    @type  line: C{str}
+
+    @return: A tuple (name, text) or C{None}
+    @rtype:  (C{str}, C{str}) or C{None}
+    """
+    m = string_pat.match(line)
+    if not m: return None
+
+    if m.group(2) is None:
+        return m.group(1), m.group(3).rstrip()
+    else:
+        return m.group(1) + m.group(2), m.group(3).rstrip()
+
+def load_local_strings(path):
+    """
+    Load the strings of a local file, and store them in a set for fast comparing.
+
+    @param path: Path of the file to load.
+    @type  path: C{str}
+
+    @return: Strings of the file.
+    @rtype:  C{set} of C{str}
+    """
+    strings = set()
+    with open(path, 'r', encoding = 'utf-8') as handle:
+        for line in handle:
+            value = parse_string(line)
+            if value is not None: strings.add(value)
+
+    return strings
+
 def parse_annotated_langfile(data):
     """
     Parse an annotated language file loaded from eints.
@@ -781,6 +820,37 @@ def parse_annotated_langfile(data):
 
     return parsed
 
+def collect_credits(strings, parsed):
+    """
+    Find changed language file strings, and collect credits for who changed them.
+
+    @param strings: Strings of the local file.
+    @type  strings: C{list} of (C{str}, C{str})
+
+    @param parsed: Parsed annotated language file.
+    @type  parsed: C{list} of (C{str}, C{str}, C{str} or C{None})
+    """
+    credits = {}
+    for p in parsed:
+        if p[0] != 'string': continue # Not a string.
+        value = parse_string(p[1])
+        if value is None or p[2] is None or value in strings: continue
+
+        n = credits.get(p[2])
+        if n is None:
+            credits[p[2]] = 1
+        else:
+            credits[p[2]] = n + 1
+
+    persons = []
+    for user, count in credits.items():
+        if count == 1:
+            persons.append((1, "1 change by " + user))
+        else:
+            persons.append((count, str(count) + " changes by " + user))
+
+    return ", ".join(p[1] for p in sorted(persons, reverse = True))
+
 def write_parsed_lines(parsed, path):
     """
     Write a language file previously parsed into lines by L{parse_annotated_langfile} to the local disc.
@@ -817,16 +887,19 @@ def perform_download(ll_files, el_files):
         if ll is not None:
             path = ll.path_name
             action = "Wrote"
+            current_strings = load_local_strings(path)
         else:
             path = get_filename(el.grf_langid)
             if path is None: path = el.lang_name + user_cfg.lang_ext
             path = user_cfg.lang_dir + os.sep + path
             action = "Created"
+            current_strings = set()
 
         if user_cfg.no_write:
             action = "Skipped " + action.lower()
         else:
             parsed = parse_annotated_langfile(data)
+            credits = collect_credits(current_strings, parsed)
             write_parsed_lines(parsed, path)
 
         if user_cfg.verbose:
