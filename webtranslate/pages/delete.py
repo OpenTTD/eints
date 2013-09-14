@@ -43,6 +43,8 @@ def delete_submit(userauth, prjname, lngname):
     del pdata.languages[lngname]
     if lngname in pdata.statistics:
         del pdata.statistics[lngname]
+    if lngname in pmd.overview:
+        del pmd.overview[lngname]
 
     config.process_project_changes(pdata) # Update changes of the project.
     config.cache.save_pmd(pmd)
