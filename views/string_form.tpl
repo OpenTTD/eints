@@ -58,7 +58,7 @@
             <p>Previous base language text:<br />{{tc.transl[0].trans_base.text}}</p>
         % end
         % if len(tc.transl) > 1:
-            <h4>Previous Translations</h4>
+            <h5>Previous Translations</h5>
             <table class="table table-condensed">
                 <thead>
                     <tr>
@@ -79,7 +79,7 @@
             </table>
         % end
         % if len(tc.related) > 0:
-            <p><strong>Related strings:</strong></p>
+            <h5>Related Strings</h5>
             <table border="0" class="table table-condensed">
                 % for rel in tc.related:
                     <tr>
