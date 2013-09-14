@@ -20,6 +20,22 @@ def plain_langfile(lines, text_type, text):
     """
     lines.append(text)
 
+def annotated_langfile(lines, text_type, text):
+    """
+    Add the L{text} to the L{lines} to give an annotated language file.
+
+    @param lines: Lines of output already created. Updated-in-place.
+    @type  lines: C{list} of C{str}
+
+    @param text_type: Type of text being added.
+    @type  text_type: C{str}
+
+    @param text: Actual text (of type L{text_type}) to add.
+    @type  text: C{str}
+    """
+    lines.append(text_type + ":" + text)
+
+
 def make_langfile(pdata, base_lng, lng, add_func):
     """
     Construct a language file.
@@ -111,3 +127,23 @@ def download(userauth, prjname, lngname):
 
     response.content_type = 'text/plain; charset=UTF-8'
     return make_langfile(pdata, base_lng, lng, plain_langfile)
+
+@route('/annotate/<prjname>/<lngname>', method = 'GET')
+@protected(['annotate', 'prjname', 'lngname'])
+def download(userauth, prjname, lngname):
+    pmd = config.cache.get_pmd(prjname)
+    if pmd is None:
+        abort(404, "Page not found")
+        return
+
+    pdata = pmd.pdata
+    base_lng = pdata.get_base_language()
+
+    lng = pdata.languages.get(lngname)
+    if lng is None:
+        abort(404, "Language does not exist")
+        return
+
+    response.content_type = 'text/plain; charset=UTF-8'
+    return make_langfile(pdata, base_lng, lng, annotated_langfile)
+

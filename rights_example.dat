@@ -23,6 +23,7 @@ OWNER + /makeproject/*/-/add
 * + /project/*/-/read
 * + /download-list/*/*/read
 * + /download/*/*/read
+* + /annotate/*/*/read
 * + /translation/*/*/read
 
 # Strings editing
