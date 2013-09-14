@@ -93,6 +93,9 @@ class UserConfig:
     @ivar langfile_map: Name of the mapping file from language grf id to base filename, if available.
     @type langfile_map: C{str} or C{None}
 
+    @ivar credits_file: If available, path to a file for writing credits for changes in the language files.
+    @type credits_file: C{str} or C{None}
+
     @ivar verbose: Whether to be verbose in what actions the program performs.
     @type verbose: C{bool}
 
@@ -110,6 +113,7 @@ class UserConfig:
         self.base_url = None
         self.base_lang = None
         self.langfile_map = None
+        self.credits_file = None
         self.project = None
         self.project_desc = None
         self.project_url = ''
@@ -502,8 +506,8 @@ def get_local_languages():
 # }}}
 
 # Upload and download operations.
-# {{{ def perform_operation(op_type, lang_type):
-def perform_operation(op_type, lang_type):
+# {{{ def perform_operation(op_type, lang_type, credits_handle):
+def perform_operation(op_type, lang_type, credits_handle):
     """
     Perform a synchronization operation.
 
@@ -512,6 +516,9 @@ def perform_operation(op_type, lang_type):
 
     @param lang_type: Type of languages involved, either C{"base"}, C{"translations"}, or C{"project"}.
     @type  lang_type: C{str}
+
+    @param credits_handle: If available, output stream for writing credits of language file changes.
+    @type  credits_handle: C{file} or C{None}
     """
     global user_cfg
 
@@ -555,7 +562,7 @@ def perform_operation(op_type, lang_type):
     if op_type == 'upload':
         perform_upload(ll_files, lang_type == 'base')
     else:
-        perform_download(ll_files, el_files)
+        perform_download(ll_files, el_files, credits_handle)
 # }}}
 # {{{ def perform_create_project():
 def perform_create_project():
@@ -731,7 +738,7 @@ def get_filename(grf_langid):
 
     return None
 # }}}
-# {{{ def perform_download(ll_files, el_files):
+# {{{ def perform_download(ll_files, el_files, credits_handle):
 
 string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
 
@@ -865,7 +872,7 @@ def write_parsed_lines(parsed, path):
         handle.write('\n'.join(p[1] for p in parsed))
         handle.write('\n')
 
-def perform_download(ll_files, el_files):
+def perform_download(ll_files, el_files, credits_handle):
     """
     Download Eints files to local files.
 
@@ -874,6 +881,9 @@ def perform_download(ll_files, el_files):
 
     @param el_files: Eints files to download.
     @type  el_files: C{list} of L{EintsLanguageInfo}
+
+    @param credits_handle: If available, output stream for writing credits of language file changes.
+    @type  credits_handle: C{file} or C{None}
     """
     local_files = dict((ll.grf_langid, ll) for ll in ll_files) # Mapping of grf lang id to local info.
 
@@ -887,7 +897,10 @@ def perform_download(ll_files, el_files):
         if ll is not None:
             path = ll.path_name
             action = "Wrote"
-            current_strings = load_local_strings(path)
+            if credits_handle is None:
+                current_strings = None # Causes a crash if you try to use it.
+            else:
+                current_strings = load_local_strings(path)
         else:
             path = get_filename(el.grf_langid)
             if path is None: path = el.lang_name + user_cfg.lang_ext
@@ -899,7 +912,11 @@ def perform_download(ll_files, el_files):
             action = "Skipped " + action.lower()
         else:
             parsed = parse_annotated_langfile(data)
-            credits = collect_credits(current_strings, parsed)
+            if credits_handle is not None:
+                credits = collect_credits(current_strings, parsed)
+                if len(credits) > 0:
+                    credits_handle.write(el.lang_name + ": " + credits + '\n')
+                    credits_handle.flush() # Flush it to disk, so it is preserved on crash.
             write_parsed_lines(parsed, path)
 
         if user_cfg.verbose:
@@ -988,6 +1005,9 @@ Getting project information:
     Format of the file are lines of the form "0x[HEX][HEX]: basename", '#'
     starts a line comment and empty lines are ignored.
 
+--credits=FNAME
+    Credits for translation string changes are written in the provided FNAME.
+
 
 
 and <operations>:
@@ -1022,7 +1042,7 @@ def run():
                      "not-interactive", "base-url=", "project=",
                      "project-desc=", "project-url=", "lang-dir=",
                      "base-language=", "language-file-mapping=",
-                     "lang-file-ext=", "help", "verbose", "no-write"]
+                     "lang-file-ext=", "credits=", "help", "verbose", "no-write"]
 
         opts, args = getopt.getopt(sys.argv[1:], "h", long_opts)
     except getopt.GetoptError as err:
@@ -1059,6 +1079,9 @@ def run():
             continue
         if opt == '--base-url':
             user_cfg.base_url = val
+            continue
+        if opt == '--credits':
+            user_cfg.credits_file = val
             continue
         if opt == '--project':
             user_cfg.project = val
@@ -1114,10 +1137,19 @@ def run():
 
     setup_auth()
 
+    # Open 'credits' file.
+    if user_cfg.credits_file is None:
+        credits_handle = None
+    else:
+        credits_handle = open(user_cfg.credits_file, 'w', encoding = 'utf-8')
+
     for op_type, lng_type in user_cfg.operations:
         if user_cfg.verbose:
             print("Performing \"{}-{}\"".format(op_type, lng_type))
-        perform_operation(op_type, lng_type)
+        perform_operation(op_type, lng_type, credits_handle)
+
+    if credits_handle is not None:
+        credits_handle.close()
 
     sys.exit(0)
 
