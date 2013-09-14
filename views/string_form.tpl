@@ -7,7 +7,7 @@
     <a class="eint-header-link" href="/translation/{{proj_name}}/{{lname}}">{{lname}}</a> - Edit Strings
     <span class="muted pull-right">{{sname}}</span>
 </h2>
-<form class="form-horizontal well well-large" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
+<form class="form-horizontal" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
 % for tc in tcs:
     <fieldset class="well">
         <span class="pull-left">{{tc.get_stringname(sname)}}</span>
@@ -43,40 +43,44 @@
                 % end
             </div>
         </div>
-        <div class="control-group">
-            <div class="controls">
-                % if tc.transl[0].saved and tc.transl[0].user is not None:
+        % if tc.transl[0].saved and tc.transl[0].user is not None:
+            <div class="control-group">
+                <div class="controls">
                     <span class="help-block">Translation created by "{{tc.transl[0].user}}"
                     % if tc.transl[0].stamp_desc is not None:
                         ({{tc.transl[0].stamp_desc}} ago)
                     % end
                     </span>
-                % end
+                </div>
             </div>
-        </div>
+        % end
         % if tc.transl[0].current_base != tc.transl[0].trans_base:
             <p>Previous base language text:<br />{{tc.transl[0].trans_base.text}}</p>
         % end
         % if len(tc.transl) > 1:
-            <p><strong>Previous translations:</strong></p>
-            <table border="1">
-                <tr>
-                    <th>Who</th>
-                    <th>When</th>
-                    <th>Translation</th>
-                </tr>
-                % for tl in tc.transl[1:]:
+            <h4>Previous Translations</h4>
+            <table class="table table-condensed">
+                <thead>
                     <tr>
-                        <td>{{tl.user}}</td>
-                        <td>{{tl.stamp_desc}} ago</td>
-                        <td>{{tl.text.text}}</td>
+                        <th>Who</th>
+                        <th>When</th>
+                        <th>Translation</th>
                     </tr>
-                % end
+                </thead>
+                <tbody>
+                    % for tl in tc.transl[1:]:
+                        <tr>
+                            <td>{{tl.user}}</td>
+                            <td>{{tl.stamp_desc}} ago</td>
+                            <td>{{tl.text.text}}</td>
+                        </tr>
+                    % end
+                </tbody>
             </table>
         % end
         % if len(tc.related) > 0:
             <p><strong>Related strings:</strong></p>
-            <table border="0" class="table">
+            <table border="0" class="table table-condensed">
                 % for rel in tc.related:
                     <tr>
                         <td><a href="/string/{{proj_name}}/{{lname}}/{{rel.sname}}">{{rel.sname}}</a></td>
@@ -87,10 +91,10 @@
         % end
     </fieldset>
 % end
-    <br />
     <div>
         <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
     </div>
+    <br />
 </form>
 <script type="text/javascript" onload="updatePlaceholder()">
 function updatePlaceholder() {
