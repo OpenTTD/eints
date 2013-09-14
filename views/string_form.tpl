@@ -78,11 +78,10 @@
                 % end
             </table>
         % end
-        <br />
-        <div>
-            <input class="btn btn-danger" type="reset" value="Reset All Strings"/>
-            <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
-        </div>
     </fieldset>
 % end
+    <br />
+    <div>
+        <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
+    </div>
 </form>
