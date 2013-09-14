@@ -5,7 +5,22 @@ from webtranslate.bottle import route, abort, response
 from webtranslate.protect import protected
 from webtranslate import config, data
 
-def make_langfile(pdata, base_lng, lng):
+def plain_langfile(lines, text_type, text):
+    """
+    Add the L{text} to the L{lines} to give a normal language file.
+
+    @param lines: Lines of output already created. Updated-in-place.
+    @type  lines: C{list} of C{str}
+
+    @param text_type: Type of text being added.
+    @type  text_type: C{str}
+
+    @param text: Actual text (of type L{text_type}) to add.
+    @type  text: C{str}
+    """
+    lines.append(text)
+
+def make_langfile(pdata, base_lng, lng, add_func):
     """
     Construct a language file.
 
@@ -18,13 +33,16 @@ def make_langfile(pdata, base_lng, lng):
     @param lng: Language to output.
     @type  lng: L{Language}
 
+    @param add_func: Function to add text to the output.
+    @type  add_func: C{function}
+
     @return: Text containing the language file.
     @rtype:  C{str}
     """
     lines = []
     for skel_type, skel_value in pdata.skeleton:
         if skel_type == 'literal':
-            lines.append(skel_value)
+            add_func(lines, skel_type, skel_value)
             continue
         if skel_type == 'string':
             column, sname = skel_value
@@ -49,27 +67,27 @@ def make_langfile(pdata, base_lng, lng):
 
                         length = column - len(line)
                         if length < 1: length = 1
-                        lines.append(line + (' ' * length) + ':' + text)
+                        add_func(lines, skel_type, line + (' ' * length) + ':' + text)
             continue
 
         if skel_type == 'grflangid':
-            lines.append('##grflangid 0x{:02x}'.format(lng.grflangid))
+            add_func(lines, skel_type, '##grflangid 0x{:02x}'.format(lng.grflangid))
             continue
 
         if skel_type == 'plural':
             if lng.plural is not None:
-                lines.append('##plural {:d}'.format(lng.plural))
+                add_func(lines, skel_type, '##plural {:d}'.format(lng.plural))
             continue
 
         if skel_type == 'case':
             cases = [c for c in lng.case if c != '']
             if len(cases) > 0:
-                lines.append('##case ' + ' '.join(cases))
+                add_func(lines, skel_type, '##case ' + ' '.join(cases))
             continue
 
         if skel_type == 'gender':
             if len(lng.gender) > 0:
-                lines.append('##gender ' + ' '.join(lng.gender))
+                add_func(lines, skel_type, '##gender ' + ' '.join(lng.gender))
             continue
 
     return '\n'.join(lines) + '\n'
@@ -92,4 +110,4 @@ def download(userauth, prjname, lngname):
         return
 
     response.content_type = 'text/plain; charset=UTF-8'
-    return make_langfile(pdata, base_lng, lng)
+    return make_langfile(pdata, base_lng, lng, plain_langfile)
