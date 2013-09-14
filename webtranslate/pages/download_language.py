@@ -18,6 +18,7 @@ def plain_langfile(lines, text_type, text):
     @param text: Actual text (of type L{text_type}) to add.
     @type  text: C{str}
     """
+    if text_type == 'credits': return
     lines.append(text)
 
 def annotated_langfile(lines, text_type, text):
@@ -84,6 +85,8 @@ def make_langfile(pdata, base_lng, lng, add_func):
                         length = column - len(line)
                         if length < 1: length = 1
                         add_func(lines, skel_type, line + (' ' * length) + ':' + text)
+                        if chg.user is not None:
+                            add_func(lines, 'credits', chg.user)
             continue
 
         if skel_type == 'grflangid':
