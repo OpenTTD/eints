@@ -43,6 +43,7 @@ def project_post(userauth, prjname):
     message_parts = []
     if pdata.human_name != human_name:
         pdata.human_name = human_name
+        pmd.human_name = human_name # Also assign the new name to the meta-data storage.
         message_parts.append("name")
     if pdata.url != url:
         pdata.url = url
