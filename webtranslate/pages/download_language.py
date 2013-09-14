@@ -5,23 +5,22 @@ from webtranslate.bottle import route, abort, response
 from webtranslate.protect import protected
 from webtranslate import config, data
 
-@route('/download/<prjname>/<lngname>', method = 'GET')
-@protected(['download', 'prjname', 'lngname'])
-def download(userauth, prjname, lngname):
-    pmd = config.cache.get_pmd(prjname)
-    if pmd is None:
-        abort(404, "Page not found")
-        return
+def make_langfile(pdata, base_lng, lng):
+    """
+    Construct a language file.
 
-    pdata = pmd.pdata
-    base_lng = pdata.get_base_language()
+    @param pdata: Project data.
+    @type  pdata: L{Project}
 
-    lng = pdata.languages.get(lngname)
-    if lng is None:
-        abort(404, "Language does not exist")
-        return
+    @param base_lng: Base language.
+    @type  base_lng: L{Language}
 
-    response.content_type = 'text/plain; charset=UTF-8'
+    @param lng: Language to output.
+    @type  lng: L{Language}
+
+    @return: Text containing the language file.
+    @rtype:  C{str}
+    """
     lines = []
     for skel_type, skel_value in pdata.skeleton:
         if skel_type == 'literal':
@@ -74,3 +73,23 @@ def download(userauth, prjname, lngname):
             continue
 
     return '\n'.join(lines) + '\n'
+
+
+@route('/download/<prjname>/<lngname>', method = 'GET')
+@protected(['download', 'prjname', 'lngname'])
+def download(userauth, prjname, lngname):
+    pmd = config.cache.get_pmd(prjname)
+    if pmd is None:
+        abort(404, "Page not found")
+        return
+
+    pdata = pmd.pdata
+    base_lng = pdata.get_base_language()
+
+    lng = pdata.languages.get(lngname)
+    if lng is None:
+        abort(404, "Language does not exist")
+        return
+
+    response.content_type = 'text/plain; charset=UTF-8'
+    return make_langfile(pdata, base_lng, lng)
