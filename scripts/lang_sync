@@ -870,7 +870,7 @@ def detect_eolstyle(path):
     @return: EOL style. '\n', '\r' or '\r\n' or None for unknown (no linebreaks at all).
     @rtype:  C{str}
     """
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding = 'utf-8') as f:
         f.readline()
         if type(f.newlines) == tuple:
             return f.newlines[0]
