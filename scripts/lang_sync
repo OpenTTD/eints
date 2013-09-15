@@ -552,17 +552,19 @@ def perform_operation(op_type, lang_type, credits_handle):
         sys.exit(1)
 
     # Filter languages.
+    path_base = None
     if lang_type == 'base':
         ll_files = [ll for ll in ll_files if ll.grf_langid == blng_grfid]
         el_files = [el for el in el_files if el.grf_langid == blng_grfid]
     else:
+        path_base = next((ll.path_name for ll in ll_files if ll.grf_langid == blng_grfid), None)
         ll_files = [ll for ll in ll_files if ll.grf_langid != blng_grfid]
         el_files = [el for el in el_files if el.grf_langid != blng_grfid]
 
     if op_type == 'upload':
         perform_upload(ll_files, lang_type == 'base')
     else:
-        perform_download(ll_files, el_files, credits_handle)
+        perform_download(ll_files, el_files, credits_handle, path_base)
 # }}}
 # {{{ def perform_create_project():
 def perform_create_project():
@@ -858,7 +860,25 @@ def collect_credits(strings, parsed):
 
     return ", ".join(p[1] for p in sorted(persons, reverse = True))
 
-def write_parsed_lines(parsed, path):
+def detect_eolstyle(path):
+    """
+    Detect eolstyle of a file.
+
+    @param path: Path of the file to rad.
+    @type  path: C{str}
+
+    @return: EOL style. '\n', '\r' or '\r\n' or None for unknown (no linebreaks at all).
+    @rtype:  C{str}
+    """
+    with open(path, 'r') as f:
+        f.readline()
+        if type(f.newlines) == tuple:
+            return f.newlines[0]
+        else:
+            return f.newlines
+    
+
+def write_parsed_lines(parsed, path, eolstyle):
     """
     Write a language file previously parsed into lines by L{parse_annotated_langfile} to the local disc.
 
@@ -867,12 +887,15 @@ def write_parsed_lines(parsed, path):
 
     @param path: Path of the file to write.
     @type  path: C{str}
+
+    @param eolstyle: EOL style. '\n', '\r' or '\r\n' or None for native.
+    @type  eolstyle: C{str} or C{None}
     """
-    with open(path, 'w', encoding = 'utf-8') as handle:
+    with open(path, 'w', encoding = 'utf-8', newline=eolstyle) as handle:
         handle.write('\n'.join(p[1] for p in parsed))
         handle.write('\n')
 
-def perform_download(ll_files, el_files, credits_handle):
+def perform_download(ll_files, el_files, credits_handle, path_base):
     """
     Download Eints files to local files.
 
@@ -884,8 +907,15 @@ def perform_download(ll_files, el_files, credits_handle):
 
     @param credits_handle: If available, output stream for writing credits of language file changes.
     @type  credits_handle: C{file} or C{None}
+
+    @param path_base: Local baselang file.
+    @type  path_base: C{str} or C{None}
     """
     local_files = dict((ll.grf_langid, ll) for ll in ll_files) # Mapping of grf lang id to local info.
+
+    eolstyle_baselang = None
+    if path_base is not None:
+        eolstyle_baselang = detect_eolstyle(path_base)
 
     for el in el_files:
         url = build_url('/annotate/' + user_cfg.project + '/' + el.lang_name)
@@ -894,8 +924,10 @@ def perform_download(ll_files, el_files, credits_handle):
             print("Error: Could not download the {} language from Eints.".format(el.lang_name))
             continue
         ll = local_files.get(el.grf_langid)
+        eolstyle = None
         if ll is not None:
             path = ll.path_name
+            eolstyle = detect_eolstyle(path)
             action = "Wrote"
             if credits_handle is None:
                 current_strings = None # Causes a crash if you try to use it.
@@ -908,6 +940,9 @@ def perform_download(ll_files, el_files, credits_handle):
             action = "Created"
             current_strings = set()
 
+        if eolstyle is None:
+            eolstyle = eolstyle_baselang
+
         if user_cfg.no_write:
             action = "Skipped " + action.lower()
         else:
@@ -917,7 +952,7 @@ def perform_download(ll_files, el_files, credits_handle):
                 if len(credits) > 0:
                     credits_handle.write(el.lang_name + ": " + credits + '\n')
                     credits_handle.flush() # Flush it to disk, so it is preserved on crash.
-            write_parsed_lines(parsed, path)
+            write_parsed_lines(parsed, path, eolstyle)
 
         if user_cfg.verbose:
             print("{} language file \"{}\"".format(action, path))
