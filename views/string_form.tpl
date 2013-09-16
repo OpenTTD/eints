@@ -94,6 +94,7 @@
     </fieldset>
 % end
     <div>
+        <a href="/fix/{{proj_name}}/{{lname}}">Get another string</a>
         <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
     </div>
     <br />
