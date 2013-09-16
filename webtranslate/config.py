@@ -333,6 +333,10 @@ class ProjectMetaData:
     @ivar overview: Overview of the state of the strings in each language, ordered by language name.
     @type overview: C{dict} of C{str} to [#UNKNOWN, #UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
 
+    @ivar string_avoid_cache: Cache to store which strings to avoid for translating, ordered by
+                              language.
+    @type string_avoid_cache: C{dict} of C{str} to L{StringAvoidanceCache}
+
     @ivar blang_name: Name of base language, if any.
     @type blang_name: C{None} or C{str}
 
@@ -349,6 +353,7 @@ class ProjectMetaData:
         self.pdata = None
         self.name = disk_name
         self.overview = {}
+        self.string_avoid_cache = {}
         self.blang_name = None
         self.blang_count = 0
         if human_name is not None:

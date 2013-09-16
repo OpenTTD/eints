@@ -121,6 +121,54 @@ class TransLationCase:
     def __repr__(self):
         return "TransLationCase({}, {}, {})".format(repr(self.case), repr(self.transl), repr(self.related))
 
+class StringAvoidanceCache:
+    """
+    LRU cache of string names to avoid picking.
+
+    @cvar AVOID_MAXLEN: Maximum number of strings to store in the cache.
+    @type AVOID_MAXLEN: C{int}
+
+    @ivar cache: Cached items (string names to avoid).
+    @type cache: C{dict} of C{str} to C{int}
+    """
+    AVOID_MAXLEN = 5
+
+    def __init__(self):
+        self.cache = {}
+
+    def add(self, name):
+        """
+        Add a string to the cache.
+
+        @param name: Name to add.
+        @type  name: C{str}
+        """
+        i = self.cache.get(name)
+        if i == 0: return
+
+        new_cache = {name: 0}
+        for nm, idx in self.cache.items():
+            if i is None or idx < i:
+                new_idx = idx + 1
+                if new_idx < self.AVOID_MAXLEN: new_cache[nm] = new_idx
+            elif idx > i:
+                new_cache[nm] = idx
+
+        self.cache = new_cache
+
+    def find(self, name):
+        """
+        Find the provided name in the cache.
+
+        @param name: Name to find.
+        @type  name: C{str}
+
+        @return: Index of the entry if found, else C{None}
+        @rtype:  C{int} or C{None}
+        """
+        return self.cache.get(name)
+
+
 def find_string(pmd, lngname):
     """
     Find a string to translate.
@@ -141,26 +189,53 @@ def find_string(pmd, lngname):
     ldict = pdata.statistics.get(lngname)
     if ldict is None: return None # Unsupported language.
 
-    prio_map = {data.MISSING: MISSING_PRIO,
-                data.INVALID: INVALID_PRIO,
-                data.OUT_OF_DATE: OUTDATED_PRIO}
+    str_lists = {}
+    str_lists[MISSING_PRIO] = []
+    str_lists[INVALID_PRIO] = []
+    str_lists[OUTDATED_PRIO] = []
 
-    cur_prio = max(MISSING_PRIO, INVALID_PRIO, OUTDATED_PRIO) + 1
-    cur_strings = []
+    prio_map = {data.MISSING: str_lists[MISSING_PRIO],
+                data.INVALID: str_lists[INVALID_PRIO],
+                data.OUT_OF_DATE: str_lists[OUTDATED_PRIO]}
+
+    # Collect all strings that need work in the above list(s).
     for sname in blng.changes:
         state = max(s[1] for s in pdata.statistics[lngname][sname])
-        state_prio = prio_map.get(state)
-        if state_prio is None: continue
-        if state_prio == cur_prio:
-            cur_strings.append(sname)
-            continue
-        if state_prio < cur_prio:
-            cur_prio = state_prio
-            cur_strings = [sname]
-            continue
+        str_coll = prio_map.get(state)
+        if str_coll is None: continue
+        str_coll.append(sname)
+
+    # Collect high priority strings, until we have enough, or we run out of strings.
+    cur_strings = set()
+    for _prio, strs in sorted(str_lists.items()):
+        cur_strings.update(strs)
+        if len(cur_strings) > StringAvoidanceCache.AVOID_MAXLEN: break # Sounds like enough.
 
     if len(cur_strings) == 0: return None
-    return random.choice(cur_strings)
+
+    sac = pmd.string_avoid_cache.get(lngname)
+    if sac is None:
+        sac = StringAvoidanceCache()
+        pmd.string_avoid_cache[lngname] = sac
+
+    if len(cur_strings) > len(sac.cache):
+        cur_strings.difference_update(sac.cache.keys())
+        sel = random.choice(list(cur_strings))
+        sac.add(sel)
+        return sel
+    else:
+        # Just try them all, and pick the best one.
+        best_val = None
+        best_name = None
+        for sname in cur_strings:
+            idx = sac.find(sname)
+            if idx is None:
+                sac.add(sname)
+                return sname
+            if best_val is None or best_val < idx:
+                best_val, best_name = idx, sname
+        sac.add(best_name)
+        return best_name
 
 @route('/fix/<prjname>/<lngname>', method = 'GET')
 @protected(['string', 'prjname', 'lngname'])
