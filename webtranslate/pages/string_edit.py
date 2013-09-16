@@ -4,6 +4,11 @@ from webtranslate.protect import protected
 from webtranslate import data, config, utils
 from webtranslate.newgrf import language_file
 
+# Priorities of strings that need editing. Smaller number is more important to do first.
+MISSING_PRIO = 1
+INVALID_PRIO = 2
+OUTDATED_PRIO = 3
+
 class Translation:
     """
     All information of a translation.
@@ -116,7 +121,7 @@ class TransLationCase:
     def __repr__(self):
         return "TransLationCase({}, {}, {})".format(repr(self.case), repr(self.transl), repr(self.related))
 
-def find_string(pmd, lngname, missing_prio, invalid_prio, outdated_prio):
+def find_string(pmd, lngname):
     """
     Find a string to translate.
     Collects the strings with the highest priority (the smallest number), and picks one at random.
@@ -127,15 +132,6 @@ def find_string(pmd, lngname, missing_prio, invalid_prio, outdated_prio):
     @param lngname: Language name.
     @type  lngname: C{str}
 
-    @param missing_prio: Priority of finding a missing string.
-    @type  missing_prio: C{int}
-
-    @param invalid_prio: Priority of finding an invalid string.
-    @type  invalid_prio: C{int}
-
-    @param outdated_prio: Priority of finding an outdated string.
-    @type  outdated_prio: C{int}
-
     @return: Name of a string with a highest priority (lowest prio number), if available.
     @rtype:  C{str} or C{None}
     """
@@ -145,11 +141,11 @@ def find_string(pmd, lngname, missing_prio, invalid_prio, outdated_prio):
     ldict = pdata.statistics.get(lngname)
     if ldict is None: return None # Unsupported language.
 
-    prio_map = {data.MISSING: missing_prio,
-                data.INVALID: invalid_prio,
-                data.OUT_OF_DATE: outdated_prio}
+    prio_map = {data.MISSING: MISSING_PRIO,
+                data.INVALID: INVALID_PRIO,
+                data.OUT_OF_DATE: OUTDATED_PRIO}
 
-    cur_prio = max(missing_prio, invalid_prio, outdated_prio) + 1
+    cur_prio = max(MISSING_PRIO, INVALID_PRIO, OUTDATED_PRIO) + 1
     cur_strings = []
     for sname in blng.changes:
         state = max(s[1] for s in pdata.statistics[lngname][sname])
@@ -198,7 +194,22 @@ def fix_string(userauth, prjname, lngname):
 
 
 def fix_string_page(pmd, prjname, lngname, message):
-    sname = find_string(pmd, lngname, 1, 2, 3)
+    """
+    Jump to a string edit page to fix a string.
+
+    @param pmd: Meta data of the project.
+    @type  pmd: L{ProjectMetaData}
+
+    @param prjname: Internal project identifier.
+    @type  prjname: C{str}
+
+    @param lngname: Language to select from.
+    @type  lngname: C{str}
+
+    @param message: Message to display, if any.
+    @type  message: C{str} or C{None}
+    """
+    sname = find_string(pmd, lngname)
     if sname is None:
         if message is None: message = "All strings are up-to-date, perhaps some translations need rewording?"
         redirect('/translation/{}/{}?message={}'.format(prjname, lngname, message))
