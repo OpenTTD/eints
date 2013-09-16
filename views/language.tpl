@@ -22,7 +22,7 @@
             <td><a href="/project/{{pmd.name}}">{{pmd.human_name}}</a></td>
             % if exists:
                 % if lstate[2] > 0 or lstate[3] > 0 or lstate[4] > 0:
-                  <td><a href="/translation/{{pmd.name}}/{{lngname}}">Start fixing</a></td>
+                  <td><a href="/fix/{{pmd.name}}/{{lngname}}">Start fixing</a></td>
                 % else:
                   <td>Done!</td>
                 % end
