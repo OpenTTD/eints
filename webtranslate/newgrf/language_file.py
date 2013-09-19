@@ -831,7 +831,8 @@ def is_critical_non_positional(name):
     elif name == '{':
         sc = CURLY_PARAMETER
     else:
-        sc = PARAMETERS[name]
+        sc = PARAMETERS.get(name)
+        if sc is None: return True
 
     return sc.critical
 # }}}
