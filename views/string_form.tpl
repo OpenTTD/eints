@@ -2,6 +2,7 @@
 <h1>
     <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
 </h1>
+<a class="pull-right" target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/strings.html">String editing Manual</a>
 <hr />
 <h2 class="eint-heading-icon eint-icon-document-1-edit">
     <a class="eint-header-link" href="/translation/{{proj_name}}/{{lname}}">{{lname}}</a> - Edit Strings
