@@ -19,13 +19,14 @@
         <hr class="clearfix" style="margin-top:30px;"/><!-- an inline style per day keeps the doctor away -->
         <div class="control-group">
             <span class="control-label">Base lang string:</span>
-            <span class="eint-form-value-as-text span8"><strong>{{tc.transl[0].current_base.text}}</strong></span>
+            <span class="eint-form-value-as-text span8"><strong id="base_{{tc.case}}">{{tc.transl[0].current_base.text}}</strong></span>
+            <button class="pull-right" type="button" onclick="copyText('base_{{tc.case}}', 'text_{{tc.case}}')">Copy</button>
             <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
         </div>
         <div class="control-group {{('error','')[len(tc.transl[0].errors) == 0]}}">
             <label class="control-label">Translation:</label>
             <div class="controls">
-                <textarea class="span8" name="text_{{tc.case}}" rows="4"
+                <textarea class="span8" name="text_{{tc.case}}" id="text_{{tc.case}}" rows="4"
                 % if len(tc.case) == 0:
                 id="default_case" oninput="updatePlaceholder()"
                 % end
@@ -110,5 +111,10 @@ function updatePlaceholder() {
         if (child == def) continue;
         child.placeholder = text;
     }
+}
+function copyText(srcid, destid) {
+    var src = document.getElementById(srcid);
+    var dest = document.getElementById(destid);
+    dest.value = src.innerHTML;
 }
 </script>
