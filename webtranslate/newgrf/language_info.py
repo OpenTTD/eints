@@ -316,7 +316,7 @@ polish = LanguageData(name="Polish", ownname="Polski", isocode="pl_PL",
                       plural=7, textdir="ltr",
                       digitsep=".", digitsepcur=".", decimalsep=",",
                       winlangid=0x0415, grflangid=0x30,
-                      gender=['m','f','n'], case=['d c','b','n','m','w'])
+                      gender=['m','f','n'], case=['d','c','b','n','m','w'])
 
 portuguese = LanguageData(name="Portuguese", ownname="Português", isocode="pt_PT",
                           plural=0, textdir="ltr",
