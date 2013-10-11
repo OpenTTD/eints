@@ -90,14 +90,14 @@ def page_post(userauth, prjname):
 
         # Push the new set of string-names to all languages (this includes the base language).
         str_names = set(sv.name for sv in ng_data.strings)
-        for lng in pdata.languages.values():
+        for lang in pdata.languages.values():
             not_seen = str_names.copy()
-            for sn in list(lng.changes.keys()):
+            for sn in list(lang.changes.keys()):
                 not_seen.discard(sn)
                 if sn in str_names: continue # Name is kept.
-                del lng.changes[sn] # Old string, delete
+                del lang.changes[sn] # Old string, delete
             for sn in not_seen:
-                lng.changes[sn] = []
+                lang.changes[sn] = []
 
 
     else:
