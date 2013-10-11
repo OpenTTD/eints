@@ -182,14 +182,24 @@ def get_lng_change(sv, lng, base_text):
     chgs = lng.changes.get(sv.name)
     if chgs is None or len(chgs) == 0: return None
 
-    best = None
+    best, best_prio = None, 5 # Smaller prio is better.
     for chg in chgs:
         if sv.case != chg.case: continue
-
-        if base_text is not None and chg.base_text != base_text: continue
         if chg.new_text is None or sv.text != chg.new_text.text: continue
 
-        if best is None or best.stamp < chg.stamp: best = chg
+        # Calculate priority.
+        if chg.base_text == base_text:
+            new_prio = 1
+        else:
+            new_prio = 3
+
+        if not chg.last_upload: new_prio = new_prio + 1
+
+        if best is not None:
+            if new_prio > best_prio: continue
+            if new_prio == best_prio and best.stamp < chg.stamp: continue
+
+        best, best_prio = chg, new_prio
 
     return best
 
