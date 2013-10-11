@@ -68,7 +68,7 @@ def page_post(userauth, prjname):
         # Add strings as changes.
         for sv in ng_data.strings:
             sv.text = language_file.sanitize_text(sv.text)
-            chg = get_best_change(sv, base_language, None, False)
+            chg = get_blng_change(sv, base_language)
             if chg is None: # New change.
                 base_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, None, stamp, userauth.name, True)
@@ -134,6 +134,32 @@ def page_post(userauth, prjname):
     message = "Successfully uploaded language '" + lng.name +"' " + utils.get_datetime_now_formatted()
     redirect("/project/" + prjname + '?message=' + message)
 
+
+def get_blng_change(sv, lng):
+    """
+    Get the best matching change in a base language for a given string value.
+    (string and case should match, and the newest time stamp)
+
+    @param sv: String value to match.
+    @type  sv: L{StringValue}
+
+    @param lng: Language to examine.
+    @type  lng: L{Language}
+
+    @return: The best change, if a matching change was found.
+    @rtype:  C{None} or L{Change}
+    """
+    assert lng is not None
+    chgs = lng.changes.get(sv.name)
+    if chgs is None or len(chgs) == 0: return None
+
+    best = None
+    for chg in chgs:
+        if sv.case != chg.case: continue
+        if sv.text != chg.base_text.text: continue
+        if best is None or best.stamp < chg.stamp: best = chg
+
+    return best
 
 def get_best_change(sv, lng, base_text, search_new):
     """
