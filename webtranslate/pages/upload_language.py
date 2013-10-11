@@ -67,10 +67,10 @@ def page_post(userauth, prjname):
 
         # Add strings as changes.
         for sv in ng_data.strings:
+            sv.text = language_file.sanitize_text(sv.text)
             chg = get_best_change(sv, base_language, None, False)
             if chg is None: # New change.
-                txt = language_file.sanitize_text(sv.text)
-                base_text = data.Text(txt, sv.case, stamp)
+                base_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, None, stamp, userauth.name, True)
                 chgs = base_language.changes.get(sv.name)
                 if chgs is None:
@@ -107,6 +107,7 @@ def page_post(userauth, prjname):
             return
 
         for sv in ng_data.strings:
+            sv.text = language_file.sanitize_text(sv.text)
             chgs = base_language.changes.get(sv.name)
             if chgs is None: continue # Translation has a string not in the base language
             chg = data.get_newest_change(chgs, '')
@@ -114,8 +115,7 @@ def page_post(userauth, prjname):
             base_text = chg.base_text
             lng_chg  = get_best_change(sv, lng, base_text, True)
             if lng_chg is None: # It's a new text or new case.
-                txt = language_file.sanitize_text(sv.text)
-                lng_text = data.Text(txt, sv.case, stamp)
+                lng_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, userauth.name, True)
                 chgs = lng.changes.get(sv.name)
                 if chgs is None:
