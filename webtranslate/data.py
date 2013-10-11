@@ -220,7 +220,7 @@ def get_string_status(lchg, case, lng, btext, binfo):
     elif lchg is None or lchg.new_text.text == '':
         return MISSING_OK, []
 
-    if lchg.base_text != btext and lchg.stamp < btext.stamp:
+    if lchg.base_text != btext or lchg.stamp < btext.stamp:
         state = OUT_OF_DATE
     else:
         state = UP_TO_DATE
