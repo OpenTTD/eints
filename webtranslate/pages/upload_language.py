@@ -84,6 +84,8 @@ def page_post(userauth, prjname):
                     chg.stamp = sv.stamp
                     chg.user = sv.user
 
+        # Update language properties as well.
+        copy_lng_properties(ng_data, base_language)
 
         pdata.skeleton = ng_data.skeleton # Use the new skeleton file.
         pdata.flush_related_cache() # Drop the related strings cache.
@@ -127,6 +129,9 @@ def page_post(userauth, prjname):
             elif override: # Override existing entry.
                 lng_chg.stamp = stamp
                 lng_chg.user = userauth.name
+
+        # Update language properties as well.
+        copy_lng_properties(ng_data, lng)
 
     config.cache.save_pmd(pmd)
     pmd.create_statistics(None) # Update all languages.
@@ -228,10 +233,7 @@ def add_new_language(ng_data, pdata, base_lang):
 
     lng = data.Language(ng_data.language_data.isocode)
     lng.grflangid = ng_data.grflangid
-    lng.plural = ng_data.plural
-    lng.gender = ng_data.gender
-    lng.case   = ng_data.case
-    lng.case.sort()
+    copy_lng_properties(ng_data, lng)
     lng.changes = {}
     pdata.languages[lng.name] = lng
 
@@ -246,4 +248,19 @@ def add_new_language(ng_data, pdata, base_lang):
         if stp == 'string': lng.changes[sparam[1]] = []
 
     return (True, lng)
+
+def copy_lng_properties(ng_data, lng):
+    """
+    Copy language properties from the loaded language file to the language.
+
+    @param ng_data: Loaded language file.
+    @type  ng_data: L{NewGrfData}
+
+    @param lng: Language to update.
+    @type  lng: L{Language}
+    """
+    lng.plural = ng_data.plural
+    lng.gender = ng_data.gender
+    lng.case   = ng_data.case
+    lng.case.sort()
 
