@@ -198,10 +198,7 @@ def get_arguments(text, lnum, cmd, idx, errors):
             return args, m.end()
         m = argument_pat.match(text, idx)
         if m:
-            arg = m.group(1)
-            if arg[0] == '"' and arg[1] == '"': # Strip quotes
-                arg = arg[1:-1]
-            args.append(arg)
+            args.append(m.group(1)) # Do not strip quotes to keep the difference between {P 0 ..} and {P "0" ..}.
             idx = m.end()
             continue
 
