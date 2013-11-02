@@ -13,6 +13,7 @@ param_pat = re.compile('{([0-9]+:)?([A-Z_0-9]*|{)}')
 gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
 argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
+number_pat = re.compile('[0-9]+$')
 
 # {{{ def check_string(text, lnum , default_case, extra_commands, plural_count, gender, errors):
 def check_string(text, lnum, default_case, extra_commands, plural_count, gender, errors):
@@ -99,27 +100,24 @@ def check_string(text, lnum, default_case, extra_commands, plural_count, gender,
 
             args, idx = args
             expected = plural_count
-            num = None
             if expected == 0:
                 errors.append((ERROR, lnum, "{P ..} cannot be used without defining the plural type with ##plural"))
                 return None
-            elif len(args) == expected:
-                num = pos - 1
-            elif len(args) == expected + 1:
-                # Extra argument, is the first argument a number?
-                try:
+            elif len(args) > 0:
+                # If the first argument is a number, it cannot be a value for the plural command.
+                m = number_pat.match(args[0])
+                if m:
                     num = int(args[0], 10)
-                except ValueError:
-                    pass
-                    # Fall through to the general error
+                    args = args[1:]
+                else:
+                    num = pos - 1
 
-            if num is None:
-                errors.append((ERROR, lnum, "Expected {} string arguments for {{P ..}}, found {} arguments".format(expected, len(args))))
-                return None
+                if len(args) == expected:
+                    string_info.add_plural(num)
+                    continue
 
-            string_info.add_plural(num)
-            continue
-
+            errors.append((ERROR, lnum, "Expected {} string arguments for {{P ..}}, found {} arguments".format(expected, len(args))))
+            return None
 
         # {G=...}
         m = gender_assign_pat.match(text, idx)
@@ -144,26 +142,24 @@ def check_string(text, lnum, default_case, extra_commands, plural_count, gender,
 
             args, idx = args
             expected = len(gender)
-            num = None
             if expected == 0:
                 errors.append((ERROR, lnum, "{G ..} cannot be used without defining the genders with ##gender"))
                 return None
-            elif len(args) == expected:
-                num = pos
-            elif len(args) == expected + 1:
-                # Extra argument, is the first argument a number?
-                try:
+            elif len(args) > 0:
+                # If the first argument is a number, it cannot be a value for the plural command.
+                m = number_pat.match(args[0])
+                if m:
                     num = int(args[0], 10)
-                except ValueError:
-                    pass
-                    # Fall through to the general error
+                    args = args[1:]
+                else:
+                    num = pos
 
-            if num is None:
-                errors.append((ERROR, lnum, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
-                return None
+                if len(args) == expected:
+                    string_info.add_gender(num)
+                    continue
 
-            string_info.add_gender(num)
-            continue
+            errors.append((ERROR, lnum, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
+            return None
 
 
         errors.append((ERROR, lnum, "Unknown {...} command found in the string"))
