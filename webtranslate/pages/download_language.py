@@ -133,7 +133,7 @@ def download(userauth, prjname, lngname):
 
 @route('/annotate/<prjname>/<lngname>', method = 'GET')
 @protected(['annotate', 'prjname', 'lngname'])
-def download(userauth, prjname, lngname):
+def annotate(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Page not found")
