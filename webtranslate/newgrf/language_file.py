@@ -490,7 +490,7 @@ class NewGrfData:
 
     def cleanup_skeleton(self):
         """
-        Clean up the skeleton file, and ensure it has all language properties.
+        Clean up the skeleton file.
         """
         while len(self.skeleton) > 0 and self.skeleton[0][0] == 'literal' and self.skeleton[0][1] == '': del self.skeleton[0]
         while len(self.skeleton) > 0 and self.skeleton[-1][0] == 'literal' and self.skeleton[-1][1] == '': del self.skeleton[-1]
