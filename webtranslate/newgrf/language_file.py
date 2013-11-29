@@ -335,7 +335,7 @@ class NewGrfStringInfo:
 
                 parm = PARAMETERS[self.commands[pos]]
                 if not parm.use_gender:
-                    errors.append((ERROR, lnum, "String parameter {} may not be used for gender queries {{P ..}}".format(pos)))
+                    errors.append((ERROR, lnum, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
                     ok = False
 
         return ok
