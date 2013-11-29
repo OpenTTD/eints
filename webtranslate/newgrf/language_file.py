@@ -710,7 +710,7 @@ def get_base_string_info(text, lng, errors):
     @type  errors: C{list} of (C{str}, C{int} or C{None}, C{str})
 
     @return: Information about the used string parameters.
-    @rtype:  L{NewGrfStringInfo}
+    @rtype:  L{NewGrfStringInfo} or C{None}
     """
     return check_string(text, None, True, None, get_plural_count(lng.plural), lng.gender, errors)
 # }}}

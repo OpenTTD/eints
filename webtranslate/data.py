@@ -156,7 +156,7 @@ def get_base_string_info(text, lng):
     @type  lng: L{Language}
 
     @return: String information.
-    @rtype:  L{NewGrfStringInfo}
+    @rtype:  L{NewGrfStringInfo} or C{None}
     """
     errors = []
     result = language_file.get_base_string_info(text, lng, errors)
