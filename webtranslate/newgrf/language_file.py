@@ -68,18 +68,21 @@ def check_string(text, default_case, extra_commands, lng, errors):
                 argnum = int(m.group(1)[:-1], 10)
 
             entry = PARAMETERS.get(m.group(2))
-            if entry is None or entry.takes_param == 0:
+            if entry is None:
                 if argnum is not None:
                     errors.append((ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
                     return None
 
-            if entry is None:
                 if not string_info.add_extra_command(m.group(2), errors):
                     return None
                 idx = m.end()
                 continue
 
-            if entry.takes_param == 0:
+            if not entry.takes_param:
+                if argnum is not None:
+                    errors.append((ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
+                    return None
+
                 string_info.add_nonpositional(entry)
             else:
                 if argnum is not None: pos = argnum
