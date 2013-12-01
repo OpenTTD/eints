@@ -705,50 +705,6 @@ def sanitize_text(txt):
     return txt
 
 # Get string information
-# {{{ def get_base_string_info(text, lng, errors):
-def get_base_string_info(text, lng, errors):
-    """
-    Get the information about the used parameters from a string in the base language.
-
-    @param text: String to examine.
-    @type  text: C{str}
-
-    @param lng: Language containing the string.
-    @type  lng: L{Language}
-
-    @param errors: Errors found in the string are appended to this list.
-    @type  errors: C{list} of (C{str}, C{int} or C{None}, C{str})
-
-    @return: Information about the used string parameters.
-    @rtype:  L{NewGrfStringInfo} or C{None}
-    """
-    return check_string(text, True, None, lng, errors)
-# }}}
-# {{{ def get_translation_string_info(text, case, extra_commands, lng, errors):
-def get_translation_string_info(text, case, extra_commands, lng, errors):
-    """
-    Get the information about the used parameters from a string in a translation.
-
-    @param text: String to examine.
-    @type  text: C{str}
-
-    @param case: Case of the string, if given.
-    @type  case: C{str}
-
-    @param extra_commands: Extra commands that are allowed in the translation.
-    @type  extra_commands: C{set} of C{str}
-
-    @param lng: Language containing the string.
-    @type  lng: L{Language}
-
-    @param errors: Errors found in the string are appended to this list.
-    @type  errors: C{list} of (C{str}, C{int} or C{None}, C{str})
-
-    @return: Information about the used string parameters.
-    @rtype:  L{NewGrfStringInfo}
-    """
-    return check_string(text, case == '', extra_commands, lng, errors)
-# }}}
 # {{{ def compare_info(base_info, lng_info, errors):
 def compare_info(base_info, lng_info, errors):
     """

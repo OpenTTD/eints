@@ -159,7 +159,7 @@ def get_base_string_info(text, lng):
     @rtype:  L{NewGrfStringInfo} or C{None}
     """
     errors = []
-    result = language_file.get_base_string_info(text, lng, errors)
+    result = language_file.check_string(text, True, None, lng, errors)
     assert (errors and not result) or (not errors and result) # Either we get an error or we get a result
     return result
 
@@ -226,7 +226,7 @@ def get_string_status(lchg, case, lng, btext, binfo):
         state = UP_TO_DATE
 
     errors = []
-    linfo = language_file.get_translation_string_info(lchg.new_text.text, lchg.case, binfo.extra_commands, lng, errors)
+    linfo = language_file.check_string(lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng, errors)
     assert (not errors and linfo) or (errors and not linfo)
     if not language_file.compare_info(binfo, linfo, errors):
         state = INVALID
