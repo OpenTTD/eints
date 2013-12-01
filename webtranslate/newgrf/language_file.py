@@ -29,7 +29,7 @@ class ErrorMessage:
 # Number of plural forms for each plural type (C{None} means no plural forms allowed).
 plural_count_map = {None: 0, 0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4, 13: 4}
 
-param_pat = re.compile('{([0-9]+:)?([A-Z_0-9]*|{)}')
+param_pat = re.compile('{([0-9]+:)?([A-Z_0-9]+)(\\.[A-Za-z0-9]+)?}')
 gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
 argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
@@ -82,16 +82,32 @@ def check_string(text, default_case, extra_commands, lng):
             else:
                 argnum = int(m.group(1)[:-1], 10)
 
+            if m.group(3) is None:
+                case = None
+            else:
+                case = m.group(3)[1:]
+
             entry = PARAMETERS.get(m.group(2))
             if entry is None:
                 if argnum is not None:
                     string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
+                    return string_info
+                if case is not None:
+                    string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take a case".format(m.group(2))))
                     return string_info
 
                 if not string_info.add_extra_command(m.group(2)):
                     return string_info
                 idx = m.end()
                 continue
+
+            if case is not None:
+                if not entry.allow_case:
+                    string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take a case".format(m.group(2))))
+                    return string_info
+                if case not in lng.case:
+                    string_info.add_error(ErrorMessage(ERROR, None, "Case {} of string command {} does not exist in the language".format(case, m.group(2))))
+                    return string_info
 
             if not entry.takes_param:
                 if argnum is not None:
@@ -398,66 +414,70 @@ class ParameterInfo:
     @ivar use_gender: May be used for gender.
     @type use_gender: C{bool}
 
+    @ivar allow_case: May have a ".case" suffix.
+    @type allow_case: C{bool}
+
     @ivar critical: String command is critical, its count should match between the base language and the translation.
     @type critical: C{bool}
     """
-    def __init__(self, literal, takes_param, use_plural, use_gender, critical):
+    def __init__(self, literal, takes_param, use_plural, use_gender, allow_case, critical):
         self.literal = literal
         self.takes_param = takes_param
         self.use_plural = use_plural
         self.use_gender = use_gender
+        self.allow_case = allow_case
         self.critical = critical
 
 _PARAMETERS = [
-    ParameterInfo("NBSP",           False, False, False, False),
-    ParameterInfo("COPYRIGHT",      False, False, False, True ),
-    ParameterInfo("TRAIN",          False, False, False, True ),
-    ParameterInfo("LORRY",          False, False, False, True ),
-    ParameterInfo("BUS",            False, False, False, True ),
-    ParameterInfo("PLANE",          False, False, False, True ),
-    ParameterInfo("SHIP",           False, False, False, True ),
-    ParameterInfo("TINYFONT",       False, False, False, True ),
-    ParameterInfo("BIGFONT",        False, False, False, True ),
-    ParameterInfo("BLUE",           False, False, False, True ),
-    ParameterInfo("SILVER",         False, False, False, True ),
-    ParameterInfo("GOLD",           False, False, False, True ),
-    ParameterInfo("RED",            False, False, False, True ),
-    ParameterInfo("PURPLE",         False, False, False, True ),
-    ParameterInfo("LTBROWN",        False, False, False, True ),
-    ParameterInfo("ORANGE",         False, False, False, True ),
-    ParameterInfo("GREEN",          False, False, False, True ),
-    ParameterInfo("YELLOW",         False, False, False, True ),
-    ParameterInfo("DKGREEN",        False, False, False, True ),
-    ParameterInfo("CREAM",          False, False, False, True ),
-    ParameterInfo("BROWN",          False, False, False, True ),
-    ParameterInfo("WHITE",          False, False, False, True ),
-    ParameterInfo("LTBLUE",         False, False, False, True ),
-    ParameterInfo("GRAY",           False, False, False, True ),
-    ParameterInfo("DKBLUE",         False, False, False, True ),
-    ParameterInfo("BLACK",          False, False, False, True ),
+    ParameterInfo("NBSP",           False, False, False, False, False),
+    ParameterInfo("COPYRIGHT",      False, False, False, False, True ),
+    ParameterInfo("TRAIN",          False, False, False, False, True ),
+    ParameterInfo("LORRY",          False, False, False, False, True ),
+    ParameterInfo("BUS",            False, False, False, False, True ),
+    ParameterInfo("PLANE",          False, False, False, False, True ),
+    ParameterInfo("SHIP",           False, False, False, False, True ),
+    ParameterInfo("TINYFONT",       False, False, False, False, True ),
+    ParameterInfo("BIGFONT",        False, False, False, False, True ),
+    ParameterInfo("BLUE",           False, False, False, False, True ),
+    ParameterInfo("SILVER",         False, False, False, False, True ),
+    ParameterInfo("GOLD",           False, False, False, False, True ),
+    ParameterInfo("RED",            False, False, False, False, True ),
+    ParameterInfo("PURPLE",         False, False, False, False, True ),
+    ParameterInfo("LTBROWN",        False, False, False, False, True ),
+    ParameterInfo("ORANGE",         False, False, False, False, True ),
+    ParameterInfo("GREEN",          False, False, False, False, True ),
+    ParameterInfo("YELLOW",         False, False, False, False, True ),
+    ParameterInfo("DKGREEN",        False, False, False, False, True ),
+    ParameterInfo("CREAM",          False, False, False, False, True ),
+    ParameterInfo("BROWN",          False, False, False, False, True ),
+    ParameterInfo("WHITE",          False, False, False, False, True ),
+    ParameterInfo("LTBLUE",         False, False, False, False, True ),
+    ParameterInfo("GRAY",           False, False, False, False, True ),
+    ParameterInfo("DKBLUE",         False, False, False, False, True ),
+    ParameterInfo("BLACK",          False, False, False, False, True ),
 
-    ParameterInfo("COMMA",          True,  True,  False, True ),
-    ParameterInfo("SIGNED_WORD",    True,  True,  False, True ),
-    ParameterInfo("UNSIGNED_WORD",  True,  True,  False, True ),
-    ParameterInfo("CURRENCY",       True,  False, False, True ),
-    ParameterInfo("VELOCITY",       True,  False, False, True ),
-    ParameterInfo("VOLUME",         True,  False, False, True ),
-    ParameterInfo("VOLUME_SHORT",   True,  False, False, True ),
-    ParameterInfo("POWER",          True,  False, False, True ),
-    ParameterInfo("WEIGHT",         True,  False, False, True ),
-    ParameterInfo("WEIGHT_SHORT",   True,  False, False, True ),
-    ParameterInfo("HEX",            True,  True,  False, True ),
-    ParameterInfo("STRING",         True,  False, True , True ),
-    ParameterInfo("DATE1920_LONG",  True,  False, False, True ),
-    ParameterInfo("DATE1920_SHORT", True,  False, False, True ),
-    ParameterInfo("DATE_LONG",      True,  False, False, True ),
-    ParameterInfo("DATE_SHORT",     True,  False, False, True ),
-    ParameterInfo("POP_WORD",       True,  False, False, True ),
-    ParameterInfo("STATION",        True,  False, False, True ),
+    ParameterInfo("COMMA",          True,  True,  False, False, True ),
+    ParameterInfo("SIGNED_WORD",    True,  True,  False, False, True ),
+    ParameterInfo("UNSIGNED_WORD",  True,  True,  False, False, True ),
+    ParameterInfo("CURRENCY",       True,  False, False, False, True ),
+    ParameterInfo("VELOCITY",       True,  False, False, False, True ),
+    ParameterInfo("VOLUME",         True,  False, False, False, True ),
+    ParameterInfo("VOLUME_SHORT",   True,  False, False, False, True ),
+    ParameterInfo("POWER",          True,  False, False, False, True ),
+    ParameterInfo("WEIGHT",         True,  False, False, False, True ),
+    ParameterInfo("WEIGHT_SHORT",   True,  False, False, False, True ),
+    ParameterInfo("HEX",            True,  True,  False, False, True ),
+    ParameterInfo("STRING",         True,  False, True , True,  True ),
+    ParameterInfo("DATE1920_LONG",  True,  False, False, False, True ),
+    ParameterInfo("DATE1920_SHORT", True,  False, False, False, True ),
+    ParameterInfo("DATE_LONG",      True,  False, False, False, True ),
+    ParameterInfo("DATE_SHORT",     True,  False, False, False, True ),
+    ParameterInfo("POP_WORD",       True,  False, False, False, True ),
+    ParameterInfo("STATION",        True,  False, False, False, True ),
 ]
 
-NL_PARAMETER    = ParameterInfo("",  False, False, False, False)
-CURLY_PARAMETER = ParameterInfo("{", False, False, False, True)
+NL_PARAMETER    = ParameterInfo("",  False, False, False, False, False)
+CURLY_PARAMETER = ParameterInfo("{", False, False, False, False, True)
 
 PARAMETERS = dict((x.literal, x) for x in _PARAMETERS)
 
