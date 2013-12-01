@@ -25,6 +25,7 @@ class ErrorMessage:
         self.line = line
         self.msg = msg
 
+# {{{ def check_string(text, default_case, extra_commands, lng):
 # Number of plural forms for each plural type (C{None} means no plural forms allowed).
 plural_count_map = {None: 0, 0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4, 13: 4}
 
@@ -34,8 +35,7 @@ argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 number_pat = re.compile('[0-9]+$')
 
-# {{{ def check_string(text, default_case, extra_commands, lng, errors):
-def check_string(text, default_case, extra_commands, lng, errors):
+def check_string(text, default_case, extra_commands, lng):
     """
     Check the contents of a single string.
 
@@ -52,11 +52,8 @@ def check_string(text, default_case, extra_commands, lng, errors):
     @param lng: Language containing the string.
     @type  lng: L{Language}
 
-    @param errors: Errors found so far, list of line numbers + message.
-    @type  errors: C{list} of L{ErrorMessage}
-
-    @return: String parameter information if the string was correct, else C{None}
-    @rtype:  C{NewGrfStringInfo} or C{None}
+    @return: String parameter information.
+    @rtype:  C{NewGrfStringInfo}
     """
     string_info = NewGrfStringInfo(extra_commands)
     plural_count = plural_count_map[lng.plural]
@@ -88,36 +85,36 @@ def check_string(text, default_case, extra_commands, lng, errors):
             entry = PARAMETERS.get(m.group(2))
             if entry is None:
                 if argnum is not None:
-                    errors.append(ErrorMessage(ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
-                    return None
+                    string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
+                    return string_info
 
-                if not string_info.add_extra_command(m.group(2), errors):
-                    return None
+                if not string_info.add_extra_command(m.group(2)):
+                    return string_info
                 idx = m.end()
                 continue
 
             if not entry.takes_param:
                 if argnum is not None:
-                    errors.append(ErrorMessage(ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
-                    return None
+                    string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
+                    return string_info
 
                 string_info.add_nonpositional(entry)
             else:
                 if argnum is not None: pos = argnum
-                string_info.add_positional(pos, entry, errors)
+                string_info.add_positional(pos, entry)
                 pos = pos + 1
 
             idx = m.end()
             continue
 
         if text.startswith('{P ', idx):
-            args = get_arguments(text, 'P', idx + 2, errors)
-            if args is None: return None
+            args = get_arguments(text, 'P', idx + 2, string_info)
+            if args is None: return string_info
 
             args, idx = args
             if plural_count == 0:
-                errors.append(ErrorMessage(ERROR, None, "{P ..} cannot be used without defining the plural type with ##plural"))
-                return None
+                string_info.add_error(ErrorMessage(ERROR, None, "{P ..} cannot be used without defining the plural type with ##plural"))
+                return string_info
             elif len(args) > 0:
                 # If the first argument is a number, it cannot be a value for the plural command.
                 m = number_pat.match(args[0])
@@ -131,35 +128,35 @@ def check_string(text, default_case, extra_commands, lng, errors):
                     string_info.add_plural(num)
                     continue
 
-            errors.append(ErrorMessage(ERROR, None, "Expected {} string arguments for {{P ..}}, found {} arguments".format(plural_count, len(args))))
-            return None
+            string_info.add_error(ErrorMessage(ERROR, None, "Expected {} string arguments for {{P ..}}, found {} arguments".format(plural_count, len(args))))
+            return string_info
 
         # {G=...}
         m = gender_assign_pat.match(text, idx)
         if m:
             if idx != 0:
-                errors.append(ErrorMessage(ERROR, None, "{} may only be used at the start of a string".format(m.group(0))))
-                return None
+                string_info.add_error(ErrorMessage(ERROR, None, "{} may only be used at the start of a string".format(m.group(0))))
+                return string_info
             if not default_case:
-                errors.append(ErrorMessage(ERROR, '{G=..} may only be used for the default string (that is, without case extension)'))
-                return None
+                string_info.add_error(ErrorMessage(ERROR, '{G=..} may only be used for the default string (that is, without case extension)'))
+                return string_info
             if m.group(1) not in lng.gender:
-                errors.append(ErrorMessage(ERROR, None, "Gender {} is not listed in ##gender".format(m.group(1))))
-                return None
+                string_info.add_error(ErrorMessage(ERROR, None, "Gender {} is not listed in ##gender".format(m.group(1))))
+                return string_info
 
             idx = m.end()
             continue
 
         if text.startswith('{G ', idx):
             assert text[idx:idx+2] != '{G='
-            args = get_arguments(text, 'G', idx + 2, errors)
-            if args is None: return None
+            args = get_arguments(text, 'G', idx + 2, string_info)
+            if args is None: return string_info
 
             args, idx = args
             expected = len(lng.gender)
             if expected == 0:
-                errors.append(ErrorMessage(ERROR, None, "{G ..} cannot be used without defining the genders with ##gender"))
-                return None
+                string_info.add_error(ErrorMessage(ERROR, None, "{G ..} cannot be used without defining the genders with ##gender"))
+                return string_info
             elif len(args) > 0:
                 # If the first argument is a number, it cannot be a value for the plural command.
                 m = number_pat.match(args[0])
@@ -173,18 +170,18 @@ def check_string(text, default_case, extra_commands, lng, errors):
                     string_info.add_gender(num)
                     continue
 
-            errors.append(ErrorMessage(ERROR, None, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
-            return None
+            string_info.add_error(ErrorMessage(ERROR, None, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
+            return string_info
 
 
-        errors.append(ErrorMessage(ERROR, None, "Unknown {...} command found in the string"))
-        return None
+        string_info.add_error(ErrorMessage(ERROR, None, "Unknown {...} command found in the string"))
+        return string_info
 
-    if string_info.check_sanity(errors): return string_info
-    return None
+    string_info.check_sanity()
+    return string_info
 
-# {{{ def get_arguments(text, cmd, idx, errors):
-def get_arguments(text, cmd, idx, errors):
+# {{{ def get_arguments(text, cmd, idx, string_info):
+def get_arguments(text, cmd, idx, string_info):
     """
     Get arguments of a C{"{P"} or C{"{G"}.
 
@@ -197,8 +194,8 @@ def get_arguments(text, cmd, idx, errors):
     @param idx: Index in the text to start searching.
     @type  idx: C{int}
 
-    @param errors: Errors found so far, list of line numbers + message.
-    @type  errors: C{list} of L{ErrorMessage}
+    @param string_info: Class collecting the string information.
+    @type  string_info: L{NewGrfStringInfo}
 
     @return: Found arguments and new index, or C{None} if an error was found.
     @rtype:  (C{list} of C{str}, C{int}) or C{None}
@@ -214,10 +211,10 @@ def get_arguments(text, cmd, idx, errors):
             idx = m.end()
             continue
 
-        errors.append(ErrorMessage(ERROR, None, "Error while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
+        string_info.add_error(ErrorMessage(ERROR, None, "Error while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
         return None
 
-    errors.append(ErrorMessage(ERROR, None, "Missing the terminating '}}' while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
+    string_info.add_error(ErrorMessage(ERROR, None, "Missing the terminating '}}' while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
     return None
 
 # }}}
@@ -242,6 +239,12 @@ class NewGrfStringInfo:
 
     @ivar extra_commands: Found extra commands.
     @type extra_commands: C{set} of C{str}
+
+    @ivar errors: Detected errors in the string.
+    @type errors: c{list} of L{ErrorMessage}
+
+    @ivar has_error: Whether the L{errors} list has a real error.
+    @type has_error: C{bool}
     """
     def __init__(self, allowed_extra):
         self.allowed_extra = allowed_extra
@@ -250,6 +253,8 @@ class NewGrfStringInfo:
         self.commands = []
         self.non_positionals = {}
         self.extra_commands = set()
+        self.errors = []
+        self.has_error = False
 
     def __str__(self):
         rv = []
@@ -259,6 +264,18 @@ class NewGrfStringInfo:
         if len(self.non_positionals) > 0: rv.append("non-pos=" + str(self.non_positionals))
         if len(self.extra_commands) > 0: rv.append("extra=" + str(self.extra_commands))
         return "**strinfo(" + ", ".join(rv) + ")"
+
+    def add_error(self, errmsg):
+        """
+        Add an error/warning to the list of detected errors.
+
+        @param errmsg: Error message to add.
+        @type  errmsg: L{ErrorMessage}
+        """
+        if errmsg.type == ERROR:
+            self.has_error = True
+
+        self.errors.append(errmsg)
 
     def add_gender(self, pos):
         """
@@ -290,15 +307,12 @@ class NewGrfStringInfo:
         cnt = self.non_positionals.get(cmd.literal, 0)
         self.non_positionals[cmd.literal] = cnt + 1
 
-    def add_extra_command(self, cmdname, errors):
+    def add_extra_command(self, cmdname):
         """
         Add an extra command (a custom tag). The command is always non-positional.
 
         @param cmdname: Name of the command.
         @type  cmdname: C{str}
-
-        @param errors: Errors found so far, list of line numbers + message.
-        @type  errors: C{list} of L{ErrorMessage}
 
         @return: Whether the command was correct.
         @rtype:  C{bool}
@@ -306,14 +320,14 @@ class NewGrfStringInfo:
         if self.allowed_extra is None: # Allow any additional command.
             self.extra_commands.add(cmdname)
         elif cmdname not in self.allowed_extra:
-            errors.append(ErrorMessage(ERROR, None, "Unknown string command {} found".format("{" + cmdname + "}")))
+            self.add_error(ErrorMessage(ERROR, None, "Unknown string command {} found".format("{" + cmdname + "}")))
             return False
 
         cnt = self.non_positionals.get(cmdname, 0)
         self.non_positionals[cmdname] = cnt + 1
         return True
 
-    def add_positional(self, pos, cmd, errors):
+    def add_positional(self, pos, cmd):
         """
         Add a string command at the stated position.
 
@@ -323,9 +337,6 @@ class NewGrfStringInfo:
         @param cmd: String command used at the stated position.
         @type  cmd: C{ParameterInfo}
 
-        @param errors: Errors found so far, list of line numbers + message.
-        @type  errors: C{list} of L{ErrorMessage}
-
         @return: Whether the command was correct.
         @rtype:  C{bool}
         """
@@ -334,54 +345,43 @@ class NewGrfStringInfo:
                 self.commands[pos] = cmd.literal
                 return True
             if self.commands[pos] != cmd.literal:
-                errors.append(ErrorMessage(ERROR, None, "String parameter {} has more than one string command".format(pos)))
+                self.add_error(ErrorMessage(ERROR, None, "String parameter {} has more than one string command".format(pos)))
                 return False
             return True
         while pos > len(self.commands): self.commands.append(None)
         self.commands.append(cmd.literal)
         return True
 
-    def check_sanity(self, errors):
+    def check_sanity(self):
         """
         Check sanity of the string commands and parameters.
-
-        @param errors: Errors found so far, list of line numbers + message.
-        @type  errors: C{list} of L{ErrorMessage}
-
-        @return: Whether the string parameters and commands are correct.
-        @rtype:  C{bool}
         """
         ok = True
         for pos, cmd in enumerate(self.commands):
             if cmd is None:
-                errors.append(ErrorMessage(ERROR, None, "String parameter {} has no string command".format(pos)))
+                self.add_error(ErrorMessage(ERROR, None, "String parameter {} has no string command".format(pos)))
                 ok = False
         if ok:
             for pos in self.plurals:
                 if pos < 0 or pos >= len(self.commands):
-                    errors.append(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos)))
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos)))
                     ok = False
                     continue
 
                 parm = PARAMETERS[self.commands[pos]]
                 if not parm.use_plural:
-                    errors.append(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos)))
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos)))
                     ok = False
 
         if ok:
             for pos in self.genders:
                 if pos < 0 or pos >= len(self.commands):
-                    errors.append(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos)))
-                    ok = False
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos)))
                     continue
 
                 parm = PARAMETERS[self.commands[pos]]
                 if not parm.use_gender:
-                    errors.append(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
-                    ok = False
-
-        return ok
-
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
 # }}}
 # {{{ PARAMETERS
 class ParameterInfo:
@@ -731,10 +731,10 @@ def sanitize_text(txt):
     return txt
 
 # Get string information
-# {{{ def compare_info(base_info, lng_info, errors):
-def compare_info(base_info, lng_info, errors):
+# {{{ def compare_info(base_info, lng_info):
+def compare_info(base_info, lng_info):
     """
-    Compare both string uses with each other.
+    Compare both string uses with each other. Errors found during the comparison are added to the translation L{lng_info}.
 
     @param base_info: Information about string parameters from the base language.
     @type  base_info: L{NewGrfStringInfo}
@@ -742,32 +742,29 @@ def compare_info(base_info, lng_info, errors):
     @param lng_info: Information about string parameters from the translation.
     @type  lng_info: L{NewGrfStringInfo}
 
-    @param errors: Errors found in the string are appended to this list.
-    @type  errors: C{list} of L{ErrorMessage}
-
     @return: Whether both parameter uses are compatible.
     @rtype:  C{bool}
     """
-    if base_info is None: return True # Cannot blame the translation when the base language is broken.
-    if lng_info is None: return False # Translation has more serious problems.
+    if base_info.has_error: return True # Cannot blame the translation when the base language is broken.
+    if lng_info.has_error: return False # Translation has more serious problems.
 
     if base_info.commands != lng_info.commands:
         if len(base_info.commands) > len(lng_info.commands):
             msg = 'String command for position {} (and further) is missing in the translation'
             msg = msg.format(len(lng_info.commands))
-            errors.append(ErrorMessage(ERROR, None, msg))
+            lng_info.add_error(ErrorMessage(ERROR, None, msg))
             return False
         if len(base_info.commands) < len(lng_info.commands):
             msg = 'String command for position {} (and further) is not used in the base language'
             msg = msg.format(len(base_info.commands))
-            errors.append(ErrorMessage(ERROR, None, msg))
+            lng_info.add_error(ErrorMessage(ERROR, None, msg))
             return False
 
         for i in range(len(base_info.commands)):
             if base_info.commands[i] != lng_info.commands[i]:
                 msg = 'String command for position {} is wrong, base language uses {}, the translation uses {}'
                 msg = msg.format(i, '{' + base_info.commands[i] + '}', '{' + lng_info.commands[i] + '}')
-                errors.append(ErrorMessage(ERROR, None, msg))
+                lng_info.add_error(ErrorMessage(ERROR, None, msg))
                 return False
 
         assert False # Never reached
@@ -778,25 +775,25 @@ def compare_info(base_info, lng_info, errors):
             if bname not in lng_info.non_positionals:
                 msg = 'String command {} is missing in the translation'.format('{' + bname + '}')
                 if is_critical_non_positional(bname):
-                    errors.append(ErrorMessage(ERROR, None, msg))
+                    lng_info.add_error(ErrorMessage(ERROR, None, msg))
                     return False
                 else:
-                    errors.append(ErrorMessage(WARNING, None, msg))
+                    lng_info.add_error(ErrorMessage(WARNING, None, msg))
             elif lng_info.non_positionals[bname] != bcnt:
                 # Non-positional is used both in base language and in translation, but a different number of times.
                 # Requiring an exact match would give too much trouble, especially with ltr <-> rtl translations.
                 msg = 'String command {} is used {} times in the base language, and {} times in the translation'
                 msg = msg.format('{' + bname + '}', bcnt, lng_info.non_positionals[bname])
-                errors.append(ErrorMessage(WARNING, None, msg))
+                lng_info.add_error(ErrorMessage(WARNING, None, msg))
 
         for np in lng_info.non_positionals:
             if np not in base_info.non_positionals:
                 msg = 'String command {} is not used in the base language'.format('{' + np + '}')
                 if is_critical_non_positional(np):
-                    errors.append(ErrorMessage(ERROR, None, msg))
+                    lng_info.add_error(ErrorMessage(ERROR, None, msg))
                     return False
                 else:
-                    errors.append(ErrorMessage(WARNING, None, msg))
+                    lng_info.add_error(ErrorMessage(WARNING, None, msg))
 
     return True
 

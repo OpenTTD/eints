@@ -334,9 +334,10 @@ def check_page_parameters(prjname, lngname, sname):
         abort(404, "String does not exist in the project")
         return None
 
+    # Check newest base language string.
     bchg = max(bchgs)
-    binfo = data.get_base_string_info(bchg.base_text.text, blng)
-    if binfo is None:
+    binfo = language_file.check_string(bchg.base_text.text, True, None, blng)
+    if binfo.has_error:
         # XXX Add errors too
         abort(404, "String cannot be translated, its base language version is incorrect")
         return None

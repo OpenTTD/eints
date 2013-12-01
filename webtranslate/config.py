@@ -3,7 +3,7 @@ Configuration and global routines of the translator service.
 """
 import os, sys, glob
 from webtranslate import data, loader
-from webtranslate.newgrf import language_info
+from webtranslate.newgrf import language_info, language_file
 
 def get_subnode_text(node, tag):
     """
@@ -440,12 +440,13 @@ class ProjectMetaData:
 
         # First construct detailed information in the project
         for sname, bchgs in blng.changes.items():
+            # Check newest base language string.
             bchg = data.get_newest_change(bchgs, '')
-            binfo = data.get_base_string_info(bchg.base_text.text, blng)
-            if binfo:
-                bstat[sname] = [('', data.UP_TO_DATE)]
-            else:
+            binfo = language_file.check_string(bchg.base_text.text, True, None, blng)
+            if binfo.has_error:
                 bstat[sname] = [('', data.INVALID)]
+            else:
+                bstat[sname] = [('', data.UP_TO_DATE)]
 
             if parm_lng is None or parm_lng is blng: # Update all languages.
                 lngs = pdata.languages.items()

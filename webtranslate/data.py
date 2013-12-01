@@ -144,26 +144,6 @@ STATUSES = [StatusDefinition(MISSING_OK,  'Omitted',  'The case was not needed i
 STATE_MAP = dict((sd.code, sd) for sd in STATUSES)
 
 
-def get_base_string_info(text, lng):
-    """
-    Get the newgrf string information about the given text.
-    Assume the string is from the base language.
-
-    @param text: String to examine.
-    @type  text: C{str}
-
-    @param lng: Language.
-    @type  lng: L{Language}
-
-    @return: String information.
-    @rtype:  L{NewGrfStringInfo} or C{None}
-    """
-    errors = []
-    result = language_file.check_string(text, True, None, lng, errors)
-    assert (errors and not result) or (not errors and result) # Either we get an error or we get a result
-    return result
-
-
 def decide_all_string_status(base_chg, lng_chgs, lng, binfo):
     """
     Decide the state of all the cases of the string based on the information of L{base_chg} and
@@ -225,13 +205,11 @@ def get_string_status(lchg, case, lng, btext, binfo):
     else:
         state = UP_TO_DATE
 
-    errors = []
-    linfo = language_file.check_string(lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng, errors)
-    assert (not errors and linfo) or (errors and not linfo)
-    if not language_file.compare_info(binfo, linfo, errors):
+    linfo = language_file.check_string(lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng)
+    if not language_file.compare_info(binfo, linfo):
         state = INVALID
 
-    return state, errors
+    return state, linfo.errors
 
 def convert_num(txt, default):
     """
