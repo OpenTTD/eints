@@ -7,7 +7,8 @@ from webtranslate.newgrf import language_info
 ERROR = 'Error'
 WARNING = 'Warning'
 
-num_plurals = {0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4, 13: 4}
+# Number of plural forms for each plural type (C{None} means no plural forms allowed).
+plural_count_map = {None: 0, 0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4, 13: 4}
 
 param_pat = re.compile('{([0-9]+:)?([A-Z_0-9]*|{)}')
 gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
@@ -15,8 +16,8 @@ argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 number_pat = re.compile('[0-9]+$')
 
-# {{{ def check_string(text, default_case, extra_commands, plural_count, gender, errors):
-def check_string(text, default_case, extra_commands, plural_count, gender, errors):
+# {{{ def check_string(text, default_case, extra_commands, lng, errors):
+def check_string(text, default_case, extra_commands, lng, errors):
     """
     Check the contents of a single string.
 
@@ -30,11 +31,8 @@ def check_string(text, default_case, extra_commands, plural_count, gender, error
     @type  extra_commands: C{None} if any extra commands are allowed,
                            C{set} of C{str} if a specific set of extra commands is allowed.
 
-    @param plural_count: Number of plural forms.
-    @type  plural_count: C{int}
-
-    @param gender: Names of the gender forms.
-    @type  gender: C{list} of C{str}
+    @param lng: Language containing the string.
+    @type  lng: L{Language}
 
     @param errors: Errors found so far, list of line numbers + message.
     @type  errors: C{list} of ((C{ERROR} or C{WARNING}, C{int} or C{None}), C{str})
@@ -43,6 +41,7 @@ def check_string(text, default_case, extra_commands, plural_count, gender, error
     @rtype:  C{NewGrfStringInfo} or C{None}
     """
     string_info = NewGrfStringInfo()
+    plural_count = plural_count_map[lng.plural]
     pos = 0 # String parameter number.
     idx = 0 # Text string index.
     while idx < len(text):
@@ -96,8 +95,7 @@ def check_string(text, default_case, extra_commands, plural_count, gender, error
             if args is None: return None
 
             args, idx = args
-            expected = plural_count
-            if expected == 0:
+            if plural_count == 0:
                 errors.append((ERROR, None, "{P ..} cannot be used without defining the plural type with ##plural"))
                 return None
             elif len(args) > 0:
@@ -109,11 +107,11 @@ def check_string(text, default_case, extra_commands, plural_count, gender, error
                 else:
                     num = pos - 1
 
-                if len(args) == expected:
+                if len(args) == plural_count:
                     string_info.add_plural(num)
                     continue
 
-            errors.append((ERROR, None, "Expected {} string arguments for {{P ..}}, found {} arguments".format(expected, len(args))))
+            errors.append((ERROR, None, "Expected {} string arguments for {{P ..}}, found {} arguments".format(plural_count, len(args))))
             return None
 
         # {G=...}
@@ -125,7 +123,7 @@ def check_string(text, default_case, extra_commands, plural_count, gender, error
             if not default_case:
                 errors.append((ERROR, None, '{G=..} may only be used for the default string (that is, without case extension)'))
                 return None
-            if m.group(1) not in gender:
+            if m.group(1) not in lng.gender:
                 errors.append((ERROR, None, "Gender {} is not listed in ##gender".format(m.group(1))))
                 return None
 
@@ -138,7 +136,7 @@ def check_string(text, default_case, extra_commands, plural_count, gender, error
             if args is None: return None
 
             args, idx = args
-            expected = len(gender)
+            expected = len(lng.gender)
             if expected == 0:
                 errors.append((ERROR, None, "{G ..} cannot be used without defining the genders with ##gender"))
                 return None
@@ -488,20 +486,6 @@ class NewGrfData:
 
 # }}}
 
-def get_plural_count(plural):
-    """
-    Get the number of plural forms to expect in a {P ..}.
-
-    @param plural: The plural number.
-    @type  plural: C{int}, or C{None} for no plurals.
-
-    @return: Number of plural forms to expect in a {P ..}.
-    @rtype:  C{int}
-    """
-    if plural is None:
-        return 0
-    return num_plurals[plural]
-
 # {{{ def load_language_file(handle, max_size, errors):
 # {{{ def handle_pragma(lnum, line, data, errors):
 def handle_pragma(lnum, line, data, errors):
@@ -703,7 +687,7 @@ def get_base_string_info(text, lng, errors):
     @return: Information about the used string parameters.
     @rtype:  L{NewGrfStringInfo} or C{None}
     """
-    return check_string(text, True, None, get_plural_count(lng.plural), lng.gender, errors)
+    return check_string(text, True, None, lng, errors)
 # }}}
 # {{{ def get_translation_string_info(text, case, extra_commands, lng, errors):
 def get_translation_string_info(text, case, extra_commands, lng, errors):
@@ -728,7 +712,7 @@ def get_translation_string_info(text, case, extra_commands, lng, errors):
     @return: Information about the used string parameters.
     @rtype:  L{NewGrfStringInfo}
     """
-    return check_string(text, case == '', extra_commands, get_plural_count(lng.plural), lng.gender, errors)
+    return check_string(text, case == '', extra_commands, lng, errors)
 # }}}
 # {{{ def compare_info(base_info, lng_info, errors):
 def compare_info(base_info, lng_info, errors):
