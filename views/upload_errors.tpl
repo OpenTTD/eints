@@ -3,10 +3,10 @@
 <p class="alert alert-error">The file that you uploaded contains errors</p>
 <ul>
 % for err in errors:
-    % if err[1] is not None:
-        <li>{{err[0]}} at line {{err[1] + 1}}: {{err[2]}}</li>
+    % if err.line is not None:
+        <li>{{err.type}} at line {{err.line + 1}}: {{err.msg}}</li>
     % else:
-        <li>{{err[0]}}: {{err[2]}}</li>
+        <li>{{err.type}}: {{err.msg}}</li>
     % end
 % end
 </ul>

@@ -183,7 +183,7 @@ def decide_all_string_status(base_chg, lng_chgs, lng, binfo):
 
     @return: Info about each case of the string in the translation, mapping of case to state value,
              and a list of found errors.
-    @rtype:  C{dict} of C{str} to C{tuple} (C{int}, C{list} of C{tuple} (C{str}, C{None}, C{str}))
+    @rtype:  C{dict} of C{str} to C{tuple} (C{int}, C{list} of L{ErrorMessage})
     """
     base_text = base_chg.base_text
 
@@ -212,7 +212,7 @@ def get_string_status(lchg, case, lng, btext, binfo):
     @type  binfo: L{NewGrfStringInfo}
 
     @return: State of the translated string and any errors.
-    @rtype:  C{tuple} (C{int}, C{list} of C{tuple} (C{str}, C{None}, C{str}))
+    @rtype:  C{tuple} (C{int}, C{list} of L{ErrorMessage})
     """
     if case == '':
         if lchg is None:

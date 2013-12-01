@@ -26,7 +26,7 @@ class Translation:
     @type state: C{str} or C{None}
 
     @ivar errors: Errors found in this translation, if available.
-    @type errors: C{list} of C{tuple} (C{str}, C{None}, C{str})
+    @type errors: C{list} of L{ErrorMessage}
 
     @ivar user: User that created the translation. C{None} means it is a fake change.
     @type user: C{str} or C{None}
@@ -371,7 +371,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
 
     @param states: Changes, state and errors for (some of) the cases, omission of a case
                    means the function should derive it from the language.
-    @type  states: C{dict} of C{str} to tuple (L{Change}, C{int}, C{list} of tuples (C{str}, C{None}, C{str})),
+    @type  states: C{dict} of C{str} to tuple (L{Change}, C{int}, C{list} of L{ErrorMessage}),
                    use C{None} to derive all.
 
     @return: Either an error, or an instantiated template.
@@ -404,7 +404,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
             # No changes for this case, make a dummy one to display the base data.
             tra = Translation(bchg, None, now, False)
             if case == '':
-                tra.errors = [('ERROR', None, 'String is missing')]
+                tra.errors = [language_file.ErrorMessage(language_file.ERROR, None, 'String is missing')]
                 tra.state = data.STATE_MAP[data.MISSING].name
             else:
                 tra.errors = []

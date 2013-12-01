@@ -40,7 +40,7 @@
                     % end
                 % else:
                     % for err in tc.transl[0].errors:
-                        <span class="help-block error">{{err[0]}}: {{err[2]}}</span>
+                        <span class="help-block error">{{err.type}}: {{err.msg}}</span>
                     % end
                 % end
             </div>
