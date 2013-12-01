@@ -40,7 +40,7 @@ def check_string(text, default_case, extra_commands, lng, errors):
     @return: String parameter information if the string was correct, else C{None}
     @rtype:  C{NewGrfStringInfo} or C{None}
     """
-    string_info = NewGrfStringInfo()
+    string_info = NewGrfStringInfo(extra_commands)
     plural_count = plural_count_map[lng.plural]
     pos = 0 # String parameter number.
     idx = 0 # Text string index.
@@ -74,12 +74,8 @@ def check_string(text, default_case, extra_commands, lng, errors):
                     return None
 
             if entry is None:
-                if extra_commands is None: # Allow any additional command.
-                    string_info.extra_commands.add(m.group(2))
-                elif m.group(2) not in extra_commands: # Verify against set of supplied extra commands.
-                    errors.append((ERROR, None, "Unknown string command {} found".format("{" + m.group(2) + "}")))
+                if not string_info.add_extra_command(m.group(2), errors):
                     return None
-                string_info.add_extra_command(m.group(2))
                 idx = m.end()
                 continue
 
@@ -207,6 +203,10 @@ def get_arguments(text, cmd, idx, errors):
 # {{{ class NewGrfStringInfo:
 class NewGrfStringInfo:
     """
+    @ivar allowed_extra: Extra commands that are allowed, if supplied.
+    @type allowed_extra: C{None} if any extra commands are allowed,
+                         C{set} of C{str} if a specific set of extra commands is allowed.
+
     @ivar genders: String parameters used for gender queries.
     @type genders: C{list} of C{bool}
 
@@ -222,7 +222,8 @@ class NewGrfStringInfo:
     @ivar extra_commands: Found extra commands.
     @type extra_commands: C{set} of C{str}
     """
-    def __init__(self):
+    def __init__(self, allowed_extra):
+        self.allowed_extra = allowed_extra
         self.genders  = []
         self.plurals  = []
         self.commands = []
@@ -268,15 +269,28 @@ class NewGrfStringInfo:
         cnt = self.non_positionals.get(cmd.literal, 0)
         self.non_positionals[cmd.literal] = cnt + 1
 
-    def add_extra_command(self, cmdname):
+    def add_extra_command(self, cmdname, errors):
         """
         Add an extra command (a custom tag). The command is always non-positional.
 
         @param cmdname: Name of the command.
         @type  cmdname: C{str}
+
+        @param errors: Errors found so far, list of line numbers + message.
+        @type  errors: C{list} of ((C{ERROR} or C{WARNING}, C{int} or C{None}), C{str})
+
+        @return: Whether the command was correct.
+        @rtype:  C{bool}
         """
+        if self.allowed_extra is None: # Allow any additional command.
+            self.extra_commands.add(cmdname)
+        elif cmdname not in self.allowed_extra:
+            errors.append((ERROR, None, "Unknown string command {} found".format("{" + cmdname + "}")))
+            return False
+
         cnt = self.non_positionals.get(cmdname, 0)
         self.non_positionals[cmdname] = cnt + 1
+        return True
 
     def add_positional(self, pos, cmd, errors):
         """
