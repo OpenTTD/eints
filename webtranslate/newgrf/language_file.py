@@ -15,16 +15,13 @@ argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 number_pat = re.compile('[0-9]+$')
 
-# {{{ def check_string(text, lnum , default_case, extra_commands, plural_count, gender, errors):
-def check_string(text, lnum, default_case, extra_commands, plural_count, gender, errors):
+# {{{ def check_string(text, default_case, extra_commands, plural_count, gender, errors):
+def check_string(text, default_case, extra_commands, plural_count, gender, errors):
     """
     Check the contents of a single string.
 
     @param text: String text.
     @type  text: C{str}
-
-    @param lnum: Line number (0-based)
-    @type  lnum: C{int} or C{None}
 
     @param default_case: This string is the default case.
     @type  default_case: C{bool}
@@ -55,12 +52,12 @@ def check_string(text, lnum, default_case, extra_commands, plural_count, gender,
 
         # text[idx] == '{', now find matching '}'
         if text.startswith('{}', idx):
-            string_info.add_string_command(None, '', errors, lnum)
+            string_info.add_string_command(None, '', errors)
             idx = idx + 2
             continue
 
         if text.startswith('{{}', idx):
-            string_info.add_string_command(None, '{', errors, lnum)
+            string_info.add_string_command(None, '{', errors)
             idx = idx + 3
             continue
 
@@ -74,34 +71,34 @@ def check_string(text, lnum, default_case, extra_commands, plural_count, gender,
             entry = PARAMETERS.get(m.group(2))
             if entry is None or entry.takes_param == 0:
                 if argnum is not None:
-                    errors.append((ERROR, lnum, "String command {} does not take an argument count".format(m.group(2))))
+                    errors.append((ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
                     return None
 
             if entry is None:
                 if extra_commands is None: # Allow any additional command.
                     string_info.extra_commands.add(m.group(2))
                 elif m.group(2) not in extra_commands: # Verify against set of supplied extra commands.
-                    errors.append((ERROR, lnum, "Unknown string command {} found".format("{" + m.group(2) + "}")))
+                    errors.append((ERROR, None, "Unknown string command {} found".format("{" + m.group(2) + "}")))
                     return None
 
             if entry is None or entry.takes_param == 0:
-                string_info.add_string_command(None, m.group(2), errors, lnum)
+                string_info.add_string_command(None, m.group(2), errors)
             else:
                 if argnum is not None: pos = argnum
-                string_info.add_string_command(pos, m.group(2), errors, lnum)
+                string_info.add_string_command(pos, m.group(2), errors)
                 pos = pos + 1
 
             idx = m.end()
             continue
 
         if text.startswith('{P ', idx):
-            args = get_arguments(text, lnum, 'P', idx + 2, errors)
+            args = get_arguments(text, 'P', idx + 2, errors)
             if args is None: return None
 
             args, idx = args
             expected = plural_count
             if expected == 0:
-                errors.append((ERROR, lnum, "{P ..} cannot be used without defining the plural type with ##plural"))
+                errors.append((ERROR, None, "{P ..} cannot be used without defining the plural type with ##plural"))
                 return None
             elif len(args) > 0:
                 # If the first argument is a number, it cannot be a value for the plural command.
@@ -116,20 +113,20 @@ def check_string(text, lnum, default_case, extra_commands, plural_count, gender,
                     string_info.add_plural(num)
                     continue
 
-            errors.append((ERROR, lnum, "Expected {} string arguments for {{P ..}}, found {} arguments".format(expected, len(args))))
+            errors.append((ERROR, None, "Expected {} string arguments for {{P ..}}, found {} arguments".format(expected, len(args))))
             return None
 
         # {G=...}
         m = gender_assign_pat.match(text, idx)
         if m:
             if idx != 0:
-                errors.append((ERROR, lnum, "{} may only be used at the start of a string".format(m.group(0))))
+                errors.append((ERROR, None, "{} may only be used at the start of a string".format(m.group(0))))
                 return None
             if not default_case:
-                errors.append((ERROR, lnum, '{G=..} may only be used for the default string (that is, without case extension)'))
+                errors.append((ERROR, None, '{G=..} may only be used for the default string (that is, without case extension)'))
                 return None
             if m.group(1) not in gender:
-                errors.append((ERROR, lnum, "Gender {} is not listed in ##gender".format(m.group(1))))
+                errors.append((ERROR, None, "Gender {} is not listed in ##gender".format(m.group(1))))
                 return None
 
             idx = m.end()
@@ -137,13 +134,13 @@ def check_string(text, lnum, default_case, extra_commands, plural_count, gender,
 
         if text.startswith('{G ', idx):
             assert text[idx:idx+2] != '{G='
-            args = get_arguments(text, lnum, 'G', idx + 2, errors)
+            args = get_arguments(text, 'G', idx + 2, errors)
             if args is None: return None
 
             args, idx = args
             expected = len(gender)
             if expected == 0:
-                errors.append((ERROR, lnum, "{G ..} cannot be used without defining the genders with ##gender"))
+                errors.append((ERROR, None, "{G ..} cannot be used without defining the genders with ##gender"))
                 return None
             elif len(args) > 0:
                 # If the first argument is a number, it cannot be a value for the plural command.
@@ -158,26 +155,23 @@ def check_string(text, lnum, default_case, extra_commands, plural_count, gender,
                     string_info.add_gender(num)
                     continue
 
-            errors.append((ERROR, lnum, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
+            errors.append((ERROR, None, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
             return None
 
 
-        errors.append((ERROR, lnum, "Unknown {...} command found in the string"))
+        errors.append((ERROR, None, "Unknown {...} command found in the string"))
         return None
 
-    if string_info.check_sanity(errors, lnum): return string_info
+    if string_info.check_sanity(errors): return string_info
     return None
 
-# {{{ def get_arguments(text, lnum, cmd, idx, errors):
-def get_arguments(text, lnum, cmd, idx, errors):
+# {{{ def get_arguments(text, cmd, idx, errors):
+def get_arguments(text, cmd, idx, errors):
     """
     Get arguments of a C{"{P"} or C{"{G"}.
 
     @param text: String text.
     @type  text: C{str}
-
-    @param lnum: Line number (0-based)
-    @type  lnum: C{int} or C{None}
 
     @param cmd: Command being parsed ('P' or 'G').
     @type  cmd: C{str}
@@ -202,10 +196,10 @@ def get_arguments(text, lnum, cmd, idx, errors):
             idx = m.end()
             continue
 
-        errors.append((ERROR, lnum, "Error while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
+        errors.append((ERROR, None, "Error while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
         return None
 
-    errors.append((ERROR, lnum, "Missing the terminating '}}' while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
+    errors.append((ERROR, None, "Missing the terminating '}}' while parsing arguments of a '{}' command".format('{' + cmd + '..}')))
     return None
 
 # }}}
@@ -263,7 +257,7 @@ class NewGrfStringInfo:
         if pos not in self.plurals:
             self.plurals.append(pos)
 
-    def add_string_command(self, pos, cmd, errors, lnum):
+    def add_string_command(self, pos, cmd, errors):
         """
         Add a string command at the stated position.
 
@@ -289,22 +283,19 @@ class NewGrfStringInfo:
                 self.commands[pos] = cmd
                 return True
             if self.commands[pos] != cmd:
-                errors.append((ERROR, lnum, "String parameter {} has more than one string command".format(pos)))
+                errors.append((ERROR, "String parameter {} has more than one string command".format(pos)))
                 return False
             return True
         while pos > len(self.commands): self.commands.append(None)
         self.commands.append(cmd)
         return True
 
-    def check_sanity(self, errors, lnum):
+    def check_sanity(self, errors):
         """
         Check sanity of the string commands and parameters.
 
         @param errors: Errors found so far, list of line numbers + message.
         @type  errors: C{list} of ((C{ERROR} or C{WARNING}, C{int} or C{None}), C{str})
-
-        @param lnum: Line number (0-based).
-        @type  lnum: C{int}
 
         @return: Whether the string parameters and commands are correct.
         @rtype:  C{bool}
@@ -312,30 +303,30 @@ class NewGrfStringInfo:
         ok = True
         for pos, cmd in enumerate(self.commands):
             if cmd is None:
-                errors.append((ERROR, lnum, "String parameter {} has no string command".format(pos)))
+                errors.append((ERROR, None, "String parameter {} has no string command".format(pos)))
                 ok = False
         if ok:
             for pos in self.plurals:
                 if pos < 0 or pos >= len(self.commands):
-                    errors.append((ERROR, lnum, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos)))
+                    errors.append((ERROR, None, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos)))
                     ok = False
                     continue
 
                 parm = PARAMETERS[self.commands[pos]]
                 if not parm.use_plural:
-                    errors.append((ERROR, lnum, "String parameter {} may not be used for plural queries {{P ..}}".format(pos)))
+                    errors.append((ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos)))
                     ok = False
 
         if ok:
             for pos in self.genders:
                 if pos < 0 or pos >= len(self.commands):
-                    errors.append((ERROR, lnum, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos)))
+                    errors.append((ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos)))
                     ok = False
                     continue
 
                 parm = PARAMETERS[self.commands[pos]]
                 if not parm.use_gender:
-                    errors.append((ERROR, lnum, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
+                    errors.append((ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
                     ok = False
 
         return ok
@@ -712,7 +703,7 @@ def get_base_string_info(text, lng, errors):
     @return: Information about the used string parameters.
     @rtype:  L{NewGrfStringInfo} or C{None}
     """
-    return check_string(text, None, True, None, get_plural_count(lng.plural), lng.gender, errors)
+    return check_string(text, True, None, get_plural_count(lng.plural), lng.gender, errors)
 # }}}
 # {{{ def get_translation_string_info(text, case, extra_commands, lng, errors):
 def get_translation_string_info(text, case, extra_commands, lng, errors):
@@ -737,7 +728,7 @@ def get_translation_string_info(text, case, extra_commands, lng, errors):
     @return: Information about the used string parameters.
     @rtype:  L{NewGrfStringInfo}
     """
-    return check_string(text, None, case == '', extra_commands, get_plural_count(lng.plural), lng.gender, errors)
+    return check_string(text, case == '', extra_commands, get_plural_count(lng.plural), lng.gender, errors)
 # }}}
 # {{{ def compare_info(base_info, lng_info, errors):
 def compare_info(base_info, lng_info, errors):
