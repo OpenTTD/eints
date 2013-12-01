@@ -51,12 +51,12 @@ def check_string(text, default_case, extra_commands, lng, errors):
 
         # text[idx] == '{', now find matching '}'
         if text.startswith('{}', idx):
-            string_info.add_string_command(None, '', errors)
+            string_info.add_nonpositional(NL_PARAMETER)
             idx = idx + 2
             continue
 
         if text.startswith('{{}', idx):
-            string_info.add_string_command(None, '{', errors)
+            string_info.add_nonpositional(CURLY_PARAMETER)
             idx = idx + 3
             continue
 
@@ -79,12 +79,15 @@ def check_string(text, default_case, extra_commands, lng, errors):
                 elif m.group(2) not in extra_commands: # Verify against set of supplied extra commands.
                     errors.append((ERROR, None, "Unknown string command {} found".format("{" + m.group(2) + "}")))
                     return None
+                string_info.add_extra_command(m.group(2))
+                idx = m.end()
+                continue
 
-            if entry is None or entry.takes_param == 0:
-                string_info.add_string_command(None, m.group(2), errors)
+            if entry.takes_param == 0:
+                string_info.add_nonpositional(entry)
             else:
                 if argnum is not None: pos = argnum
-                string_info.add_string_command(pos, m.group(2), errors)
+                string_info.add_positional(pos, entry, errors)
                 pos = pos + 1
 
             idx = m.end()
@@ -255,15 +258,35 @@ class NewGrfStringInfo:
         if pos not in self.plurals:
             self.plurals.append(pos)
 
-    def add_string_command(self, pos, cmd, errors):
+    def add_nonpositional(self, cmd):
+        """
+        Add a non-positional string command.
+
+        @param cmd: Command to add.
+        @type  cmd: L{ParameterInfo}
+        """
+        cnt = self.non_positionals.get(cmd.literal, 0)
+        self.non_positionals[cmd.literal] = cnt + 1
+
+    def add_extra_command(self, cmdname):
+        """
+        Add an extra command (a custom tag). The command is always non-positional.
+
+        @param cmdname: Name of the command.
+        @type  cmdname: C{str}
+        """
+        cnt = self.non_positionals.get(cmdname, 0)
+        self.non_positionals[cmdname] = cnt + 1
+
+    def add_positional(self, pos, cmd, errors):
         """
         Add a string command at the stated position.
 
-        @param pos: String parameter number if required (else C{None}.
-        @type  pos: C{int}, or C{None}
+        @param pos: String parameter number.
+        @type  pos: C{int}
 
         @param cmd: String command used at the stated position.
-        @type  cmd: C{str}
+        @type  cmd: C{ParameterInfo}
 
         @param errors: Errors found so far, list of line numbers + message.
         @type  errors: C{list} of ((C{ERROR} or C{WARNING}, C{int} or C{None}), C{str})
@@ -271,21 +294,16 @@ class NewGrfStringInfo:
         @return: Whether the command was correct.
         @rtype:  C{bool}
         """
-        if pos is None:
-            cnt = self.non_positionals.get(cmd, 0)
-            self.non_positionals[cmd] = cnt + 1
-            return True
-
         if pos < len(self.commands):
             if self.commands[pos] is None:
-                self.commands[pos] = cmd
+                self.commands[pos] = cmd.literal
                 return True
-            if self.commands[pos] != cmd:
+            if self.commands[pos] != cmd.literal:
                 errors.append((ERROR, "String parameter {} has more than one string command".format(pos)))
                 return False
             return True
         while pos > len(self.commands): self.commands.append(None)
-        self.commands.append(cmd)
+        self.commands.append(cmd.literal)
         return True
 
     def check_sanity(self, errors):
