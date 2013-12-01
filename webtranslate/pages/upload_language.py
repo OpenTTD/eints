@@ -44,10 +44,9 @@ def page_post(userauth, prjname):
         return
 
     # Parse language file, and report any errors.
-    errors = []
-    ng_data = language_file.load_language_file(langfile.file, config.cfg.language_file_size, errors)
-    if len(errors) > 0:
-        return template('upload_errors', proj_name = prjname, errors = errors)
+    ng_data = language_file.load_language_file(langfile.file, config.cfg.language_file_size)
+    if len(ng_data.errors) > 0:
+        return template('upload_errors', proj_name = prjname, errors = ng_data.errors)
 
     stamp = data.make_stamp()
 

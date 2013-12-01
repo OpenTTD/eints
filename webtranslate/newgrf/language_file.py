@@ -520,6 +520,9 @@ class NewGrfData:
 
     @ivar strings: Strings with their line number, name and text.
     @type strings: C{list} of L{StringValue}
+
+    @ivar errors: Errors detected during loading of the file.
+    @type errors: C{list} of L{ErrorMessage}
     """
     def __init__(self):
         self.grflangid = None
@@ -529,6 +532,16 @@ class NewGrfData:
         self.case = ['']
         self.skeleton = []
         self.strings = []
+        self.errors = []
+
+    def add_error(self, errmsg):
+        """
+        Add an error/warning to the list of detected errors.
+
+        @param errmsg: Error message to add.
+        @type  errmsg: L{ErrorMessage}
+        """
+        self.errors.append(errmsg)
 
     def cleanup_skeleton(self):
         """
@@ -539,9 +552,9 @@ class NewGrfData:
 
 # }}}
 
-# {{{ def load_language_file(handle, max_size, errors):
-# {{{ def handle_pragma(lnum, line, data, errors):
-def handle_pragma(lnum, line, data, errors):
+# {{{ def load_language_file(handle, max_size):
+# {{{ def handle_pragma(lnum, line, data):
+def handle_pragma(lnum, line, data):
     """
     Handle a pragma line.
 
@@ -553,14 +566,11 @@ def handle_pragma(lnum, line, data, errors):
 
     @param data: Data store of the properties.
     @type  data: L{NewGrfData}
-
-    @param errors: Errors found so far, list of line numbers + message.
-    @type  errors: C{list} of L{ErrorMessage}
     """
     line = line.split()
     if line[0] == '##grflangid':
         if len(line) != 2:
-            errors.append(ErrorMessage(ERROR, lnum, "##grflangid takes exactly one argument"))
+            data.add_error(ErrorMessage(ERROR, lnum, "##grflangid takes exactly one argument"))
             return
 
         # Is the argument a known text-name?
@@ -574,7 +584,7 @@ def handle_pragma(lnum, line, data, errors):
         try:
             val = int(line[1], 16)
         except ValueError:
-            errors.append(ErrorMessage(ERROR, lnum, "##grflangid is neither a valid language name nor a language code"))
+            data.add_error(ErrorMessage(ERROR, lnum, "##grflangid is neither a valid language name nor a language code"))
             return
         for entry in language_info.all_languages:
             if entry.grflangid == val:
@@ -582,45 +592,45 @@ def handle_pragma(lnum, line, data, errors):
                 data.language_data = entry
                 return
         # Don't know what it is.
-        errors.append(ErrorMessage(ERROR, lnum, "##grflangid is neither a valid language name nor a language code"))
+        data.add_error(ErrorMessage(ERROR, lnum, "##grflangid is neither a valid language name nor a language code"))
         return
 
     if line[0] == '##plural':
         if len(line) != 2:
-            errors.append(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
+            data.add_error(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
             return
         try:
             val = int(line[1], 10)
         except ValueError:
             val = -1
         if val < 0 or val > 12:
-            errors.append(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
+            data.add_error(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
             return
         data.plural = val
         return
 
     if line[0] == '##gender':
         if len(line) == 1:
-            errors.append(ErrorMessage(ERROR, lnum, "##gender takes a non-empty list of gender names"))
+            data.add_error(ErrorMessage(ERROR, lnum, "##gender takes a non-empty list of gender names"))
             return
         data.gender = line[1:]
         return
 
     if line[0] == '##case':
         if len(line) == 1:
-            errors.append(ErrorMessage(ERROR, lnum, "##case takes a non-empty list of case names"))
+            data.add_error(ErrorMessage(ERROR, lnum, "##case takes a non-empty list of case names"))
             return
         data.case = [''] + line[1:]
         return
 
-    errors.append(ErrorMessage(ERROR, lnum, "Unknown pragma '{}'".format(line[0])))
+    data.add_error(ErrorMessage(ERROR, lnum, "Unknown pragma '{}'".format(line[0])))
     return
 # }}}
 
 string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
 bom = codecs.BOM_UTF8.decode('utf-8')
 
-def load_language_file(handle, max_size, errors):
+def load_language_file(handle, max_size):
     """
     Load a language file.
 
@@ -629,9 +639,6 @@ def load_language_file(handle, max_size, errors):
 
     @param max_size: Maimum allowed size to read from the handle.
     @type  max_size: C{int}
-
-    @param errors: Problems found while parsing the file. Extended in-place.
-    @type  errors: C{list} of L{ErrorMessage}
 
     @return: Loaded language data.
     @rtype:  L{NewGrfData}
@@ -648,7 +655,8 @@ def load_language_file(handle, max_size, errors):
 
     # Read file, and process the lines.
     text = handle.read(max_size)
-    if len(text) == max_size: errors.append(ErrorMessage(ERROR, None, 'File not completely read'))
+    if len(text) == max_size:
+        data.add_error(ErrorMessage(ERROR, None, 'File not completely read'))
     text = str(text, encoding = "utf-8")
     for lnum, line in enumerate(text.split('\n')):
         line = line.rstrip()
@@ -657,9 +665,9 @@ def load_language_file(handle, max_size, errors):
 
         if line.startswith('##'):
             if seen_strings:
-                errors.append(ErrorMessage(ERROR, lnum, "Cannot change language properties after processing strings"))
+                data.add_error(ErrorMessage(ERROR, lnum, "Cannot change language properties after processing strings"))
                 continue
-            handle_pragma(lnum, line, data, errors)
+            handle_pragma(lnum, line, data)
             continue
 
         if line == "" or line.startswith(';') or line.startswith('#'):
@@ -677,7 +685,7 @@ def load_language_file(handle, max_size, errors):
             data.strings.append(sv)
             if m2 is '':
                 if m.group(1) in skeleton_strings:
-                    errors.append(ErrorMessage(ERROR, lnum, 'String name {} is already used.'.format(m.group(1))))
+                    data.add_error(ErrorMessage(ERROR, lnum, 'String name {} is already used.'.format(m.group(1))))
                     continue
                 skeleton_strings.add(m.group(1))
                 if '\t' in line:
@@ -687,14 +695,14 @@ def load_language_file(handle, max_size, errors):
                 data.skeleton.append(('string', (normalized_line.find(':'), m.group(1))))
             continue
 
-        errors.append(ErrorMessage(ERROR, lnum, "Line not recognized"))
+        data.add_error(ErrorMessage(ERROR, lnum, "Line not recognized"))
 
     for sv in data.strings:
         if sv.name not in skeleton_strings:
-            errors.append(ErrorMessage(ERROR, None, 'String name \"{}\" has no default definition (that is, without case).'.format(sv.name)))
+            data.add_error(ErrorMessage(ERROR, None, 'String name \"{}\" has no default definition (that is, without case).'.format(sv.name)))
 
     if data.language_data is None:
-        errors.append(ErrorMessage(ERROR, None, 'Language file has no ##grflangid'))
+        data.add_error(ErrorMessage(ERROR, None, 'Language file has no ##grflangid'))
 
     data.cleanup_skeleton()
     return data
