@@ -154,7 +154,7 @@ def check_string(text, default_case, extra_commands, lng):
                 string_info.add_error(ErrorMessage(ERROR, None, "{} may only be used at the start of a string".format(m.group(0))))
                 return string_info
             if not default_case:
-                string_info.add_error(ErrorMessage(ERROR, '{G=..} may only be used for the default string (that is, without case extension)'))
+                string_info.add_error(ErrorMessage(ERROR, None, '{G=..} may only be used for the default string (that is, without case extension)'))
                 return string_info
             if m.group(1) not in lng.gender:
                 string_info.add_error(ErrorMessage(ERROR, None, "Gender {} is not listed in ##gender".format(m.group(1))))
