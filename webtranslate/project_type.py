@@ -45,6 +45,18 @@ class NewGRFProject(ProjectType):
             allow_case = True,
             allow_extra = True)
 
+class GameScriptProject(ProjectType):
+    """
+    Project type for game script strings.
+    """
+    def __init__(self):
+        ProjectType.__init__(self,
+            name = "game-script",
+            human_name = "GameScript",
+            text_commands = GS_PARAMETERS,
+            allow_gender = False,
+            allow_case = False,
+            allow_extra = False)
 
 class ParameterInfo:
     """
@@ -125,6 +137,113 @@ _NEWGRF_PARAMETERS = [
 
 NEWGRF_PARAMETERS = dict((x.literal, x) for x in _NEWGRF_PARAMETERS)
 # }}}
+# {{{ GS_PARAMETERS
+# Based on OpenTTD src/tables/strgen_tables.h r26050
+_GS_PARAMETERS = [
+    ParameterInfo("TINY_FONT",         False, False, False, False, True ),
+    ParameterInfo("BIG_FONT",          False, False, False, False, True ),
+
+    ParameterInfo("BLUE",              False, False, False, False, False),
+    ParameterInfo("SILVER",            False, False, False, False, False),
+    ParameterInfo("GOLD",              False, False, False, False, False),
+    ParameterInfo("RED",               False, False, False, False, False),
+    ParameterInfo("PURPLE",            False, False, False, False, False),
+    ParameterInfo("LTBROWN",           False, False, False, False, False),
+    ParameterInfo("ORANGE",            False, False, False, False, False),
+    ParameterInfo("GREEN",             False, False, False, False, False),
+    ParameterInfo("YELLOW",            False, False, False, False, False),
+    ParameterInfo("DKGREEN",           False, False, False, False, False),
+    ParameterInfo("CREAM",             False, False, False, False, False),
+    ParameterInfo("BROWN",             False, False, False, False, False),
+    ParameterInfo("WHITE",             False, False, False, False, False),
+    ParameterInfo("LTBLUE",            False, False, False, False, False),
+    ParameterInfo("GRAY",              False, False, False, False, False),
+    ParameterInfo("DKBLUE",            False, False, False, False, False),
+    ParameterInfo("BLACK",             False, False, False, False, False),
+#    ParameterInfo("REV",               False, False, False, False, True ),
+
+    ParameterInfo("STRING1",           True,  True,  True,  True,  True ),
+    ParameterInfo("STRING2",           True,  True,  True,  True,  True ),
+    ParameterInfo("STRING3",           True,  True,  True,  True,  True ),
+    ParameterInfo("STRING4",           True,  True,  True,  True,  True ),
+    ParameterInfo("STRING5",           True,  True,  True,  True,  True ),
+    ParameterInfo("STRING6",           True,  True,  True,  True,  True ),
+    ParameterInfo("STRING7",           True,  True,  True,  True,  True ),
+
+#    ParameterInfo("STATION_FEATURES",  True,  False, False, False, True ), # station features string, icons of the features
+    ParameterInfo("INDUSTRY",          True,  False, True,  True,  True ), # takes an industry number.
+    ParameterInfo("CARGO_LONG",        True,  False, True,  False, True ),
+    ParameterInfo("CARGO_SHORT",       True,  False, False, False, True ), # short cargo description, only ### tons, or ### litres
+    ParameterInfo("CARGO_TINY",        True,  False, False, False, True ), # tiny cargo description with only the amount
+    ParameterInfo("CARGO_LIST",        True,  False, False, True,  True ),
+    ParameterInfo("POWER",             True,  False, False, False, True ),
+    ParameterInfo("VOLUME_LONG",       True,  False, False, False, True ),
+    ParameterInfo("VOLUME_SHORT",      True,  False, False, False, True ),
+    ParameterInfo("WEIGHT_LONG",       True,  False, False, False, True ),
+    ParameterInfo("WEIGHT_SHORT",      True,  False, False, False, True ),
+    ParameterInfo("FORCE",             True,  False, False, False, True ),
+    ParameterInfo("VELOCITY",          True,  False, False, False, True ),
+    ParameterInfo("HEIGHT",            True,  False, False, False, True ),
+    ParameterInfo("DATE_TINY",         True,  False, False, False, True ),
+    ParameterInfo("DATE_SHORT",        True,  False, False, True,  True ),
+    ParameterInfo("DATE_LONG",         True,  False, False, True,  True ),
+    ParameterInfo("DATE_ISO",          True,  False, False, False, True ),
+
+    ParameterInfo("STRING",            True,  True,  True,  True,  True ),
+    ParameterInfo("RAW_STRING",        True,  True,  True,  False, True ),
+
+    ParameterInfo("COMMA",             True,  True,  False, False, True ), # Number with comma
+    ParameterInfo("DECIMAL",           True,  True,  False, False, True ), # Number with comma and fractional part.
+    ParameterInfo("NUM",               True,  True,  False, False, True ), # Signed number
+    ParameterInfo("ZEROFILL_NUM",      True,  True,  False, False, True ), # Unsigned number with zero fill, e.g. "02".
+    ParameterInfo("BYTES",             True,  True,  False, False, True ), # Unsigned number with "bytes", i.e. "1.02 MiB or 123 KiB"
+    ParameterInfo("HEX",               True,  True,  False, False, True ), # Hexadecimally printed number
+
+    ParameterInfo("CURRENCY_LONG",     True,  True,  False, False, True ),
+    ParameterInfo("CURRENCY_SHORT",    True,  True,  False, False, True ), # compact currency
+
+    ParameterInfo("WAYPOINT",          True,  False, True,  False, True ), # waypoint name
+    ParameterInfo("STATION",           True,  False, True,  False, True ),
+    ParameterInfo("DEPOT",             True,  False, True,  False, True ),
+    ParameterInfo("TOWN",              True,  False, True,  False, True ),
+    ParameterInfo("GROUP",             True,  False, True,  False, True ),
+    ParameterInfo("SIGN",              True,  False, True,  False, True ),
+    ParameterInfo("ENGINE",            True,  False, True,  False, True ),
+    ParameterInfo("VEHICLE",           True,  False, True,  False, True ),
+    ParameterInfo("COMPANY",           True,  False, True,  False, True ),
+    ParameterInfo("COMPANY_NUM",       True,  False, False, False, True ),
+    ParameterInfo("PRESIDENT_NAME",    True,  False, True,  False, True ),
+
+#    ParameterInfo("UP_ARROW",          False, False, False, False, True ),
+#    ParameterInfo("SMALL_UP_ARROW",    False, False, False, False, True ),
+#    ParameterInfo("SMALL_DOWN_ARROW",  False, False, False, False, True ),
+    ParameterInfo("TRAIN",             False, False, False, False, True ),
+    ParameterInfo("LORRY",             False, False, False, False, True ),
+    ParameterInfo("BUS",               False, False, False, False, True ),
+    ParameterInfo("PLANE",             False, False, False, False, True ),
+    ParameterInfo("SHIP",              False, False, False, False, True ),
+    ParameterInfo("NBSP",              False, False, False, False, False),
+    ParameterInfo("COPYRIGHT",         False, False, False, False, True ),
+#    ParameterInfo("DOWN_ARROW",        False, False, False, False, True ),
+#    ParameterInfo("CHECKMARK",         False, False, False, False, True ),
+#    ParameterInfo("CROSS",             False, False, False, False, True ),
+#    ParameterInfo("RIGHT_ARROW",       False, False, False, False, False),
+#    ParameterInfo("SMALL_LEFT_ARROW",  False, False, False, False, False),
+#    ParameterInfo("SMALL_RIGHT_ARROW", False, False, False, False, False),
+
+    # The following are directional formatting codes used to get the RTL strings right:
+    # http://www.unicode.org/unicode/reports/tr9/#Directional_Formatting_Codes
+    ParameterInfo("LRM",               False, False, False, False, False),
+    ParameterInfo("RLM",               False, False, False, False, False),
+    ParameterInfo("LRE",               False, False, False, False, False),
+    ParameterInfo("RLE",               False, False, False, False, False),
+    ParameterInfo("LRO",               False, False, False, False, False),
+    ParameterInfo("RLO",               False, False, False, False, False),
+    ParameterInfo("PDF",               False, False, False, False, False),
+]
+
+GS_PARAMETERS = dict((x.literal, x) for x in _GS_PARAMETERS)
+# }}}
 
 NL_PARAMETER    = ParameterInfo("",  False, False, False, False, False)
 CURLY_PARAMETER = ParameterInfo("{", False, False, False, False, True)
@@ -132,6 +251,6 @@ CURLY_PARAMETER = ParameterInfo("{", False, False, False, False, True)
 
 # Available project types, ordered by internal name.
 project_types = {}
-for pt in [NewGRFProject()]:
+for pt in [NewGRFProject(), GameScriptProject()]:
     project_types[pt.name] = pt
 

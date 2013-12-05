@@ -8,7 +8,8 @@ from webtranslate import config, utils, project_type
 @route('/newproject', method = 'GET')
 @protected(['newproject', '-', '-'])
 def page_get(userauth):
-    return template('newproject_form')
+    all_ptype_names = sorted(projtype.human_name for projtype in project_type.project_types.values())
+    return template('newproject_form', all_ptype_names = all_ptype_names)
 
 @route('/createproject', method = 'POST')
 @protected(['createproject', '-', '-'])
@@ -21,12 +22,22 @@ def page_post(userauth):
 
     if prjname in config.cache.projects:
         redirect('/newproject?message=' + "Project \"{}\" already exists".format(prjname))
+        return
 
-    return template('createproject_form', prjname = prjname)
+    ptype_name = request.forms.projtype_select
+    projtype = None
+    for prjtp in project_type.project_types.values():
+        if prjtp.human_name == ptype_name:
+            projtype = prjtp
+            break
+    if projtype is None:
+        redirect('/newproject?message=No known project type provided')
+        return
+    return template('createproject_form', projtype_name = projtype.name, prjname = prjname)
 
-@route('/makeproject/<prjname>', method = 'POST')
+@route('/makeproject/<prjtypename>/<prjname>', method = 'POST')
 @protected(['makeproject', 'prjname', '-'])
-def create_project(userauth, prjname):
+def create_project(userauth, prjtypename, prjname):
     acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
         redirect('/newproject?message=' + acceptance)
@@ -34,6 +45,7 @@ def create_project(userauth, prjname):
 
     if prjname in config.cache.projects:
         redirect('/newproject?message=' + "Project \"{}\" already exists".format(prjname))
+        return
 
     human_name = request.forms.humanname.strip()
     acceptance = utils.verify_name(human_name, "Full project name", False)
@@ -47,7 +59,11 @@ def create_project(userauth, prjname):
         abort(404, acceptance)
         return
 
-    projtype = project_type.project_types["newgrf"]
+    projtype = project_type.project_types.get(prjtypename)
+    if projtype is None:
+        abort(404, "Unknown project type.")
+        return
+
     error = config.cache.create_project(prjname, human_name, projtype, url)
     if error is not None:
         abort(404, error)

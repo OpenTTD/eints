@@ -9,8 +9,16 @@
         <span class="help-block">Only characters A-Z, a-z, 0-9 and dash (-) allowed</span>
         <br />
         <br />
-        <div class="eint-form-actions">
-            <button class="btn btn-large btn-primary" type="submit">Create Project!</button>
+        <div class="control-group">
+            <label class="control-label" for="projtype_select">Project type:</label>&nbsp;
+            <select name="projtype_select" id="projtype_select">
+                <option selected value="none">Select a project type</option>
+                % for ptype_name in all_ptype_names:
+                    <option value="{{ptype_name}}">{{ptype_name}}</option>
+                % end
+            </select>
+            &nbsp;
+            <button class="btn btn-primary" type="submit">Create Project!</button>
         </div>
     </fieldset>
 </form>
