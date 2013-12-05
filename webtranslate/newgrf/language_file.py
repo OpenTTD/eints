@@ -62,6 +62,7 @@ def check_string(projtype, text, default_case, extra_commands, lng):
     assert projtype.allow_gender or len(lng.gender) == 0
     assert projtype.allow_case or default_case
 
+    if not projtype.allow_extra: extra_commands = set()
     string_info = StringInfo(extra_commands)
     plural_count = plural_count_map[lng.plural]
     pos = 0 # String parameter number.

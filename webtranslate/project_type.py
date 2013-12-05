@@ -20,13 +20,17 @@ class ProjectType:
 
     @ivar allow_gender: Allow string cases.
     @type allow_gender: C{bool}
+
+    @ivar allow_extra: Allow extra string commands (that is, custom tags).
+    @type allow_extra: C{bool}
     """
-    def __init__(self, name, human_name, text_commands, allow_gender, allow_case):
+    def __init__(self, name, human_name, text_commands, allow_gender, allow_case, allow_extra):
         self.name = name
         self.human_name = human_name
         self.text_commands = text_commands
         self.allow_gender = allow_gender
         self.allow_case = allow_case
+        self.allow_extra = allow_extra
 
 class NewGRFProject(ProjectType):
     """
@@ -38,7 +42,8 @@ class NewGRFProject(ProjectType):
             human_name = "NewGrf",
             text_commands = NEWGRF_PARAMETERS,
             allow_gender = True,
-            allow_case = True)
+            allow_case = True,
+            allow_extra = True)
 
 
 class ParameterInfo:
