@@ -97,6 +97,11 @@ used is however allowed.
 
    Name of the project in Eints (may contain letters, digits, and dashes).
 
+.. option:: --project-type = <project-type>
+
+   Type of project in Eints, needed to create the project.
+   Accepted values are "game-script" and "newgrf".
+
 .. option:: --project-desc = <project-description>
 
    For project creation, a longer title of the project (may contain letters,

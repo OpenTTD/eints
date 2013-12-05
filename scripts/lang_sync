@@ -3,6 +3,11 @@
 import getopt, re, sys, getpass, codecs, os
 import urllib.request
 
+KNOWN_PROJECT_TYPES = ["game-script", "newgrf"]
+
+PROJECT_TYPES_TEXT = ['"{}"'.format(pt) for pt in KNOWN_PROJECT_TYPES]
+PROJECT_TYPES_TEXT = PROJECT_TYPES_TEXT[0] + " and " + PROJECT_TYPES_TEXT[-1]
+
 hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
 
 # Configuration.
@@ -75,6 +80,9 @@ class UserConfig:
     @ivar project: Project identifier of Eints, if available.
     @type project: C{str} or C{None}
 
+    @ivar project_type: Type of the project.
+    @type project_type: C{str}
+
     @ivar project_desc: Project description, if available.
     @type project_desc: C{str} or C{None}
 
@@ -115,6 +123,7 @@ class UserConfig:
         self.langfile_map = None
         self.credits_file = None
         self.project = None
+        self.project_type = "**unset**"
         self.project_desc = None
         self.project_url = ''
         self.lang_dir = "lang"
@@ -133,6 +142,9 @@ class UserConfig:
             sys.exit(1)
         if self.project is None:
             print("Error: Missing Eints project identifier (add it with --project=PROJ_ID).")
+            sys.exit(1)
+        if self.project_type not in KNOWN_PROJECT_TYPES:
+            print("Error: Project type \"{}\" is not known.".format(self.project_type))
             sys.exit(1)
         if not check_project_name(self.project):
             print("Error: Project identifier \"{}\" is not valid.".format(self.project))
@@ -577,7 +589,7 @@ def perform_create_project():
 
     fields = {'humanname' : user_cfg.project_desc,
               'url' : user_cfg.project_url}
-    url = build_url('/makeproject/' + user_cfg.project)
+    url = build_url('/makeproject/' + user_cfg.project_type + "/" + user_cfg.project)
     if user_cfg.no_write:
         print("Skipped creation of project \"{}\".".format(user_cfg.project))
     else:
@@ -1015,6 +1027,10 @@ Getting project information:
 --project=PROJECT_NAME
     Name of the project in Eints (may contain letters, digits, and dashes).
 
+--project-type=PROJECT_TYPE
+    Type of the project. Accepted values are """ + PROJECT_TYPES_TEXT + "." + \
+"""
+
 --project-desc=PROJECT_DESCRIPTION
     For project creation, a longer title of the project (may contain letters,
     digits, dashes and spaces).
@@ -1072,13 +1088,13 @@ def run():
     """
     global user_cfg
 
-    try:
-        long_opts = ["user-password-file=", "user=", "password=",
-                     "not-interactive", "base-url=", "project=",
-                     "project-desc=", "project-url=", "lang-dir=",
-                     "base-language=", "language-file-mapping=",
-                     "lang-file-ext=", "credits=", "help", "verbose", "no-write"]
+    long_opts = ["user-password-file=", "user=", "password=",
+                 "not-interactive", "base-url=", "project=", "project-type=",
+                 "project-desc=", "project-url=", "lang-dir=",
+                 "base-language=", "language-file-mapping=",
+                 "lang-file-ext=", "credits=", "help", "verbose", "no-write"]
 
+    try:
         opts, args = getopt.getopt(sys.argv[1:], "h", long_opts)
     except getopt.GetoptError as err:
         print("lang_sync: " + str(err) + " (try \"lang_sync --help\")")
@@ -1120,6 +1136,9 @@ def run():
             continue
         if opt == '--project':
             user_cfg.project = val
+            continue
+        if opt == '--project-type':
+            user_cfg.project_type = val
             continue
         if opt == '--project-desc':
             user_cfg.project_desc = val
