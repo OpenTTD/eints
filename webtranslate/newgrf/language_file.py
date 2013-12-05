@@ -2,6 +2,7 @@
 Language file processing.
 """
 import re, codecs
+from webtranslate import project_type
 from webtranslate.newgrf import language_info
 
 ERROR = 'Error'
@@ -35,9 +36,12 @@ argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 number_pat = re.compile('[0-9]+$')
 
-def check_string(text, default_case, extra_commands, lng):
+def check_string(projtype, text, default_case, extra_commands, lng):
     """
     Check the contents of a single string.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param text: String text.
     @type  text: C{str}
@@ -66,12 +70,12 @@ def check_string(text, default_case, extra_commands, lng):
 
         # text[idx] == '{', now find matching '}'
         if text.startswith('{}', idx):
-            string_info.add_nonpositional(NL_PARAMETER)
+            string_info.add_nonpositional(project_type.NL_PARAMETER)
             idx = idx + 2
             continue
 
         if text.startswith('{{}', idx):
-            string_info.add_nonpositional(CURLY_PARAMETER)
+            string_info.add_nonpositional(project_type.CURLY_PARAMETER)
             idx = idx + 3
             continue
 
@@ -87,7 +91,7 @@ def check_string(text, default_case, extra_commands, lng):
             else:
                 case = m.group(3)[1:]
 
-            entry = PARAMETERS.get(m.group(2))
+            entry = projtype.text_commands.get(m.group(2))
             if entry is None:
                 if argnum is not None:
                     string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
@@ -193,7 +197,7 @@ def check_string(text, default_case, extra_commands, lng):
         string_info.add_error(ErrorMessage(ERROR, None, "Unknown {...} command found in the string"))
         return string_info
 
-    string_info.check_sanity()
+    string_info.check_sanity(projtype)
     return string_info
 
 # {{{ def get_arguments(text, cmd, idx, string_info):
@@ -368,9 +372,12 @@ class NewGrfStringInfo:
         self.commands.append(cmd.literal)
         return True
 
-    def check_sanity(self):
+    def check_sanity(self, projtype):
         """
         Check sanity of the string commands and parameters.
+
+        @param projtype: Project type.
+        @type  projtype: L{ProjectType}
         """
         ok = True
         for pos, cmd in enumerate(self.commands):
@@ -384,7 +391,7 @@ class NewGrfStringInfo:
                     ok = False
                     continue
 
-                parm = PARAMETERS[self.commands[pos]]
+                parm = projtype.text_commands[self.commands[pos]]
                 if not parm.use_plural:
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos)))
                     ok = False
@@ -395,92 +402,9 @@ class NewGrfStringInfo:
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos)))
                     continue
 
-                parm = PARAMETERS[self.commands[pos]]
+                parm = projtype.text_commands[self.commands[pos]]
                 if not parm.use_gender:
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
-# }}}
-# {{{ PARAMETERS
-class ParameterInfo:
-    """
-    @ivar literal: Text of the literal (without curly brackets).
-    @type literal: C{str}
-
-    @ivar takes_param: Takes a string parameter.
-    @type takes_param: C{bool}
-
-    @ivar use_plural: May be used for plural.
-    @type use_plural: C{bool}
-
-    @ivar use_gender: May be used for gender.
-    @type use_gender: C{bool}
-
-    @ivar allow_case: May have a ".case" suffix.
-    @type allow_case: C{bool}
-
-    @ivar critical: String command is critical, its count should match between the base language and the translation.
-    @type critical: C{bool}
-    """
-    def __init__(self, literal, takes_param, use_plural, use_gender, allow_case, critical):
-        self.literal = literal
-        self.takes_param = takes_param
-        self.use_plural = use_plural
-        self.use_gender = use_gender
-        self.allow_case = allow_case
-        self.critical = critical
-
-_PARAMETERS = [
-    ParameterInfo("NBSP",           False, False, False, False, False),
-    ParameterInfo("COPYRIGHT",      False, False, False, False, True ),
-    ParameterInfo("TRAIN",          False, False, False, False, True ),
-    ParameterInfo("LORRY",          False, False, False, False, True ),
-    ParameterInfo("BUS",            False, False, False, False, True ),
-    ParameterInfo("PLANE",          False, False, False, False, True ),
-    ParameterInfo("SHIP",           False, False, False, False, True ),
-    ParameterInfo("TINYFONT",       False, False, False, False, True ),
-    ParameterInfo("BIGFONT",        False, False, False, False, True ),
-    ParameterInfo("BLUE",           False, False, False, False, True ),
-    ParameterInfo("SILVER",         False, False, False, False, True ),
-    ParameterInfo("GOLD",           False, False, False, False, True ),
-    ParameterInfo("RED",            False, False, False, False, True ),
-    ParameterInfo("PURPLE",         False, False, False, False, True ),
-    ParameterInfo("LTBROWN",        False, False, False, False, True ),
-    ParameterInfo("ORANGE",         False, False, False, False, True ),
-    ParameterInfo("GREEN",          False, False, False, False, True ),
-    ParameterInfo("YELLOW",         False, False, False, False, True ),
-    ParameterInfo("DKGREEN",        False, False, False, False, True ),
-    ParameterInfo("CREAM",          False, False, False, False, True ),
-    ParameterInfo("BROWN",          False, False, False, False, True ),
-    ParameterInfo("WHITE",          False, False, False, False, True ),
-    ParameterInfo("LTBLUE",         False, False, False, False, True ),
-    ParameterInfo("GRAY",           False, False, False, False, True ),
-    ParameterInfo("DKBLUE",         False, False, False, False, True ),
-    ParameterInfo("BLACK",          False, False, False, False, True ),
-
-    ParameterInfo("COMMA",          True,  True,  False, False, True ),
-    ParameterInfo("SIGNED_WORD",    True,  True,  False, False, True ),
-    ParameterInfo("UNSIGNED_WORD",  True,  True,  False, False, True ),
-    ParameterInfo("CURRENCY",       True,  False, False, False, True ),
-    ParameterInfo("VELOCITY",       True,  False, False, False, True ),
-    ParameterInfo("VOLUME",         True,  False, False, False, True ),
-    ParameterInfo("VOLUME_SHORT",   True,  False, False, False, True ),
-    ParameterInfo("POWER",          True,  False, False, False, True ),
-    ParameterInfo("WEIGHT",         True,  False, False, False, True ),
-    ParameterInfo("WEIGHT_SHORT",   True,  False, False, False, True ),
-    ParameterInfo("HEX",            True,  True,  False, False, True ),
-    ParameterInfo("STRING",         True,  False, True , True,  True ),
-    ParameterInfo("DATE1920_LONG",  True,  False, False, False, True ),
-    ParameterInfo("DATE1920_SHORT", True,  False, False, False, True ),
-    ParameterInfo("DATE_LONG",      True,  False, False, False, True ),
-    ParameterInfo("DATE_SHORT",     True,  False, False, False, True ),
-    ParameterInfo("POP_WORD",       True,  False, False, False, True ),
-    ParameterInfo("STATION",        True,  False, False, False, True ),
-]
-
-NL_PARAMETER    = ParameterInfo("",  False, False, False, False, False)
-CURLY_PARAMETER = ParameterInfo("{", False, False, False, False, True)
-
-PARAMETERS = dict((x.literal, x) for x in _PARAMETERS)
-
 # }}}
 # }}}
 
@@ -752,9 +676,12 @@ def sanitize_text(txt):
 
 # Get string information
 # {{{ def compare_info(base_info, lng_info):
-def compare_info(base_info, lng_info):
+def compare_info(projtype, base_info, lng_info):
     """
     Compare both string uses with each other. Errors found during the comparison are added to the translation L{lng_info}.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param base_info: Information about string parameters from the base language.
     @type  base_info: L{NewGrfStringInfo}
@@ -794,7 +721,7 @@ def compare_info(base_info, lng_info):
         for bname, bcnt in base_info.non_positionals.items():
             if bname not in lng_info.non_positionals:
                 msg = 'String command {} is missing in the translation'.format('{' + bname + '}')
-                if is_critical_non_positional(bname):
+                if is_critical_non_positional(projtype, bname):
                     lng_info.add_error(ErrorMessage(ERROR, None, msg))
                     return False
                 else:
@@ -809,7 +736,7 @@ def compare_info(base_info, lng_info):
         for np in lng_info.non_positionals:
             if np not in base_info.non_positionals:
                 msg = 'String command {} is not used in the base language'.format('{' + np + '}')
-                if is_critical_non_positional(np):
+                if is_critical_non_positional(projtype, np):
                     lng_info.add_error(ErrorMessage(ERROR, None, msg))
                     return False
                 else:
@@ -817,10 +744,13 @@ def compare_info(base_info, lng_info):
 
     return True
 
-def is_critical_non_positional(name):
+def is_critical_non_positional(projtype, name):
     """
     Return whether the given non-position string command should match exactly
     in count between the base language and the translation.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param name: String command.
     @type  name: C{str}
@@ -829,11 +759,11 @@ def is_critical_non_positional(name):
     @rtype:  C{bool}
     """
     if name == '':
-        sc = NL_PARAMETER
+        sc = project_type.NL_PARAMETER
     elif name == '{':
-        sc = CURLY_PARAMETER
+        sc = project_type.CURLY_PARAMETER
     else:
-        sc = PARAMETERS.get(name)
+        sc = projtype.text_commands.get(name)
         if sc is None: return True
 
     return sc.critical

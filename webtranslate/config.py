@@ -444,11 +444,13 @@ class ProjectMetaData:
             bstat = {}
             pdata.statistics[pdata.base_language] = bstat
 
+        projtype = pdata.projtype
+
         # First construct detailed information in the project
         for sname, bchgs in blng.changes.items():
             # Check newest base language string.
             bchg = data.get_newest_change(bchgs, '')
-            binfo = language_file.check_string(bchg.base_text.text, True, None, blng)
+            binfo = language_file.check_string(projtype, bchg.base_text.text, True, None, blng)
             if binfo.has_error:
                 bstat[sname] = [('', data.INVALID)]
             else:
@@ -481,7 +483,7 @@ class ProjectMetaData:
                     continue
 
                 chgs = data.get_all_newest_changes(chgs, lng.case)
-                detailed_state = data.decide_all_string_status(bchg, chgs, lng, binfo)
+                detailed_state = data.decide_all_string_status(projtype, bchg, chgs, lng, binfo)
                 sstat[:] = sorted((c,se[0]) for c, se in detailed_state.items())
 
         # Construct overview statistics for each language.

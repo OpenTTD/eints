@@ -336,7 +336,7 @@ def check_page_parameters(prjname, lngname, sname):
 
     # Check newest base language string.
     bchg = max(bchgs)
-    binfo = language_file.check_string(bchg.base_text.text, True, None, blng)
+    binfo = language_file.check_string(pdata.projtype, bchg.base_text.text, True, None, blng)
     if binfo.has_error:
         # XXX Add errors too
         abort(404, "String cannot be translated, its base language version is incorrect")
@@ -423,7 +423,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
                     if chg_err_state is not None:
                         state, errors = chg_err_state[1], chg_err_state[2]
                     else:
-                        state, errors = data.get_string_status(lchg, case, lng, bchg.base_text, binfo)
+                        state, errors = data.get_string_status(pdata.projtype, lchg, case, lng, bchg.base_text, binfo)
 
                     tra.errors = errors
                     tra.state = data.STATE_MAP[state].name
@@ -468,6 +468,7 @@ def str_post(userauth, prjname, lngname, sname):
 
     # Get changes against bchg
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, bchg)
+    projtype = pmd.pdata.projtype
 
     stamp = None # Assigned a stamp object when a change is made in the translation.
 
@@ -496,7 +497,7 @@ def str_post(userauth, prjname, lngname, sname):
             if stamp is None: stamp = data.make_stamp()
             txt = data.Text(trl_str, case, stamp)
             tchg = data.Change(sname, case, bchg.base_text, txt, stamp, userauth.name)
-            state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
+            state, errors = data.get_string_status(projtype, tchg, case, lng, bchg.base_text, binfo)
             if state == data.MISSING or state == data.INVALID:
                 new_state_errors[case] = (tchg, state, errors)
             else:
@@ -509,7 +510,7 @@ def str_post(userauth, prjname, lngname, sname):
             # Latest translation.
             if trl_chg.base_text == bchg.base_text: # And also the latest base language!
                 continue
-            state, _errors = data.get_string_status(trl_chg, case, lng, bchg.base_text, binfo)
+            state, _errors = data.get_string_status(projtype, trl_chg, case, lng, bchg.base_text, binfo)
             if state == data.OUT_OF_DATE:
                 # We displayed a 'this string is correct' checkbox. Was it changed?
                 if request.forms_get('ok_' + case):
@@ -523,7 +524,7 @@ def str_post(userauth, prjname, lngname, sname):
         # We got an older translation instead.
         if stamp is None: stamp = data.make_stamp()
         tchg = data.Change(sname, case, bchg.base_text, trl_chg.new_text, stamp, userauth.name)
-        state, errors = data.get_string_status(tchg, case, lng, bchg.base_text, binfo)
+        state, errors = data.get_string_status(projtype, tchg, case, lng, bchg.base_text, binfo)
         if state == data.MISSING or state == data.INVALID:
             new_state_errors[case] = (tchg, state, errors)
         else:

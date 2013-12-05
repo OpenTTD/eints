@@ -144,10 +144,13 @@ STATUSES = [StatusDefinition(MISSING_OK,  'Omitted',  'The case was not needed i
 STATE_MAP = dict((sd.code, sd) for sd in STATUSES)
 
 
-def decide_all_string_status(base_chg, lng_chgs, lng, binfo):
+def decide_all_string_status(projtype, base_chg, lng_chgs, lng, binfo):
     """
     Decide the state of all the cases of the string based on the information of L{base_chg} and
     the L{lng_chgs}.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param base_chg: Newest version of the string in the base language.
     @type  base_chg: L{Change}
@@ -169,12 +172,15 @@ def decide_all_string_status(base_chg, lng_chgs, lng, binfo):
 
     results = {}
     for case, chg in lng_chgs.items():
-        results[case] = get_string_status(chg, case, lng, base_text, binfo)
+        results[case] = get_string_status(projtype, chg, case, lng, base_text, binfo)
     return results
 
-def get_string_status(lchg, case, lng, btext, binfo):
+def get_string_status(projtype, lchg, case, lng, btext, binfo):
     """
     Get the status of a language string. Also collect its errors.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param lchg: Translation language change to examine.
     @type  lchg: L{Change}
@@ -205,8 +211,8 @@ def get_string_status(lchg, case, lng, btext, binfo):
     else:
         state = UP_TO_DATE
 
-    linfo = language_file.check_string(lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng)
-    if not language_file.compare_info(binfo, linfo):
+    linfo = language_file.check_string(projtype, lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng)
+    if not language_file.compare_info(projtype, binfo, linfo):
         state = INVALID
 
     return state, linfo.errors
