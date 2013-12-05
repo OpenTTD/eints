@@ -3,7 +3,7 @@ Create a new project.
 """
 from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
-from webtranslate import config, utils
+from webtranslate import config, utils, project_type
 
 @route('/newproject', method = 'GET')
 @protected(['newproject', '-', '-'])
@@ -47,7 +47,8 @@ def create_project(userauth, prjname):
         abort(404, acceptance)
         return
 
-    error = config.cache.create_project(prjname, human_name, url)
+    projtype = project_type.project_types["newgrf"]
+    error = config.cache.create_project(prjname, human_name, projtype, url)
     if error is not None:
         abort(404, error)
         return

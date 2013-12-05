@@ -4,7 +4,7 @@ Project data.
 import time, re, calendar
 from xml.dom import minidom
 from xml.dom.minidom import Node
-from webtranslate import loader
+from webtranslate import loader, project_type
 from webtranslate.newgrf import language_file
 
 def load_file(fname):
@@ -394,6 +394,9 @@ class Project:
     @ivar human_name: Project name for humans.
     @type human_name: C{str}
 
+    @ivar projtype: Project type.
+    @type projtype: L{ProjectType}
+
     @ivar url: URL to Project Home Page (somewhere on the internet).
     @type url: C{str}
 
@@ -427,8 +430,9 @@ class Project:
                     - 'case'      Cases line
                     - 'gender'    Gender line
     """
-    def __init__(self, human_name, url=''):
+    def __init__(self, human_name, projtype, url=''):
         self.human_name = human_name
+        self.projtype = projtype
         self.url = url
         self.statistics = {}
         self.languages = {}
@@ -544,8 +548,9 @@ def load_project(xloader, node):
     """
     assert node.tagName == 'project'
     human_name = node.getAttribute('name')
+    projtype = project_type.project_types[loader.get_opt_DOMattr(node, 'projtype', 'newgrf')]
     url = node.getAttribute('url')
-    project = Project(human_name, url)
+    project = Project(human_name, projtype, url)
 
     langnodes = loader.get_child_nodes(node, 'language')
     project.languages = {}
@@ -613,6 +618,7 @@ def save_project(xsaver, proj):
     """
     node = xsaver.doc.createElement('project')
     node.setAttribute('name', proj.human_name)
+    node.setAttribute('projtype', proj.projtype.name)
     node.setAttribute('url', proj.url)
     blng = proj.get_base_language()
     if blng is not None:

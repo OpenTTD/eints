@@ -233,7 +233,7 @@ class ProjectCache:
 
 
 
-    def create_project(self, disk_name, human_name, url):
+    def create_project(self, disk_name, human_name, projtype, url):
         """
         Create a new project.
 
@@ -242,6 +242,12 @@ class ProjectCache:
 
         @param human_name: Project name for humans.
         @type  human_name: C{str}
+
+        @param projtype: Project type.
+        @type  projtype: L{ProjectType}
+
+        @param url: Web address of the project, or empty.
+        @type  url: C{str}
 
         @return: Error description, or nothing if creation succeeded.
         @rtype:  C{str} or C{None}
@@ -256,7 +262,7 @@ class ProjectCache:
         # Construct a new project from scratch.
         pmd = ProjectMetaData(path, disk_name, human_name)
         self.projects[disk_name] = pmd
-        pmd.pdata = data.Project(human_name, url)
+        pmd.pdata = data.Project(human_name, projtype, url)
         pmd.create_statistics()
         self.lru.append(pmd)
         self.save_pmd(pmd)
