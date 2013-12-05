@@ -143,9 +143,6 @@ class UserConfig:
         if self.project is None:
             print("Error: Missing Eints project identifier (add it with --project=PROJ_ID).")
             sys.exit(1)
-        if self.project_type not in KNOWN_PROJECT_TYPES:
-            print("Error: Project type \"{}\" is not known.".format(self.project_type))
-            sys.exit(1)
         if not check_project_name(self.project):
             print("Error: Project identifier \"{}\" is not valid.".format(self.project))
             sys.exit(1)
@@ -586,6 +583,10 @@ def perform_create_project():
     global user_cfg
 
     assert user_cfg.project_desc is not None
+
+    if user_cfg.project_type not in KNOWN_PROJECT_TYPES:
+        print("Error: Project type \"{}\" is not known.".format(user_cfg.project_type))
+        sys.exit(1)
 
     fields = {'humanname' : user_cfg.project_desc,
               'url' : user_cfg.project_url}
