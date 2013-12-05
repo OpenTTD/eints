@@ -17,12 +17,16 @@ class ProjectType:
 
     @ivar allow_gender: Allow gender string commands.
     @type allow_gender: C{bool}
+
+    @ivar allow_gender: Allow string cases.
+    @type allow_gender: C{bool}
     """
-    def __init__(self, name, human_name, text_commands, allow_gender):
+    def __init__(self, name, human_name, text_commands, allow_gender, allow_case):
         self.name = name
         self.human_name = human_name
         self.text_commands = text_commands
         self.allow_gender = allow_gender
+        self.allow_case = allow_case
 
 class NewGRFProject(ProjectType):
     """
@@ -33,7 +37,8 @@ class NewGRFProject(ProjectType):
             name = "newgrf",
             human_name = "NewGrf",
             text_commands = NEWGRF_PARAMETERS,
-            allow_gender = True)
+            allow_gender = True,
+            allow_case = True)
 
 
 class ParameterInfo:

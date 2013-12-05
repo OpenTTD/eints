@@ -323,6 +323,7 @@ def check_page_parameters(prjname, lngname, sname):
     if lng is None:
         abort(404, "Language does not exist in the project")
         return None
+    assert pdata.projtype.allow_case or lng.case == ['']
 
     blng = pdata.get_base_language()
     if blng == lng:
@@ -379,6 +380,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     @rtype:  C{None} or C{str}
     """
     if states is None: states = {}
+    projtype = pdata.projtype
 
     # Mapping of case to list of related strings.
     related_cases = dict((case, []) for case in lng.case)
@@ -388,7 +390,9 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
             rel_chgs = data.get_all_newest_changes(rel_chgs, lng.case)
             for case, chg in rel_chgs.items():
                 if chg is not None and chg.new_text is not None:
-                    related_cases[case].append(RelatedString(rel_sname, chg.new_text))
+                    rc = related_cases.get(case)
+                    if rc is not None:
+                        rc.append(RelatedString(rel_sname, chg.new_text))
 
 
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
@@ -423,7 +427,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
                     if chg_err_state is not None:
                         state, errors = chg_err_state[1], chg_err_state[2]
                     else:
-                        state, errors = data.get_string_status(pdata.projtype, lchg, case, lng, bchg.base_text, binfo)
+                        state, errors = data.get_string_status(projtype, lchg, case, lng, bchg.base_text, binfo)
 
                     tra.errors = errors
                     tra.state = data.STATE_MAP[state].name
@@ -434,7 +438,8 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
 
                 tranls.append(tra)
 
-        transl_cases.append(TransLationCase(case, tranls, related_cases[case]))
+        if projtype.allow_case or case == '':
+            transl_cases.append(TransLationCase(case, tranls, related_cases[case]))
 
     transl_cases.sort(key=lambda tc: tc.case)
     return template('string_form', proj_name = prjname, pdata = pdata,

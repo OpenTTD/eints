@@ -172,6 +172,8 @@ def decide_all_string_status(projtype, base_chg, lng_chgs, lng, binfo):
 
     results = {}
     for case, chg in lng_chgs.items():
+        if not projtype.allow_case and case != '':
+            continue
         results[case] = get_string_status(projtype, chg, case, lng, base_text, binfo)
     return results
 
@@ -183,7 +185,7 @@ def get_string_status(projtype, lchg, case, lng, btext, binfo):
     @type  projtype: L{ProjectType}
 
     @param lchg: Translation language change to examine.
-    @type  lchg: L{Change}
+    @type  lchg: L{Change} or C{None}
 
     @param case: Case of the change.
     @type  case: C{str}
@@ -211,6 +213,7 @@ def get_string_status(projtype, lchg, case, lng, btext, binfo):
     else:
         state = UP_TO_DATE
 
+    assert projtype.allow_case or lchg.case == ''
     linfo = language_file.check_string(projtype, lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng)
     if not language_file.compare_info(projtype, binfo, linfo):
         state = INVALID
@@ -227,7 +230,7 @@ def convert_num(txt, default):
     @param default: Default value, in case the L{txt} is not a number.
     @type  default: C{int} or C{None}
 
-    @return: The numeric value of the number if it is convertable.
+    @return: The numeric value of the number if it is convertible.
     @rtype:  C{int} or the provided default
     """
     if txt is None: return default
@@ -290,7 +293,8 @@ class XmlLoader:
         pnode = loader.get_single_child_node(data, 'project')
         self.stamps = {}
 
-        # Load texts
+        # Load texts. If cases are not allowed, loading the texts from here is no problem, as they are
+        # discarded after loading the change.
         self.texts = {}
         texts = loader.get_single_child_node(pnode, 'texts')
         if texts is not None:
@@ -742,8 +746,9 @@ def save_language(xsaver, projtype, lang):
     for chgs in changes:
         chgs[1].sort() # Sort changes
         for chg in chgs[1]:
-            cnode = save_change(xsaver, chg)
-            node.appendChild(cnode)
+            cnode = save_change(xsaver, projtype, chg)
+            if cnode is not None:
+                node.appendChild(cnode)
     return node
 
 def load_language(xloader, projtype, node):
@@ -779,7 +784,7 @@ def load_language(xloader, projtype, node):
         lng.gender = gender.split(' ')
 
     case = loader.get_opt_DOMattr(node, 'cases', None)
-    if case is None or case == '':
+    if not projtype.allow_case or case is None or case == '':
         lng.case = ['']
     else:
         lng.case = case.split(' ') + ['']
@@ -788,6 +793,8 @@ def load_language(xloader, projtype, node):
     lng.changes = {}
     for ch_node in loader.get_child_nodes(node, 'change'):
         change = load_change(xloader, ch_node)
+        if not projtype.allow_case and change.case != '':
+            continue
         chgs = lng.changes.get(change.string_name)
         if chgs is None:
             lng.changes[change.string_name] = [change]
@@ -849,19 +856,25 @@ class Change:
         return self.stamp == other.stamp
 
 
-def save_change(xsaver, change):
+def save_change(xsaver, projtype, change):
     """
     Save a change.
 
     @param xsaver: Saver class.
     @type  xsaver: L{XmlSaver}
 
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
+
     @param change: Change to save.
     @type  change: L{Change}
 
-    @return: Xml node containing the change.
-    @rtype:  L{xml.dom.minidom.Node}
+    @return: Xml node containing the change, if it was allowed to create.
+    @rtype:  L{xml.dom.minidom.Node} or C{None}
     """
+    if change.case != '' and not projtype.allow_case:
+        return None
+
     node = xsaver.doc.createElement('change')
     node.setAttribute('strname', change.string_name)
     if change.last_upload: node.setAttribute('last_upload', 'true')

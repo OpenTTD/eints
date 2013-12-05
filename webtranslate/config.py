@@ -462,6 +462,7 @@ class ProjectMetaData:
                 lngs = [(parm_lng.name, parm_lng)] # Update just 'parm_lng'
 
             for lname, lng in lngs:
+                assert projtype.allow_case or lng.case == ['']
                 if lng is blng: continue
                 # Get the pdata.statistics[lname][sname] list.
                 lstat = pdata.statistics.get(lname)

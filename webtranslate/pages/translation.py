@@ -61,6 +61,7 @@ def project(userauth, prjname, lngname):
     if lng is None:
         abort(404, "Language does not exist in the project")
         return
+    assert pdata.projtype.allow_case or lng.case == ['']
 
     blng = pdata.get_base_language() # As above we established there is at least one language, this should work.
     stored = [[], [], [], [], []] # unknown, up-to-date, out-of-date, invalid, missing

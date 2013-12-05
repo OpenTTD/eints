@@ -60,6 +60,7 @@ def check_string(projtype, text, default_case, extra_commands, lng):
     @rtype:  C{StringInfo}
     """
     assert projtype.allow_gender or len(lng.gender) == 0
+    assert projtype.allow_case or default_case
 
     string_info = StringInfo(extra_commands)
     plural_count = plural_count_map[lng.plural]
@@ -108,6 +109,9 @@ def check_string(projtype, text, default_case, extra_commands, lng):
                 continue
 
             if case is not None:
+                if not projtype.allow_case:
+                    string_info.add_error(ErrorMessage(ERROR, None, "Case detected in string command {} but the project does not allow cases".format(m.group(2))))
+                    return string_info
                 if not entry.allow_case:
                     string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take a case".format(m.group(2))))
                     return string_info
@@ -577,6 +581,9 @@ def handle_pragma(projtype, lnum, line, data):
         return
 
     if line[0] == '##case':
+        if not projtype.allow_case:
+            data.add_error(ErrorMessage(ERROR, lnum, "##case is not allowed in the project"))
+            return
         if len(line) == 1:
             data.add_error(ErrorMessage(ERROR, lnum, "##case takes a non-empty list of case names"))
             return
@@ -615,7 +622,8 @@ def load_language_file(projtype, handle, max_size):
     data.skeleton.append(('plural', ''))
     if projtype.allow_gender:
         data.skeleton.append(('gender', ''))
-    data.skeleton.append(('case', ''))
+    if projtype.allow_case:
+        data.skeleton.append(('case', ''))
 
     # Read file, and process the lines.
     text = handle.read(max_size)
@@ -645,6 +653,9 @@ def load_language_file(projtype, handle, max_size):
                 m2 = ''
             else:
                 m2 = m.group(2)[1:]
+                if not projtype.allow_case and m2 != '':
+                    # Silently discard ".case" string variants if the project doesn't allow them.
+                    continue
             sv = StringValue(lnum, m.group(1), m2, m.group(3))
             data.strings.append(sv)
             if m2 is '':

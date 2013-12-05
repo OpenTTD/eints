@@ -57,6 +57,10 @@ def make_langfile(pdata, base_lng, lng, add_func):
     @rtype:  C{str}
     """
     projtype = pdata.projtype
+    if projtype.allow_case:
+        lng_case = lng.case
+    else:
+        lng_case = [''] # Suppress writing of non-default cases if the project doesn't allow them.
 
     lines = []
     for skel_type, skel_value in pdata.skeleton:
@@ -68,7 +72,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
             chgs = lng.changes.get(sname)
             if chgs is not None:
                 # Language has sorted cases, thus the default case comes first.
-                for case in lng.case:
+                for case in lng_case:
                     chg = data.get_newest_change(chgs, case)
                     if chg is not None:
                         if case == '':
@@ -102,7 +106,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
 
         if skel_type == 'case':
             cases = [c for c in lng.case if c != '']
-            if len(cases) > 0:
+            if projtype.allow_case and len(cases) > 0:
                 add_func(lines, skel_type, '##case ' + ' '.join(cases))
             continue
 

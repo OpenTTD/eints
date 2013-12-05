@@ -114,8 +114,11 @@ def make_language_post(userauth, prjname, lngname):
     else:
         lng.gender = []
 
-    lng.case = lng_def.case
-    lng.case.sort()
+    if projtype.allow_case:
+        lng.case = lng_def.case
+        lng.case.sort()
+    else:
+        lng.case = ['']
 
     pdata.languages[lng.name] = lng
 
