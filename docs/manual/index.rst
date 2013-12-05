@@ -13,23 +13,6 @@ Contents:
    strings
    usage
    lang_sync
-
-Eints structure
----------------
-- Projects in Eints
-- Project owner and translator
-- Users
-
-- Language files upload and download
-- Translating
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   string_commands
 
 .. vim: sw=4 sts=4 tw=78 spell

@@ -8,9 +8,10 @@ Strings and languages
 A large part of the application is about strings and languages, so it is
 useful to explain a few things about them.
 
-The basic idea of the application is that a (NewGRF) project provides a set of
-strings in some language (usually UK English). This language is called *base
-language* of that project. The strings in the base language are the central reference point.
+The basic idea of the application is that a (NewGRF or GameScript) project
+provides a set of strings in some language (usually UK English). This language
+is called *base language* of that project. The strings in the base language
+are the central reference point.
 
 All other languages (the *translation languages*) create the same set of
 strings, by translating the text-part of each string into their own language.
@@ -29,8 +30,8 @@ A language has
   technical name ``<lang-name>_<region>``, where ``<lang-name>`` are two lower
   case letters and ``<region>`` are two upper case letters, for example
   ``en_GB`` for English spoken in Great Britain.
-- a *grflangid*. A unique number known by NewGRFs, which serves as
-  identification of a language in language files (used in NewGRF projects).
+- a *grflangid*. A unique number known by the code, which serves as
+  identification of a language in language files.
 - a *pluralform*. Different languages use different ways to change words in
   the context of counts.
 - optionally, *genders*. Depending on what you refer to, words may change.
@@ -40,8 +41,8 @@ A language has
   differently. NewGRFs allow to provide several text-parts for a string (one
   for each case).
 
-Only the NewGRF author needs to know these things in detail. For everybody
-else, the above list is just to get you familiar by some concepts that will be
+Only the author of the code needs to know these things in detail. For everybody
+else, the above list is just to get you familiar with some concepts that will be
 needed when explaining strings (in a language).
 
 Strings
@@ -76,9 +77,13 @@ They are called *string commands*, and serve as place holder for
 enhancing the layout, adding colour, and adding other pieces of text or
 numbers.
 
-To start slowly, a list of commands for enhancing layout and colour are
-listed below. They are called *non-positional commands* for reasons that will
-become clear later.
+There are two types of commands, *non-positional commands*, and *positional
+commands*. Since the former type is the easiest to understand, they are
+explained first.
+
+A small sample of *non-positional commands* is shown below. (The full list can
+be found at :ref:`string-commands-list`.) They are usually commands to display
+symbols (like ©), or to change the colour of the text.
 
 =============== ===========================================================
 Command         Effect
@@ -88,28 +93,11 @@ Command         Effect
 ``{NBSP}``      Display a non-breaking space
 ``{COPYRIGHT}`` Display a copyright symbol
 ``{TRAIN}``     Display a train symbol
-``{LORRY}``     Display a truck symbol
-``{BUS}``       Display a bus symbol
-``{PLANE}``     Display a plane symbol
-``{SHIP}``      Display a ship symbol
 ``{TINYFONT}``  Switch to a small font
 ``{BIGFONT}``   Switch to a big font
 ``{BLUE}``      Output following text in blue colour
 ``{SILVER}``    Output following text in silver colour
-``{GOLD}``      Output following text in gold colour
 ``{RED}``       Output following text in red colour
-``{PURPLE}``    Output following text in purple colour
-``{LTBROWN}``   Output following text in light brown colour
-``{ORANGE}``    Output following text in orange colour
-``{GREEN}``     Output following text in green colour
-``{YELLOW}``    Output following text in yellow colour
-``{DKGREEN}``   Output following text in dark green colour
-``{CREAM}``     Output following text in cream colour
-``{BROWN}``     Output following text in brown colour
-``{WHITE}``     Output following text in white colour
-``{LTBLUE}``    Output following text in light blue colour
-``{GRAY}``      Output following text in gray colour
-``{DKBLUE}``    Output following text in dark blue colour
 ``{BLACK}``     Output following text in black colour
 =============== ===========================================================
 
@@ -120,45 +108,32 @@ A string using the above commands can be::
 This would display the word 'Eints' in a silver colour, and the other text in
 black.
 
-A second set of commands inserts numbers or other text into the string.
-These commands are called *positional commands*. Below is the list:
+The second set of commands inserts numbers or other text into the string.
+These commands are called *positional commands*. Below is a small sample (the
+full list can be found at :ref:`string-commands-list`).
 
 ==================== ====== ====== =======================================
 Command              Plural Gender Effect
 ==================== ====== ====== =======================================
 ``{COMMA}``           yes     no   Insert number into the text
-``{SIGNED_WORD}``     yes     no   Insert number into the text
-``{UNSIGNED_WORD}``   yes     no   Insert positive number into the text
-``{HEX}``             yes     no   Insert hexadecimal number into the text
 ``{STRING}``           no    yes   Insert a string into the text
 ``{CURRENCY}``         no     no   Insert an amount into the text
 ``{VELOCITY}``         no     no   Insert a speed into the text
-``{VOLUME}``           no     no   Insert a volume into the text
-``{VOLUME_SHORT}``     no     no   Insert a volume into the text
-``{POWER}``            no     no   Insert an horse-power into the text
-``{WEIGHT}``           no     no   Insert a weight into the text
-``{WEIGHT_SHORT}``     no     no   Insert a weight into the text
-``{STATION}``          no     no   Insert a station name into the text
-``{DATE1920_LONG}``    no     no   Insert a date into the text
-``{DATE1920_SHORT}``   no     no   Insert a weight into the text
-``{DATE_LONG}``        no     no   Insert a weight into the text
-``{DATE_SHORT}``       no     no   Insert a weight into the text
-``{POP_WORD}``         no     no   Insert nothing (and drop an argument)
 ==================== ====== ====== =======================================
 
-An (not so good, but they'll get improved later) example::
+A (not so good, but they'll get improved later) example::
 
         STR_BEER   :{COMMA} bottles of {STRING} are required
 
 This string has two positional commands, namely ``{COMMA}`` at position ``0``
 (counting starts from ``0``), and ``{STRING}`` at position ``1``.
-These positions are important for the NewGRF. When it wants to display this
-string, it assumes that it must supply a number as parameter ``0``, and a text as
-parameter ``1``.
+These positions are important for the code that uses the ``STR_BEER`` string.
+To display this string, it assumes that it must supply a number as parameter
+``0``, and a text as parameter ``1``.
 The latter is where *positional* comes from, it refers to the positions that
-the NewGRF assumes for its parameters.
+the code assumes for its parameters.
 The *non-positional* is now also easy to understand. For those string
-commands, the NewGRF does not need to supply anything, that is, it has no
+commands, the code does not need to supply anything, that is, it has no
 parameter value for a colour switch like ``{GREEN}``.
 
 The effect is that *non-positional* can be put anywhere without worrying about
@@ -230,7 +205,7 @@ and the ``STR_JOHN`` text ``John`` is ``m`` in gender. The gender definition
 itself is not part of the text.
 
 The ``STR_BOOKS`` string has a string positional command ``{STRING}``. For
-simplicity, let's assume that the NewGRF uses the ``STR_MARY`` or
+simplicity, let's assume that the code uses the ``STR_MARY`` or
 ``STR_JOHN`` strings at that position.
 In English, there are three genders, namely ``f``, ``m``, and ``n`` (female,
 male, and neutral). The gender selection command ``G`` thus has three texts to
@@ -264,7 +239,7 @@ The desired case of a string replacement can be specified too::
         STR_RESULT :The result is {STRING.fab}
 
 The ``{STRING.fab}`` in this text states it prefers to have the ``fab``
-translation for the first string parameter. If the NewGRF uses ``STR_OK`` at
+translation for the first string parameter. If the code uses ``STR_OK`` at
 that position, the ``super fabulous!`` text will be used.
 If a string does not have the desired case, the default case is used instead.
 
