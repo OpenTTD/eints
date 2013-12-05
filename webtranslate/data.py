@@ -561,7 +561,7 @@ def load_project(xloader, node):
     langnodes = loader.get_child_nodes(node, 'language')
     project.languages = {}
     for lnode in langnodes:
-        lng = load_language(xloader, lnode)
+        lng = load_language(xloader, projtype, lnode)
         project.languages[lng.name] = lng
 
     baselang = loader.get_opt_DOMattr(node, 'baselang', None)
@@ -634,7 +634,7 @@ def save_project(xsaver, proj):
     langs = list(proj.languages.items())
     langs.sort()
     for lang in langs:
-        lnode = save_language(xsaver, lang[1])
+        lnode = save_language(xsaver, proj.projtype, lang[1])
         node.appendChild(lnode)
 
     skelnode = save_skeleton(xsaver, proj.skeleton)
@@ -704,12 +704,15 @@ class Language:
         self.case  = ['']
         self.changes = {}
 
-def save_language(xsaver, lang):
+def save_language(xsaver, projtype, lang):
     """
     Save the language to Xml.
 
     @param xsaver: Saver class.
     @type  xsaver: L{XmlSaver}
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param lang: Language to save.
     @type  lang: L{Language}
@@ -728,7 +731,7 @@ def save_language(xsaver, lang):
     node.setAttribute('langid', str(lang.grflangid))
     if lang.plural is not None:
         node.setAttribute('plural', str(lang.plural))
-    if len(lang.gender) > 0:
+    if projtype.allow_gender and len(lang.gender) > 0:
         node.setAttribute('gender', " ".join(lang.gender))
     cases = [c for c in lang.case if c != '']
     if len(cases) > 0:
@@ -743,12 +746,15 @@ def save_language(xsaver, lang):
             node.appendChild(cnode)
     return node
 
-def load_language(xloader, node):
+def load_language(xloader, projtype, node):
     """
     Load a language from the given xml node.
 
     @param xloader: Loader helper.
     @type  xloader: L{XmlLoader}
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param node: Node containing the language.
     @type  node: L{xml.dom.minidom.Node}
@@ -767,7 +773,7 @@ def load_language(xloader, node):
     lng.plural = plural
 
     gender = loader.get_opt_DOMattr(node, 'gender', None)
-    if gender is None:
+    if not projtype.allow_gender or gender is None:
         lng.gender = []
     else:
         lng.gender = gender.split(' ')

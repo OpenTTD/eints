@@ -102,11 +102,18 @@ def make_language_post(userauth, prjname, lngname):
         abort(404, "Language \"{}\" already exists".format(lng_def.isocode))
         return
 
+    projtype = pdata.projtype
+
     # Create the language.
     lng = data.Language(lng_def.isocode)
     lng.grflangid = lng_def.grflangid
     lng.plural = lng_def.plural
-    lng.gender = lng_def.gender
+
+    if projtype.allow_gender:
+        lng.gender = lng_def.gender
+    else:
+        lng.gender = []
+
     lng.case = lng_def.case
     lng.case.sort()
 

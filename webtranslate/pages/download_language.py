@@ -56,6 +56,8 @@ def make_langfile(pdata, base_lng, lng, add_func):
     @return: Text containing the language file.
     @rtype:  C{str}
     """
+    projtype = pdata.projtype
+
     lines = []
     for skel_type, skel_value in pdata.skeleton:
         if skel_type == 'literal':
@@ -105,7 +107,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
             continue
 
         if skel_type == 'gender':
-            if len(lng.gender) > 0:
+            if projtype.allow_gender and len(lng.gender) > 0:
                 add_func(lines, skel_type, '##gender ' + ' '.join(lng.gender))
             continue
 

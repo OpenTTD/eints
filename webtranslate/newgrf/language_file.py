@@ -59,6 +59,8 @@ def check_string(projtype, text, default_case, extra_commands, lng):
     @return: String parameter information.
     @rtype:  C{StringInfo}
     """
+    assert projtype.allow_gender or len(lng.gender) == 0
+
     string_info = StringInfo(extra_commands)
     plural_count = plural_count_map[lng.plural]
     pos = 0 # String parameter number.
@@ -154,6 +156,9 @@ def check_string(projtype, text, default_case, extra_commands, lng):
         # {G=...}
         m = gender_assign_pat.match(text, idx)
         if m:
+            if not projtype.allow_gender:
+                string_info.add_error(ErrorMessage(ERROR, None, "{G=..} detected, but the project does not support genders"))
+                return string_info
             if idx != 0:
                 string_info.add_error(ErrorMessage(ERROR, None, "{} may only be used at the start of a string".format(m.group(0))))
                 return string_info
@@ -168,7 +173,10 @@ def check_string(projtype, text, default_case, extra_commands, lng):
             continue
 
         if text.startswith('{G ', idx):
-            assert text[idx:idx+2] != '{G='
+            if not projtype.allow_gender:
+                string_info.add_error(ErrorMessage(ERROR, None, "{G ..} detected, but the project does not support genders"))
+                return string_info
+
             args = get_arguments(text, 'G', idx + 2, string_info)
             if args is None: return string_info
 
@@ -241,15 +249,17 @@ def get_arguments(text, cmd, idx, string_info):
 # {{{ class StringInfo:
 class StringInfo:
     """
+    Collected information about a string.
+
     @ivar allowed_extra: Extra commands that are allowed, if supplied.
     @type allowed_extra: C{None} if any extra commands are allowed,
                          C{set} of C{str} if a specific set of extra commands is allowed.
 
-    @ivar genders: String parameters used for gender queries.
-    @type genders: C{list} of C{bool}
+    @ivar genders: String parameter numbers used for gender queries.
+    @type genders: C{list} of C{int}
 
-    @ivar plurals: String parameters used for plural queries.
-    @type plurals: C{list} of C{bool}
+    @ivar plurals: String parameter numbers used for plural queries.
+    @type plurals: C{list} of C{int}
 
     @ivar commands: String commands at each position.
     @type commands: C{list} of C{str}
@@ -496,11 +506,14 @@ class NewGrfData:
 
 # }}}
 
-# {{{ def load_language_file(handle, max_size):
-# {{{ def handle_pragma(lnum, line, data):
-def handle_pragma(lnum, line, data):
+# {{{ def load_language_file(projtype, handle, max_size):
+# {{{ def handle_pragma(projtype, lnum, line, data):
+def handle_pragma(projtype, lnum, line, data):
     """
     Handle a pragma line.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param lnum: Line number (0-based).
     @type  lnum: C{int}
@@ -554,6 +567,9 @@ def handle_pragma(lnum, line, data):
         return
 
     if line[0] == '##gender':
+        if not projtype.allow_gender:
+            data.add_error(ErrorMessage(ERROR, lnum, "##gender is not allowed in the project"))
+            return
         if len(line) == 1:
             data.add_error(ErrorMessage(ERROR, lnum, "##gender takes a non-empty list of gender names"))
             return
@@ -574,9 +590,12 @@ def handle_pragma(lnum, line, data):
 string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
 bom = codecs.BOM_UTF8.decode('utf-8')
 
-def load_language_file(handle, max_size):
+def load_language_file(projtype, handle, max_size):
     """
     Load a language file.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param handle: File handle.
     @type  handle: L{io.BufferedReader}
@@ -594,7 +613,8 @@ def load_language_file(handle, max_size):
     # Ensure the skeleton has all language properties.
     data.skeleton.append(('grflangid', ''))
     data.skeleton.append(('plural', ''))
-    data.skeleton.append(('gender', ''))
+    if projtype.allow_gender:
+        data.skeleton.append(('gender', ''))
     data.skeleton.append(('case', ''))
 
     # Read file, and process the lines.
@@ -611,7 +631,7 @@ def load_language_file(handle, max_size):
             if seen_strings:
                 data.add_error(ErrorMessage(ERROR, lnum, "Cannot change language properties after processing strings"))
                 continue
-            handle_pragma(lnum, line, data)
+            handle_pragma(projtype, lnum, line, data)
             continue
 
         if line == "" or line.startswith(';') or line.startswith('#'):

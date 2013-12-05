@@ -14,11 +14,15 @@ class ProjectType:
 
     @ivar text_commands: All regular commands, ordered by name.
     @type text_commands: C{dict} of C{str} to L{ParameterInfo}
+
+    @ivar allow_gender: Allow gender string commands.
+    @type allow_gender: C{bool}
     """
-    def __init__(self, name, human_name, text_commands):
+    def __init__(self, name, human_name, text_commands, allow_gender):
         self.name = name
         self.human_name = human_name
         self.text_commands = text_commands
+        self.allow_gender = allow_gender
 
 class NewGRFProject(ProjectType):
     """
@@ -28,7 +32,8 @@ class NewGRFProject(ProjectType):
         ProjectType.__init__(self,
             name = "newgrf",
             human_name = "NewGrf",
-            text_commands = NEWGRF_PARAMETERS)
+            text_commands = NEWGRF_PARAMETERS,
+            allow_gender = True)
 
 
 class ParameterInfo:
