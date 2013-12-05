@@ -57,9 +57,9 @@ def check_string(projtype, text, default_case, extra_commands, lng):
     @type  lng: L{Language}
 
     @return: String parameter information.
-    @rtype:  C{NewGrfStringInfo}
+    @rtype:  C{StringInfo}
     """
-    string_info = NewGrfStringInfo(extra_commands)
+    string_info = StringInfo(extra_commands)
     plural_count = plural_count_map[lng.plural]
     pos = 0 # String parameter number.
     idx = 0 # Text string index.
@@ -215,7 +215,7 @@ def get_arguments(text, cmd, idx, string_info):
     @type  idx: C{int}
 
     @param string_info: Class collecting the string information.
-    @type  string_info: L{NewGrfStringInfo}
+    @type  string_info: L{StringInfo}
 
     @return: Found arguments and new index, or C{None} if an error was found.
     @rtype:  (C{list} of C{str}, C{int}) or C{None}
@@ -238,8 +238,8 @@ def get_arguments(text, cmd, idx, string_info):
     return None
 
 # }}}
-# {{{ class NewGrfStringInfo:
-class NewGrfStringInfo:
+# {{{ class StringInfo:
+class StringInfo:
     """
     @ivar allowed_extra: Extra commands that are allowed, if supplied.
     @type allowed_extra: C{None} if any extra commands are allowed,
@@ -684,10 +684,10 @@ def compare_info(projtype, base_info, lng_info):
     @type  projtype: L{ProjectType}
 
     @param base_info: Information about string parameters from the base language.
-    @type  base_info: L{NewGrfStringInfo}
+    @type  base_info: L{StringInfo}
 
     @param lng_info: Information about string parameters from the translation.
-    @type  lng_info: L{NewGrfStringInfo}
+    @type  lng_info: L{StringInfo}
 
     @return: Whether both parameter uses are compatible.
     @rtype:  C{bool}

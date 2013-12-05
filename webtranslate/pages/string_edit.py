@@ -311,7 +311,7 @@ def check_page_parameters(prjname, lngname, sname):
 
     @return: Nothing if the parameters don't make sense,
              else the project meta data, base change, language, and base text info.
-    @rtype:  C{None} or tuple (L{ProjectMetaData}, L{Change}, L{Language}, L{NewGrfStringInfo}
+    @rtype:  C{None} or tuple (L{ProjectMetaData}, L{Change}, L{Language}, L{StringInfo}
     """
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -352,7 +352,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     @type  bchg: L{Change}
 
     @param binfo: Information about the state of the L{bchg} string.
-    @type  binfo: L{NewGrfStringInfo}
+    @type  binfo: L{StringInfo}
 
     @param lng: Language being translated.
     @type  lng: L{Language}

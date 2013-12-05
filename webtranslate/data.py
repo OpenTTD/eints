@@ -162,7 +162,7 @@ def decide_all_string_status(projtype, base_chg, lng_chgs, lng, binfo):
     @type  lng: L{Language}
 
     @param binfo: String information of the base language (obtained from L{get_base_string_info}).
-    @type  binfo: L{NewGrfStringInfo}
+    @type  binfo: L{StringInfo}
 
     @return: Info about each case of the string in the translation, mapping of case to state value,
              and a list of found errors.
@@ -195,7 +195,7 @@ def get_string_status(projtype, lchg, case, lng, btext, binfo):
     @type  btext: C{Text}
 
     @param binfo: String information of the base language (obtained from L{get_base_string_info}).
-    @type  binfo: L{NewGrfStringInfo}
+    @type  binfo: L{StringInfo}
 
     @return: State of the translated string and any errors.
     @rtype:  C{tuple} (C{int}, C{list} of L{ErrorMessage})
