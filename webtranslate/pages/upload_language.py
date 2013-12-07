@@ -25,11 +25,38 @@ def page_post(userauth, prjname):
         return
 
     pdata = pmd.pdata
-    assert pdata is not None
+    if not pdata.projtype.has_grflangid:
+        abort(404, "No language identification provided.")
 
-    langfile    = request.files.langfile
-    override    = request.forms.override
-    is_base     = request.forms.base_language
+    langfile = request.files.langfile
+    override = request.forms.override
+    is_base  = request.forms.base_language
+    return handle_upload(userauth, pmd, prjname, langfile, override, is_base, None)
+
+
+def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data):
+    """
+    Process the upload.
+
+    @param userauth: User authentication.
+    @type  userauth: L{UserAuthentication}
+
+    @param pmd: Project meta data.
+    @type  pmd: L{ProjectMetaData}
+
+    @param projname: Project name.
+    @type  projname: C{str}
+
+    @param langfile: Language file to load if available.
+    @type  langfile: C{file} or C{None}
+
+    @param override: Override existing text.
+    @type  override: C{bool}
+
+    @param lng_data: Used language, if provided.
+    @type  lng_data: L{LanguageData} or C{None}
+    """
+    pdata = pmd.pdata
 
     # Missing language file in the upload.
     if not langfile or not langfile.file:
@@ -44,9 +71,9 @@ def page_post(userauth, prjname):
         return
 
     # Parse language file, and report any errors.
-    ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size)
+    ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size, lng_data)
     if len(ng_data.errors) > 0:
-        return template('upload_errors', proj_name = prjname, errors = ng_data.errors)
+        return template('upload_errors', proj_name = projname, errors = ng_data.errors)
 
     stamp = data.make_stamp()
 
@@ -136,7 +163,7 @@ def page_post(userauth, prjname):
     pmd.create_statistics(None) # Update all languages.
 
     message = "Successfully uploaded language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-    redirect("/project/" + prjname + '?message=' + message)
+    redirect("/project/" + projname + '?message=' + message)
 
 
 def get_blng_change(sv, lng):
