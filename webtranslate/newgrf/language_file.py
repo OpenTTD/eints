@@ -541,6 +541,10 @@ def handle_pragma(projtype, lnum, line, data):
     """
     line = line.split()
     if line[0] == '##grflangid':
+        if not projtype.has_grflangid:
+            data.add_error(ErrorMessage(ERROR, lnum, "##grflangid not allowed by the project type"))
+            return
+
         if len(line) != 2:
             data.add_error(ErrorMessage(ERROR, lnum, "##grflangid takes exactly one argument"))
             return
@@ -627,7 +631,8 @@ def load_language_file(projtype, handle, max_size):
     skeleton_strings = set()
 
     # Ensure the skeleton has all language properties.
-    data.skeleton.append(('grflangid', ''))
+    if projtype.has_grflangid:
+        data.skeleton.append(('grflangid', ''))
     data.skeleton.append(('plural', ''))
     if projtype.allow_gender:
         data.skeleton.append(('gender', ''))
@@ -686,7 +691,7 @@ def load_language_file(projtype, handle, max_size):
             data.add_error(ErrorMessage(ERROR, None, 'String name \"{}\" has no default definition (that is, without case).'.format(sv.name)))
 
     if data.language_data is None:
-        data.add_error(ErrorMessage(ERROR, None, 'Language file has no ##grflangid'))
+        data.add_error(ErrorMessage(ERROR, None, 'Language file has no language identification (missing ##grflangid?)'))
 
     data.cleanup_skeleton()
     return data
