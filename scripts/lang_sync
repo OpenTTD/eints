@@ -636,8 +636,6 @@ def perform_upload(ll_files, is_base):
         if not ok:
             print("Error: Failed to upload \"{}\".".format(ll.path_name))
 # }}}
-# {{{ def get_filename(grf_langid):
-langfile_map_cache = None #: Cache of the UserConfig.langfile_map file content.
 
 # {{{ filename_table = ...
 filename_table = {
@@ -706,53 +704,50 @@ filename_table = {
     }
 # }}}
 
-def get_filename(grf_langid):
+loaded_langfile_map = False # Whether the user-supplied language file map has been loaded.
+
+def load_userdefined_langfile_map():
     """
-    Get a base filename for the language with the given lang id.
-
-    @param grf_langid: Language id of data to store in the file.
-    @type  grf_langid: C{int}
-
-    @return: Base filename for the language file, if it can be found.
-    @rtype:  C{str} or C{None}
+    Load the user-define language file map, if available.
     """
-    global langfile_map_cache
+    global loaded_langfile_map, filename_table
 
-    if langfile_map_cache is None:
-        langfile_map_cache = {}
-        if user_cfg.langfile_map is not None:
-            with open(user_cfg.langfile_map, 'r', encoding = 'utf-8') as handle:
-                for idx, line in handle:
-                    i = line.find('#')
-                    if i >= 0: line = line[:i]
-                    line = line.strip()
-                    if line == '': continue
-                    i = line.find(':')
-                    if i < 0:
-                        print("Error: Line {} of \"{}\" has no colon.".format(idx + 1, user_cfg.langfile_map))
-                        sys.exit(1)
+    if loaded_langfile_map: return
+    loaded_langfile_map = True
 
-                    grfid = line[:i].rstrip()
-                    m = hex_pat.match(grfid)
-                    if not m:
-                        print("Error: Line {} of \"{}\" has no grf language id.".format(idx + 1, user_cfg.langfile_map))
-                        sys.exit(1)
+    if user_cfg.langfile_map is None: return
 
-                    line = line[i+1:].lstrip()
-                    if len(line) == 0:
-                        print("Error: Line {} of \"{}\" has no base filename.".format(idx + 1, user_cfg.langfile_map))
-                        sys.exit(1)
+    with open(user_cfg.langfile_map, 'r', encoding = 'utf-8') as handle:
+        for idx, line in handle:
+            i = line.find('#')
+            if i >= 0: line = line[:i]
+            line = line.strip()
+            if line == '': continue
+            i = line.find(':')
+            if i < 0:
+                print("Error: Line {} of \"{}\" has no colon.".format(idx + 1, user_cfg.langfile_map))
+                sys.exit(1)
 
-                    langfile_map_cache[int(m.group(1), 16)] = line
+            grfid = line[:i].rstrip()
+            m = hex_pat.match(grfid)
+            if not m:
+                print("Error: Line {} of \"{}\" has no grf language id.".format(idx + 1, user_cfg.langfile_map))
+                sys.exit(1)
 
-    name = langfile_map_cache.get(grf_langid)
-    if name is not None: return name + user_cfg.lang_ext
+            line = line[i+1:].lstrip()
+            if len(line) == 0:
+                print("Error: Line {} of \"{}\" has no base filename.".format(idx + 1, user_cfg.langfile_map))
+                sys.exit(1)
 
-    name = filename_table.get(grf_langid)
-    if name is not None: return name + user_cfg.lang_ext
+            grfid = int(m.group(1), 16)
+            ldata = filename_table.get(grfid)
+            if ldata is None:
+                print("Error: NewGRF language ID 0x{:02X} not found.".format(grfid))
+                sys.exit(1)
 
-    return None
-# }}}
+            filename_table[grfid] = line # Update the filename of the entry.
+
+
 # {{{ def perform_download(ll_files, el_files, credits_handle):
 
 string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
@@ -889,7 +884,7 @@ def detect_eolstyle(path):
             return f.newlines[0]
         else:
             return f.newlines
-    
+
 
 def write_parsed_lines(parsed, path, eolstyle):
     """
@@ -947,9 +942,13 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             else:
                 current_strings = load_local_strings(path)
         else:
-            path = get_filename(el.grf_langid)
-            if path is None: path = el.lang_name + user_cfg.lang_ext
-            path = user_cfg.lang_dir + os.sep + path
+            load_userdefined_langfile_map()
+            ldata = filename_table.get(el.grf_langid)
+            if ldata is None:
+                path = el.lang_name
+            else:
+                path = ldata
+            path = user_cfg.lang_dir + os.sep + path + user_cfg.lang_ext
             action = "Created"
             current_strings = set()
 
