@@ -521,7 +521,7 @@ class NewGrfData:
 
 # }}}
 
-# {{{ def load_language_file(projtype, handle, max_size):
+# {{{ def load_language_file(projtype, handle, max_size, lng_data = None):
 # {{{ def handle_pragma(projtype, lnum, line, data):
 def handle_pragma(projtype, lnum, line, data):
     """
@@ -610,7 +610,7 @@ def handle_pragma(projtype, lnum, line, data):
 string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
 bom = codecs.BOM_UTF8.decode('utf-8')
 
-def load_language_file(projtype, handle, max_size):
+def load_language_file(projtype, handle, max_size, lng_data = None):
     """
     Load a language file.
 
@@ -622,6 +622,9 @@ def load_language_file(projtype, handle, max_size):
 
     @param max_size: Maimum allowed size to read from the handle.
     @type  max_size: C{int}
+
+    @param lng_data: Suggested language, if specified.
+    @type  lng_data: L{LanguageData} or C{None}
 
     @return: Loaded language data.
     @rtype:  L{NewGrfData}
@@ -638,6 +641,10 @@ def load_language_file(projtype, handle, max_size):
         data.skeleton.append(('gender', ''))
     if projtype.allow_case:
         data.skeleton.append(('case', ''))
+
+    if not projtype.has_grflangid and lng_data is not None:
+        # If the project has no ##grflangid support, and there is lng_data provided, use it.
+        data.set_lang(lng_data)
 
     # Read file, and process the lines.
     text = handle.read(max_size)
