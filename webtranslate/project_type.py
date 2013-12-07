@@ -23,14 +23,18 @@ class ProjectType:
 
     @ivar allow_extra: Allow extra string commands (that is, custom tags).
     @type allow_extra: C{bool}
+
+    @ivar has_grflangid: Project uses '##grflangid' in the language file for identifying the language.
+    @type has_grflangid: C{bool}
     """
-    def __init__(self, name, human_name, text_commands, allow_gender, allow_case, allow_extra):
+    def __init__(self, name, human_name, text_commands, allow_gender, allow_case, allow_extra, has_grflangid):
         self.name = name
         self.human_name = human_name
         self.text_commands = text_commands
         self.allow_gender = allow_gender
         self.allow_case = allow_case
         self.allow_extra = allow_extra
+        self.has_grflangid = has_grflangid
 
 class NewGRFProject(ProjectType):
     """
@@ -43,7 +47,8 @@ class NewGRFProject(ProjectType):
             text_commands = NEWGRF_PARAMETERS,
             allow_gender = True,
             allow_case = True,
-            allow_extra = True)
+            allow_extra = True,
+            has_grflangid = True)
 
 class GameScriptProject(ProjectType):
     """
@@ -56,7 +61,8 @@ class GameScriptProject(ProjectType):
             text_commands = GS_PARAMETERS,
             allow_gender = False,
             allow_case = False,
-            allow_extra = False)
+            allow_extra = False,
+            has_grflangid = False)
 
 class ParameterInfo:
     """
