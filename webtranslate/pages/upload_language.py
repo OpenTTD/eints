@@ -4,7 +4,7 @@ Upload a language file.
 from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
 from webtranslate import config, data, utils
-from webtranslate.newgrf import language_file
+from webtranslate.newgrf import language_file, language_info
 
 @route('/upload/<prjname>', method = 'GET')
 @protected(['upload', 'prjname', '-'])
@@ -15,7 +15,44 @@ def page_get(userauth, prjname):
         return
 
     pdata = pmd.pdata
-    return template('upload_lang', proj_name = prjname, pdata = pdata)
+    if pdata.projtype.has_grflangid:
+        return template('upload_lang', proj_name = prjname, pdata = pdata)
+    else:
+        return template('upload_lang_select', proj_name = prjname, pdata = pdata,
+                    lisos = sorted((linfo.isocode, linfo.name) for linfo in language_info.all_languages))
+
+@route('/upload/<prjname>/<lngname>', method = 'GET')
+@protected(['upload', 'prjname', '-'])
+def page_get_subdir(userauth, prjname, lngname):
+    pmd = config.cache.get_pmd(prjname)
+    if pmd is None:
+        abort(404, "Page not found")
+        return
+
+    pdata = pmd.pdata
+    linfo = language_info.isocode.get(lngname)
+    if linfo is None:
+        abort(404, "Page not found")
+        return
+    return template('upload_lang_subdir', proj_name = prjname, pdata = pdata, lngname = lngname)
+
+@route('/upload/<prjname>/<lngname>', method = 'POST')
+@protected(['upload', 'prjname', '-'])
+def page_post_subdir(userauth, prjname, lngname):
+    pmd = config.cache.get_pmd(prjname)
+    if pmd is None:
+        abort(404, "Page not found")
+        return
+
+    linfo = language_info.isocode.get(lngname)
+    if linfo is None:
+        abort(404, "Language \"{}\" is unknown".format(lngname))
+        return
+
+    langfile = request.files.langfile
+    override = request.forms.override
+    is_base  = request.forms.base_language
+    return handle_upload(userauth, pmd, prjname, langfile, override, is_base, linfo)
 
 @route('/upload/<prjname>', method = 'POST')
 @protected(['upload', 'prjname', '-'])
