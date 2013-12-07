@@ -431,3 +431,5 @@ all_languages = [afrikaans, arabic_egypt, basque, belarusian,
 
 grflangid = dict((x.grflangid, x) for x in all_languages)
 assert len(all_languages) == len(grflangid)
+isocode = dict((x.isocode, x) for x in all_languages)
+assert len(all_languages) == len(isocode)
