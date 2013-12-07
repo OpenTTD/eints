@@ -493,6 +493,16 @@ class NewGrfData:
         self.strings = []
         self.errors = []
 
+    def set_lang(self, language_data):
+        """
+        Set the language information.
+
+        @param language_data: Language meta-data.
+        @type  language_data: L{LanguageData}
+        """
+        self.grflangid = language_data.grflangid
+        self.language_data = language_data
+
     def add_error(self, errmsg):
         """
         Add an error/warning to the list of detected errors.
@@ -538,8 +548,7 @@ def handle_pragma(projtype, lnum, line, data):
         # Is the argument a known text-name?
         for entry in language_info.all_languages:
             if entry.isocode == line[1]:
-                data.grflangid = entry.grflangid
-                data.language_data = entry
+                data.set_lang(entry)
                 return
 
         # Is it a number?
@@ -550,8 +559,7 @@ def handle_pragma(projtype, lnum, line, data):
             return
         for entry in language_info.all_languages:
             if entry.grflangid == val:
-                data.grflangid = val
-                data.language_data = entry
+                data.set_lang(entry)
                 return
         # Don't know what it is.
         data.add_error(ErrorMessage(ERROR, lnum, "##grflangid is neither a valid language name nor a language code"))
