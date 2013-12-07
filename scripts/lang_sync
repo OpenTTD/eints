@@ -479,26 +479,40 @@ def get_local_languages():
     if not os.path.isdir(user_cfg.lang_dir):
         print("Error: \"{}\" is not a directory. (Is the --lang-dir option correct?)".format(user_cfg.lang_dir))
         sys.exit(1)
+
     for fname in os.listdir(user_cfg.lang_dir):
         if not fname.endswith(user_cfg.lang_ext):
             continue
         path = os.path.join(user_cfg.lang_dir, fname)
         verbose_msg = "File \"{}\" matches extension".format(path)
+
+        # Try reading the grflangid from the file.
+        grflangid = None
         handle = open(path, 'r', encoding = 'utf-8')
         for line in handle:
             if line.startswith(utf8_bom):
                 line = line[len(utf8_bom):]
             m = grflangid_pattern.match(line)
             if m:
-                grfid = int(m.group(1), 16)
-                result.append(LocalLanguageInfo(path, grfid))
-                verbose_msg = None
+                grflangid = int(m.group(1), 16)
                 break
 
         handle.close()
-        if user_cfg.verbose and verbose_msg is not None:
-            verbose_msg = verbose_msg + ", but no ##grflangid 0x.. found."
+
+        # If not found, try to derive it from the filename.
+        if grflangid is None:
+            load_userdefined_langfile_map()
+            ldata = get_languagedata_by_filename(fname[:-len(user_cfg.lang_ext)])
+            if ldata is not None: grflangid = ldata.grflangid
+
+        if grflangid is not None:
+            result.append(LocalLanguageInfo(path, grflangid))
+            continue
+
+        if user_cfg.verbose:
+            verbose_msg = "File \"{}\" matches extension, but cannot derive a grflangid from it.".format(path)
             print(verbose_msg)
+
 
     local_files_cache = result
 
@@ -616,7 +630,6 @@ def perform_upload(ll_files, is_base):
     else:
         blng_value = ""
 
-    url = build_url('/upload/' + user_cfg.project)
     for ll in ll_files:
         with open(ll.path_name, 'r', encoding = 'utf-8') as handle:
             data = handle.read()
@@ -631,6 +644,12 @@ def perform_upload(ll_files, is_base):
         else:
             if user_cfg.verbose:
                 print("Uploaded \"{}\" to Eints".format(fname))
+
+            ldata = get_languagedata_by_grflangid(ll.grf_langid)
+            if ldata is None:
+                url = build_url('/upload/' + user_cfg.project)
+            else:
+                url = build_url('/upload/' + user_cfg.project + "/" + ldata.isocode)
             ok = post_form_upload(url, fields, 'langfile', fname, data)
 
         if not ok:
@@ -645,80 +664,84 @@ class LanguageData:
     @ivar grflangid: NewGRF language ID.
     @type grflangid: C{int}
 
+    @ivar isocode: ISO code of the language.
+    @type isocode: C{str}
+
     @ivar filename: Base filename of the language.
     @type filename: C{str}
     """
-    def __init__(self, grflangid, filename):
+    def __init__(self, grflangid, isocode, filename):
         self.grflangid = grflangid
+        self.isocode = isocode
         self.filename = filename
 
 language_table = [
-    LanguageData(0x1b, "afrikaans"), # Afrikaans
-    LanguageData(0x14, "arabic_egypt"), # Arabic (Egypt)
-    LanguageData(0x21, "basque"), # Basque
-    LanguageData(0x10, "belarusian"), # Belarusian
-    LanguageData(0x37, "brazilian_portuguese"), # Portuguese (Brazilian)
-    LanguageData(0x18, "bulgarian"), # Bulgarian
-    LanguageData(0x22, "catalan"), # Catalan
-    LanguageData(0x0b, "chuvash"), # Chuvash
-    LanguageData(0x38, "croatian"), # Croatian
-    LanguageData(0x15, "czech"), # Czech
-    LanguageData(0x2d, "danish"), # Danish
-    LanguageData(0x1f, "dutch"), # Dutch
-    LanguageData(0x3d, "english_au"), # English (AU)
-    LanguageData(0x01, "english"), # English (UK)
-    LanguageData(0x00, "english_us"), # English (US)
-    LanguageData(0x05, "esperanto"), # Esperanto
-    LanguageData(0x34, "estonian"), # Estonian
-    LanguageData(0x12, "faroese"), # Faroese
-    LanguageData(0x35, "finnish"), # Finnish
-    LanguageData(0x03, "french"), # French
-    LanguageData(0x32, "frisian"), # Frisian
-    LanguageData(0x13, "gaelic"), # Scottish Gaelic
-    LanguageData(0x31, "galician"), # Galician
-    LanguageData(0x02, "german"), # German
-    LanguageData(0x1e, "greek"), # Greek
-    LanguageData(0x61, "hebrew"), # Hebrew
-    LanguageData(0x24, "hungarian"), # Hungarian
-    LanguageData(0x29, "icelandic"), # Icelandic
-    LanguageData(0x06, "ido"), # Ido
-    LanguageData(0x5a, "indonesian"), # Indonesian
-    LanguageData(0x08, "irish"), # Irish
-    LanguageData(0x27, "italian"), # Italian
-    LanguageData(0x39, "japanese"), # Japanese
-    LanguageData(0x3a, "korean"), # Korean
-    LanguageData(0x2a, "latvian"), # Latvian
-    LanguageData(0x2b, "lithuanian"), # Lithuanian
-    LanguageData(0x23, "luxembourgish"), # Luxembourgish
-    LanguageData(0x26, "macedonian"), # Macedonian
-    LanguageData(0x3c, "malay"), # Malay
-    LanguageData(0x09, "maltese"), # Maltese
-    LanguageData(0x11, "marathi"), # Marathi
-    LanguageData(0x2f, "norwegian_bokmal"), # Norwegian (Bokmal)
-    LanguageData(0x0e, "norwegian_nynorsk"), # Norwegian (Nynorsk)
-    LanguageData(0x62, "persian"), # Persian
-    LanguageData(0x30, "polish"), # Polish
-    LanguageData(0x36, "portuguese"), # Portuguese
-    LanguageData(0x28, "romanian"), # Romanian
-    LanguageData(0x07, "russian"), # Russian
-    LanguageData(0x0d, "serbian"), # Serbian
-    LanguageData(0x56, "simplified_chinese"), # Chinese (Simplified)
-    LanguageData(0x16, "slovak"), # Slovak
-    LanguageData(0x2c, "slovenian"), # Slovenian
-    LanguageData(0x04, "spanish"), # Spanish
-    LanguageData(0x2e, "swedish"), # Swedish
-    LanguageData(0x0a, "tamil"), # Tamil
-    LanguageData(0x42, "thai"), # Thai
-    LanguageData(0x0c, "traditional_chinese"), # Chinese (Traditional)
-    LanguageData(0x3e, "turkish"), # Turkish
-    LanguageData(0x33, "ukrainian"), # Ukrainian
-    LanguageData(0x5c, "urdu"), # Urdu
-    LanguageData(0x54, "vietnamese"), # Vietnamese
-    LanguageData(0x0f, "welsh"), # Welsh
+    LanguageData(0x1b, "af_ZA", "afrikaans"), # Afrikaans
+    LanguageData(0x14, "ar_EG", "arabic_egypt"), # Arabic (Egypt)
+    LanguageData(0x21, "eu_ES", "basque"), # Basque
+    LanguageData(0x10, "be_BY", "belarusian"), # Belarusian
+    LanguageData(0x37, "pt_BR", "brazilian_portuguese"), # Portuguese (Brazilian)
+    LanguageData(0x18, "bg_BG", "bulgarian"), # Bulgarian
+    LanguageData(0x22, "ca_ES", "catalan"), # Catalan
+    LanguageData(0x0b, "cv_RU", "chuvash"), # Chuvash
+    LanguageData(0x38, "hr_HR", "croatian"), # Croatian
+    LanguageData(0x15, "cs_CZ", "czech"), # Czech
+    LanguageData(0x2d, "da_DK", "danish"), # Danish
+    LanguageData(0x1f, "nl_NL", "dutch"), # Dutch
+    LanguageData(0x3d, "en_AU", "english_au"), # English (AU)
+    LanguageData(0x01, "en_GB", "english"), # English (UK)
+    LanguageData(0x00, "en_US", "english_us"), # English (US)
+    LanguageData(0x05, "eo_EO", "esperanto"), # Esperanto
+    LanguageData(0x34, "et_EE", "estonian"), # Estonian
+    LanguageData(0x12, "fo_FO", "faroese"), # Faroese
+    LanguageData(0x35, "fi_FI", "finnish"), # Finnish
+    LanguageData(0x03, "fr_FR", "french"), # French
+    LanguageData(0x32, "fy_NL", "frisian"), # Frisian
+    LanguageData(0x13, "gd_GB", "gaelic"), # Scottish Gaelic
+    LanguageData(0x31, "gl_ES", "galician"), # Galician
+    LanguageData(0x02, "de_DE", "german"), # German
+    LanguageData(0x1e, "el_GR", "greek"), # Greek
+    LanguageData(0x61, "he_IL", "hebrew"), # Hebrew
+    LanguageData(0x24, "hu_HU", "hungarian"), # Hungarian
+    LanguageData(0x29, "is_IS", "icelandic"), # Icelandic
+    LanguageData(0x06, "io_IO", "ido"), # Ido
+    LanguageData(0x5a, "id_ID", "indonesian"), # Indonesian
+    LanguageData(0x08, "ga_IE", "irish"), # Irish
+    LanguageData(0x27, "it_IT", "italian"), # Italian
+    LanguageData(0x39, "ja_JP", "japanese"), # Japanese
+    LanguageData(0x3a, "ko_KR", "korean"), # Korean
+    LanguageData(0x2a, "lv_LV", "latvian"), # Latvian
+    LanguageData(0x2b, "lt_LT", "lithuanian"), # Lithuanian
+    LanguageData(0x23, "lb_LU", "luxembourgish"), # Luxembourgish
+    LanguageData(0x26, "mk_MK", "macedonian"), # Macedonian
+    LanguageData(0x3c, "ms_MY", "malay"), # Malay
+    LanguageData(0x09, "mt_MT", "maltese"), # Maltese
+    LanguageData(0x11, "mr_IN", "marathi"), # Marathi
+    LanguageData(0x2f, "nb_NO", "norwegian_bokmal"), # Norwegian (Bokmal)
+    LanguageData(0x0e, "nn_NO", "norwegian_nynorsk"), # Norwegian (Nynorsk)
+    LanguageData(0x62, "fa_IR", "persian"), # Persian
+    LanguageData(0x30, "pl_PL", "polish"), # Polish
+    LanguageData(0x36, "pt_PT", "portuguese"), # Portuguese
+    LanguageData(0x28, "ro_RO", "romanian"), # Romanian
+    LanguageData(0x07, "ru_RU", "russian"), # Russian
+    LanguageData(0x0d, "sr_RS", "serbian"), # Serbian
+    LanguageData(0x56, "zh_CN", "simplified_chinese"), # Chinese (Simplified)
+    LanguageData(0x16, "sk_SK", "slovak"), # Slovak
+    LanguageData(0x2c, "sl_SI", "slovenian"), # Slovenian
+    LanguageData(0x04, "es_ES", "spanish"), # Spanish
+    LanguageData(0x2e, "sv_SE", "swedish"), # Swedish
+    LanguageData(0x0a, "ta_IN", "tamil"), # Tamil
+    LanguageData(0x42, "th_TH", "thai"), # Thai
+    LanguageData(0x0c, "zh_TW", "traditional_chinese"), # Chinese (Traditional)
+    LanguageData(0x3e, "tr_TR", "turkish"), # Turkish
+    LanguageData(0x33, "uk_UA", "ukrainian"), # Ukrainian
+    LanguageData(0x5c, "ur_PK", "urdu"), # Urdu
+    LanguageData(0x54, "vi_VN", "vietnamese"), # Vietnamese
+    LanguageData(0x0f, "cy_GB", "welsh"), # Welsh
 ]
 # }}}
 
-def get_languagedata_by_grfid(grflangid):
+def get_languagedata_by_grflangid(grflangid):
     """
     Retrieve the language data from the table that matches the L{grflangid} parameter.
 
@@ -732,6 +755,19 @@ def get_languagedata_by_grfid(grflangid):
         if ld.grflangid == grflangid: return ld
     return None
 
+def get_languagedata_by_filename(filename):
+    """
+    Retrieve the language data from the table that matches the L{filename} parameter.
+
+    @param filename: Filename of the language file.
+    @type  filename: C{str}
+
+    @return: Language data, if available.
+    @rtype:  L{LanguageData} or C{None}
+    """
+    for ld in language_table:
+        if ld.filename == filename: return ld
+    return None
 
 loaded_langfile_map = False # Whether the user-supplied language file map has been loaded.
 
@@ -769,7 +805,7 @@ def load_userdefined_langfile_map():
                 sys.exit(1)
 
             grfid = int(m.group(1), 16)
-            ldata = get_languagedata_by_grfid(grfid)
+            ldata = get_languagedata_by_grflangid(grfid)
             if ldata is None:
                 print("Error: NewGRF language ID 0x{:02X} not found.".format(grfid))
                 sys.exit(1)
@@ -972,7 +1008,7 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
                 current_strings = load_local_strings(path)
         else:
             load_userdefined_langfile_map()
-            ldata = get_languagedata_by_grfid(el.grf_langid)
+            ldata = get_languagedata_by_grflangid(el.grf_langid)
             if ldata is None:
                 path = el.lang_name
             else:
