@@ -95,7 +95,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
                             add_func(lines, 'credits', chg.user)
             continue
 
-        if skel_type == 'grflangid':
+        if projtype.has_grflangid and skel_type == 'grflangid':
             add_func(lines, skel_type, '##grflangid 0x{:02x}'.format(lng.grflangid))
             continue
 
