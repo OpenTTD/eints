@@ -192,10 +192,10 @@ Gender
 Gender works in much the same way as plurals, but they look at the gender
 given with other strings. For example, in the English language::
 
-        STR_MARY  :{G=f}Mary
-        STR_JOHN  :{G=m}John
+        STR_MARY      :{G=f}Mary
+        STR_JOHN      :{G=m}John
 
-        STR_BOOKS :{STRING} his books
+        STR_READ_BOOK :{STRING} reads his book
 
 The first two strings ``STR_MARY`` and ``STR_JOHN`` define two persons. We
 derive their gender from our general knowledge, but computers need to be
@@ -204,14 +204,18 @@ explicitly told the gender of a string. That's what the ``{G=f}`` and
 and the ``STR_JOHN`` text ``John`` is ``m`` in gender. The gender definition
 itself is not part of the text.
 
-The ``STR_BOOKS`` string has a string positional command ``{STRING}``. For
+The ``STR_READ_BOOK`` string has a string positional command ``{STRING}``. For
 simplicity, let's assume that the code uses the ``STR_MARY`` or
-``STR_JOHN`` strings at that position.
+``STR_JOHN`` strings at that position. So, the resulting strings are
+``John reads his book`` and ``Mary reads his book``. Obviously the latter one
+is incorrect, it should be ``her book``.
+
+The gender selection command ``G`` can fix this.
 In English, there are three genders, namely ``f``, ``m``, and ``n`` (female,
 male, and neutral). The gender selection command ``G`` thus has three texts to
 select from, as in::
 
-        STR_BOOKS :{STRING} {G 0 her his its} books
+        STR_READ_BOOK :{STRING} reads {G 0 her his its} book
 
 The ``G`` command looks for a string behind it by default. The ``0`` in the
 above example forces it to use the parameter at position ``0`` (that is, the
@@ -220,27 +224,56 @@ above example forces it to use the parameter at position ``0`` (that is, the
 Case
 ====
 
-The English language does not have cases, which makes explaining a little
-artificial. For the purpose of discussing cases however, assume English has two
-moods, a normal one, and a super-happy one, which are encoded as cases.
+The English language does not have cases in the linguistic sense, which makes
+explaining a little artificial. However, we can construct something similar.
 
-Cases can change wording in a very precise manner. Each string can be
-translated for each case, and string replacements can give the preferred case.
-An example::
+Assume there are a bunch of locations::
 
-        STR_OK      :ok
-        STR_OK.fab  :super fabulous!
+        STR_ROOF             :on the roof
+        STR_HOUSE            :in the house
+        STR_SCHOOL           :at school
 
-This defines the ``STR_OK`` string in two cases. The first line define the
-default case, the second line defines the same string for the ``fab`` case.
+Using these locations one can express the location of a person::
 
-The desired case of a string replacement can be specified too::
+        STR_LOCATION         :Peter is {{STRING}}
+        STR_TRAVEL           :Peter goes {{STRING}}
 
-        STR_RESULT :The result is {STRING.fab}
+Using these strings, the location of Peter can be expressed nicely,
+and also where he is travelling to::
 
-The ``{STRING.fab}`` in this text states it prefers to have the ``fab``
-translation for the first string parameter. If the code uses ``STR_OK`` at
-that position, the ``super fabulous!`` text will be used.
+        ``Peter is on the roof``
+        ``Peter is in the house``
+        ``Peter is at school``
+
+        ``Peter goes on the roof``
+        ``Peter goes in the house``
+        ``Peter goes at school``
+
+Uh, oh... while the first three sentences are fine, the latter three
+are wrong. The preposition does not only depend on the type of
+the location, but also whether Peter is already there, or still travelling.
+
+To fix this, we introduce a case ``target``::
+
+        STR_ROOF             :on the roof
+        STR_ROOF.target      :onto the roof
+        STR_HOUSE            :in the house
+        STR_HOUSE.target     :into the house
+        STR_SCHOOL           :at school
+        STR_SCHOOL.target    :to school
+
+        STR_LOCATION         :Peter is {{STRING}}
+        STR_TRAVEL           :Peter goes {{STRING.target}}
+
+The ``{STRING.target}`` in this text states it prefers to have the ``target``
+translation for the first string parameter. If the code uses ``STR_ROOF`` at
+that position, the ``onto``-variant will be used instead of ``on``.
 If a string does not have the desired case, the default case is used instead.
+
+Now, ``STR_LOCATION`` can be used to state the location of Peter, and
+``STR_TRAVEL`` can be used to express him travelling to a new location.
+The location can in both cases be expressed with a single string id.
+The usage of cases makes sure that the right preposition is used
+in all cases.
 
 .. vim: tw=78 spell
