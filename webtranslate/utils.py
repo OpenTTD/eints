@@ -1,4 +1,5 @@
 from webtranslate import data
+from webtranslate.newgrf import language_file
 import re
 
 def get_datetime_now_formatted():
@@ -165,3 +166,24 @@ def verify_url(url):
         return None # XXX This is a bit too much trust perhaps.
 
     return "Incorrect url"
+
+def create_displayed_base_text(pdata, text):
+    """
+    Construct the base language string to display to the user. In particular,
+    transform the string commands that are available in the base language only.
+
+    @param pdata: Project data.
+    @type  pdata: L{Project}
+
+    @param text: Text to display.
+    @type  text: L{Text}
+
+    @return: String to display.
+    @rtype:  C{str}
+    """
+    text = text.text
+    blng = pdata.get_base_language()
+    if blng is None: return text
+    str_info = language_file.check_string(pdata.projtype, text, True, None, blng, True)
+    if str_info.has_error or str_info.pieces is None: return text
+    return str_info.get_translation_text()

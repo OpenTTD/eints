@@ -26,7 +26,7 @@ class ErrorMessage:
         self.line = line
         self.msg = msg
 
-# {{{ def check_string(text, default_case, extra_commands, lng):
+# {{{ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, save_pieces = False):
 # Number of plural forms for each plural type (C{None} means no plural forms allowed).
 plural_count_map = {None: 0, 0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4, 13: 4}
 
@@ -36,7 +36,7 @@ argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 number_pat = re.compile('[0-9]+$')
 
-def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
+def check_string(projtype, text, default_case, extra_commands, lng, in_blng, save_pieces = False):
     """
     Check the contents of a single string.
 
@@ -59,6 +59,9 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
     @param in_blng: Whether the string is in the base language.
     @type  in_blng: C{bool}
 
+    @param save_pieces: Save the pieces of the string for translation string construction.
+    @type  save_pieces: C{bool}
+
     @return: String parameter information.
     @rtype:  C{StringInfo}
     """
@@ -66,14 +69,18 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
     assert projtype.allow_case or default_case
 
     if not projtype.allow_extra: extra_commands = set()
-    string_info = StringInfo(extra_commands, in_blng)
+    string_info = StringInfo(extra_commands, in_blng, save_pieces)
     plural_count = plural_count_map[lng.plural]
     pos = 0 # String parameter number.
     idx = 0 # Text string index.
     while idx < len(text):
         i = text.find('{', idx)
-        if i == -1: break
-        if i > 0: idx = i
+        if i == -1:
+            if save_pieces: string_info.add_text(text[idx:])
+            break
+        if i > idx:
+            if save_pieces: string_info.add_text(text[idx:i])
+            idx = i
 
         # text[idx] == '{', now find matching '}'
         if text.startswith('{}', idx):
@@ -131,7 +138,7 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
                 string_info.add_nonpositional(entry)
             else:
                 if argnum is not None: pos = argnum
-                string_info.add_positional(pos, entry)
+                string_info.add_positional(pos, argnum, entry, case)
                 pos = pos + 1
 
             idx = m.end()
@@ -150,12 +157,15 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
                 m = number_pat.match(args[0])
                 if m:
                     num = int(args[0], 10)
-                    args = args[1:]
+                    cmd_num = num
+                    cmd_args = args[1:]
                 else:
                     num = pos - 1
+                    cmd_num = None
+                    cmd_args = args
 
-                if len(args) == plural_count:
-                    string_info.add_plural(num)
+                if len(cmd_args) == plural_count:
+                    string_info.add_plural(num, cmd_num, cmd_args)
                     continue
 
             string_info.add_error(ErrorMessage(ERROR, None, "Expected {} string arguments for {{P ..}}, found {} arguments".format(plural_count, len(args))))
@@ -177,6 +187,7 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
                 string_info.add_error(ErrorMessage(ERROR, None, "Gender {} is not listed in ##gender".format(m.group(1))))
                 return string_info
 
+            if save_pieces: string_info.add_gender_assignment(m.group(1))
             idx = m.end()
             continue
 
@@ -198,12 +209,15 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
                 m = number_pat.match(args[0])
                 if m:
                     num = int(args[0], 10)
-                    args = args[1:]
+                    cmd_num = num
+                    cmd_args = args[1:]
                 else:
                     num = pos
+                    cmd_num = None
+                    cmd_args = args
 
-                if len(args) == expected:
-                    string_info.add_gender(num)
+                if len(cmd_args) == expected:
+                    string_info.add_gender(num, cmd_num, cmd_args)
                     continue
 
             string_info.add_error(ErrorMessage(ERROR, None, "Expected {} string arguments for {{G ..}}, found {} arguments".format(expected, len(args))))
@@ -255,6 +269,139 @@ def get_arguments(text, cmd, idx, string_info):
 
 # }}}
 # {{{ class StringInfo:
+# {{{ String pieces (for storing parsed strings)
+class StringPiece:
+    """
+    Base class for storing a piece of the string.
+    """
+    def get_translation_text(self):
+        """
+        Return the text of the piece (in the base language) as it should be displayed for translating.
+
+        @return: Text to display to the user for translating.
+        @rtype:  C{str}
+        """
+        raise NotImplementedError("Implement me in " + repr(self))
+
+class TextPiece(StringPiece):
+    """
+    Piece representing literal text from the string.
+
+    @ivar text: Literal text.
+    @type text: C{str}
+    """
+    def __init__(self, text):
+        self.text = text
+
+    def get_translation_text(self):
+        return self.text
+
+class CmdPiece(StringPiece):
+    """
+    Piece representing a string command.
+
+    @ivar argnum: Argument number, if provided.
+    @type argnum: C{int} or C{None}
+
+    @ivar cmd: Command.
+    @type cmd: L{ParameterInfo}
+
+    @ivar case: Case suffix, if provided.
+    @type case: C{str} or C{None}
+    """
+    def __init__(self, argnum, cmd, case):
+        self.argnum = argnum
+        self.cmd = cmd
+        self.case = case
+
+    def get_translation_text(self):
+        if self.argnum is None and self.case is None and self.cmd.translated_cmd is None:
+            # Do common case quickly.
+            return "{" + self.cmd.literal + "}"
+
+        parts = ["{"]
+        if self.argnum is not None:
+            parts.append(str(self.argnum))
+            parts.append(":")
+        if self.cmd.translated_cmd is None:
+            parts.append(self.cmd.literal)
+        else:
+            parts.append(self.cmd.translated_cmd)
+        if self.case is not None:
+            parts.append(".")
+            parts.append(self.case)
+        parts.append("}")
+        return "".join(parts)
+
+class ExtraCmdPiece(StringPiece):
+    """
+    Piece representing an extra command.
+
+    @ivar text: Text of the extra command.
+    @type text: C{str}
+    """
+    def __init__(self, text):
+        self.text = text
+
+    def get_translation_text(self):
+        return "{" +self.text + "}"
+
+class PluralPiece(StringPiece):
+    """
+    Piece representing a plural {P ...} command.
+
+    @param cmd_num: Number given to the command by the user, if provided.
+    @type  cmd_num: C{int} or C{None}
+
+    @ivar cmd_args: Plural command arguments.
+    @type cmd_args: C{list} of C{str}
+    """
+    def __init__(self, cmd_num, cmd_args):
+        self.cmd_args = cmd_args
+        self.cmd_num = cmd_num
+
+    def get_translation_text(self):
+        if self.cmd_num is None:
+            prefix = "{P "
+        else:
+            prefix = "{P " + str(self.cmd_num) + " "
+        return prefix + " ".join(self.cmd_args) + "}"
+
+class GenderPiece(StringPiece):
+    """
+    Piece representing a gender {G ...} command.
+
+    @param cmd_num: Number given to the command by the user, if provided.
+    @type  cmd_num: C{int} or C{None}
+
+    @ivar cmd_args: Gender command arguments.
+    @type cmd_args: C{list} of C{str}
+    """
+    def __init__(self, cmd_num, cmd_args):
+        self.cmd_args = cmd_args
+        self.cmd_num = cmd_num
+
+    def get_translation_text(self):
+        if self.cmd_num is None:
+            prefix = "{G "
+        else:
+            prefix = "{G " + str(self.cmd_num) + " "
+        return prefix + " ".join(self.cmd_args) + "}"
+
+class GenderAssignPiece(StringPiece):
+    """
+    Piece representing a gender assignment command.
+
+    @ivar gender: Gender of the assignment.
+    @type gender: C{str}
+    """
+    def __init__(self, gender):
+        self.gender = gender
+
+    def get_translation_text(self):
+        return "{G=" + self.gender + "}"
+
+# }}}
 class StringInfo:
     """
     Collected information about a string.
@@ -286,8 +433,11 @@ class StringInfo:
 
     @ivar has_error: Whether the L{errors} list has a real error.
     @type has_error: C{bool}
+
+    @ivar pieces: Pieces of the string, for translation string construction, if available.
+    @type pieces: C{None} if no pieces available, else a C{list} of L{StringPiece}
     """
-    def __init__(self, allowed_extra, in_blng):
+    def __init__(self, allowed_extra, in_blng, save_pieces):
         self.in_blng = in_blng
         self.allowed_extra = allowed_extra
         self.genders  = []
@@ -297,6 +447,10 @@ class StringInfo:
         self.extra_commands = set()
         self.errors = []
         self.has_error = False
+        if save_pieces:
+            self.pieces = []
+        else:
+            self.pieces = None
 
     def __str__(self):
         rv = []
@@ -306,6 +460,19 @@ class StringInfo:
         if len(self.non_positionals) > 0: rv.append("non-pos=" + str(self.non_positionals))
         if len(self.extra_commands) > 0: rv.append("extra=" + str(self.extra_commands))
         return "**strinfo(" + ", ".join(rv) + ")"
+
+    def get_translation_text(self):
+        """
+        Construct the text to display after translating the string commands to
+        their equivalent in the translated languages.
+
+        @precond: The parsed string stored in the object should be from the base language.
+        @precond: While parsing, the pieces should have been saved in L{pieces}.
+
+        @return: The text to translate against, in terms of a translation.
+        @rtype:  C{str}
+        """
+        return "".join(pc.get_translation_text() for pc in self.pieces)
 
     def add_error(self, errmsg):
         """
@@ -319,25 +486,48 @@ class StringInfo:
 
         self.errors.append(errmsg)
 
-    def add_gender(self, pos):
+    def add_text(self, text):
+        """
+        Save a piece of literal text.
+
+        @param text: Literal text of the string to save.
+        @type  text: C{str}
+        """
+        self.pieces.append(TextPiece(text))
+
+    def add_gender(self, pos, cmd_num, cmd_args):
         """
         Add a gender query for parameter L{pos}.
 
         @param pos: String parameter number used for gender query.
         @type  pos: C{int}
+
+        @param cmd_num: Number given to the command by the user, if provided.
+        @type  cmd_num: C{int} or C{None}
+
+        @param cmd_args: Command arguments.
+        @type  cmd_args: C{list} of C{str}
         """
         if pos not in self.genders:
             self.genders.append(pos)
+        if self.pieces is not None: self.pieces.append(GenderPiece(cmd_num, cmd_args))
 
-    def add_plural(self, pos):
+    def add_plural(self, pos, cmd_num, cmd_args):
         """
         Add a plural query for parameter L{pos}.
 
         @param pos: String parameter number used for plural query.
         @type  pos: C{int}
+
+        @param cmd_num: Number given to the command by the user, if provided.
+        @type  cmd_num: C{int} or C{None}
+
+        @param cmd_args: Command arguments.
+        @type  cmd_args: C{list} of C{str}
         """
         if pos not in self.plurals:
             self.plurals.append(pos)
+        if self.pieces is not None: self.pieces.append(PluralPiece(cmd_num, cmd_args))
 
     def add_nonpositional(self, cmd):
         """
@@ -348,6 +538,7 @@ class StringInfo:
         """
         cnt = self.non_positionals.get(cmd.literal, 0)
         self.non_positionals[cmd.literal] = cnt + 1
+        if self.pieces is not None: self.pieces.append(CmdPiece(None, cmd, None))
 
     def add_extra_command(self, cmdname):
         """
@@ -367,17 +558,24 @@ class StringInfo:
 
         cnt = self.non_positionals.get(cmdname, 0)
         self.non_positionals[cmdname] = cnt + 1
+        if self.pieces is not None: self.pieces.append(ExtraCmdPiece(cmdname))
         return True
 
-    def add_positional(self, pos, cmd):
+    def add_positional(self, pos, argnum, cmd, case):
         """
         Add a string command at the stated position.
 
         @param pos: String parameter number.
         @type  pos: C{int}
 
+        @param argnum: Number specified with the string command, if available.
+        @type  argnum: C{int} or C{None}
+
         @param cmd: String command used at the stated position.
         @type  cmd: C{ParameterInfo}
+
+        @param case: Case specified with the string command, if available.
+        @type  case: C{str} or C{None}
 
         @return: Whether the command was correct.
         @rtype:  C{bool}
@@ -385,15 +583,29 @@ class StringInfo:
         if pos < len(self.commands):
             if self.commands[pos] is None:
                 self.commands[pos] = cmd
+                if self.pieces is not None: self.pieces.append(CmdPiece(argnum, cmd, case))
                 return True
             if self.commands[pos] != cmd: # Reference equality is almost always valid.
                 if not self.in_blng or self.commands[pos].get_translation_cmd() != cmd.get_translation_cmd():
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} has more than one string command".format(pos)))
                     return False
+            if self.pieces is not None: self.pieces.append(CmdPiece(argnum, cmd, case))
             return True
         while pos > len(self.commands): self.commands.append(None)
         self.commands.append(cmd)
+        if self.pieces is not None: self.pieces.append(CmdPiece(argnum, cmd, case))
         return True
+
+    def add_gender_assignment(self, gender):
+        """
+        Add a gender assignment command.
+
+        @param gender: Gender being assigned.
+        @type  gender: C{str}
+
+        @precond: String pieces should be saved.
+        """
+        self.pieces.append(GenderAssignPiece(gender))
 
     def check_sanity(self):
         """

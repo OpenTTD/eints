@@ -1,4 +1,5 @@
 %rebase main_template title='Editing ' + sname
+%from webtranslate import utils
 <h1>
     <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
 </h1>
@@ -19,7 +20,7 @@
         <hr class="clearfix" style="margin-top:30px;"/><!-- an inline style per day keeps the doctor away -->
         <div class="control-group">
             <span class="control-label">Base lang string:</span>
-            <span class="eint-form-value-as-text span8"><strong id="base_{{tc.case}}">{{tc.transl[0].current_base.text}}</strong></span>
+            <span class="eint-form-value-as-text span8"><strong id="base_{{tc.case}}">{{utils.create_displayed_base_text(pdata, tc.transl[0].current_base)}}</strong></span>
             <button class="pull-right" type="button" onclick="copyText('base_{{tc.case}}', 'text_{{tc.case}}')">Copy</button>
             <input type="hidden" name="base" value="{{tc.transl[0].current_base.text}}"/>
         </div>
@@ -57,7 +58,7 @@
             </div>
         % end
         % if tc.transl[0].current_base != tc.transl[0].trans_base:
-            <p>Previous base language text:<br />{{tc.transl[0].trans_base.text}}</p>
+            <p>Previous base language text:<br />{{utils.create_displayed_base_text(pdata, tc.transl[0].trans_base.text)}}</p>
         % end
         % if len(tc.transl) > 1:
             <h5>Previous Translations</h5>
