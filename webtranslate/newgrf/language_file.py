@@ -210,7 +210,7 @@ def check_string(projtype, text, default_case, extra_commands, lng):
         string_info.add_error(ErrorMessage(ERROR, None, "Unknown {...} command found in the string"))
         return string_info
 
-    string_info.check_sanity(projtype)
+    string_info.check_sanity()
     return string_info
 
 # {{{ def get_arguments(text, cmd, idx, string_info):
@@ -267,7 +267,7 @@ class StringInfo:
     @type plurals: C{list} of C{int}
 
     @ivar commands: String commands at each position.
-    @type commands: C{list} of C{str}
+    @type commands: C{list} of C{ParameterInfo}
 
     @ivar non_positionals: Mapping of commands without position to their count.
     @type non_positionals: C{dict} of C{str} to C{int}
@@ -377,22 +377,19 @@ class StringInfo:
         """
         if pos < len(self.commands):
             if self.commands[pos] is None:
-                self.commands[pos] = cmd.literal
+                self.commands[pos] = cmd
                 return True
-            if self.commands[pos] != cmd.literal:
+            if self.commands[pos] != cmd:
                 self.add_error(ErrorMessage(ERROR, None, "String parameter {} has more than one string command".format(pos)))
                 return False
             return True
         while pos > len(self.commands): self.commands.append(None)
-        self.commands.append(cmd.literal)
+        self.commands.append(cmd)
         return True
 
-    def check_sanity(self, projtype):
+    def check_sanity(self):
         """
         Check sanity of the string commands and parameters.
-
-        @param projtype: Project type.
-        @type  projtype: L{ProjectType}
         """
         ok = True
         for pos, cmd in enumerate(self.commands):
@@ -406,8 +403,8 @@ class StringInfo:
                     ok = False
                     continue
 
-                parm = projtype.text_commands[self.commands[pos]]
-                if not parm.use_plural:
+                cmd = self.commands[pos]
+                if cmd is None or not cmd.use_plural:
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos)))
                     ok = False
 
@@ -417,8 +414,8 @@ class StringInfo:
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos)))
                     continue
 
-                parm = projtype.text_commands[self.commands[pos]]
-                if not parm.use_gender:
+                cmd = self.commands[pos]
+                if cmd is None or not cmd.use_gender:
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
 # }}}
 # }}}
@@ -747,22 +744,25 @@ def compare_info(projtype, base_info, lng_info):
     if base_info.has_error: return True # Cannot blame the translation when the base language is broken.
     if lng_info.has_error: return False # Translation has more serious problems.
 
-    if base_info.commands != lng_info.commands:
-        if len(base_info.commands) > len(lng_info.commands):
+    base_cmds = [cmd.literal for cmd in base_info.commands]
+    lng_cmds = [cmd.literal for cmd in lng_info.commands]
+
+    if base_cmds != lng_cmds:
+        if len(base_cmds) > len(lng_cmds):
             msg = 'String command for position {} (and further) is missing in the translation'
-            msg = msg.format(len(lng_info.commands))
+            msg = msg.format(len(lng_cmds))
             lng_info.add_error(ErrorMessage(ERROR, None, msg))
             return False
-        if len(base_info.commands) < len(lng_info.commands):
+        if len(base_cmds) < len(lng_cmds):
             msg = 'String command for position {} (and further) is not used in the base language'
-            msg = msg.format(len(base_info.commands))
+            msg = msg.format(len(base_cmds))
             lng_info.add_error(ErrorMessage(ERROR, None, msg))
             return False
 
-        for i in range(len(base_info.commands)):
-            if base_info.commands[i] != lng_info.commands[i]:
+        for i in range(len(base_cmds)):
+            if base_cmds[i] != lng_cmds[i]:
                 msg = 'String command for position {} is wrong, base language uses {}, the translation uses {}'
-                msg = msg.format(i, '{' + base_info.commands[i] + '}', '{' + lng_info.commands[i] + '}')
+                msg = msg.format(i, '{' + base_cmds[i] + '}', '{' + lng_cmds[i] + '}')
                 lng_info.add_error(ErrorMessage(ERROR, None, msg))
                 return False
 
