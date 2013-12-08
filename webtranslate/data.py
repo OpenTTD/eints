@@ -214,7 +214,7 @@ def get_string_status(projtype, lchg, case, lng, btext, binfo):
         state = UP_TO_DATE
 
     assert projtype.allow_case or lchg.case == ''
-    linfo = language_file.check_string(projtype, lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng)
+    linfo = language_file.check_string(projtype, lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng, False)
     if not language_file.compare_info(projtype, binfo, linfo):
         state = INVALID
 

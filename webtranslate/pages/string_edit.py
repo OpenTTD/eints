@@ -337,7 +337,7 @@ def check_page_parameters(prjname, lngname, sname):
 
     # Check newest base language string.
     bchg = max(bchgs)
-    binfo = language_file.check_string(pdata.projtype, bchg.base_text.text, True, None, blng)
+    binfo = language_file.check_string(pdata.projtype, bchg.base_text.text, True, None, blng, True)
     if binfo.has_error:
         # XXX Add errors too
         abort(404, "String cannot be translated, its base language version is incorrect")

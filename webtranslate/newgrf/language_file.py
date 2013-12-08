@@ -36,7 +36,7 @@ argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
 number_pat = re.compile('[0-9]+$')
 
-def check_string(projtype, text, default_case, extra_commands, lng):
+def check_string(projtype, text, default_case, extra_commands, lng, in_blng):
     """
     Check the contents of a single string.
 
@@ -56,6 +56,9 @@ def check_string(projtype, text, default_case, extra_commands, lng):
     @param lng: Language containing the string.
     @type  lng: L{Language}
 
+    @param in_blng: Whether the string is in the base language.
+    @type  in_blng: C{bool}
+
     @return: String parameter information.
     @rtype:  C{StringInfo}
     """
@@ -63,7 +66,7 @@ def check_string(projtype, text, default_case, extra_commands, lng):
     assert projtype.allow_case or default_case
 
     if not projtype.allow_extra: extra_commands = set()
-    string_info = StringInfo(extra_commands)
+    string_info = StringInfo(extra_commands, in_blng)
     plural_count = plural_count_map[lng.plural]
     pos = 0 # String parameter number.
     idx = 0 # Text string index.
@@ -260,6 +263,9 @@ class StringInfo:
     @type allowed_extra: C{None} if any extra commands are allowed,
                          C{set} of C{str} if a specific set of extra commands is allowed.
 
+    @ivar in_blng: Whether the parsed string is from the base language.
+    @type in_blng: C{bool}
+
     @ivar genders: String parameter numbers used for gender queries.
     @type genders: C{list} of C{int}
 
@@ -281,7 +287,8 @@ class StringInfo:
     @ivar has_error: Whether the L{errors} list has a real error.
     @type has_error: C{bool}
     """
-    def __init__(self, allowed_extra):
+    def __init__(self, allowed_extra, in_blng):
+        self.in_blng = in_blng
         self.allowed_extra = allowed_extra
         self.genders  = []
         self.plurals  = []
@@ -379,9 +386,10 @@ class StringInfo:
             if self.commands[pos] is None:
                 self.commands[pos] = cmd
                 return True
-            if self.commands[pos] != cmd:
-                self.add_error(ErrorMessage(ERROR, None, "String parameter {} has more than one string command".format(pos)))
-                return False
+            if self.commands[pos] != cmd: # Reference equality is almost always valid.
+                if not self.in_blng or self.commands[pos].get_translation_cmd() != cmd.get_translation_cmd():
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} has more than one string command".format(pos)))
+                    return False
             return True
         while pos > len(self.commands): self.commands.append(None)
         self.commands.append(cmd)
@@ -744,7 +752,7 @@ def compare_info(projtype, base_info, lng_info):
     if base_info.has_error: return True # Cannot blame the translation when the base language is broken.
     if lng_info.has_error: return False # Translation has more serious problems.
 
-    base_cmds = [cmd.literal for cmd in base_info.commands]
+    base_cmds = [cmd.get_translated_cmd() for cmd in base_info.commands]
     lng_cmds = [cmd.literal for cmd in lng_info.commands]
 
     if base_cmds != lng_cmds:

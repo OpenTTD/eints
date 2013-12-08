@@ -450,7 +450,7 @@ class ProjectMetaData:
         for sname, bchgs in blng.changes.items():
             # Check newest base language string.
             bchg = data.get_newest_change(bchgs, '')
-            binfo = language_file.check_string(projtype, bchg.base_text.text, True, None, blng)
+            binfo = language_file.check_string(projtype, bchg.base_text.text, True, None, blng, True)
             if binfo.has_error:
                 bstat[sname] = [('', data.INVALID)]
             else:

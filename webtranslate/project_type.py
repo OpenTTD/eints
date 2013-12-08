@@ -83,14 +83,28 @@ class ParameterInfo:
 
     @ivar critical: String command is critical, its count should match between the base language and the translation.
     @type critical: C{bool}
+
+    @ivar translated_cmd: For commands in the base language, command to use checking and displaying.
+    @type translated_cmd: C{str} or C{None} (the latter means use C{self})
     """
-    def __init__(self, literal, takes_param, use_plural, use_gender, allow_case, critical):
+    def __init__(self, literal, takes_param, use_plural, use_gender, allow_case, critical, translated_cmd = None):
         self.literal = literal
         self.takes_param = takes_param
         self.use_plural = use_plural
         self.use_gender = use_gender
         self.allow_case = allow_case
         self.critical = critical
+        self.translated_cmd = translated_cmd
+
+    def get_translated_cmd(self):
+        """
+        Get the command name to use for a translation.
+
+        @return: The command name to use for a translation.
+        @rtype:  C{str}
+        """
+        if self.translated_cmd is None: return self.literal
+        return self.translated_cmd
 
 # {{{ NEWGRF_PARAMETERS
 _NEWGRF_PARAMETERS = [
@@ -168,13 +182,13 @@ _GS_PARAMETERS = [
     ParameterInfo("BLACK",             False, False, False, False, False),
 #    ParameterInfo("REV",               False, False, False, False, True ),
 
-    ParameterInfo("STRING1",           True,  True,  True,  True,  True ),
-    ParameterInfo("STRING2",           True,  True,  True,  True,  True ),
-    ParameterInfo("STRING3",           True,  True,  True,  True,  True ),
-    ParameterInfo("STRING4",           True,  True,  True,  True,  True ),
-    ParameterInfo("STRING5",           True,  True,  True,  True,  True ),
-    ParameterInfo("STRING6",           True,  True,  True,  True,  True ),
-    ParameterInfo("STRING7",           True,  True,  True,  True,  True ),
+    ParameterInfo("STRING1",           True,  True,  True,  True,  True,  "STRING"),
+    ParameterInfo("STRING2",           True,  True,  True,  True,  True,  "STRING"),
+    ParameterInfo("STRING3",           True,  True,  True,  True,  True,  "STRING"),
+    ParameterInfo("STRING4",           True,  True,  True,  True,  True,  "STRING"),
+    ParameterInfo("STRING5",           True,  True,  True,  True,  True,  "STRING"),
+    ParameterInfo("STRING6",           True,  True,  True,  True,  True,  "STRING"),
+    ParameterInfo("STRING7",           True,  True,  True,  True,  True,  "STRING"),
 
 #    ParameterInfo("STATION_FEATURES",  True,  False, False, False, True ), # station features string, icons of the features
     ParameterInfo("INDUSTRY",          True,  False, True,  True,  True ), # takes an industry number.
@@ -196,7 +210,7 @@ _GS_PARAMETERS = [
     ParameterInfo("DATE_ISO",          True,  False, False, False, True ),
 
     ParameterInfo("STRING",            True,  True,  True,  True,  True ),
-    ParameterInfo("RAW_STRING",        True,  True,  True,  False, True ),
+    ParameterInfo("RAW_STRING",        True,  True,  True,  False, True,  "STRING"),
 
     ParameterInfo("COMMA",             True,  True,  False, False, True ), # Number with comma
     ParameterInfo("DECIMAL",           True,  True,  False, False, True ), # Number with comma and fractional part.
