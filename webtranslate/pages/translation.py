@@ -31,6 +31,9 @@ class StringDisplayData:
     @ivar sname: Name of the string.
     @type sname: C{str}
 
+    @ivar base: Text of the string in the base language.
+    @type base: C{Text}
+
     @ivar cases: Cases, sorted on case name.
     @type cases: C{list} of L{CaseDisplayData}
     """
@@ -77,7 +80,7 @@ def project(userauth, prjname, lngname):
         state = max(s[1] for s in cstates)
         if state >= unknown:
             bchg = data.get_newest_change(bchgs, '')
-            sdd = StringDisplayData(sname, bchg.base_text.text)
+            sdd = StringDisplayData(sname, bchg.base_text)
             chgs = lng.changes.get(sname)
             if chgs is not None:
                 cases = data.get_all_newest_changes(chgs, lng.case)
