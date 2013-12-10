@@ -32,7 +32,9 @@
                 id="default_case" oninput="updatePlaceholder()"
                 % end
                 >{{tc.transl[0].text.text}}</textarea>
-                % if len(tc.case) != 0:
+                % if len(tc.case) == 0:
+                <p>Allow empty input: <input type="checkbox" name="allow_empty_default"/>
+                % else:
                 <p>Note: Leave the entry for cases empty, if they shall use the same translation as the default case.</p>
                 % end
                 % if len(tc.transl[0].errors) == 0:

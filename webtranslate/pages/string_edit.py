@@ -486,6 +486,15 @@ def str_post(userauth, prjname, lngname, sname):
         if trl_str is None: continue # It's missing from the form data.
 
         trl_str = language_file.sanitize_text(trl_str)
+        if case == '' and trl_str == '' and bchg.base_text != '':
+            # Empty base case for a non-empty string, was the "allow empty base translation" flag set?
+            if request_forms.get('allow_empty_default') != 'on':
+                if stamp is None: stamp = data.make_stamp()
+                txt = data.Text(trl_str, case, stamp)
+                tchg = data.Change(sname, case, bchg.base_text, txt, stamp, userauth.name)
+                error = language_file.ErrorMessage(language_file.ERROR, None, "Empty default case is not allowed (enable by setting 'Allow empty input').")
+                new_state_errors[case] = (tchg, data.INVALID, [error])
+                continue
 
         # Check whether there is a match with a change in the translation.
         trl_chg = None
