@@ -176,7 +176,8 @@ example::
 The ``P`` means that a plural form must be selected. As expected it has two
 texts, namely ``bottle`` (used for the value 1) and ``bottles`` (used for all
 other numbers). The quotes ``"`` are not part of the text.
-In case of a single (non-empty) word, the quotes can be omitted.
+In case of a single (non-empty) word, the quotes can be omitted. The example can
+thus also be written as ``{P bottle bottles}``.
 
 The ``P`` command looks at the positional command just in front of it (ie the
 ``{COMMA}`` command). Like the positional commands you can also explicitly
@@ -235,19 +236,19 @@ Assume there are a bunch of locations::
 
 Using these locations one can express the location of a person::
 
-        STR_LOCATION         :Peter is {{STRING}}
-        STR_TRAVEL           :Peter goes {{STRING}}
+        STR_LOCATION         :Peter is {STRING}
+        STR_TRAVEL           :Peter goes {STRING}
 
 Using these strings, the location of Peter can be expressed nicely,
 and also where he is travelling to::
 
-        ``Peter is on the roof``
-        ``Peter is in the house``
-        ``Peter is at school``
+        Peter is on the roof
+        Peter is in the house
+        Peter is at school
 
-        ``Peter goes on the roof``
-        ``Peter goes in the house``
-        ``Peter goes at school``
+        Peter goes on the roof
+        Peter goes in the house
+        Peter goes at school
 
 Uh, oh... while the first three sentences are fine, the latter three
 are wrong. The preposition does not only depend on the type of
@@ -262,8 +263,8 @@ To fix this, we introduce a case ``target``::
         STR_SCHOOL           :at school
         STR_SCHOOL.target    :to school
 
-        STR_LOCATION         :Peter is {{STRING}}
-        STR_TRAVEL           :Peter goes {{STRING.target}}
+        STR_LOCATION         :Peter is {STRING}
+        STR_TRAVEL           :Peter goes {STRING.target}
 
 The ``{STRING.target}`` in this text states it prefers to have the ``target``
 translation for the first string parameter. If the code uses ``STR_ROOF`` at
