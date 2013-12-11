@@ -60,7 +60,7 @@
             </div>
         % end
         % if tc.transl[0].current_base != tc.transl[0].trans_base:
-            <p>Previous base language text:<br />{{utils.create_displayed_base_text(pdata, tc.transl[0].trans_base.text)}}</p>
+            <p>Previous base language text:<br />{{utils.create_displayed_base_text(pdata, tc.transl[0].trans_base)}}</p>
         % end
         % if len(tc.transl) > 1:
             <h5>Previous Translations</h5>
