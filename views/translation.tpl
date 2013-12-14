@@ -12,6 +12,11 @@
 %end
 </div>
 <br />
+% if is_blng and pdata.projtype.is_base_translated():
+    <br />
+    <center><font size=+2>Warning: Strings displayed here may have string commands that are not used in translating</font></center>
+    <br />
+%end
 <br />
 % for title, strs in strings:
     <h3 id="{{title}}">{{title}}</h3>

@@ -26,6 +26,9 @@ class ProjectType:
 
     @ivar has_grflangid: Project uses '##grflangid' in the language file for identifying the language.
     @type has_grflangid: C{bool}
+
+    @ivar base_is_translated_cache: Whether string commands in the base language may be rewritten before display.
+    @type base_is_translated_cache: C{None} means 'unknown', otherwise C{bool}.
     """
     def __init__(self, name, human_name, text_commands, allow_gender, allow_case, allow_extra, has_grflangid):
         self.name = name
@@ -35,6 +38,27 @@ class ProjectType:
         self.allow_case = allow_case
         self.allow_extra = allow_extra
         self.has_grflangid = has_grflangid
+        self.base_is_translated_cache = None
+
+    def is_base_translated(self):
+        """
+        Return whether strings in the base language may have been modified to
+        match better with the required translation, when they are displayed at
+        the string edit form.
+
+        An example of the above is the {RAW_STRING} -> {STRING} mapping.
+
+        @return: Whether strings in the base language may be changed before displaying them for translating.
+        @rtype:  C{bool}
+        """
+        if self.base_is_translated_cache is None:
+            self.base_is_translated_cache = False
+            for pi in self.text_commands.values():
+                if pi.translated_cmd is not None:
+                    self.base_is_translated_cache = True
+                    break
+        return self.base_is_translated_cache
+
 
 class NewGRFProject(ProjectType):
     """
