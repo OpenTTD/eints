@@ -31,6 +31,12 @@ def protected(page_name):
             prjname = ka.get('prjname')
             lngname = ka.get('lngname')
             userauth = users.get_authentication(user, pwd)
+
+            # We must read all uploaded content before returning a response.
+            # Otherwise the connection may be closed by the server and the client aborts.
+            for f in request.files:
+                pass
+
             if userauth is None:
                 # No authentication backend.
                 abort(401, "Access denied")
