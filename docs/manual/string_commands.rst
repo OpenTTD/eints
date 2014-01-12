@@ -72,6 +72,9 @@ Command              Plural Gender Effect
 ``{POWER}``            no     no   Insert an horse-power into the text
 ``{WEIGHT}``           no     no   Insert a weight into the text
 ``{WEIGHT_SHORT}``     no     no   Insert a weight into the text
+``{CARGO_LONG}``       no    yes   Insert a cargo amount into the text
+``{CARGO_SHORT}``      no     no   Insert a cargo amount into the text
+``{CARGO_TINY}``       no     no   Insert a cargo amount into the text
 ``{STATION}``          no     no   Insert a station name into the text
 ``{DATE1920_LONG}``    no     no   Insert a date into the text
 ``{DATE1920_SHORT}``   no     no   Insert a weight into the text
