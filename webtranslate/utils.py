@@ -140,10 +140,10 @@ def verify_name(name, name_type, is_identifier):
     if not name:
         return "{} missing".format(name_type)
     if is_identifier:
-        if not re.match('[A-Za-z][-A-Za-z0-9]*$', name):
+        if not re.match('[A-Za-z0-9][-A-Za-z0-9]*$', name):
             return "{} can only contain characters A-Z, a-z, 0-9 and dash (-)".format(name_type)
     else:
-        if not re.match('[A-Za-z][-A-Za-z0-9+./ ]*$', name):
+        if not re.match('[A-Za-z0-9][-A-Za-z0-9+./ ]*$', name):
             return "{} can only contain characters A-Z, a-z, 0-9, plus (+), dash (-), dot (.), slash (/), and space ( )".format(name_type)
     return None
 
