@@ -140,11 +140,11 @@ def verify_name(name, name_type, is_identifier):
     if not name:
         return "{} missing".format(name_type)
     if is_identifier:
-        if not re.match('[A-Za-z0-9][-A-Za-z0-9]*$', name):
-            return "{} can only contain characters A-Z, a-z, 0-9 and dash (-)".format(name_type)
+        if not re.match('[-A-Za-z0-9_]+$', name):
+            return "{} can only contain characters A-Z, a-z, 0-9, dash (-) and underscore (_)".format(name_type)
     else:
-        if not re.match('[A-Za-z0-9][-A-Za-z0-9+./ ]*$', name):
-            return "{} can only contain characters A-Z, a-z, 0-9, plus (+), dash (-), dot (.), slash (/), and space ( )".format(name_type)
+        if len(name) == 0:
+            return "{} may not be empty".format(name_type)
     return None
 
 def verify_url(url):

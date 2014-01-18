@@ -12,7 +12,7 @@ hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
 
 # Configuration.
 # {{{ def check_project_name(name):
-project_pat = re.compile('[A-Za-z0-9][-A-Za-z0-9]*$')
+project_pat = re.compile('[-A-Za-z0-9_]+$')
 
 def check_project_name(name):
     """
@@ -27,8 +27,6 @@ def check_project_name(name):
     return project_pat.match(name.strip())
 # }}}
 # {{{ def check_project_name(name):
-human_pat = re.compile('[A-Za-z0-9][-A-Za-z0-9+./ ]*$')
-
 def check_human_name(name):
     """
     Check whether L{name} can be a valid human project name.
@@ -39,7 +37,7 @@ def check_human_name(name):
     @return: Whether the given name is valid.
     @rtype:  C{bool}
     """
-    return human_pat.match(name.strip())
+    return len(name.strip()) != 0
 # }}}
 # {{{ def check_project_url(url):
 def check_project_url(url):
