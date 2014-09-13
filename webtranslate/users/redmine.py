@@ -9,7 +9,7 @@ A lot of the magic in this file has been copied from hgweb.py in https://bitbuck
 
 This code is not thread-safe!!
 """
-import hashlib
+import hashlib, time
 from webtranslate import rights, userauth
 
 # Also initialized in the config loader.
@@ -55,15 +55,16 @@ class RedmineUserAuthentication(userauth.UserAuthentication):
 
         return False
 
-def init():
+def connect():
     """
-    Initialize the user admin system.
+    Try to connect to the data base.
+
+    @return: Whether we are connected (not 100% certain).
+    @rtype:  C{bool}
     """
     global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
 
-    rights.init_page_access()
-
-    db_connection = None
+    if db_connection is not None: return True # Already connected.
 
     if db_name is None or db_name == "": return
 
@@ -73,7 +74,13 @@ def init():
         psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
         dsn = "dbname='{}' user='{}' host='{}' password='{}' port={}".format(db_name, db_user, db_host, db_password, db_port)
+        # In case the db is down, we probably get an error here.
+        # try:
         db_connection = psycopg2.connect(dsn)
+        # except psycopg2.XXXXError: # Don't know what to catch :(
+        #   db_connection = None
+        #   return False
+
         db_connection.set_client_encoding('UTF-8')
 
         if db_schema is not None and db_schema != "":
@@ -84,18 +91,102 @@ def init():
             except KeyError:
                 pass
 
+        return True
 
     elif db_type == 'mysql':
         import MySQLdb
 
         db_connection = MySQLdb.connect(user=db_user, passwd=db_password, host=db_host, port=db_port, db=db_name, use_unicode=True)
+        return True
 
     elif db_type == 'sqlite3':
         import sqlite3
 
         db_connection = sqlite3.connect(db_name)
+        return True
+
     else:
-        db_connection = None # There is no db connection.
+        db_connection = None
+        return False
+
+def _do_command(cmd, parms):
+    """
+    Internal function to perform a command. Use L{query} instead.
+
+    @param cmd: Command to perform.
+    @type  cmd: C{str}
+
+    @param parms: Parameters of the command.
+    @type  parms: C{tuple} of C{str}
+
+    @return: Cursor with the result, if all went well, else C{None}
+    @rtype:  db cursor, or C{None}
+    """
+    global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
+
+    if db_type == 'postgress':
+        cur = db_connection.cursor()
+        try:
+            cur.execute(cmd, parms)
+            return cur
+        except psycopg2.OperationalError:
+            # Administrator closed the connection.
+            db_connection = None
+            return None
+
+    else:
+        # For other data bases, assume good weather behavior until proven otherwise.
+        cur = db_connection.cursor()
+        cur.execute(cmd, parms)
+        return cur
+
+def query(cmd, parms):
+    """
+    Perform a query with the data base.
+
+    @param cmd: Command to perform.
+    @type  cmd: C{str}
+
+    @param parms: Parameters of the command.
+    @type  parms: C{tuple} of C{str}
+
+    @return: Cursor with the result, if all went well, else C{None}
+    @rtype:  db cursor, or C{None}
+    """
+    global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
+
+    count = 0
+    while count < 3:
+        # Connect if not connected.
+        if db_connection is None:
+            if not connect():
+                print("Eints: Failed to connect to the data base.")
+                time.sleep(10) # Avoid flooding.
+                return None
+
+            assert db_connection is not None
+
+        cur = _do_command(cmd, parms)
+        if cur is not None:
+            return cur
+
+        print("Attempt {}, query failed.".format(count))
+        time.sleep(10)
+        count = count + 1
+
+    return None # 3 Failures, not going to work.
+
+
+def init():
+    """
+    Initialize the user admin system.
+    """
+    global db_connection
+
+    rights.init_page_access()
+
+    db_connection = None
+    connect() # Not really needed, but perhaps useful?
 
 
 def get_authentication(user, pwd):
@@ -114,19 +205,21 @@ def get_authentication(user, pwd):
     global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
     global owner_role, translator_roles
 
-    if db_connection is None: return None  # No connection -> Always refuse.
-
     # Verify user.
     # Note that failure to authenticate is not fatal, it falls back to an 'unknown' user.
     if user is not None and user != "" and pwd is not None:
         if db_type == 'postgress' or db_type == 'mysql':
-            cur = db_connection.cursor()
-            cur.execute("SELECT users.hashed_password, users.salt FROM users WHERE users.login=%s", (user,))
+            cur = query("SELECT users.hashed_password, users.salt FROM users WHERE users.login=%s", (user,))
+            if cur is None:
+                return RedmineUserAuthentication(False, "unknown", dict())
+
             row = cur.fetchone()
 
         elif db_type == 'sqlite3':
-            cur = db_connection.cursor()
-            cur.execute("SELECT users.hashed_password, users.salt FROM users WHERE users.login=?", (user,))
+            cur = query("SELECT users.hashed_password, users.salt FROM users WHERE users.login=?", (user,))
+            if cur is None:
+                return RedmineUserAuthentication(False, "unknown", dict())
+
             row = cur.fetchone()
         else:
             return None
@@ -146,13 +239,15 @@ def get_authentication(user, pwd):
     if user is None: return RedmineUserAuthentication(False, "unknown", dict())
 
     # Fetch roles from database
-    cur = db_connection.cursor()
-    cur.execute("""SELECT projects.identifier, roles.name FROM users, members, projects, member_roles, roles
+    cur = query("""SELECT projects.identifier, roles.name FROM users, members, projects, member_roles, roles
                    WHERE users.login=%s
                      AND users.id = members.user_id
                      AND projects.id = members.project_id
                      AND members.id = member_roles.member_id
                      AND member_roles.role_id = roles.id""", (user,))
+    if cur is None:
+        return RedmineUserAuthentication(False, "unknown", dict())
+
     rows = cur.fetchall()
 
     roles = dict()
