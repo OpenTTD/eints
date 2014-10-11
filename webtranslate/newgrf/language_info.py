@@ -254,6 +254,12 @@ korean = LanguageData(name="Korean", ownname="한국어", isocode="ko_KR",
                       winlangid=0x0412, grflangid=0x3a,
                       gender=['m','f'])
 
+latin = LanguageData(name="Latin", ownname="Latina", isocode="la_VA",
+                       plural=0, textdir="ltr",
+                       digitsep="{NBSP}", digitsepcur="{NBSP}", decimalsep=".",
+                       winlangid=0x0476, grflangid=0x66,
+                       gender=['m','f','n','mp','fp','np'], case=['gen','acc','abl','dat'])
+
 latvian = LanguageData(name="Latvian", ownname="Latviešu", isocode="lv_LV",
                        plural=3, textdir="ltr",
                        digitsep=".", digitsepcur=".", decimalsep=",",
@@ -421,7 +427,7 @@ all_languages = [afrikaans, arabic_egypt, basque, belarusian,
                  czech, danish, dutch, english_AU, english, english_US,
                  esperanto, estonian, faroese, finnish, french, frisian,
                  galician, gaelic, german, greek, hebrew, hungarian, icelandic, ido,
-                 indonesian, irish, italian, japanese, korean, latvian,
+                 indonesian, irish, italian, japanese, korean, latin, latvian,
                  lithuanian, luxembourgish, macedonian, malay, maltese,
                  marathi, norwegian_bokmal, norwegian_nynorsk, persian,
                  polish, portuguese, romanian, russian, serbian,

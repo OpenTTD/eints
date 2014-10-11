@@ -708,6 +708,7 @@ language_table = [
     LanguageData(0x27, "it_IT", "italian"), # Italian
     LanguageData(0x39, "ja_JP", "japanese"), # Japanese
     LanguageData(0x3a, "ko_KR", "korean"), # Korean
+    LanguageData(0x66, "la_VA", "latin"), # Latin
     LanguageData(0x2a, "lv_LV", "latvian"), # Latvian
     LanguageData(0x2b, "lt_LT", "lithuanian"), # Lithuanian
     LanguageData(0x23, "lb_LU", "luxembourgish"), # Luxembourgish
