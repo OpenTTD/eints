@@ -56,7 +56,7 @@ def create_project(userauth, prjtypename, prjname):
     url = request.forms.url
     acceptance = utils.verify_url(url)
     if acceptance is not None:
-        abort(404, acceptance)
+        redirect('/newproject?message=' + acceptance)
         return
 
     projtype = project_type.project_types.get(prjtypename)
