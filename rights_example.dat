@@ -3,6 +3,13 @@
 * + /languages/-/-/read
 * + /language/-/*/read
 
+* + /projects/-/-/read
+* + /project/*/-/read
+* + /download-list/*/*/read
+* + /download/*/*/read
+* + /annotate/*/*/read
+* + /translation/*/*/read
+
 # Unauthenticated users don't get any further
 SOMEONE - /*/*/*/*
 
@@ -13,18 +20,10 @@ SOMEONE - /*/*/*/*
 # project to authenticate against).
 * + /newproject/-/-/read
 * + /createproject/-/-/add
+* + /newlanguage/*/-/*
 
 # Only the owner can create a project.
 OWNER + /makeproject/*/-/add
-
-# Authenticated users (of a project) can see the projects, see each project, download a
-# language, and get an overview of a translation language in a project.
-* + /projects/-/-/read
-* + /project/*/-/read
-* + /download-list/*/*/read
-* + /download/*/*/read
-* + /annotate/*/*/read
-* + /translation/*/*/read
 
 # Strings editing
 OWNER      + /string/*/*/*
@@ -33,6 +32,5 @@ TRANSLATOR + /string/*/*/*
 # Language file uploading, language deletion and creation
 OWNER + /upload/*/-/*
 OWNER + /delete/*/*/*
-OWNER + /newlanguage/*/-/*
-OWNER + /makelanguage/*/*/add
+OWNER + /makelanguage/*/*/*
 OWNER + /projsettings/*/-/*
