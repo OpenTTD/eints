@@ -105,8 +105,6 @@ def get_authentication(user, pwd):
 
     if user is None: return LdapUserAuthentication(False, "unknown", set())
 
-    print(user, groups)
-
     return LdapUserAuthentication(True, user, groups)
 
 
