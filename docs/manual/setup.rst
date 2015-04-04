@@ -39,9 +39,10 @@ additional configuration file must be set up:
 - :ref:`project_owners_translators` must be set up.
 - :ref:`users_passwords` must be set up.
 
-If the authentication in the ``config.xml`` file is set to ``redmine``, the
-latter information is retrieved from the Redmine data base, as explained in
-:ref:`redmine_configuration_setup`.
+If the authentication in the ``config.xml`` file is set to ``redmine`` or
+``ldap``, the latter information is retrieved from the Redmine data base
+or LDAP respectively, as explained in :ref:`redmine_configuration_setup`
+and :ref:`ldap_configuration_setup`.
 
 
 .. _server_configuration:
@@ -77,6 +78,7 @@ The following configuration fields exist for the general server set up.
     * ``development`` which uses local files for everything, or
     * ``redmine`` which hooks into the `Redmine <http:www.redmine.org>`_ software for
       roles and users.
+    * ``ldap`` which queries an LDAP server for authentication and roles.
 
 Eints uses basic authentication to authenticate users. For this reason, the
 Eints service should be remotely accessible only through a secure connection.
@@ -207,7 +209,52 @@ from the Redmine interface.
     A translator role must be defined for each language that is used in Eints.
     Each Eints role may map to the same Redmine role however.
 
-    Note that project owner access is implied by translator access by Eints.
+    Note that project owner access implies translator access in Eints.
+    Any page accessible to a translator is also accessible by the owner of the
+    project.
+
+.. _ldap_configuration_setup:
+
+LDAP configuration setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If Eints *authentication* is using ``LDAP``, the LDAP part of the
+configuration should also be filled in.
+
+*host*
+    URL to LDAP server, optionally including a port number.
+
+*basedn-users*
+    Base DN for users in the LDAP tree. User objects are looked up
+    via 'cn:Username' directly subordinate to the base DN.
+
+*basedn-groups*
+    Base DN for groups in the LDAP tree. Group objects are looked up
+    via 'cn:Groupname' directly subordinate to the base DN:
+
+LDAP roles setup
+~~~~~~~~~~~~~~~~~~~
+
+Eints uses a project owner and translator roles to provide access to its web
+pages. These roles are mapped to posixGroup memberships in LDAP.
+Note, that the roles are language specific, but not project specific. All
+translators have access too all projects in Eints. The 'OWNER' role is an
+administrator role, with access to all projects.
+
+*owner-group*
+    CN of the posixGroup to denote the user(s) which are considered
+    'project owner' for *all* Eints project.
+
+*translator-group*
+    CN of the posixGroup to denote the user(s) which are considered to be
+    a translator for one language.
+
+    A translator group must be defined for each language that is used in Eints.
+    Each Eints role may map to the same posixGroup however.
+
+    The groups are not project specific, a translator always has access to all
+    projects.
+
+    Note that project owner access implies translator access in Eints.
     Any page accessible to a translator is also accessible by the owner of the
     project.
 
@@ -307,8 +354,8 @@ Project owners and translators
 In the above section, user categories ``OWNER`` and ``TRANSLATOR`` may be used to
 define who can access certain pages.
 
-If the ``authentication`` entry in ``config.xml`` is set to *redmine*, the
-Redmine data base is queried for membership of the roles. If the
+If the ``authentication`` entry in ``config.xml`` is set to *redmine* or *ldap*,
+the Redmine data base or LDAP are queried for membership of the roles. If the
 ``authentication`` entry is set to *development*, a local file is used,
 explained below.
 
@@ -337,8 +384,8 @@ Users send authentication information using standard HTTP basic authentication
 to the web server. As such, it is highly recommended to use the ``https``
 protocol for the translator service.
 
-If the ``authentication`` entry in ``config.xml`` is set to *redmine*, the
-Redmine data base is queried for user authentication. If the
+If the ``authentication`` entry in ``config.xml`` is set to *redmine* or *ldap*,
+the Redmine data base or LDAP are queried for user authentication. If the
 ``authentication`` entry is set to *development*, a local file is used. In the
 latter case users and their passwords are stored in plain text in
 ``users.dat``. Obviously, this is not secure in any way. It should never be

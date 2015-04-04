@@ -46,4 +46,25 @@
 		  -  What that means for page access depends on the Eints page access configuration.
 		  -->
 	</redmine>
+
+	<ldap>
+		<!-- Ldap interfacing
+		  -->
+		<host>ldaps://localhost</host> <!-- Protocol, hostname and port for Ldap connection: scheme://hostname:hostport -->
+		<basedn-users>ou=People,dc=example,dc=net</basedn-users> <!-- Base DN for users: cn=Username,ou=People,dc=example,dc=net -->
+		<basedn-groups>ou=Groups,dc=example,dc=net</basedn-groups> <!-- Base DN for groups: cn=Groupname,ou=Groups,dc=example,dc=net -->
+
+		<!-- Group setup
+		  -->
+
+		<owner-group>Translator-Admin</owner-group>
+
+		<!-- posixGroup CN for translator of the 'de_DE' language. -->
+		<translator-group language="de_DE">Translator-German</translator-group>
+
+		<!-- Roles not mentioned here are assumed not to exist.
+		  -  What that means for page access depends on the Eints page access configuration.
+		  -->
+	</ldap>
+
 </config>

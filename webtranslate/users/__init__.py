@@ -7,7 +7,7 @@ Whatever system you make, it needs to deliver the following interface:
 - get_authentication(user, pwd) -> C{UserAuthentication} to query permissions.
 """
 
-from webtranslate.users import development, redmine
+from webtranslate.users import development, redmine, ldap
 
 get_authentication = None
 
@@ -23,4 +23,7 @@ def init(auth):
     elif auth == 'redmine':
         get_authentication = redmine.get_authentication
         redmine.init()
+    elif auth == 'ldap':
+        get_authentication = ldap.get_authentication
+        ldap.init()
 

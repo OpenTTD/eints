@@ -37,7 +37,7 @@ class Config:
     @ivar server_port: Port number of the server host.
     @type server_port: C{int}
 
-    @ivar authentication: Method of authentication, either C{'development'} or C{'redmine'}.
+    @ivar authentication: Method of authentication, either C{'development'}. C{'redmine'} or C{'ldap'}.
     @type authentication: C{str}
 
     @ivar project_root: Root directory of the web translation service.
@@ -73,7 +73,7 @@ class Config:
     def load_fromxml(self):
         """
         Load the entire 'config.xml' file into the configuration, including the
-        'redmine' part if it exists.
+        'redmine' and 'ldap' parts if they exist.
         """
         if not os.path.isfile(self.config_path):
             print("Cannot find configuration file " + self.config_path)
@@ -90,7 +90,7 @@ class Config:
         self.server_host = get_subnode_text(cfg, 'server-host')
         self.server_port = data.convert_num(get_subnode_text(cfg, 'server-port'), 80)
         self.authentication = get_subnode_text(cfg, 'authentication')
-        if self.authentication not in ('development', 'redmine'):
+        if self.authentication not in ('development', 'redmine', 'ldap'):
             print("Incorrect authentication in the configuration, aborting!")
             sys.exit(1)
 
@@ -169,6 +169,42 @@ class Config:
             if redmine.owner_role == "": redmine.owner_role = None
             for iso_code, role_name in list(redmine.translator_roles.items()):
                 if role_name == "": del redmine.translator_roles[iso_code]
+
+        # Ldap configuration
+        ldap_node = loader.get_single_child_node(cfg, 'ldap', True)
+        if ldap_node is not None:
+            from webtranslate.users import ldap
+            # Initialize the ldap fields.
+            ldap.ldap_host = None
+            ldap.ldap_basedn_users = None
+            ldap.ldap_basedn_groups = None
+            ldap.owner_group = None
+            ldap.translator_groups = {}
+
+            ldap.ldap_host = get_subnode_text(ldap_node, 'host')
+            ldap.ldap_basedn_users = get_subnode_text(ldap_node, 'basedn-users')
+            ldap.ldap_basedn_groups = get_subnode_text(ldap_node, 'basedn-groups')
+
+            ldap.owner_group = get_subnode_text(ldap_node, 'owner-group')
+
+            iso_codes = set(li.isocode for li in language_info.all_languages)
+            for node in loader.get_child_nodes(ldap_node, 'translator-group'):
+                iso_code = node.getAttribute('language')
+                if iso_code not in iso_codes:
+                    print("Language \"" + iso_code + "\" in translator groups is not known, ignored the entry.")
+                    continue
+                if iso_code in ldap.translator_groups:
+                    print("Language \"" + iso_code + "\" in translator groups is already defined, ignoring the other entry.")
+                    continue
+                ldap.translator_groups[iso_code] = loader.collect_text_DOM(node).strip()
+
+            # Do some sanity checking.
+            if ldap.ldap_host == "":
+                ldap.ldap_host = None
+
+            if ldap.owner_group == "": ldap.owner_group = None
+            for iso_code, group_name in list(ldap.translator_groups.items()):
+                if group_name == "": del ldap.translator_groups[iso_code]
 
 
 
