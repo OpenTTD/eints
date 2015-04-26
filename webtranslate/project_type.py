@@ -18,8 +18,8 @@ class ProjectType:
     @ivar allow_gender: Allow gender string commands.
     @type allow_gender: C{bool}
 
-    @ivar allow_gender: Allow string cases.
-    @type allow_gender: C{bool}
+    @ivar allow_case: Allow string cases.
+    @type allow_case: C{bool}
 
     @ivar allow_extra: Allow extra string commands (that is, custom tags).
     @type allow_extra: C{bool}

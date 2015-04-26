@@ -5,6 +5,7 @@ import os, sys, glob
 from webtranslate import data, loader
 from webtranslate.newgrf import language_info, language_file
 
+# {{{ def get_subnode_text(node, tag):
 def get_subnode_text(node, tag):
     """
     Get the text of a child node of L{node}.
@@ -22,7 +23,9 @@ def get_subnode_text(node, tag):
     if child is None:
         return ""
     return loader.collect_text_DOM(child).strip()
+# }}}
 
+# {{{ class Config:
 class Config:
     """
     Service configuration.
@@ -205,10 +208,8 @@ class Config:
             if ldap.owner_group == "": ldap.owner_group = None
             for iso_code, group_name in list(ldap.translator_groups.items()):
                 if group_name == "": del ldap.translator_groups[iso_code]
-
-
-
-
+# }}}
+# {{{ class ProjectCache:
 class ProjectCache:
     """
     Cache for project data.
@@ -232,6 +233,15 @@ class ProjectCache:
         self.lru = []
 
     def init(self, project_root, cache_size):
+        """
+        Initialize the project cache.
+
+        @param project_root: Root directory of the projects.
+        @type  project_root: C{str}
+
+        @param cache_size: Maximum number of cached projects.
+        @type  cache_size: C{str}
+        """
         self.project_root = project_root
         self.cache_size = cache_size
         self.projects = {}
@@ -360,8 +370,8 @@ class ProjectCache:
         @type  pmd: L{ProjectMetaData}
         """
         pmd.save()
-
-
+# }}}
+# {{{ class ProjectMetaData:
 class ProjectMetaData:
     """
     Some project meta data for the translation service.
@@ -538,8 +548,9 @@ class ProjectMetaData:
                 state = max(s[1] for s in pdata.statistics[lname][sname])
                 if state >= unknown: counts[state - unknown] = counts[state - unknown] + 1
             self.overview[lname] = counts
+# }}}
 
-
+# {{{ def process_changes(lchgs, cases, stamp, used_basetexts):
 def process_changes(lchgs, cases, stamp, used_basetexts):
     """
     Check whether the changes should all still be kept.
@@ -585,7 +596,8 @@ def process_changes(lchgs, cases, stamp, used_basetexts):
             used_basetexts.add(chg.base_text)
 
     return newchgs
-
+# }}}
+# {{{ def process_project_changes(pdata):
 def process_project_changes(pdata):
     """
     Update the changes of the texts in the project.
@@ -629,7 +641,7 @@ def process_project_changes(pdata):
             pdata.flush_related_cache()
 
     return modified
-
+# }}}
 
 cfg = None
 cache = ProjectCache()

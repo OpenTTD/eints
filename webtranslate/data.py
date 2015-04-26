@@ -251,6 +251,7 @@ class XmlLoader:
     """
     def __init__(self):
         self.stamps = {}
+        self.texts = {}
 
     def get_stamp(self, secs, index):
         """
@@ -346,7 +347,7 @@ class XmlSaver:
 
     def save_project(self, project):
         """
-        Save a project as xml doc document.
+        Save a project as an xml doc document.
 
         @param project: Project to save.
         @type  project: L{Project}
@@ -550,7 +551,7 @@ def load_project(xloader, node):
     @param xloader: Loader helper.
     @type  xloader: L{XmlLoader}
 
-    @param node: Node containing the time stamp.
+    @param node: Node containing the project.
     @type  node: L{xml.dom.minidom.Node}
 
     @return: Loaded project
@@ -698,7 +699,7 @@ class Language:
     @type changes: C{map} of C{str} to (C{list} of L{Change} or C{None})
 
     @note: L{case} is sorted to make 'download language' output the default case first,
-           which NML more happy.
+           which makes NML more happy.
     """
     def __init__(self, name):
         self.name = name
@@ -1043,7 +1044,7 @@ def save_stamp(xsaver, stamp):
     @param xsaver: Saver class.
     @type  xsaver: L{XmlSaver}
 
-    @param stamp: Text object to save.
+    @param stamp: Time stamp object to save.
     @type  stamp: L{Stamp}
 
     @return: The created xml representation.
