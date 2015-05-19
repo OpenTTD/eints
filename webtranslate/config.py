@@ -429,42 +429,8 @@ class ProjectMetaData:
         """
         Save project data into an xml file, and manage the backup files.
         """
-        base_path = self.path + ".xml"
-        bpl = len(base_path) + 1 # "projname.xml." + "<something>"
-
-        # Find current set of data files.
-        data_files = {}
-        if os.path.exists(base_path):
-            data_files[None] = base_path
-
-        for fname in glob.glob(base_path + ".*"):
-            extname = fname[bpl:]
-            if extname.startswith("bup"):
-                num = data.convert_num(extname[3:], None)
-                if num is not None: data_files[num] = fname
-
         data.save_file(self.pdata, self.path + ".xml.new")
-
-        # Generate mv and rm commands for the data files.
-        cmds = [('mv', self.path + ".xml.new", base_path)]
-        last, num = None, 1
-        while num <= cfg.num_backup_files and num < 100 and last in data_files:
-            new_name = base_path + ".bup{:02d}".format(num)
-            cmds.append(('mv', data_files[last], new_name))
-            del data_files[last]
-            last = num
-            num = num + 1
-        for fname in data_files.values():
-            cmds.append(('rm', fname))
-
-        # Execute the commands.
-        cmds.reverse()
-        for cmd in cmds:
-            if cmd[0] == 'mv':
-                os.rename(cmd[1], cmd[2])
-            elif cmd[0] == 'rm':
-                os.unlink(cmd[1])
-
+        rotate_files(self.path + ".xml")
 
     def create_statistics(self, parm_lng = None):
         """
@@ -641,6 +607,69 @@ def process_project_changes(pdata):
             pdata.flush_related_cache()
 
     return modified
+# }}}
+# {{{ def rotate_files(fpath):
+def rotate_files(fpath):
+    """
+    Rotate backup files of the provided filename path. It is assumed a C{fpath + ".new"} file exists
+    to rotate in.
+
+    @param fpath: Path of the file to rotate.
+    @type  fpath: C{str}
+    """
+    dirname, filename = os.path.split(fpath)
+    assert dirname != '' and filename != '' # Assume it is a path with a / in it.
+
+    data_files = {}
+    new_name = filename + ".new"
+    bup_name = filename + ".bup"
+    for name in os.listdir(dirname):
+        if not name.startswith(filename): continue
+
+        path = os.path.join(dirname, name)
+        if name == filename:
+            data_files[0] = path
+
+        elif name == new_name:
+            data_files[-1] = path
+
+        elif name.startswith(bup_name):
+            num = data.convert_num(name[len(bup_name):], None)
+            if num is None or num <= 0: continue
+            data_files[num] = path
+
+    assert -1 in data_files # We should have a '.new' file.
+    missing = 0
+    while missing in data_files and missing < 99 and missing < cfg.num_backup_files:
+        missing = missing + 1
+
+    cmds = []
+    if missing in data_files:
+        # Missing isn't really missing, loop ended due to upper bound check.
+        # Remove the 'missing' file to make room.
+        cmds.append(('rm', data_files[missing]))
+    else:
+        # 'missing' was really missing, add it so it can be used below.
+        if missing == 0:
+            data_files[missing] = os.path.join(dirname, filename)
+        else:
+            data_files[missing] = os.path.join(dirname, "{}{:02d}".format(bup_name, missing))
+
+    # Generate mv and rm commands for the data files.
+    num = missing - 1
+    while num >= -1:
+        cmds.append(('mv', data_files[num], data_files[num + 1]))
+        num = num - 1
+    for num, path in data_files.items():
+        if num > cfg.num_backup_files:
+            cmds.append(('rm', path))
+
+    # Execute the commands.
+    for cmd in cmds:
+        if cmd[0] == 'mv':
+            os.rename(cmd[1], cmd[2])
+        elif cmd[0] == 'rm':
+            os.unlink(cmd[1])
 # }}}
 
 cfg = None
