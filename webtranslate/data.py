@@ -31,11 +31,7 @@ def save_file(proj, fname):
     @type  fname: C{str}
     """
     xsaver = XmlSaver()
-    doc = xsaver.save_project(proj)
-
-    handle = open(fname, 'w', encoding = "utf-8")
-    handle.write(doc.toprettyxml())
-    handle.close()
+    xsaver.save_project(proj, fname)
 
 def get_newest_change(chgs, case):
     """
@@ -345,15 +341,15 @@ class XmlSaver:
         self.texts = {}
         self.number = 1
 
-    def save_project(self, project):
+    def save_project(self, project, fname):
         """
         Save a project as an xml doc document.
 
         @param project: Project to save.
         @type  project: L{Project}
 
-        @return: Xml document.
-        @rtype:  L{xml.dom.minidom.Document}
+        @param fname: Name of the file to write.
+        @type  fname: C{str}
         """
         self.doc = minidom.Document()
         self.texts_node = self.doc.createElement('texts')
@@ -363,7 +359,10 @@ class XmlSaver:
         node = save_project(self, project)
         node.appendChild(self.texts_node)
         self.doc.appendChild(node)
-        return self.doc
+
+        handle = open(fname, 'w', encoding = "utf-8")
+        handle.write(self.doc.toprettyxml())
+        handle.close()
 
     def get_textref(self, text):
         """
