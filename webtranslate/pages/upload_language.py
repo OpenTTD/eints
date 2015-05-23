@@ -145,8 +145,8 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                     chgs.append(chg)
             else:
                 if override: # Don't mind other changes at all.
-                    chg.stamp = sv.stamp
-                    chg.user = sv.user
+                    chg.stamp = stamp
+                    chg.user = userauth.name
 
         # Update language properties as well.
         copy_lng_properties(ng_data, base_language)
