@@ -5,6 +5,34 @@ import os, sys, glob
 from webtranslate import data, loader
 from webtranslate.newgrf import language_info, language_file
 
+# {{{ class ProjectStorage
+# Recognized types of project disk storage.
+STORAGE_ONE_FILE = 'One large file for the entire project'
+STORAGE_SEPARATE_LANGUAGES = 'Directory with root.xml and a set of language files'
+
+class ProjectStorage:
+    """
+    @ivar path: Path to the base of the stored project.
+                For C{STORAGE_ONE_FILE}, the path is the name of the .xml file.
+                For C{STORAGE_SEPARATE_LANGUAGES}, the path is the directory path.
+    @type path: C{str}
+
+    @ivar name: Name of the project (basename at the disk).
+    @type name: C{str}
+
+    @ivar languages: Detected language files of the project. Always empty for L{STORAGE_ONE_FILE}.
+    @type languages: C{list} of C{str}
+
+    @ivar storage_type: Type of storage of the project at the disk.
+    @type storage_type: One of L{STORAGE_ONE_FILE} or L{STORAGE_SEPARATE_LANGUAGES}
+    """
+    def __init__(self, path, name, languages, storage_type):
+        self.path = path
+        self.name = name
+        self.languages = languages
+        self.storage_type = storage_type
+# }}}
+
 # {{{ def get_subnode_text(node, tag):
 def get_subnode_text(node, tag):
     """
@@ -247,37 +275,10 @@ class ProjectCache:
         self.projects = {}
         self.lru = []
 
-        for name in os.listdir(self.project_root):
-            if not name.endswith('.xml'): continue
-            name = name[:-4]
-            path = os.path.join(self.project_root, name)
-            pmd = ProjectMetaData(path, name)
-            assert name not in self.projects
-            self.projects[name] = pmd
-            self.get_pmd(name)
-
-        # Compatibility: Also, load from the 'projects' sub directory.
-        # XXX Delete this at some point.
-        old_root = os.path.join(self.project_root, 'projects')
-        if os.path.isdir(old_root):
-            msg = "Warning: Projects in \"{}\" should be moved to \"{}\" and the former directory should be deleted (but loading them now)"
-            msg = msg.format(old_root, self.project_root)
-            print(msg)
-
-            for name in os.listdir(old_root):
-                if not name.endswith('.xml'): continue
-                name = name[:-4]
-                path = os.path.join(old_root, name)
-                pmd = ProjectMetaData(path, name)
-                if name in self.projects:
-                    msg = "Warning: Skipping project file \"{}\" (is already loaded, perhaps you did not remove the 'projects' directory?)"
-                    msg = msg.format(path)
-                    print(msg)
-                    continue
-                self.projects[name] = pmd
-                self.get_pmd(name)
-
-
+        for proj in find_projects(self.project_root):
+            if proj.storage_type == STORAGE_ONE_FILE:
+                self.projects[proj.name] = ProjectMetaData(proj.path, proj.name)
+                self.get_pmd(proj.name)
 
     def create_project(self, disk_name, human_name, projtype, url):
         """
@@ -398,7 +399,7 @@ class ProjectMetaData:
     @ivar human_name: Project name for humans.
     @type human_name: C{str}
 
-    @ivar path: Path of the project file at disk (without extension.
+    @ivar path: Path of the project file at disk (with extension).
     @type path: C{str}
     """
     def __init__(self, path, disk_name, human_name=None):
@@ -417,7 +418,7 @@ class ProjectMetaData:
 
     def load(self):
         assert self.pdata is None
-        self.pdata = data.load_file(self.path + ".xml")
+        self.pdata = data.load_file(self.path)
         process_project_changes(self.pdata)
         self.human_name = self.pdata.human_name # Copy the human-readable name from the project data.
 
@@ -429,8 +430,8 @@ class ProjectMetaData:
         """
         Save project data into an xml file, and manage the backup files.
         """
-        data.save_file(self.pdata, self.path + ".xml.new")
-        rotate_files(self.path + ".xml")
+        data.save_file(self.pdata, self.path + ".new")
+        rotate_files(self.path)
 
     def create_statistics(self, parm_lng = None):
         """
@@ -514,6 +515,68 @@ class ProjectMetaData:
                 state = max(s[1] for s in pdata.statistics[lname][sname])
                 if state >= unknown: counts[state - unknown] = counts[state - unknown] + 1
             self.overview[lname] = counts
+# }}}
+
+# {{{ def find_projects(root):
+def find_projects(root):
+    """
+    Find projects at the disk, starting from the L{root} directory.
+
+    @param root: Root of the projects disk storage.
+    @type  root: C{str}
+
+    @return: Found projects.
+    @rtype:  C{list} of L{ProjectStorage}
+
+    @note: the L{ProjectStorage.languages} field is not used in case of L{STORAGE_ONE_FILE}.
+    """
+    projects = []
+    for name in os.listdir(root):
+        path = os.path.join(root, name)
+        if os.path.isfile(path):
+            if not name.endswith('.xml'): continue
+
+            name = name[:-4]
+            projects.append(ProjectStorage(path, name, [], STORAGE_ONE_FILE))
+            continue
+
+        elif os.path.isdir(path):
+            if name == 'projects':
+                # Ignore obsolete 'projects' sub-directory, projects should be moved.
+                continue
+
+            found_projdata = False
+            found_languages = []
+            for sub_name in os.listdir(path):
+                sub_path = os.path.join(path, sub_name)
+                if not sub_name.endswith('.xml'): continue
+
+                sub_name = sub_name[:-4]
+                if sub_name == 'project_data':
+                    found_projdata = True
+                elif sub_name in language_info.isocode:
+                    found_languages.append(sub_name)
+
+            if found_projdata:
+                # Languages may be empty (in case the project has no base language).
+                projects.append(ProjectStorage(path, name, found_languages, STORAGE_SEPARATE_LANGUAGES))
+
+    pnames = {}
+    found_error = False
+    for p in projects:
+        if p.name in pnames:
+            msg = "Error: Project \"{}\" exists twice (as \"{}\" and as \"{}\"), please fix."
+            msg = msg.format(p.name, p.path, pnames[p.name].path)
+            print(msg)
+            found_error = True
+
+        pnames[p.name] = p
+
+    if found_error:
+        print("Aborting.")
+        sys.exit(1)
+
+    return projects
 # }}}
 
 # {{{ def process_changes(lchgs, cases, stamp, used_basetexts):
