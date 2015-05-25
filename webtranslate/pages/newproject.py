@@ -8,7 +8,11 @@ from webtranslate import config, utils, project_type
 @route('/newproject', method = 'GET')
 @protected(['newproject', '-', '-'])
 def page_get(userauth):
-    all_ptype_names = sorted(projtype.human_name for projtype in project_type.project_types.values())
+    all_ptype_names = []
+    for projtype in project_type.project_types.values():
+        if projtype.name in config.cfg.project_types:
+            all_ptype_names.append(projtype.human_name)
+    all_ptype_names.sort()
     return template('newproject_form', all_ptype_names = all_ptype_names)
 
 @route('/createproject', method = 'POST')
@@ -27,7 +31,7 @@ def page_post(userauth):
     ptype_name = request.forms.projtype_select
     projtype = None
     for prjtp in project_type.project_types.values():
-        if prjtp.human_name == ptype_name:
+        if prjtp.human_name == ptype_name and prjtp.name in config.cfg.project_types:
             projtype = prjtp
             break
     if projtype is None:
@@ -60,7 +64,7 @@ def create_project(userauth, prjtypename, prjname):
         return
 
     projtype = project_type.project_types.get(prjtypename)
-    if projtype is None:
+    if projtype is None or projtype.name not in config.cfg.project_types:
         abort(404, "Unknown project type.")
         return
 
