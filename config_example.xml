@@ -14,6 +14,10 @@
 	  -->
 	<project-root>root_dir</project-root>
 	<project-cache>1</project-cache>
+	<project-types>game-script newgrf</project-types>
+
+	<storage-format>one-file</storage-format> <!-- Standard storage format. -->
+	<!-- <storage-format>split-languages</storage-format> -->
 
 	<language-file-size>100000</language-file-size> <!-- about 100K -->
 	<num-backup-files>5</num-backup-files>

@@ -133,6 +133,25 @@ treated.
   Eints loads project data files when needed. To reduce memory requirements,
   this setting controls how many data files it may keep in memory.
 
+*project-types*
+  Eints understands three types of projects, ``openttd``, ``game-script``, and
+  ``newgrf``. Each has a different set of known string commands. In this
+  configuration field, you can list the project types that should be allowed
+  (separated by white space).
+
+*storage-format*
+  This configuration field controls the storage format used for new
+  translation projects.
+
+  The ``one-file`` format stores all information about a project in a single
+  file. It is simple to handle, having all information at one place.
+  For bigger projects, the format may become too unwieldy to handle.
+  Internally, the file is completely created before storage, and memory
+  requirements can become huge. The ``split-languages`` format aims to solve
+  that. Instead of a file, the project data all goes into a directory. Within
+  the directory, there is a ``project_data.xml`` file, and one for each
+  language. Files are only written when modified.
+
 *language-file-size*
   Eints can download `NML <http://dev.openttdcoop.org/projects/nml>` language files.
   This setting control the maximum size in bytes of such files.

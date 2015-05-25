@@ -2,7 +2,7 @@
 Configuration and global routines of the translator service.
 """
 import os, sys, glob
-from webtranslate import data, loader
+from webtranslate import data, loader, project_type
 from webtranslate.newgrf import language_info, language_file
 
 # {{{ class ProjectStorage
@@ -77,6 +77,12 @@ class Config:
     @ivar language_file_size: Maximum accepted file size of a language file.
     @type language_file_size: C{int}
 
+    @ivar project_types: Project types that are acceptable to the web translation.
+    @type project_types: C{set} of C{str}
+
+    @ivar storage_format: Preferred storage format at the disk.
+    @type storage_format: One of C{STORAGE_ONE_FILE} or C{STORAGE_SEPARATE_LANGUAGES}
+
     @ivar num_backup_files: Number of backup files kept for a project.
     @type num_backup_files: C{int}
 
@@ -128,6 +134,21 @@ class Config:
         self.project_root = get_subnode_text(cfg, 'project-root')
         if self.project_root is None or self.project_root == "":
             print("No project root found, aborting!")
+            sys.exit(1)
+
+        self.project_types = get_subnode_text(cfg, 'project-types').split()
+        self.project_types = set(ptype for ptype in self.project_types if ptype in project_type.project_types)
+        if len(self.project_types) == 0:
+            print("No valid project types found, aborting!")
+            sys.exit(1)
+
+        storage_type = get_subnode_text(cfg, 'storage-format').strip()
+        if storage_type == 'one-file':
+            self.storage_format = STORAGE_ONE_FILE
+        elif storage_type == 'split-languages':
+            self.storage_format = STORAGE_SEPARATE_LANGUAGES
+        else:
+            print("Unrecognized preferred storage format \"{}\", aborting!".format(storage_type))
             sys.exit(1)
 
         self.language_file_size = data.convert_num(get_subnode_text(cfg, 'language-file-size'),
