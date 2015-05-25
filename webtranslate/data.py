@@ -30,7 +30,7 @@ def save_file(proj, fname):
     @param fname: Name of the file to write.
     @type  fname: C{str}
     """
-    xsaver = XmlSaver(False)
+    xsaver = XmlSaver(False, True)
     xsaver.save_project(proj, fname)
 
 def get_newest_change(chgs, case):
@@ -375,14 +375,18 @@ class XmlSaver:
                            saved separately at a later stage.
     @type split_languages: C{bool}
 
+    @param share_text: Whether to share text strings with a 'text' node.
+    @type  share_text: C{bool}
+
     @ivar number: Number for creating unique text references.
     @type number: C{int}
     """
-    def __init__(self, split_languages):
+    def __init__(self, split_languages, share_text):
         self.doc = None
         self.texts_node = None
         self.texts = {}
         self.split_languages = split_languages
+        self.share_text = share_text
         self.number = 1
 
     def save_project(self, project, fname):
@@ -446,6 +450,8 @@ class XmlSaver:
         @return: Reference to the text node.
         @rtype:  C{str}
         """
+        assert self.share_text
+
         ref = self.texts.get(text)
         if ref is not None: return ref
 
