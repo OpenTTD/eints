@@ -1,4 +1,4 @@
-%rebase main_template title='Editing ' + sname
+%rebase('main_template', title='Editing ' + sname)
 %from webtranslate import utils
 <h1>
     <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>

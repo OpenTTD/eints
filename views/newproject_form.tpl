@@ -1,4 +1,4 @@
-%rebase main_template title='Create a new translation project'
+%rebase('main_template', title='Create a new translation project')
 <h1 class="eint-heading-icon eint-icon-add">Create a new translation project</h1>
 <br />
 <form class="form well" action="/createproject" method="post" enctype="multipart/form-data">

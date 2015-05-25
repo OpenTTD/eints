@@ -1,4 +1,4 @@
-%rebase main_template title='Web translator language overview'
+%rebase('main_template', title='Web translator language overview')
 <h1 class="eint-heading-icon eint-icon-drawer-closed">State of the {{lngname}} language for all projects</h1>
 % if len(prjdata) == 0:
     Currently there are no projects that use the {{lngname}} language, perhaps you can

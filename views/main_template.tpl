@@ -42,7 +42,7 @@
             %end
         %end
         <!-- content from calling template -->
-        %include
+        {{!base}}
 
         <div class="footer">
             <a href="http://dev.openttdcoop.org/projects/eints">Web Translator</a> from <a href="http://dev.openttdcoop.org">#openttdcoop</a>

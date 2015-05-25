@@ -1,4 +1,4 @@
-%rebase main_template title='Web translator language overview'
+%rebase('main_template', title='Web translator language overview')
 <h1 class="eint-heading-icon eint-icon-drawer-closed">Profile of user '{{userauth.name}}'</h1>
 % if not is_owner and len(languages) == 0:
     Sorry, you have no access to any projects.
@@ -32,7 +32,7 @@
                 % if lang is not None:
                     % if not lang[2]:
                         No access
-                    % elif lang[0]:                        
+                    % elif lang[0]:
                         % if lang[1][2] > 0 or lang[1][3] > 0 or lang[1][4] > 0:
                             <a href="/translation/{{pmd.name}}/{{lngname}}">Start fixing</a>
                         % else:

@@ -1,4 +1,4 @@
-%rebase main_template title='Add a new translation language'
+%rebase('main_template', title='Add a new translation language')
 <h1>
     <a class="eint-header-link" href="/project/{{prjname}}">{{pdata.human_name}}</a>
 </h1>

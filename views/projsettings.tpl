@@ -1,4 +1,4 @@
-%rebase main_template title='Web translator - ' + human_name
+%rebase('main_template', title='Web translator - ' + human_name)
 <h1>
     <a class="eint-header-link" href="/project/{{proj_name}}">{{human_name}}</a>
 </h1>

@@ -1,5 +1,5 @@
 %from webtranslate.bottle import url, request
-%rebase main_template title='Remove translation language ' + lname
+%rebase('main_template', title='Remove translation language ' + lname)
 <h1>
     <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
 </h1>

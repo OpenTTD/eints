@@ -1,4 +1,4 @@
-%rebase main_template title='language ' + language + ' in ' + proj_name
+%rebase('main_template', title='language ' + language + ' in ' + proj_name)
 <h1>
     <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
 </h1>

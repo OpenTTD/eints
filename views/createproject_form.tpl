@@ -1,4 +1,4 @@
-%rebase main_template title='Add project details'
+%rebase('main_template', title='Add project details')
 <h1 class="eint-heading-icon eint-icon-add">Add project details of {{prjname}}</h1>
 <br />
 <form class="form well" action="/makeproject/{{projtype_name}}/{{prjname}}" method="post" enctype="multipart/form-data">
