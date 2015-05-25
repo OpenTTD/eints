@@ -17,7 +17,7 @@ def load_file(fname):
     @return: The loaded project.
     @rtype:  L{Project}
     """
-    xloader = XmlLoader()
+    xloader = XmlLoader(False)
     return xloader.load_project(fname)
 
 def save_file(proj, fname):
@@ -30,7 +30,7 @@ def save_file(proj, fname):
     @param fname: Name of the file to write.
     @type  fname: C{str}
     """
-    xsaver = XmlSaver()
+    xsaver = XmlSaver(False)
     xsaver.save_project(proj, fname)
 
 def get_newest_change(chgs, case):
@@ -244,10 +244,15 @@ class XmlLoader:
 
     @ivar texts: Loaded texts, ordered by their reference.
     @type texts: C{dict} of C{str} to L{Text}
+
+    @ivar split_languages: If set, don't expect the languages to be part of the project.
+                           They have been saved separately.
+    @type split_languages: C{bool}
     """
-    def __init__(self):
+    def __init__(self, split_languages):
         self.stamps = {}
         self.texts = {}
+        self.split_languages = split_languages
 
     def get_stamp(self, secs, index):
         """
@@ -283,7 +288,8 @@ class XmlLoader:
         @param fname: Name of the file to load.
         @type  fname: C{str}
 
-        @return: The loaded project.
+        @return: The loaded project. Depending on L{split_languages} set during construction of the
+                 object, the project may not have all languages.
         @rtype:  L{Project}
         """
         data = loader.load_dom(fname)
@@ -305,6 +311,39 @@ class XmlLoader:
                 self.texts[ref] = Text(txt, case, stamp)
 
         return load_project(self, pnode)
+
+    def load_language(self, projtype, fname):
+        """
+        Load a language into the project from the give filename.
+
+        @param projtype: Project type.
+        @type  projtype: L{ProjectType}
+
+        @param fname: Name of the file to load.
+        @type  fname: C{str}
+
+        @return: The loaded project.
+        @rtype:  L{Project}
+        """
+        data = loader.load_dom(fname)
+        pnode = loader.get_single_child_node(data, 'language')
+        self.stamps = {}
+
+        # Load texts. If cases are not allowed, loading the texts from here is no problem, as they are
+        # discarded after loading the change.
+        self.texts = {}
+        texts = loader.get_single_child_node(pnode, 'texts')
+        if texts is not None:
+            for node in loader.get_child_nodes(texts, 'string'):
+                ref = node.getAttribute('ref')
+                case = loader.get_opt_DOMattr(node, 'case', '')
+                stamp = load_stamp(self, loader.get_single_child_node(node, 'stamp'))
+                txt = loader.get_single_child_node(node, 'text')
+                txt = loader.collect_text_DOM(txt)
+                txt = language_file.sanitize_text(txt)
+                self.texts[ref] = Text(txt, case, stamp)
+
+        return load_language(self, projtype, pnode)
 
     def get_textref(self, ref):
         """
@@ -332,13 +371,18 @@ class XmlSaver:
     @ivar texts: Text references of the project, ordered by text object.
     @type texts: C{dict} of L{Text} to C{str}
 
+    @ivar split_languages: If set, don't save the languages as part of the project. They are
+                           saved separately at a later stage.
+    @type split_languages: C{bool}
+
     @ivar number: Number for creating unique text references.
     @type number: C{int}
     """
-    def __init__(self):
+    def __init__(self, split_languages):
         self.doc = None
         self.texts_node = None
         self.texts = {}
+        self.split_languages = split_languages
         self.number = 1
 
     def save_project(self, project, fname):
@@ -357,6 +401,34 @@ class XmlSaver:
         self.number = 1
 
         node = save_project(self, project)
+        node.appendChild(self.texts_node)
+        self.doc.appendChild(node)
+
+        handle = open(fname, 'w', encoding = "utf-8")
+        handle.write(self.doc.toprettyxml())
+        handle.close()
+
+    def save_language(self, projtype, lng, fname):
+        """
+        Save a language as xml document.
+
+        @param projtype: Project type.
+        @type  projtype: L{ProjectType}
+
+        @param lng: Language to save.
+        @type  lng: L{Language}
+
+        @param fname: Name of the file to write.
+        @type  fname: C{str}
+        """
+        assert self.split_languages
+
+        self.doc = minidom.Document()
+        self.texts_node = self.doc.createElement('texts')
+        self.texts = {}
+        self.number = 1
+
+        node = save_language(self, projtype, lng)
         node.appendChild(self.texts_node)
         self.doc.appendChild(node)
 
@@ -562,19 +634,23 @@ def load_project(xloader, node):
     url = node.getAttribute('url')
     project = Project(human_name, projtype, url)
 
-    langnodes = loader.get_child_nodes(node, 'language')
     project.languages = {}
-    for lnode in langnodes:
-        lng = load_language(xloader, projtype, lnode)
-        project.languages[lng.name] = lng
+    if not xloader.split_languages:
+        langnodes = loader.get_child_nodes(node, 'language')
+        for lnode in langnodes:
+            lng = load_language(xloader, projtype, lnode)
+            project.languages[lng.name] = lng
 
     baselang = loader.get_opt_DOMattr(node, 'baselang', None)
-    if baselang is None or baselang not in project.languages:
-        baselang = None
-        if len(project.languages) > 0:
-            print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
-            project.languages = {}
-            return project # Also skip loading the skeleton.
+
+    if not xloader.split_languages:
+        if baselang is None or baselang not in project.languages:
+            baselang = None
+            if len(project.languages) > 0:
+                print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
+                project.languages = {}
+                return project # Also skip loading the skeleton.
+
     project.base_language = baselang
     project.flush_related_cache()
 
@@ -635,11 +711,12 @@ def save_project(xsaver, proj):
         node.setAttribute('baselang', blng.name)
 
     # Save languages in alphabetical order
-    langs = list(proj.languages.items())
-    langs.sort()
-    for lang in langs:
-        lnode = save_language(xsaver, proj.projtype, lang[1])
-        node.appendChild(lnode)
+    if not xsaver.split_languages:
+        langs = list(proj.languages.items())
+        langs.sort()
+        for lang in langs:
+            lnode = save_language(xsaver, proj.projtype, lang[1])
+            node.appendChild(lnode)
 
     skelnode = save_skeleton(xsaver, proj.skeleton)
     node.appendChild(skelnode)
