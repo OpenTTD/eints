@@ -464,6 +464,7 @@ def str_post(userauth, prjname, lngname, sname):
 
     pmd, bchg, lng, binfo = parms
 
+    request.forms.recode_unicode = False # Allow Unicode input
     request_forms = request.forms.decode() # Convert dict to Unicode.
 
     base_str = request_forms.get('base') # Base text translated against in the form.
