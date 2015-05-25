@@ -339,6 +339,7 @@ class ProjectCache:
         pmd = ProjectMetaData(proj_store, human_name)
         self.projects[disk_name] = pmd
         pmd.pdata = data.Project(human_name, projtype, url)
+        pmd.pdata.set_modified()
         pmd.create_statistics()
         self.lru.append(pmd)
         self.save_pmd(pmd)
