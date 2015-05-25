@@ -302,8 +302,7 @@ class ProjectCache:
         if disk_name in self.projects:
             return "A project named \"{}\" already exists".format(disk_name)
 
-        path =  os.path.join(self.project_root, disk_name)
-        if os.path.exists(path + ".xml"):
+        if not may_create_project(self.project_root, disk_name):
             return "A project file named \"{}\" already exists".format(disk_name)
 
         # Construct a new project from scratch.
@@ -577,6 +576,36 @@ def find_projects(root):
         sys.exit(1)
 
     return projects
+# }}}
+# {{{ def may_create_project(root, name)
+def may_create_project(root, name):
+    """
+    Can a project named L{name} be safely created at the disk?
+
+    @param root: Root of the projects disk storage.
+    @type  root: C{str}
+
+    @param name: Name of the project.
+    @type  name: C{str}
+
+    @return: Whether a project with the provided name can be safely created.
+    @rtype:  C{bool}
+    """
+    if name == 'projects': # Don't allow legacy directory name at all.
+        return False
+
+    path = os.path.join(root, name)
+
+    # Does a L{STORAGE_ONE_FILE} project with the given name exists?
+    if os.path.exists(path + ".xml"):
+        return False
+
+    # Does a L{STORAGE_SEPARATE_LANGUAGES} project with the give name exists?
+    # Over-estimate, just name existence is sufficient reason to reject.
+    if os.path.exists(path):
+        return False
+
+    return True
 # }}}
 
 # {{{ def process_changes(lchgs, cases, stamp, used_basetexts):
