@@ -299,16 +299,11 @@ class XmlLoader:
         # Load texts. If cases are not allowed, loading the texts from here is no problem, as they are
         # discarded after loading the change.
         self.texts = {}
-        texts = loader.get_single_child_node(pnode, 'texts')
+        texts = loader.get_single_child_node(pnode, 'texts', True)
         if texts is not None:
             for node in loader.get_child_nodes(texts, 'string'):
                 ref = node.getAttribute('ref')
-                case = loader.get_opt_DOMattr(node, 'case', '')
-                stamp = load_stamp(self, loader.get_single_child_node(node, 'stamp'))
-                txt = loader.get_single_child_node(node, 'text')
-                txt = loader.collect_text_DOM(txt)
-                txt = language_file.sanitize_text(txt)
-                self.texts[ref] = Text(txt, case, stamp)
+                self.texts[ref] = get_text_node(self, node)
 
         return load_project(self, pnode)
 
@@ -332,16 +327,11 @@ class XmlLoader:
         # Load texts. If cases are not allowed, loading the texts from here is no problem, as they are
         # discarded after loading the change.
         self.texts = {}
-        texts = loader.get_single_child_node(pnode, 'texts')
+        texts = loader.get_single_child_node(pnode, 'texts', True)
         if texts is not None:
             for node in loader.get_child_nodes(texts, 'string'):
                 ref = node.getAttribute('ref')
-                case = loader.get_opt_DOMattr(node, 'case', '')
-                stamp = load_stamp(self, loader.get_single_child_node(node, 'stamp'))
-                txt = loader.get_single_child_node(node, 'text')
-                txt = loader.collect_text_DOM(txt)
-                txt = language_file.sanitize_text(txt)
-                self.texts[ref] = Text(txt, case, stamp)
+                self.texts[ref] = get_text_node(self, node)
 
         return load_language(self, projtype, pnode)
 
@@ -400,14 +390,16 @@ class XmlSaver:
         @type  fname: C{str}
         """
         self.doc = minidom.Document()
-        self.texts_node = self.doc.createElement('texts')
-        self.texts = {}
-        self.number = 1
+        if self.share_text:
+            self.texts_node = self.doc.createElement('texts')
+            self.texts = {}
+            self.number = 1
 
         node = save_project(self, project)
-        node.appendChild(self.texts_node)
-        self.doc.appendChild(node)
+        if self.share_text and len(self.texts) > 0:
+            node.appendChild(self.texts_node)
 
+        self.doc.appendChild(node)
         handle = open(fname, 'w', encoding = "utf-8")
         handle.write(self.doc.toprettyxml())
         handle.close()
@@ -428,14 +420,16 @@ class XmlSaver:
         assert self.split_languages
 
         self.doc = minidom.Document()
-        self.texts_node = self.doc.createElement('texts')
-        self.texts = {}
-        self.number = 1
+        if self.share_text:
+            self.texts_node = self.doc.createElement('texts')
+            self.texts = {}
+            self.number = 1
 
         node = save_language(self, projtype, lng)
-        node.appendChild(self.texts_node)
-        self.doc.appendChild(node)
+        if self.share_text and len(self.texts) > 0:
+            node.appendChild(self.texts_node)
 
+        self.doc.appendChild(node)
         handle = open(fname, 'w', encoding = "utf-8")
         handle.write(self.doc.toprettyxml())
         handle.close()
@@ -953,9 +947,16 @@ def save_change(xsaver, projtype, change):
     if change.case != '': node.setAttribute('case', change.case)
     if change.user is not None: node.setAttribute('user', change.user)
 
-    node.setAttribute('basetext', make_ref_text(xsaver, change.base_text))
+    if xsaver.share_text:
+        node.setAttribute('basetext', make_ref_text(xsaver, change.base_text))
+    else:
+        node.appendChild(make_text_node(xsaver, change.base_text, 'basetext', None)[0])
+
     if change.new_text is not None:
-        node.setAttribute('newtext', make_ref_text(xsaver, change.new_text))
+        if xsaver.share_text:
+            node.setAttribute('newtext', make_ref_text(xsaver, change.new_text))
+        else:
+            node.appendChild(make_text_node(xsaver, change.new_text, 'newtext', None)[0])
 
     snode = save_stamp(xsaver, change.stamp)
     node.appendChild(snode)
@@ -979,10 +980,21 @@ def load_change(xloader, node):
     last_upload = loader.get_opt_DOMattr(node, 'last_upload', '')
     case = loader.get_opt_DOMattr(node, 'case', '')
     user = loader.get_opt_DOMattr(node, 'user', None)
-    base_text = get_text(xloader, node.getAttribute('basetext'))
+
+    base_text = loader.get_opt_DOMattr(node, 'basetext', None)
+    if base_text is not None:
+        base_text = get_text(xloader, base_text)
+    else:
+        base_text = get_text_node(xloader, loader.get_single_child_node(node, 'basetext'))
+
     new_text = loader.get_opt_DOMattr(node, 'newtext', None)
     if new_text is not None:
         new_text = get_text(xloader, new_text)
+    else:
+        new_text = loader.get_single_child_node(node, 'newtext', True)
+        if new_text is not None:
+            new_text = get_text_node(xloader, new_text)
+
     stamp = loader.get_single_child_node(node, 'stamp')
     stamp = load_stamp(xloader, stamp)
     return Change(strname, case, base_text, new_text, stamp, user, last_upload == 'true')
@@ -1060,6 +1072,26 @@ def make_ref_text(xsaver, text):
     @rtype:  C{str}
     """
     return xsaver.get_textref(text)
+
+def get_text_node(xloader, node):
+    """
+    Load a text node (written by L{make_text_node}).
+
+    @param xloader: Loader helper.
+    @type  xloader: L{XmlLoader}
+
+    @param node: Text node to load.
+    @type  node: L{xml.dom.minidom.Node}
+
+    @return: Text object.
+    @rtype:  L{Text}
+    """
+    case = loader.get_opt_DOMattr(node, 'case', '')
+    stamp = load_stamp(xloader, loader.get_single_child_node(node, 'stamp'))
+    txt = loader.get_single_child_node(node, 'text')
+    txt = loader.collect_text_DOM(txt)
+    txt = language_file.sanitize_text(txt)
+    return Text(txt, case, stamp)
 
 def get_text(xloader, ref):
     """
