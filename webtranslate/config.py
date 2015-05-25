@@ -326,7 +326,6 @@ class ProjectCache:
             return "A project file named \"{}\" already exists".format(disk_name)
 
         # Construct a new project from scratch.
-        path = os.path.join(self.project_root, path)
         storage = cfg.storage_format
         if storage == STORAGE_ONE_FILE:
             path = os.path.join(self.project_root, disk_name + ".xml")

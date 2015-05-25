@@ -158,7 +158,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
         # Push the new set of string-names to all languages (this includes the base language).
         str_names = set(sv.name for sv in ng_data.strings)
         for lang in pdata.languages.values():
-            lng_modfied = False
+            lng_modified = False
             not_seen = str_names.copy()
             for sn in list(lang.changes.keys()):
                 not_seen.discard(sn)
