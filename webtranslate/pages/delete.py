@@ -10,6 +10,10 @@ def delete_form(userauth, prjname, lngname):
         abort(404, "Project does not exist")
         return
 
+    if pmd.storage_type == config.STORAGE_SEPARATE_LANGUAGES:
+        abort(404, "Cannot delete a language, ask the system administrator to remove the language file")
+        return
+
     pdata = pmd.pdata
     lng = pdata.languages.get(lngname)
     if lng is None:
@@ -28,6 +32,10 @@ def delete_submit(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
+        return
+
+    if pmd.storage_type == config.STORAGE_SEPARATE_LANGUAGES:
+        abort(404, "Cannot delete a language, ask the system administrator to remove the language file")
         return
 
     pdata = pmd.pdata
