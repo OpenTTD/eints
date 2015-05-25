@@ -88,6 +88,20 @@ class GameScriptProject(ProjectType):
             allow_extra = False,
             has_grflangid = False)
 
+class OpenTTDProject(ProjectType):
+    """
+    Project type for OpenTTD strings.
+    """
+    def __init__(self):
+        ProjectType.__init__(self,
+            name = "openttd",
+            human_name = "OpenTTD",
+            text_commands = GS_PARAMETERS,
+            allow_gender = True,
+            allow_case = True,
+            allow_extra = False,
+            has_grflangid = True)
+
 class ParameterInfo:
     """
     @ivar literal: Text of the literal (without curly brackets).
@@ -298,6 +312,6 @@ CURLY_PARAMETER = ParameterInfo("{", False, False, False, False, True)
 
 # Available project types, ordered by internal name.
 project_types = {}
-for pt in [NewGRFProject(), GameScriptProject()]:
+for pt in [NewGRFProject(), GameScriptProject(), OpenTTDProject()]:
     project_types[pt.name] = pt
 
