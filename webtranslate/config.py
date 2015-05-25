@@ -297,9 +297,8 @@ class ProjectCache:
         self.lru = []
 
         for proj in find_projects(self.project_root):
-            if proj.storage_type == STORAGE_ONE_FILE:
-                self.projects[proj.name] = ProjectMetaData(proj)
-                self.get_pmd(proj.name)
+            self.projects[proj.name] = ProjectMetaData(proj)
+            self.get_pmd(proj.name)
 
     def create_project(self, disk_name, human_name, projtype, url):
         """
@@ -327,6 +326,16 @@ class ProjectCache:
             return "A project file named \"{}\" already exists".format(disk_name)
 
         # Construct a new project from scratch.
+        path = os.path.join(self.project_root, path)
+        storage = cfg.storage_format
+        if storage == STORAGE_ONE_FILE:
+            path = os.path.join(self.project_root, disk_name + ".xml")
+        else:
+            path = os.path.join(self.project_root, disk_name)
+            if not os.path.isdir(path):
+                assert not os.path.exists(path)
+                os.mkdir(path)
+
         proj_store = ProjectStorage(path, disk_name, [], cfg.storage_format)
         pmd = ProjectMetaData(proj_store, human_name)
         self.projects[disk_name] = pmd
@@ -458,8 +467,24 @@ class ProjectMetaData:
     def load(self):
         assert self.pdata is None
 
-        xloader = data.XmlLoader(False)
-        self.pdata = xloader.load_project(self.path)
+        if self.storage_type == STORAGE_ONE_FILE:
+            xloader = data.XmlLoader(False)
+            self.pdata = xloader.load_project(self.path)
+        else:
+            assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
+            xloader = data.XmlLoader(True)
+            self.pdata = xloader.load_project(os.path.join(self.path, "project_data.xml"))
+            for lng_name in self.overview:
+                path = os.path.join(self.path, lng_name + ".xml")
+                self.pdata.languages[lng_name] = xloader.load_language(self.pdata.projtype, path)
+
+            # Check that we have a base language, else drop translations.
+            project = self.pdata
+            if project.get_base_language() is None:
+                project.base_language = None
+                if len(self.pdata.languages) > 0:
+                    print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
+                project.languages = {}
 
         process_project_changes(self.pdata)
         self.human_name = self.pdata.human_name # Copy the human-readable name from the project data.
@@ -472,10 +497,23 @@ class ProjectMetaData:
         """
         Save project data into an xml file, and manage the backup files.
         """
-        xsaver = data.XmlSaver(False, True)
-        xsaver.save_project(self.pdata, self.path + ".new")
+        if self.storage_type == STORAGE_ONE_FILE:
+            xsaver = data.XmlSaver(False, True)
+            xsaver.save_project(self.pdata, self.path + ".new")
+            rotate_files(self.path)
+        else:
+            # Project directory should already exist, created as part of project creation.
+            assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
+            xsaver = data.XmlSaver(True, False)
+            path = os.path.join(self.path, "project_data.xml")
+            xsaver.save_project(self.pdata, path + ".new")
+            rotate_files(path)
 
-        rotate_files(self.path)
+            for lng in self.pdata.languages.values():
+                path = os.path.join(self.path, lng.name + ".xml")
+                xsaver.save_language(self.pdata.projtype, lng, path + ".new")
+                rotate_files(path)
+
 
     def create_statistics(self, parm_lng = None):
         """
