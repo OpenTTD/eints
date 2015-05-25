@@ -307,7 +307,7 @@ GS_PARAMETERS = dict((x.literal, x) for x in _GS_PARAMETERS)
 # }}}
 
 NL_PARAMETER    = ParameterInfo("",  False, False, False, False, False)
-CURLY_PARAMETER = ParameterInfo("{", False, False, False, False, True)
+CURLY_PARAMETER = ParameterInfo("{", False, False, False, False, False)
 
 
 # Available project types, ordered by internal name.
