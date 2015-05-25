@@ -457,7 +457,10 @@ class ProjectMetaData:
 
     def load(self):
         assert self.pdata is None
-        self.pdata = data.load_file(self.path)
+
+        xloader = data.XmlLoader(False)
+        self.pdata = xloader.load_project(self.path)
+
         process_project_changes(self.pdata)
         self.human_name = self.pdata.human_name # Copy the human-readable name from the project data.
 
@@ -469,7 +472,9 @@ class ProjectMetaData:
         """
         Save project data into an xml file, and manage the backup files.
         """
-        data.save_file(self.pdata, self.path + ".new")
+        xsaver = data.XmlSaver(False, True)
+        xsaver.save_project(self.pdata, self.path + ".new")
+
         rotate_files(self.path)
 
     def create_statistics(self, parm_lng = None):

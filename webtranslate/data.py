@@ -7,32 +7,6 @@ from xml.dom.minidom import Node
 from webtranslate import loader, project_type
 from webtranslate.newgrf import language_file
 
-def load_file(fname):
-    """
-    Load a project with everything in it.
-
-    @param fname: File to load.
-    @type  fname: C{str}
-
-    @return: The loaded project.
-    @rtype:  L{Project}
-    """
-    xloader = XmlLoader(False)
-    return xloader.load_project(fname)
-
-def save_file(proj, fname):
-    """
-    Save the project to the file.
-
-    @param proj: The project to save.
-    @type  proj: L{Project}
-
-    @param fname: Name of the file to write.
-    @type  fname: C{str}
-    """
-    xsaver = XmlSaver(False, True)
-    xsaver.save_project(proj, fname)
-
 def get_newest_change(chgs, case):
     """
     Get the newest change matching the case.
