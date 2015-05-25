@@ -96,7 +96,7 @@ class OpenTTDProject(ProjectType):
         ProjectType.__init__(self,
             name = "openttd",
             human_name = "OpenTTD",
-            text_commands = GS_PARAMETERS,
+            text_commands = OPENTTD_PARAMETERS,
             allow_gender = True,
             allow_case = True,
             allow_extra = False,
@@ -221,7 +221,6 @@ _GS_PARAMETERS = [
     ParameterInfo("GRAY",              False, False, False, False, False),
     ParameterInfo("DKBLUE",            False, False, False, False, False),
     ParameterInfo("BLACK",             False, False, False, False, False),
-#    ParameterInfo("REV",               False, False, False, False, True ),
 
     ParameterInfo("STRING1",           True,  True,  True,  True,  True,  "STRING"),
     ParameterInfo("STRING2",           True,  True,  True,  True,  True,  "STRING"),
@@ -231,7 +230,6 @@ _GS_PARAMETERS = [
     ParameterInfo("STRING6",           True,  True,  True,  True,  True,  "STRING"),
     ParameterInfo("STRING7",           True,  True,  True,  True,  True,  "STRING"),
 
-#    ParameterInfo("STATION_FEATURES",  True,  False, False, False, True ), # station features string, icons of the features
     ParameterInfo("INDUSTRY",          True,  False, True,  True,  True ), # takes an industry number.
     ParameterInfo("CARGO_LONG",        True,  False, True,  False, True ),
     ParameterInfo("CARGO_SHORT",       True,  False, False, False, True ), # short cargo description, only ### tons, or ### litres
@@ -275,9 +273,6 @@ _GS_PARAMETERS = [
     ParameterInfo("COMPANY_NUM",       True,  False, False, False, True ),
     ParameterInfo("PRESIDENT_NAME",    True,  False, True,  False, True ),
 
-#    ParameterInfo("UP_ARROW",          False, False, False, False, True ),
-#    ParameterInfo("SMALL_UP_ARROW",    False, False, False, False, True ),
-#    ParameterInfo("SMALL_DOWN_ARROW",  False, False, False, False, True ),
     ParameterInfo("TRAIN",             False, False, False, False, True ),
     ParameterInfo("LORRY",             False, False, False, False, True ),
     ParameterInfo("BUS",               False, False, False, False, True ),
@@ -285,12 +280,6 @@ _GS_PARAMETERS = [
     ParameterInfo("SHIP",              False, False, False, False, True ),
     ParameterInfo("NBSP",              False, False, False, False, False),
     ParameterInfo("COPYRIGHT",         False, False, False, False, True ),
-#    ParameterInfo("DOWN_ARROW",        False, False, False, False, True ),
-#    ParameterInfo("CHECKMARK",         False, False, False, False, True ),
-#    ParameterInfo("CROSS",             False, False, False, False, True ),
-#    ParameterInfo("RIGHT_ARROW",       False, False, False, False, False),
-#    ParameterInfo("SMALL_LEFT_ARROW",  False, False, False, False, False),
-#    ParameterInfo("SMALL_RIGHT_ARROW", False, False, False, False, False),
 
     # The following are directional formatting codes used to get the RTL strings right:
     # http://www.unicode.org/unicode/reports/tr9/#Directional_Formatting_Codes
@@ -304,6 +293,28 @@ _GS_PARAMETERS = [
 ]
 
 GS_PARAMETERS = dict((x.literal, x) for x in _GS_PARAMETERS)
+# }}}
+# {{{ OPENTTD_PARAMETERS
+# Based on OpenTTD src/tables/strgen_tables.h r26050
+_OPENTTD_PARAMETERS = [
+    # Some string parameters are only allowed in the OpenTTD project.
+    # While they technically also work in Game Scripts, disencourage the usage.
+    # This also includes the "sprite" characters.
+    ParameterInfo("REV",               False, False, False, False, True ),
+    ParameterInfo("STATION_FEATURES",  True,  False, False, False, True ), # station features string, icons of the features
+    ParameterInfo("UP_ARROW",          False, False, False, False, True ),
+    ParameterInfo("SMALL_UP_ARROW",    False, False, False, False, True ),
+    ParameterInfo("SMALL_DOWN_ARROW",  False, False, False, False, True ),
+    ParameterInfo("DOWN_ARROW",        False, False, False, False, True ),
+    ParameterInfo("CHECKMARK",         False, False, False, False, True ),
+    ParameterInfo("CROSS",             False, False, False, False, True ),
+    ParameterInfo("RIGHT_ARROW",       False, False, False, False, False),
+    ParameterInfo("SMALL_LEFT_ARROW",  False, False, False, False, False),
+    ParameterInfo("SMALL_RIGHT_ARROW", False, False, False, False, False),
+]
+
+OPENTTD_PARAMETERS = dict((x.literal, x) for x in _OPENTTD_PARAMETERS)
+OPENTTD_PARAMETERS.update((x.literal, x) for x in _GS_PARAMETERS)
 # }}}
 
 NL_PARAMETER    = ParameterInfo("",  False, False, False, False, False)
