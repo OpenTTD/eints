@@ -558,6 +558,7 @@ def str_post(userauth, prjname, lngname, sname):
             lng.changes[sname].append(tchg)
         else:
             lng.changes[sname] = [tchg]
+        lng.set_modified()
 
     modified = config.process_project_changes(pmd.pdata) # Update changes of the project.
     if modified or stamp is not None:

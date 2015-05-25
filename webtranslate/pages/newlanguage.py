@@ -121,6 +121,8 @@ def make_language_post(userauth, prjname, lngname):
         lng.case = ['']
 
     pdata.languages[lng.name] = lng
+    pdata.set_modified()
+    lng.set_modified()
 
     config.cache.save_pmd(pmd)
     pmd.create_statistics(lng)

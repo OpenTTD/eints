@@ -457,6 +457,10 @@ class Project:
     @ivar base_language: Base language of the project.
     @type base_language: C{str} or C{None}
 
+    @ivar modified: Whether the project object (excluding the languages) has been modified
+                    (and needs writing to disk).
+    @type modified: C{bool}
+
     @ivar normalized: Computed current base language words ordered by string name. Used to get
                       related strings. (Created as a side-effect of setting up L{word_scores}.)
     @type normalized: C{dict} of C{str} to C{list} of C{str}
@@ -482,10 +486,17 @@ class Project:
         self.statistics = {}
         self.languages = {}
         self.base_language = None
+        self.modified = False
         self.normalized = None # Created while creating 'word_scores'
         self.word_scores = None
 
         self.skeleton = []
+
+    def set_modified(self):
+        """
+        Mark the project object (excluding the languages) as modified (and needs to be written to disk).
+        """
+        self.modified = True
 
     def get_base_language(self):
         """
@@ -733,6 +744,9 @@ class Language:
     @ivar case: Cases of the language (sorted).
     @type case: C{list} of C{str}
 
+    @ivar modified: Whether the language strings have been modified in some way (and need to be written out).
+    @type modified: C{bool}
+
     @ivar changes: Changes to this language ordered by string name, for strings
                    that exist in the language.
     @type changes: C{map} of C{str} to (C{list} of L{Change} or C{None})
@@ -746,7 +760,14 @@ class Language:
         self.plural = None
         self.gender = []
         self.case  = ['']
+        self.modified = False
         self.changes = {}
+
+    def set_modified(self):
+        """
+        Mark the language as modified (and needs to be written to disk).
+        """
+        self.modified = True
 
 def save_language(xsaver, projtype, lang):
     """

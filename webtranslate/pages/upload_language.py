@@ -153,17 +153,24 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
 
         pdata.skeleton = ng_data.skeleton # Use the new skeleton file.
         pdata.flush_related_cache() # Drop the related strings cache.
+        pdata.set_modified()
 
         # Push the new set of string-names to all languages (this includes the base language).
         str_names = set(sv.name for sv in ng_data.strings)
         for lang in pdata.languages.values():
+            lng_modfied = False
             not_seen = str_names.copy()
             for sn in list(lang.changes.keys()):
                 not_seen.discard(sn)
                 if sn in str_names: continue # Name is kept.
                 del lang.changes[sn] # Old string, delete
+                lng_modified = True
             for sn in not_seen:
                 lang.changes[sn] = []
+                lng_modified = True
+
+            if lng_modified:
+                lang.set_modified()
 
 
     else:
@@ -196,6 +203,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
 
         # Update language properties as well.
         copy_lng_properties(ng_data, lng)
+        lng.set_modified()
 
     config.cache.save_pmd(pmd)
     pmd.create_statistics(None) # Update all languages.
@@ -311,6 +319,8 @@ def add_new_language(ng_data, pdata, base_lang):
     for stp, sparam in pdata.skeleton:
         if stp == 'string': lng.changes[sparam[1]] = []
 
+    pdata.set_modified()
+    lng.set_modified()
     return (True, lng)
 
 def copy_lng_properties(ng_data, lng):
@@ -327,4 +337,5 @@ def copy_lng_properties(ng_data, lng):
     lng.gender = ng_data.gender
     lng.case   = ng_data.case
     lng.case.sort()
+    lng.set_modified()
 

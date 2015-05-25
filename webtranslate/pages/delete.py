@@ -49,6 +49,7 @@ def delete_submit(userauth, prjname, lngname):
         return
 
     del pdata.languages[lngname]
+    pdata.set_modified()
     if lngname in pdata.statistics:
         del pdata.statistics[lngname]
     if lngname in pmd.overview:

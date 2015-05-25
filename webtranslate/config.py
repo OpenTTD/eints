@@ -498,21 +498,37 @@ class ProjectMetaData:
         Save project data into an xml file, and manage the backup files.
         """
         if self.storage_type == STORAGE_ONE_FILE:
-            xsaver = data.XmlSaver(False, True)
-            xsaver.save_project(self.pdata, self.path + ".new")
-            rotate_files(self.path)
+            needs_save = self.pdata.modified
+            if not needs_save:
+                for lng in self.pdata.languages.values():
+                    if lng.modified:
+                        needs_save = True
+                        break
+
+            if needs_save:
+                xsaver = data.XmlSaver(False, True)
+                xsaver.save_project(self.pdata, self.path + ".new")
+                rotate_files(self.path)
+
+                self.pdata.modified = False
+                for lng in self.pdata.languages.values():
+                    lng.modified = False
         else:
             # Project directory should already exist, created as part of project creation.
             assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
             xsaver = data.XmlSaver(True, False)
-            path = os.path.join(self.path, "project_data.xml")
-            xsaver.save_project(self.pdata, path + ".new")
-            rotate_files(path)
+            if self.pdata.modified:
+                path = os.path.join(self.path, "project_data.xml")
+                xsaver.save_project(self.pdata, path + ".new")
+                rotate_files(path)
+                self.pdata.modified = False
 
             for lng in self.pdata.languages.values():
-                path = os.path.join(self.path, lng.name + ".xml")
-                xsaver.save_language(self.pdata.projtype, lng, path + ".new")
-                rotate_files(path)
+                if lng.modified:
+                    path = os.path.join(self.path, lng.name + ".xml")
+                    xsaver.save_language(self.pdata.projtype, lng, path + ".new")
+                    rotate_files(path)
+                    lng.modified = False
 
 
     def create_statistics(self, parm_lng = None):
@@ -752,18 +768,26 @@ def process_project_changes(pdata):
     used_basetexts = set()
     stamp = data.make_stamp()
     modified = False
-    if pdata.base_language is None: return # No base language -> nothing to do.
+    if pdata.base_language is None:
+        return False # No base language -> nothing to do.
+
     # Update translation changes.
     for lname, lng in pdata.languages.items():
         if lname == pdata.base_language: continue
+        lng_modified = False
         for chgs in lng.changes.values():
             nchgs = process_changes(chgs, lng.case, stamp, used_basetexts)
             if len(nchgs) != len(chgs):
                 chgs[:] = nchgs
                 modified = True
+                lng_modified = True
+
+        if lng_modified:
+            lng.set_modified()
 
     # Update base language changes.
     blng = pdata.languages[pdata.base_language]
+    blng_modified = False
     for chgs in blng.changes.values():
         chgs.sort()
         nchgs = []
@@ -780,6 +804,10 @@ def process_project_changes(pdata):
             chgs[:] = nchgs
             modified = True
             pdata.flush_related_cache()
+            blng_modified = True
+
+    if blng_modified:
+        blng.set_modified()
 
     return modified
 # }}}
