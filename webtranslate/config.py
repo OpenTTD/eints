@@ -298,7 +298,7 @@ class ProjectCache:
 
         for proj in find_projects(self.project_root):
             if proj.storage_type == STORAGE_ONE_FILE:
-                self.projects[proj.name] = ProjectMetaData(proj.path, proj.name)
+                self.projects[proj.name] = ProjectMetaData(proj)
                 self.get_pmd(proj.name)
 
     def create_project(self, disk_name, human_name, projtype, url):
@@ -327,7 +327,8 @@ class ProjectCache:
             return "A project file named \"{}\" already exists".format(disk_name)
 
         # Construct a new project from scratch.
-        pmd = ProjectMetaData(path, disk_name, human_name)
+        proj_store = ProjectStorage(path, disk_name, [], cfg.storage_format)
+        pmd = ProjectMetaData(proj_store, human_name)
         self.projects[disk_name] = pmd
         pmd.pdata = data.Project(human_name, projtype, url)
         pmd.create_statistics()
@@ -404,6 +405,8 @@ class ProjectMetaData:
     @type name: C{str}
 
     @ivar overview: Overview of the state of the strings in each language, ordered by language name.
+                    Entries also define the set of languages to load in case L{storage_format} is
+                    L{STORAGE_SEPARATE_LANGUAGES}.
     @type overview: C{dict} of C{str} to [#UNKNOWN, #UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
 
     @ivar string_avoid_cache: Cache to store which strings to avoid for translating, ordered by
@@ -421,11 +424,19 @@ class ProjectMetaData:
 
     @ivar path: Path of the project file at disk (with extension).
     @type path: C{str}
+
+    @ivar storage_type: Format used to store the project.
+    @type storage_type: C{str}, either L{STORAGE_ONE_FILE} or L{STORAGE_SEPARATE_LANGUAGES}
     """
-    def __init__(self, path, disk_name, human_name=None):
+    def __init__(self, proj_store, human_name=None):
         self.pdata = None
-        self.name = disk_name
+        self.name = proj_store.name
+
         self.overview = {}
+        if proj_store.storage_type == STORAGE_SEPARATE_LANGUAGES:
+            for lng_name in proj_store.languages:
+                self.overview[lng_name] = [0, 0, 0, 0, 0]
+
         self.string_avoid_cache = {}
         self.blang_name = None
         self.blang_count = 0
@@ -433,8 +444,16 @@ class ProjectMetaData:
             self.human_name = human_name
         else:
             # The project has the actual human-readable name, and will be stored here on first load.
-            self.human_name = disk_name
-        self.path = path
+            self.human_name = proj_store.name
+
+        self.path = proj_store.path
+        self.storage_type = proj_store.storage_type
+
+        if self.storage_type == STORAGE_SEPARATE_LANGUAGES:
+            assert not self.path.endswith('.xml')
+        else:
+            assert self.storage_type == STORAGE_ONE_FILE
+            assert self.path.endswith('.xml')
 
     def load(self):
         assert self.pdata is None
