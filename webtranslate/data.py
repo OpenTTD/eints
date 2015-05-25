@@ -449,19 +449,8 @@ class XmlSaver:
         ref = self.texts.get(text)
         if ref is not None: return ref
 
-        node = self.doc.createElement('string')
-        if text.case != '': node.setAttribute('case', text.case)
-
-        ref = "text_{:04d}".format(self.number)
+        node, ref = make_text_node(self, text, "string", self.number)
         self.number = self.number + 1
-        node.setAttribute('ref', ref)
-
-        stamp = save_stamp(self, text.stamp)
-        node.appendChild(stamp)
-        tnode = self.doc.createElement('text')
-        node.appendChild(tnode)
-        xnode = self.doc.createTextNode(text.text)
-        tnode.appendChild(xnode)
 
         self.texts_node.appendChild(node)
         self.texts[text] = ref
@@ -1014,6 +1003,42 @@ class Text:
 
     def __str__(self):
         return "Text(text={!r}, case={!r})".format(self.text, self.case)
+
+def make_text_node(xmlsaver, text, name, number):
+    """
+    Construct a node containing the provided text.
+
+    @param xmlsaver: Saver class.
+    @type  xmlsaver: L{XmlSaver}
+
+    @param text: Text to save.
+    @type  text: L{Text}
+
+    @param name: Name of the node for storing the text.
+    @type  name: C{str}
+
+    @param number: Number to refer to the text. Use {@code None} to suppress creating a reference.
+    @type  number: C{int} or C{None}
+
+    @return: Node containing the text, and the reference string with the number or C{None}.
+    @rtype:  L{xml.dom.minidom.Node}, (C{str} or C{None})
+    """
+    node = xmlsaver.doc.createElement(name)
+    if text.case != '': node.setAttribute('case', text.case)
+
+    if number is not None:
+        ref = "text_{:04d}".format(number)
+        node.setAttribute('ref', ref)
+    else:
+        ref = None
+
+    stamp = save_stamp(xmlsaver, text.stamp)
+    node.appendChild(stamp)
+    tnode = xmlsaver.doc.createElement('text')
+    node.appendChild(tnode)
+    xnode = xmlsaver.doc.createTextNode(text.text)
+    tnode.appendChild(xnode)
+    return node, ref
 
 def make_ref_text(xsaver, text):
     """
