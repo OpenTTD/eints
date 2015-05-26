@@ -909,11 +909,11 @@ class Change:
         return "Change('{}', base={}, new={})".format(self.string_name, str(self.base_text), str(self.new_text))
 
     def __lt__(self, other):
-        if not isinstance(other, Change): return False
+        if not isinstance(other, Change): return
         return self.stamp < other.stamp
 
     def __eq__(self, other):
-        if not isinstance(other, Change): return False
+        if not isinstance(other, Change): return
         return self.stamp == other.stamp
 
 
@@ -1016,6 +1016,17 @@ class Text:
 
     def __str__(self):
         return "Text(text={!r}, case={!r})".format(self.text, self.case)
+
+    def __eq__(self, other):
+        if not isinstance(other, Text): return
+        return self.text == other.text and self.case == other.case and self.stamp == other.stamp
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(self.text) + hash(self.case) + hash(self.stamp)
+
 
 def make_text_node(xmlsaver, text, name, number):
     """
@@ -1120,16 +1131,19 @@ class Stamp:
         self.number = number
 
     def __lt__(self, other):
-        if not isinstance(other, Stamp): return False
+        if not isinstance(other, Stamp): return
         return self.seconds < other.seconds or \
                (self.seconds == other.seconds and self.number < other.number)
 
     def __eq__(self, other):
-        if not isinstance(other, Stamp): return False
+        if not isinstance(other, Stamp): return
         return self.seconds == other.seconds and self.number == other.number
 
     def __str__(self):
         return time.asctime(time.gmtime(self.seconds))
+
+    def __hash__(self):
+        return (self.seconds << 4) | self.number
 
 last_stamp = 0 # A loooooong time ago.
 last_index = -1
