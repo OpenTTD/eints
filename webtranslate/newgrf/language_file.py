@@ -420,7 +420,7 @@ class StringInfo:
     @type plurals: C{list} of C{int}
 
     @ivar commands: String commands at each position.
-    @type commands: C{list} of C{ParameterInfo}
+    @type commands: C{list} of (L{ParameterInfo} or C{None})
 
     @ivar non_positionals: Mapping of commands without position to their count.
     @type non_positionals: C{dict} of C{str} to C{int}
@@ -612,10 +612,6 @@ class StringInfo:
         Check sanity of the string commands and parameters.
         """
         ok = True
-        for pos, cmd in enumerate(self.commands):
-            if cmd is None:
-                self.add_error(ErrorMessage(ERROR, None, "String parameter {} has no string command".format(pos)))
-                ok = False
         if ok:
             for pos in self.plurals:
                 if pos < 0 or pos >= len(self.commands):
@@ -964,29 +960,36 @@ def compare_info(projtype, base_info, lng_info):
     if base_info.has_error: return True # Cannot blame the translation when the base language is broken.
     if lng_info.has_error: return False # Translation has more serious problems.
 
-    base_cmds = [cmd.get_translated_cmd() for cmd in base_info.commands]
-    lng_cmds = [cmd.literal for cmd in lng_info.commands]
+    if len(base_info.commands) > len(lng_info.commands):
+        msg = 'String command for position {} (and further) is missing in the translation'
+        msg = msg.format(len(lng_info.commands))
+        lng_info.add_error(ErrorMessage(ERROR, None, msg))
+        return False
+    if len(base_info.commands) < len(lng_info.commands):
+        msg = 'String command for position {} (and further) is not used in the base language'
+        msg = msg.format(len(base_info.commands))
+        lng_info.add_error(ErrorMessage(ERROR, None, msg))
+        return False
 
-    if base_cmds != lng_cmds:
-        if len(base_cmds) > len(lng_cmds):
-            msg = 'String command for position {} (and further) is missing in the translation'
-            msg = msg.format(len(lng_cmds))
-            lng_info.add_error(ErrorMessage(ERROR, None, msg))
-            return False
-        if len(base_cmds) < len(lng_cmds):
-            msg = 'String command for position {} (and further) is not used in the base language'
-            msg = msg.format(len(base_cmds))
-            lng_info.add_error(ErrorMessage(ERROR, None, msg))
-            return False
+    for i, (base_name, lng_name) in enumerate(zip(base_info.commands, lng_info.commands)):
+        if base_name is not None:
+            base_name = base_name.get_translated_cmd()
 
-        for i in range(len(base_cmds)):
-            if base_cmds[i] != lng_cmds[i]:
+        if lng_name is not None:
+            lng_name = lng_name.literal
+
+        if base_name != lng_name:
+            if base_name is None:
+                msg = 'String command for position {} does not exist, the translation uses {}'
+                msg = msg.format(i, '{' + lng_name + '}')
+            elif lng_name is None:
+                msg = 'String command for position {} ({}) is missing in translation'
+                msg = msg.format(i, '{' + base_name + '}')
+            else:
                 msg = 'String command for position {} is wrong, base language uses {}, the translation uses {}'
-                msg = msg.format(i, '{' + base_cmds[i] + '}', '{' + lng_cmds[i] + '}')
-                lng_info.add_error(ErrorMessage(ERROR, None, msg))
-                return False
-
-        assert False # Never reached
+                msg = msg.format(i, '{' + base_name + '}', '{' + lng_name + '}')
+            lng_info.add_error(ErrorMessage(ERROR, None, msg))
+            return False
 
     # Non-positional commands must match in count.
     if base_info.non_positionals != lng_info.non_positionals:
