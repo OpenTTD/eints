@@ -869,7 +869,9 @@ def load_language_file(projtype, handle, max_size, lng_data = None):
         if line.startswith(bom):
             line = line[len(bom):]
 
-        if line.startswith('##'):
+        # Comments either have 1 or >= 3 leading '#'.
+        # The pragma ##id is special. It belongs to the skeleton, not to the header. Threat it like a comment.
+        if line.startswith('##') and not line.startswith('###') and not line.startswith('##id'):
             if seen_strings:
                 data.add_error(ErrorMessage(ERROR, lnum, "Cannot change language properties after processing strings"))
                 continue
