@@ -34,7 +34,7 @@ param_pat = re.compile('{([0-9]+:)?([A-Z_0-9]+)(\\.[A-Za-z0-9]+)?}')
 gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
 argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
 end_argument_pat = re.compile('[ \\t]*}')
-number_pat = re.compile('[0-9]+$')
+posref_pat = re.compile('([0-9]+)(:([0-9]+))?$')
 
 def check_string(projtype, text, default_case, extra_commands, lng, in_blng, save_pieces = False):
     """
@@ -130,7 +130,7 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, sav
                     string_info.add_error(ErrorMessage(ERROR, None, "Case {} of string command {} does not exist in the language".format(case, m.group(2))))
                     return string_info
 
-            if not entry.takes_param:
+            if len(entry.parameters) == 0:
                 if argnum is not None:
                     string_info.add_error(ErrorMessage(ERROR, None, "String command {} does not take an argument count".format(m.group(2))))
                     return string_info
@@ -154,14 +154,20 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, sav
                 return string_info
             elif len(args) > 0:
                 # If the first argument is a number, it cannot be a value for the plural command.
-                m = number_pat.match(args[0])
+                m = posref_pat.match(args[0])
                 if m:
-                    num = int(args[0], 10)
-                    cmd_num = num
+                    num = int(m.group(1), 10)
+                    sub = m.group(3)
+
+                    if sub is not None:
+                        sub = int(sub, 10)
+
+                    num = cmd_num = (num, sub)
+
                     cmd_args = args[1:]
                 else:
-                    num = pos - 1
-                    cmd_num = None
+                    num = (pos - 1, None)
+                    cmd_num = (None, None)
                     cmd_args = args
 
                 if len(cmd_args) == plural_count:
@@ -206,14 +212,22 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, sav
                 return string_info
             elif len(args) > 0:
                 # If the first argument is a number, it cannot be a value for the plural command.
-                m = number_pat.match(args[0])
+                m = posref_pat.match(args[0])
                 if m:
-                    num = int(args[0], 10)
-                    cmd_num = num
+                    num = int(m.group(1), 10)
+                    sub = m.group(3)
+
+                    if sub is None:
+                        cmd_num = (num, None)
+                        num = (num, 0)
+                    else:
+                        sub = int(sub, 10)
+                        num = cmd_num = (num, sub)
+
                     cmd_args = args[1:]
                 else:
-                    num = pos
-                    cmd_num = None
+                    num = (pos, 0)
+                    cmd_num = (None, None)
                     cmd_args = args
 
                 if len(cmd_args) == expected:
@@ -227,7 +241,9 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, sav
         string_info.add_error(ErrorMessage(ERROR, None, "Unknown {...} command found in the string"))
         return string_info
 
-    string_info.check_sanity()
+    if in_blng:
+        string_info.check_plural_and_gender(string_info)
+
     return string_info
 
 # {{{ def get_arguments(text, cmd, idx, string_info):
@@ -351,7 +367,7 @@ class PluralPiece(StringPiece):
     Piece representing a plural {P ...} command.
 
     @param cmd_num: Number given to the command by the user, if provided.
-    @type  cmd_num: C{int} or C{None}
+    @type  cmd_num: C{pair} of (C{int} or C{None})
 
     @ivar cmd_args: Plural command arguments.
     @type cmd_args: C{list} of C{str}
@@ -361,10 +377,12 @@ class PluralPiece(StringPiece):
         self.cmd_num = cmd_num
 
     def get_translation_text(self):
-        if self.cmd_num is None:
-            prefix = "{P "
-        else:
-            prefix = "{P " + str(self.cmd_num) + " "
+        prefix = "{P "
+        if self.cmd_num[0] is not None:
+            prefix += str(self.cmd_num[0])
+            if self.cmd_num[1] is not None:
+                prefix += ":" + str(self.cmd_num[1])
+            prefix += " "
         return prefix + " ".join(self.cmd_args) + "}"
 
 class GenderPiece(StringPiece):
@@ -372,7 +390,7 @@ class GenderPiece(StringPiece):
     Piece representing a gender {G ...} command.
 
     @param cmd_num: Number given to the command by the user, if provided.
-    @type  cmd_num: C{int} or C{None}
+    @type  cmd_num: C{pair} of (C{int} or C{None})
 
     @ivar cmd_args: Gender command arguments.
     @type cmd_args: C{list} of C{str}
@@ -382,10 +400,12 @@ class GenderPiece(StringPiece):
         self.cmd_num = cmd_num
 
     def get_translation_text(self):
-        if self.cmd_num is None:
-            prefix = "{G "
-        else:
-            prefix = "{G " + str(self.cmd_num) + " "
+        prefix = "{G "
+        if self.cmd_num[0] is not None:
+            prefix += str(self.cmd_num[0])
+            if self.cmd_num[1] is not None:
+                prefix += ":" + str(self.cmd_num[1])
+            prefix += " "
         return prefix + " ".join(self.cmd_args) + "}"
 
 class GenderAssignPiece(StringPiece):
@@ -500,10 +520,10 @@ class StringInfo:
         Add a gender query for parameter L{pos}.
 
         @param pos: String parameter number used for gender query.
-        @type  pos: C{int}
+        @type  pos: (C{int}, C{int})
 
         @param cmd_num: Number given to the command by the user, if provided.
-        @type  cmd_num: C{int} or C{None}
+        @type  cmd_num: C{pair} of (C{int} or C{None})
 
         @param cmd_args: Command arguments.
         @type  cmd_args: C{list} of C{str}
@@ -517,10 +537,10 @@ class StringInfo:
         Add a plural query for parameter L{pos}.
 
         @param pos: String parameter number used for plural query.
-        @type  pos: C{int}
+        @type  pos: (C{int}, C{int} or C{None})
 
         @param cmd_num: Number given to the command by the user, if provided.
-        @type  cmd_num: C{int} or C{None}
+        @type  cmd_num: C{pair} of (C{int} or C{None})
 
         @param cmd_args: Command arguments.
         @type  cmd_args: C{list} of C{str}
@@ -607,32 +627,67 @@ class StringInfo:
         """
         self.pieces.append(GenderAssignPiece(gender))
 
-    def check_sanity(self):
+    def check_plural_and_gender(self, base_info):
         """
-        Check sanity of the string commands and parameters.
+        Check plural and gender parameter references.
+
+        Note: The base language is required to know the exact string commands and amount of sub-parameters.
+
+        @param base_info: Information about string parameters from the base language.
+        @type  base_info: L{StringInfo}
+
+        @return: True of references are valid.
+        @rtype:  C{bool}
         """
         ok = True
         if ok:
-            for pos in self.plurals:
-                if pos < 0 or pos >= len(self.commands):
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos)))
+            for pos, sub in self.plurals:
+                pos_name = str(pos)
+                if sub is not None:
+                    pos_name += ":" + str(sub)
+
+                if pos < 0 or pos >= len(base_info.commands):
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos_name)))
                     ok = False
                     continue
 
-                cmd = self.commands[pos]
-                if cmd is None or not cmd.use_plural:
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos)))
+                cmd = base_info.commands[pos]
+                if cmd is None:
+                    self.add_error(ErrorMessage(ERROR, None, "Plural query {{P ..}} references non-existing parameter {}.".format(pos_name)))
+                    ok = False
+                    continue
+
+                if sub is None:
+                    sub = cmd.default_plural_pos
+                elif sub < 0 or sub >= len(cmd.parameters):
+                    self.add_error(ErrorMessage(ERROR, None, "Plural query {{P ..}} references non-existing parameter {}.".format(pos_name)))
+                    ok = False
+                    continue
+
+                if sub is None or not cmd.use_plural(sub):
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos_name)))
                     ok = False
 
         if ok:
-            for pos in self.genders:
-                if pos < 0 or pos >= len(self.commands):
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos)))
+            for pos, sub in self.genders:
+                pos_name = str(pos)
+                if sub > 0:
+                    pos_name += ":" + str(sub)
+
+                if pos < 0 or pos >= len(base_info.commands):
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos_name)))
                     continue
 
-                cmd = self.commands[pos]
-                if cmd is None or not cmd.use_gender:
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos)))
+                cmd = base_info.commands[pos]
+                if cmd is None or sub < 0 or sub >= len(cmd.parameters):
+                    self.add_error(ErrorMessage(ERROR, None, "Gender query {{G ..}} references non-existing parameter {}.".format(pos_name)))
+                    ok = False
+                    continue              
+
+                if not cmd.use_gender(sub):
+                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos_name)))
+
+        return ok
 # }}}
 # }}}
 
@@ -992,6 +1047,10 @@ def compare_info(projtype, base_info, lng_info):
                 msg = msg.format(i, '{' + base_name + '}', '{' + lng_name + '}')
             lng_info.add_error(ErrorMessage(ERROR, None, msg))
             return False
+
+    # Validate plural and gender references
+    if not lng_info.check_plural_and_gender(base_info):
+        return False
 
     # Non-positional commands must match in count.
     if base_info.non_positionals != lng_info.non_positionals:
