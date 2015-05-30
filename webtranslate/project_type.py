@@ -64,6 +64,17 @@ class ProjectType:
                     break
         return self.base_is_translated_cache
 
+    def allow_language(self, linfo):
+        """
+        Is the provided language allowed to be used by the projects of this type?
+
+        @param linfo: Language meta-data.
+        @type  linfo: L{LanguageData}
+
+        @return: Whether the language may be used by project of the project type.
+        @rtype:  C{bool}
+        """
+        return linfo.is_stable or self.allow_unstable_lng
 
 class NewGRFProject(ProjectType):
     """

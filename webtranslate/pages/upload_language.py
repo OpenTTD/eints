@@ -19,7 +19,7 @@ def page_get(userauth, prjname):
         return template('upload_lang', proj_name = prjname, pdata = pdata)
     else:
         return template('upload_lang_select', proj_name = prjname, pdata = pdata,
-                    lisos = sorted((linfo.isocode, linfo.name) for linfo in language_info.all_languages))
+                    lisos = sorted((linfo.isocode, linfo.name) for linfo in pdata.get_all_languages()))
 
 @route('/upload/<prjname>/<lngname>', method = 'GET')
 @protected(['upload', 'prjname', '-'])
@@ -112,6 +112,11 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size, lng_data)
     if len(ng_data.errors) > 0:
         return template('upload_errors', proj_name = projname, errors = ng_data.errors)
+
+    # Is the language allowed?
+    if not pdata.projtype.allow_language(ng_data.language_data):
+        abort(404, "Language \"{}\" may not be uploaded".format(ng_data.language_data.isocode))
+        return
 
     stamp = data.make_stamp()
 

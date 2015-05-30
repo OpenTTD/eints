@@ -19,7 +19,7 @@ def new_language_get(userauth, prjname):
     base_langs = []
     translations = []
     can_be_added = []
-    for lang in language_info.all_languages:
+    for lang in pdata.get_all_languages():
         if lang.isocode == pdata.base_language:
             base_langs.append(lang)
             continue
@@ -103,6 +103,10 @@ def make_language_post(userauth, prjname, lngname):
         return
 
     projtype = pdata.projtype
+    if not projtype.allow_language(lng_def):
+        msg = "Language \"{}\" may not be created in this project".format(lng_def.isocode)
+        abort(404, msg)
+        return
 
     # Create the language.
     lng = data.Language(lng_def.isocode)

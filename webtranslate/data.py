@@ -5,7 +5,7 @@ import time, re, calendar
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from webtranslate import loader, project_type
-from webtranslate.newgrf import language_file
+from webtranslate.newgrf import language_file, language_info
 
 def get_newest_change(chgs, case):
     """
@@ -588,6 +588,15 @@ class Project:
                 best = best[:i] + [(sname, score)] + best[i:-1]
 
         return [b[0] for b in best if b[0] is not None]
+
+    def get_all_languages(self):
+        """
+        Get an iterator returning meta-data of all languages that may be used in the project.
+
+        @return: Iterator returning language meta-data that could be used in the project.
+        @rtype:  C{iter} of L{LanguageData}
+        """
+        return (linfo for linfo in language_info.all_languages if self.projtype.allow_language(linfo))
 
 def load_project(xloader, node):
     """
