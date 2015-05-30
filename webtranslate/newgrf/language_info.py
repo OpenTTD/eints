@@ -31,6 +31,9 @@ class LanguageData:
 
     @ivar case: Cases of the language.
     @type case: C{list} of C{str}
+
+    @ivar is_stable: Whether the language is considered to be 'stable'. Default C{True}.
+    @type is_stable: C{bool}
     """
     def __init__(self, found_lines):
         self.name = found_lines['name']
@@ -47,6 +50,7 @@ class LanguageData:
         if case is None: case = []
         if '' not in case: case.append('')
         self.case = case
+        self.is_stable = True # By default, all languages are stable.
 
 def as_str(text):
     return text.strip()

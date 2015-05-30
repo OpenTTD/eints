@@ -24,19 +24,24 @@ class ProjectType:
     @ivar allow_extra: Allow extra string commands (that is, custom tags).
     @type allow_extra: C{bool}
 
+    @ivar allow_unstable_lng: Allow translation of 'unstable' languages.
+    @type allow_unstable_lng: C{bool}
+
     @ivar has_grflangid: Project uses '##grflangid' in the language file for identifying the language.
     @type has_grflangid: C{bool}
 
     @ivar base_is_translated_cache: Whether string commands in the base language may be rewritten before display.
     @type base_is_translated_cache: C{None} means 'unknown', otherwise C{bool}.
     """
-    def __init__(self, name, human_name, text_commands, allow_gender, allow_case, allow_extra, has_grflangid):
+    def __init__(self, name, human_name, text_commands, allow_gender,
+                 allow_case, allow_extra, allow_unstable_lng, has_grflangid):
         self.name = name
         self.human_name = human_name
         self.text_commands = text_commands
         self.allow_gender = allow_gender
         self.allow_case = allow_case
         self.allow_extra = allow_extra
+        self.allow_unstable_lng = allow_unstable_lng
         self.has_grflangid = has_grflangid
         self.base_is_translated_cache = None
 
@@ -72,6 +77,7 @@ class NewGRFProject(ProjectType):
             allow_gender = True,
             allow_case = True,
             allow_extra = True,
+            allow_unstable_lng = False,
             has_grflangid = True)
 
 class GameScriptProject(ProjectType):
@@ -86,6 +92,7 @@ class GameScriptProject(ProjectType):
             allow_gender = False,
             allow_case = False,
             allow_extra = False,
+            allow_unstable_lng = False,
             has_grflangid = False)
 
 class OpenTTDProject(ProjectType):
@@ -100,6 +107,7 @@ class OpenTTDProject(ProjectType):
             allow_gender = True,
             allow_case = True,
             allow_extra = False,
+            allow_unstable_lng = True,
             has_grflangid = True)
 
 class ParameterInfo:

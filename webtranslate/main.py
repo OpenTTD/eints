@@ -29,9 +29,15 @@ def run():
     # Load language meta-information.
     languages = []
     if config.cfg.stable_languages_path is not None:
-        languages.extend(language_info.load_dir(config.cfg.stable_languages_path))
+        for lang in language_info.load_dir(config.cfg.stable_languages_path):
+            lang.is_stable = True
+            languages.append(lang)
+
     if config.cfg.unstable_languages_path is not None:
-        languages.extend(language_info.load_dir(config.cfg.unstable_languages_path))
+        for lang in language_info.load_dir(config.cfg.unstable_languages_path):
+            lang.is_stable = False
+            languages.append(lang)
+
     language_info.set_all_languages(languages)
 
     # Load user authentication, find existing projects, and initialize authentication.
