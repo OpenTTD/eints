@@ -296,7 +296,11 @@ class ProjectCache:
         self.projects = {}
         self.lru = []
 
-        for proj in find_projects(self.project_root):
+    def find_projects(self):
+        """
+        Examine the disk for translation projects and create stubs for them.
+        """
+        for proj in find_project_files(self.project_root):
             self.projects[proj.name] = ProjectMetaData(proj)
             self.get_pmd(proj.name)
 
@@ -615,8 +619,8 @@ class ProjectMetaData:
             self.overview[lname] = counts
 # }}}
 
-# {{{ def find_projects(root):
-def find_projects(root):
+# {{{ def find_project_files(root):
+def find_project_files(root):
     """
     Find projects at the disk, starting from the L{root} directory.
 

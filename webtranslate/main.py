@@ -24,6 +24,8 @@ def run():
     config.cfg = config.Config('config.xml')
     config.cfg.load_fromxml()
 
+    config.cache.find_projects()
+
     users.init(config.cfg.authentication)
 
     # Start the web service
