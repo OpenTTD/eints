@@ -12,6 +12,9 @@
 
 	<!-- Project data
 	  -->
+	<stable-languages>stable_languages</stable-languages> <!-- Language meta-data of stable languages -->
+	<unstable-languages/> <!-- Language meta-data of unstable languages (lacking sufficient translators) -->
+
 	<project-root>root_dir</project-root>
 	<project-cache>1</project-cache>
 	<project-types>game-script newgrf</project-types>
