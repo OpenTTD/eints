@@ -107,10 +107,9 @@ class Config:
         self.min_number_changes = 1
         self.change_stabilizing_time = 1000000 # 11 days, 13 hours, 46 minutes, and 40 seconds.
 
-    def load_fromxml(self):
+    def load_settings_from_xml(self):
         """
-        Load the entire 'config.xml' file into the configuration, including the
-        'redmine' and 'ldap' parts if they exist.
+        Load the 'config.xml' settings into the configuration, mostly paths to find other data.
         """
         if not os.path.isfile(self.config_path):
             print("Cannot find configuration file " + self.config_path)
@@ -170,6 +169,18 @@ class Config:
 
         cache_size = data.convert_num(get_subnode_text(cfg, 'project-cache'), 10)
         cache.init(self.project_root, cache_size)
+
+    def load_userauth_from_xml(self):
+        """
+        Load 'redmine' and 'ldap' authentication if they exist.
+        """
+        if not os.path.isfile(self.config_path):
+            print("Cannot find configuration file " + self.config_path)
+            return
+
+        cfg = loader.load_dom(self.config_path)
+        cfg = loader.get_single_child_node(cfg, 'config')
+
 
         # Redmine configuration.
         rm_node = loader.get_single_child_node(cfg, 'redmine', True)

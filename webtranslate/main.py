@@ -22,7 +22,8 @@ bottle.TEMPLATE_PATH = ['./views/']
 
 def run():
     config.cfg = config.Config('config.xml')
-    config.cfg.load_fromxml()
+    config.cfg.load_settings_from_xml()
+    config.cfg.load_userauth_from_xml()
 
     config.cache.find_projects()
 
