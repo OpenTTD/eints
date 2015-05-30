@@ -1,0 +1,6 @@
+##name Portuguese
+##ownname Português
+##isocode pt_PT
+##plural 0
+##grflangid 0x36
+##gender n m f mp fp

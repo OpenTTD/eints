@@ -1,0 +1,6 @@
+##name Slovenian
+##ownname Slovenščina
+##isocode sl_SI
+##plural 8
+##grflangid 0x2c
+##case r d t

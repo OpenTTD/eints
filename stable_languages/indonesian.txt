@@ -1,0 +1,5 @@
+##name Indonesian
+##ownname Bahasa Indonesia
+##isocode id_ID
+##plural 1
+##grflangid 0x5a

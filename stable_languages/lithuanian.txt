@@ -1,0 +1,7 @@
+##name Lithuanian
+##ownname Lietuvių
+##isocode lt_LT
+##plural 5
+##grflangid 0x2b
+##gender vyr mot
+##case kas ko kam ka kuo kur kreip

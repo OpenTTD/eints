@@ -1,0 +1,5 @@
+##name Welsh
+##ownname Cymraeg
+##isocode cy_GB
+##plural 0
+##grflangid 0x0f

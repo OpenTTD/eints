@@ -1,0 +1,5 @@
+##name Malay
+##ownname Melayu
+##isocode ms_MY
+##plural 0
+##grflangid 0x3c

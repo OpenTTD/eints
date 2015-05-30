@@ -1,0 +1,5 @@
+##name Vietnamese
+##ownname Tiếng Việt
+##isocode vi_VN
+##plural 1
+##grflangid 0x54

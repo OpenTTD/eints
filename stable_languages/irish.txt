@@ -1,0 +1,5 @@
+##name Irish
+##ownname Gaeilge
+##isocode ga_IE
+##plural 4
+##grflangid 0x08

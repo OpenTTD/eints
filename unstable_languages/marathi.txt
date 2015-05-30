@@ -1,0 +1,5 @@
+##name Marathi
+##ownname मराठी
+##isocode mr_IN
+##plural 0
+##grflangid 0x11

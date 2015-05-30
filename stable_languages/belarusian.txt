@@ -1,0 +1,7 @@
+##name Belarusian
+##ownname Беларуская
+##isocode be_BY
+##plural 6
+##grflangid 0x10
+##gender m f n p
+##case m f n p nom gen dat acc abl pre

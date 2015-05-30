@@ -1,0 +1,6 @@
+##name German
+##ownname Deutsch
+##isocode de_DE
+##plural 0
+##grflangid 0x02
+##gender m w n p

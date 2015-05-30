@@ -1,0 +1,5 @@
+##name Swedish
+##ownname Svenska
+##isocode sv_SE
+##plural 0
+##grflangid 0x2e

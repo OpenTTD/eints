@@ -1,0 +1,5 @@
+##name Tamil
+##ownname தமிழ்
+##isocode ta_IN
+##plural 0
+##grflangid 0x0A

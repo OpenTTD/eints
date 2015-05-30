@@ -1,0 +1,5 @@
+##name Basque
+##ownname Euskara
+##isocode eu_ES
+##plural 0
+##grflangid 0x21

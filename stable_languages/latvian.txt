@@ -1,0 +1,7 @@
+##name Latvian
+##ownname Latviešu
+##isocode lv_LV
+##plural 3
+##grflangid 0x2a
+##gender m f
+##case kas

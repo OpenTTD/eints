@@ -1,0 +1,6 @@
+##name Hungarian
+##ownname Magyar
+##isocode hu_HU
+##plural 2
+##grflangid 0x24
+##case t ba

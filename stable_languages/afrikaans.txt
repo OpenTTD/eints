@@ -1,0 +1,6 @@
+##name Afrikaans
+##ownname Afrikaans
+##isocode af_ZA
+##plural 0
+##grflangid 0x1b
+##gender male

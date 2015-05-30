@@ -1,0 +1,6 @@
+##name Urdu
+##ownname Urdu
+##isocode ur_PK
+##plural 0
+##grflangid 0x5c
+##gender m f

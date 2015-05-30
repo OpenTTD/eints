@@ -125,6 +125,14 @@ Project data setup
 The following configuration fields exist to define how project data is
 treated.
 
+*stable-languages*
+  Path to the directory with meta-information of 'stable' languages (that is,
+  languages with a sufficient number of translators).
+
+*unstable-languages*
+  Path to the directory with meta-information of 'unstable' languages (that is,
+  languages generally lacking translators). Optional configuration.
+
 *project-root*
   Root directory of the data files for each project, including the backup
   files.

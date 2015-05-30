@@ -1,0 +1,6 @@
+##name Estonian
+##ownname Eesti keel
+##isocode et_EE
+##plural 0
+##grflangid 0x34
+##case g in sü

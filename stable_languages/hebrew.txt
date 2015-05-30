@@ -1,0 +1,7 @@
+##name Hebrew
+##ownname עברית
+##isocode he_IL
+##plural 0
+##grflangid 0x61
+##gender m f
+##case singular plural gen

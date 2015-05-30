@@ -1,0 +1,5 @@
+##name Maltese
+##ownname Malti
+##isocode mt_MT
+##plural 12
+##grflangid 0x09

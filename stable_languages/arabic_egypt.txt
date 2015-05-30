@@ -1,0 +1,5 @@
+##name Arabic (Egypt)
+##ownname Arabic (Egypt)
+##isocode ar_EG
+##plural 1
+##grflangid 0x14

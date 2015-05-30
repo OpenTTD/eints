@@ -1,0 +1,5 @@
+##name English (US)
+##ownname English (US)
+##isocode en_US
+##plural 0
+##grflangid 0x00

@@ -1,0 +1,5 @@
+##name Persian
+##ownname فارسی
+##isocode fa_IR
+##plural 0
+##grflangid 0x62

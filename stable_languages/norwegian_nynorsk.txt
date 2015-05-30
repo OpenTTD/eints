@@ -1,0 +1,7 @@
+##name Norwegian (Nynorsk)
+##ownname Norsk (nynorsk)
+##isocode nn_NO
+##plural 0
+##grflangid 0x0e
+##gender masculine feminine neuter
+##case small

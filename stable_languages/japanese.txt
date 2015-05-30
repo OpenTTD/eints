@@ -1,0 +1,5 @@
+##name Japanese
+##ownname 日本語
+##isocode ja_JP
+##plural 1
+##grflangid 0x39

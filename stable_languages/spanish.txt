@@ -1,0 +1,6 @@
+##name Spanish
+##ownname Español (ES)
+##isocode es_ES
+##plural 0
+##grflangid 0x04
+##gender m f

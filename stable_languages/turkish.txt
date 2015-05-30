@@ -1,0 +1,6 @@
+##name Turkish
+##ownname Türkçe
+##isocode tr_TR
+##plural 1
+##grflangid 0x3e
+##case tamlanan

@@ -1,0 +1,5 @@
+##name Macedonian
+##ownname Македонски
+##isocode mk_MK
+##plural 0
+##grflangid 0x26

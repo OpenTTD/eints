@@ -1,0 +1,5 @@
+##name Chinese (Traditional)
+##ownname 繁體中文
+##isocode zh_TW
+##plural 1
+##grflangid 0x0c

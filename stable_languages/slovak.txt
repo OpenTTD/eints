@@ -1,0 +1,7 @@
+##name Slovak
+##ownname Slovensky
+##isocode sk_SK
+##plural 10
+##grflangid 0x16
+##gender m z s
+##case g

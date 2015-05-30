@@ -1,0 +1,5 @@
+##name Ido
+##ownname Ido
+##isocode io_IO
+##plural 0
+##grflangid 0x06

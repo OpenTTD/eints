@@ -1,0 +1,5 @@
+##name Danish
+##ownname Dansk
+##isocode da_DK
+##plural 0
+##grflangid 0x2d

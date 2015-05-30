@@ -1,0 +1,7 @@
+##name Ukrainian
+##ownname Українська
+##isocode uk_UA
+##plural 6
+##grflangid 0x33
+##gender m f s mn
+##case r d z

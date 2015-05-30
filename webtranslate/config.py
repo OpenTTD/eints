@@ -71,6 +71,12 @@ class Config:
     @ivar authentication: Method of authentication, either C{'development'}. C{'redmine'} or C{'ldap'}.
     @type authentication: C{str}
 
+    @ivar stable_languages_path: Directory for meta data files of stable languages.
+    @type stable_languages_path: C{str} or C{None}
+
+    @ivar unstable_languages_path: Directory for meta data files of unstable languages (lacking sufficient translators).
+    @type unstable_languages_path: C{str} or C{None}
+
     @ivar project_root: Root directory of the web translation service.
     @type project_root: C{str}
 
@@ -101,6 +107,8 @@ class Config:
     def __init__(self, config_path):
         self.config_path = config_path
         self.language_file_size = 10000
+        self.stable_languages_path = None
+        self.unstable_languages_path = None
         self.project_root = None
         self.num_backup_files = 5
         self.max_number_changes = 5
@@ -129,6 +137,14 @@ class Config:
         if self.authentication not in ('development', 'redmine', 'ldap'):
             print("Incorrect authentication in the configuration, aborting!")
             sys.exit(1)
+
+        self.stable_languages_path = get_subnode_text(cfg, 'stable-languages')
+        if self.stable_languages_path == "":
+            self.stable_languages_path = None
+
+        self.unstable_languages_path = get_subnode_text(cfg, 'unstable-languages')
+        if self.unstable_languages_path == "":
+            self.unstable_languages_path = None
 
         self.project_root = get_subnode_text(cfg, 'project-root')
         if self.project_root is None or self.project_root == "":

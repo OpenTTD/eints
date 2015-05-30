@@ -1,0 +1,6 @@
+##name Faroese
+##ownname Føroyskt
+##isocode fo_FO
+##plural 0
+##grflangid 0x12
+##gender m f n

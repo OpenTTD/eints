@@ -1,0 +1,6 @@
+##name French
+##ownname Français
+##isocode fr_FR
+##plural 2
+##grflangid 0x03
+##gender m m2 f
