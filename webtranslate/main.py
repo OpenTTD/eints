@@ -1,7 +1,7 @@
 """
 Main program.
 """
-from webtranslate import bottle, protect, config, static, users
+from webtranslate import bottle, protect, config, static, users, project_type
 from webtranslate.newgrf import language_info
 from webtranslate.pages import root
 from webtranslate.pages import projects
@@ -34,9 +34,18 @@ def run():
             languages.append(lang)
 
     if config.cfg.unstable_languages_path is not None:
-        for lang in language_info.load_dir(config.cfg.unstable_languages_path):
-            lang.is_stable = False
-            languages.append(lang)
+        # Check if any allowed project type uses unstable languages before loading them.
+        unstable_used = False
+        for ptype_name in config.cfg.project_types:
+            ptype = project_type.project_types.get(ptype_name)
+            if ptype is not None and ptype.allow_unstable_lng:
+                unstable_used = True
+                break
+
+        if unstable_used:
+            for lang in language_info.load_dir(config.cfg.unstable_languages_path):
+                lang.is_stable = False
+                languages.append(lang)
 
     language_info.set_all_languages(languages)
 
