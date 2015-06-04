@@ -441,7 +441,6 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
         if projtype.allow_case or case == '':
             transl_cases.append(TransLationCase(case, tranls, related_cases[case]))
 
-    transl_cases.sort(key=lambda tc: tc.case)
     return template('string_form', proj_name = prjname, pdata = pdata,
                     lname = lngname, sname = sname, tcs = transl_cases)
 

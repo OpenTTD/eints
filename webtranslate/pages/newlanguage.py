@@ -120,7 +120,6 @@ def make_language_post(userauth, prjname, lngname):
 
     if projtype.allow_case:
         lng.case = lng_def.case
-        lng.case.sort()
     else:
         lng.case = ['']
 

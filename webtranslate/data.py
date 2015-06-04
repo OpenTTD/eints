@@ -877,8 +877,7 @@ def load_language(xloader, projtype, node):
     if not projtype.allow_case or case is None or case == '':
         lng.case = ['']
     else:
-        lng.case = case.split(' ') + ['']
-        lng.case.sort()
+        lng.case = [''] + case.split(' ')
 
     lng.custom_pragmas = {}
     for pragma_node in loader.get_child_nodes(node, 'pragma'):
