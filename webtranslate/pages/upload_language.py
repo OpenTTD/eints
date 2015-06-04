@@ -171,8 +171,8 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                 del lang.changes[sn] # Old string, delete
                 lng_modified = True
             for sn in not_seen:
+                # Missing translation are not saved, so no set_modified here.
                 lang.changes[sn] = []
-                lng_modified = True
 
             if lng_modified:
                 lang.set_modified()
