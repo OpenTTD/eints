@@ -115,6 +115,12 @@ def make_langfile(pdata, base_lng, lng, add_func):
                 add_func(lines, skel_type, '##gender ' + ' '.join(lng.gender))
             continue
 
+        if skel_type == 'pragma':
+            content = lng.custom_pragmas.get(skel_value)
+            if content is not None:
+                add_func(lines, skel_type, content)
+            continue
+
     return '\n'.join(lines) + '\n'
 
 

@@ -884,6 +884,10 @@ def parse_annotated_langfile(data):
             parsed.append(('text', line[8:]))
             continue
 
+        if line.startswith('pragma:'):
+            parsed.append(('text', line[7:]))
+            continue
+
         if line.startswith('gender:') or line.startswith('plural:'):
             parsed.append(('text', line[7:]))
             continue

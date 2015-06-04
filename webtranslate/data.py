@@ -478,6 +478,7 @@ class Project:
                     - 'plural'    Plural number
                     - 'case'      Cases line
                     - 'gender'    Gender line
+                    - 'pragma'    Custom pragma with specific name
     """
     def __init__(self, human_name, projtype, url=''):
         self.human_name = human_name
@@ -668,6 +669,9 @@ def load_skeleton(xloader, node):
             column = convert_num(loader.get_opt_DOMattr(lnode, 'column', '40'), 40)
             name = lnode.getAttribute('name')
             if name is not None: skeleton.append(('string', (column, name)))
+        elif lnode.tagName == 'pragma':
+            name = lnode.getAttribute('name')
+            skeleton.append(('pragma', name))
         elif lnode.tagName in ('grflangid', 'plural', 'case', 'gender'):
             skeleton.append((lnode.tagName, ''))
     return skeleton
@@ -728,6 +732,8 @@ def save_skeleton(xsaver, skel):
             column, sname = sparm
             node.setAttribute('name', sname)
             node.setAttribute('column', str(column))
+        elif stp == 'pragma':
+            node.setAttribute('name', sparm)
 
         root.appendChild(node)
     return root
@@ -740,6 +746,9 @@ class Language:
 
     @ivar name: Name of the language (isocode).
     @type name: C{str}
+
+    @ivar custom_pragmas: Custom pragmas, which are preserved when uploading languages.
+    @type custom_pragmas: C{dict} of C{str} to C{str}
 
     @ivar grflangid: Language id.
     @type grflangid: C{int}
@@ -765,6 +774,7 @@ class Language:
     """
     def __init__(self, name):
         self.name = name
+        self.custom_pragmas = {}
         self.grflangid = 0x7F
         self.plural = None
         self.gender = []
@@ -810,6 +820,16 @@ def save_language(xsaver, projtype, lang):
     cases = [c for c in lang.case if c != '']
     if len(cases) > 0:
         node.setAttribute('cases', " ".join(cases))
+
+    # Sort the custom pragmas.
+    custom_pragmas = list(lang.custom_pragmas.items())
+    custom_pragmas.sort()
+    for pname, pvalue in custom_pragmas:
+        pragma_node = xsaver.doc.createElement('pragma')
+        pragma_node.setAttribute('name', pname)
+        pragma_node.appendChild(xsaver.doc.createTextNode(pvalue))
+        node.appendChild(pragma_node)
+
     # Sort the strings of the language.
     changes = list(lang.changes.items())
     changes.sort()
@@ -859,6 +879,13 @@ def load_language(xloader, projtype, node):
     else:
         lng.case = case.split(' ') + ['']
         lng.case.sort()
+
+    lng.custom_pragmas = {}
+    for pragma_node in loader.get_child_nodes(node, 'pragma'):
+        pname = pragma_node.getAttribute('name')
+        pvalue = loader.collect_text_DOM(pragma_node)
+        pvalue = language_file.sanitize_text(pvalue)
+        lng.custom_pragmas[pname] = pvalue
 
     lng.changes = {}
     for ch_node in loader.get_child_nodes(node, 'change'):

@@ -726,6 +726,9 @@ class NewGrfData:
     @ivar language_data: Technical information about the language definition.
     @type language_data: L{LanguageData} or C{None}
 
+    @ivar custom_pragmas: Custom pragmas, which are preserved when uploading languages.
+    @type custom_pragmas: C{dict} of C{str} to C{str}
+
     @ivar plural: Plural type, if specified.
     @type plural: C{int} (0..12 inclusive) or C{None}
 
@@ -744,6 +747,7 @@ class NewGrfData:
                      - 'plural':    Plural number
                      - 'case':      Cases line
                      - 'gender':    Gender line
+                     - 'pragma':    Custom pragma with specific name
 
     @ivar strings: Strings with their line number, name and text.
     @type strings: C{list} of L{StringValue}
@@ -754,6 +758,7 @@ class NewGrfData:
     def __init__(self):
         self.grflangid = None
         self.language_data = None
+        self.custom_pragmas = {}
         self.plural = None
         self.gender = []
         self.case = ['']
@@ -820,6 +825,7 @@ def handle_pragma(projtype, lnum, line, data):
         # Is the argument a known text-name?
         for entry in language_info.all_languages:
             if entry.isocode == line[1]:
+                data.skeleton.append(('grflangid', ''))
                 data.set_lang(entry)
                 return
 
@@ -831,6 +837,7 @@ def handle_pragma(projtype, lnum, line, data):
             return
         for entry in language_info.all_languages:
             if entry.grflangid == val:
+                data.skeleton.append(('grflangid', ''))
                 data.set_lang(entry)
                 return
         # Don't know what it is.
@@ -848,6 +855,7 @@ def handle_pragma(projtype, lnum, line, data):
         if val < 0 or val > 12:
             data.add_error(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
             return
+        data.skeleton.append(('plural', ''))
         data.plural = val
         return
 
@@ -858,6 +866,7 @@ def handle_pragma(projtype, lnum, line, data):
         if len(line) == 1:
             data.add_error(ErrorMessage(ERROR, lnum, "##gender takes a non-empty list of gender names"))
             return
+        data.skeleton.append(('gender', ''))
         data.gender = line[1:]
         return
 
@@ -868,10 +877,12 @@ def handle_pragma(projtype, lnum, line, data):
         if len(line) == 1:
             data.add_error(ErrorMessage(ERROR, lnum, "##case takes a non-empty list of case names"))
             return
+        data.skeleton.append(('case', ''))
         data.case = [''] + line[1:]
         return
 
-    data.add_error(ErrorMessage(ERROR, lnum, "Unknown pragma '{}'".format(line[0])))
+    data.skeleton.append(('pragma', line[0]))
+    data.custom_pragmas[line[0]] = ' '.join(line)
     return
 # }}}
 
@@ -901,15 +912,6 @@ def load_language_file(projtype, handle, max_size, lng_data = None):
     seen_strings = False
     skeleton_strings = set()
 
-    # Ensure the skeleton has all language properties.
-    if projtype.has_grflangid:
-        data.skeleton.append(('grflangid', ''))
-    data.skeleton.append(('plural', ''))
-    if projtype.allow_gender:
-        data.skeleton.append(('gender', ''))
-    if projtype.allow_case:
-        data.skeleton.append(('case', ''))
-
     if not projtype.has_grflangid and lng_data is not None:
         # If the project has no ##grflangid support, and there is lng_data provided, use it.
         data.set_lang(lng_data)
@@ -936,6 +938,30 @@ def load_language_file(projtype, handle, max_size, lng_data = None):
         if line == "" or line.startswith(';') or line.startswith('#'):
             data.skeleton.append(('literal', line))
             continue
+
+        if not seen_strings:
+            # Add obligatory but missing pragmas to the skeleton
+            keys = set(s[0] for s in data.skeleton)
+
+            # Stuff to put in front
+            missing = []
+            if projtype.has_grflangid and 'grflangid' not in keys:
+                missing.append(('grflangid', ''))
+            data.skeleton[:0] = missing
+
+            # Stuff to put at the end
+            missing = []
+            if 'plural' not in keys:
+                missing.append(('plural', ''))
+            if projtype.allow_gender and 'gender' not in keys:
+                missing.append(('gender', ''))
+            if projtype.allow_case and 'case' not in keys:
+                missing.append(('case', ''))
+
+            pos = len(data.skeleton)
+            while pos > 0 and data.skeleton[pos - 1][0] == 'literal':
+                pos -= 1
+            data.skeleton[pos:pos] = missing
 
         m = string_pat.match(line) # Regular string line?
         if m:

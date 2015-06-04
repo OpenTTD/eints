@@ -337,6 +337,7 @@ def copy_lng_properties(ng_data, lng):
     @param lng: Language to update.
     @type  lng: L{Language}
     """
+    lng.custom_pragmas = ng_data.custom_pragmas
     lng.plural = ng_data.plural
     lng.gender = ng_data.gender
     lng.case   = ng_data.case
