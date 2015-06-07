@@ -8,12 +8,12 @@ from webtranslate.newgrf import language_info, language_file
 # {{{ class ProjectStorage
 # Recognized types of project disk storage.
 STORAGE_ONE_FILE = 'One large file for the entire project'
-STORAGE_SEPARATE_LANGUAGES = 'Directory with root.xml and a set of language files'
+STORAGE_SEPARATE_LANGUAGES = 'Directory with project_data.[xml|json] and a set of language files'
 
 class ProjectStorage:
     """
     @ivar path: Path to the base of the stored project.
-                For C{STORAGE_ONE_FILE}, the path is the name of the .xml file.
+                For C{STORAGE_ONE_FILE}, the path is the name of the .[xml|json] file.
                 For C{STORAGE_SEPARATE_LANGUAGES}, the path is the directory path.
     @type path: C{str}
 
@@ -25,12 +25,16 @@ class ProjectStorage:
 
     @ivar storage_type: Type of storage of the project at the disk.
     @type storage_type: One of L{STORAGE_ONE_FILE} or L{STORAGE_SEPARATE_LANGUAGES}
+
+    @ivar data_format: Used data format.
+    @type data_format: C{str} (C{xml} or C{json}
     """
-    def __init__(self, path, name, languages, storage_type):
+    def __init__(self, path, name, languages, storage_type, data_format):
         self.path = path
         self.name = name
         self.languages = languages
         self.storage_type = storage_type
+        self.data_format = data_format
 # }}}
 
 # {{{ def get_subnode_text(node, tag):
@@ -89,6 +93,9 @@ class Config:
     @ivar storage_format: Preferred storage format at the disk.
     @type storage_format: One of C{STORAGE_ONE_FILE} or C{STORAGE_SEPARATE_LANGUAGES}
 
+    @ivar data_format: Data format of the files.
+    @type data_format: C{str}, C{xml} or C{json}
+
     @ivar num_backup_files: Number of backup files kept for a project.
     @type num_backup_files: C{int}
 
@@ -114,6 +121,7 @@ class Config:
         self.max_number_changes = 5
         self.min_number_changes = 1
         self.change_stabilizing_time = 1000000 # 11 days, 13 hours, 46 minutes, and 40 seconds.
+        self.data_format = "xml"
 
     def load_settings_from_xml(self):
         """
@@ -359,14 +367,14 @@ class ProjectCache:
         # Construct a new project from scratch.
         storage = cfg.storage_format
         if storage == STORAGE_ONE_FILE:
-            path = os.path.join(self.project_root, disk_name + ".xml")
+            path = os.path.join(self.project_root, disk_name + "." + cfg.data_format)
         else:
             path = os.path.join(self.project_root, disk_name)
             if not os.path.isdir(path):
                 assert not os.path.exists(path)
                 os.mkdir(path)
 
-        proj_store = ProjectStorage(path, disk_name, [], cfg.storage_format)
+        proj_store = ProjectStorage(path, disk_name, [], cfg.storage_format, cfg.data_format)
         pmd = ProjectMetaData(proj_store, human_name)
         self.projects[disk_name] = pmd
         pmd.pdata = data.Project(human_name, projtype, url)
@@ -380,7 +388,7 @@ class ProjectCache:
         """
         Load a project.
 
-        @param proj_name: Name of the project (filename without .xml extension)
+        @param proj_name: Name of the project (filename without extension)
         @type  proj_name: C{str}
 
         @return: The project, or C{None}
@@ -465,8 +473,11 @@ class ProjectMetaData:
     @ivar path: Path of the project file at disk (with extension).
     @type path: C{str}
 
-    @ivar storage_type: Format used to store the project.
+    @ivar storage_type: Files used to store the project.
     @type storage_type: C{str}, either L{STORAGE_ONE_FILE} or L{STORAGE_SEPARATE_LANGUAGES}
+
+    @ivar data_format: Data format used to store the data.
+    @type data_format: C{str}, either 'xml', or 'json'
     """
     def __init__(self, proj_store, human_name=None):
         self.pdata = None
@@ -488,25 +499,34 @@ class ProjectMetaData:
 
         self.path = proj_store.path
         self.storage_type = proj_store.storage_type
+        self.data_format = proj_store.data_format
 
         if self.storage_type == STORAGE_SEPARATE_LANGUAGES:
-            assert not self.path.endswith('.xml')
+            assert not self.path.endswith('.xml') and not self.path.endswith('.json')
         else:
             assert self.storage_type == STORAGE_ONE_FILE
-            assert self.path.endswith('.xml')
+            assert self.path.endswith('.xml') or self.path.endswith('.json')
 
     def load(self):
         assert self.pdata is None
 
         if self.storage_type == STORAGE_ONE_FILE:
-            xloader = data.XmlLoader(False)
+            if self.data_format == 'xml':
+                xloader = data.XmlLoader(False)
+            else:
+                xloader = data.JsonLoader(False)
+
             self.pdata = xloader.load_project(self.path)
         else:
             assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
-            xloader = data.XmlLoader(True)
-            self.pdata = xloader.load_project(os.path.join(self.path, "project_data.xml"))
+            if self.data_format == 'xml':
+                xloader = data.XmlLoader(True)
+            else:
+                xloader = data.JsonLoader(True)
+
+            self.pdata = xloader.load_project(os.path.join(self.path, "project_data." + self.data_format))
             for lng_name in self.overview:
-                path = os.path.join(self.path, lng_name + ".xml")
+                path = os.path.join(self.path, lng_name + "." + self.data_format)
                 self.pdata.languages[lng_name] = xloader.load_language(self.pdata.projtype, path)
 
             # Check that we have a base language, else drop translations.
@@ -526,7 +546,7 @@ class ProjectMetaData:
 
     def save(self):
         """
-        Save project data into an xml file, and manage the backup files.
+        Save project data into a data file, and manage the backup files.
         """
         if self.storage_type == STORAGE_ONE_FILE:
             needs_save = self.pdata.modified
@@ -537,7 +557,11 @@ class ProjectMetaData:
                         break
 
             if needs_save:
-                xsaver = data.XmlSaver(False, True)
+                if self.data_format == 'xml':
+                    xsaver = data.XmlSaver(False, True)
+                else:
+                    xsaver = data.JsonSaver(False)
+
                 xsaver.save_project(self.pdata, self.path + ".new")
                 rotate_files(self.path)
 
@@ -547,16 +571,20 @@ class ProjectMetaData:
         else:
             # Project directory should already exist, created as part of project creation.
             assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
-            xsaver = data.XmlSaver(True, False)
+            if self.data_format == 'xml':
+                xsaver = data.XmlSaver(True, False)
+            else:
+                xsaver = data.JsonSaver(True)
+
             if self.pdata.modified:
-                path = os.path.join(self.path, "project_data.xml")
+                path = os.path.join(self.path, "project_data." + self.data_format)
                 xsaver.save_project(self.pdata, path + ".new")
                 rotate_files(path)
                 self.pdata.modified = False
 
             for lng in self.pdata.languages.values():
                 if lng.modified:
-                    path = os.path.join(self.path, lng.name + ".xml")
+                    path = os.path.join(self.path, lng.name + "." + self.data_format)
                     xsaver.save_language(self.pdata.projtype, lng, path + ".new")
                     rotate_files(path)
                     lng.modified = False
@@ -663,10 +691,16 @@ def find_project_files(root):
     for name in os.listdir(root):
         path = os.path.join(root, name)
         if os.path.isfile(path):
-            if not name.endswith('.xml'): continue
+            if name.endswith('.xml'):
+                name = name[:-4]
+                data_format = 'xml'
+            elif name.endswith('.json'):
+                name = name[:-5]
+                data_format = 'json'
+            else:
+                continue
 
-            name = name[:-4]
-            projects.append(ProjectStorage(path, name, [], STORAGE_ONE_FILE))
+            projects.append(ProjectStorage(path, name, [], STORAGE_ONE_FILE, data_format))
             continue
 
         elif os.path.isdir(path):
@@ -674,21 +708,27 @@ def find_project_files(root):
                 # Ignore obsolete 'projects' sub-directory, projects should be moved.
                 continue
 
-            found_projdata = False
+            found_format = None
             found_languages = []
             for sub_name in os.listdir(path):
                 sub_path = os.path.join(path, sub_name)
-                if not sub_name.endswith('.xml'): continue
+                if sub_name.endswith('.xml'):
+                    sub_name = sub_name[:-4]
+                    data_format = 'xml'
+                elif sub_name.endswith('.json'):
+                    sub_name = sub_name[:-5]
+                    data_format = 'json'
+                else:
+                    continue
 
-                sub_name = sub_name[:-4]
                 if sub_name == 'project_data':
-                    found_projdata = True
+                    found_format = data_format
                 elif sub_name in language_info.isocode:
                     found_languages.append(sub_name)
 
-            if found_projdata:
+            if found_format is not None:
                 # Languages may be empty (in case the project has no base language).
-                projects.append(ProjectStorage(path, name, found_languages, STORAGE_SEPARATE_LANGUAGES))
+                projects.append(ProjectStorage(path, name, found_languages, STORAGE_SEPARATE_LANGUAGES, found_format))
 
     pnames = {}
     found_error = False
@@ -727,7 +767,7 @@ def may_create_project(root, name):
     path = os.path.join(root, name)
 
     # Does a L{STORAGE_ONE_FILE} project with the given name exists?
-    if os.path.exists(path + ".xml"):
+    if os.path.exists(path + ".xml") or os.path.exists(path + '.json'):
         return False
 
     # Does a L{STORAGE_SEPARATE_LANGUAGES} project with the give name exists?
