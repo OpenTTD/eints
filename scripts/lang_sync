@@ -90,6 +90,9 @@ class UserConfig:
     @ivar lang_dir: Directory containing the language files relative to the working directory.
     @type lang_dir: C{str}
 
+    @ivar unstable_lang_dir: Directory containing the unstable language files relative to the working directory.
+    @type unstable_lang_dir: C{str}
+
     @ivar lang_ext: Extension used by language files.
     @type lang_ext: C{str}
 
@@ -121,6 +124,7 @@ class UserConfig:
         self.project_desc = None
         self.project_url = ''
         self.lang_dir = "lang"
+        self.unstable_lang_dir = None
         self.lang_ext = ".lng"
         self.verbose = False
         self.no_write = False
@@ -471,39 +475,47 @@ def get_local_languages():
     if not os.path.isdir(user_cfg.lang_dir):
         print("Error: \"{}\" is not a directory. (Is the --lang-dir option correct?)".format(user_cfg.lang_dir))
         sys.exit(1)
+    if user_cfg.unstable_lang_dir is not None and not os.path.isdir(user_cfg.lang_dir):
+        print("Error: \"{}\" is not a directory. (Is the --unstable-lang-dir option correct?)".format(user_cfg.unstable_lang_dir))
+        sys.exit(1)
 
-    for fname in os.listdir(user_cfg.lang_dir):
-        if not fname.endswith(user_cfg.lang_ext):
-            continue
-        path = os.path.join(user_cfg.lang_dir, fname)
-        verbose_msg = "File \"{}\" matches extension".format(path)
+    searchpaths = [ user_cfg.lang_dir ]
+    if user_cfg.unstable_lang_dir is not None:
+        searchpaths.append(user_cfg.unstable_lang_dir)
 
-        # Try reading the grflangid from the file.
-        grflangid = None
-        handle = open(path, 'r', encoding = 'utf-8')
-        for line in handle:
-            if line.startswith(utf8_bom):
-                line = line[len(utf8_bom):]
-            m = grflangid_pattern.match(line)
-            if m:
-                grflangid = int(m.group(1), 16)
-                break
+    for spath in searchpaths:
+        for fname in os.listdir(spath):
+            if not fname.endswith(user_cfg.lang_ext):
+                continue
+            path = os.path.join(spath, fname)
+            verbose_msg = "File \"{}\" matches extension".format(path)
 
-        handle.close()
+            # Try reading the grflangid from the file.
+            grflangid = None
+            handle = open(path, 'r', encoding = 'utf-8')
+            for line in handle:
+                if line.startswith(utf8_bom):
+                    line = line[len(utf8_bom):]
+                m = grflangid_pattern.match(line)
+                if m:
+                    grflangid = int(m.group(1), 16)
+                    break
 
-        # If not found, try to derive it from the filename.
-        if grflangid is None:
-            ldata = get_languagedata_by_filename(fname[:-len(user_cfg.lang_ext)])
-        else:
-            ldata = get_languagedata_by_grflangid(grflangid)
+            handle.close()
 
-        if ldata is not None:
-            result.append(LocalLanguageInfo(path, ldata.isocode))
-            continue
+            # If not found, try to derive it from the filename.
+            if grflangid is None:
+                ldata = get_languagedata_by_filename(fname[:-len(user_cfg.lang_ext)])
+            else:
+                ldata = get_languagedata_by_grflangid(grflangid)
 
-        if user_cfg.verbose:
-            verbose_msg = "File \"{}\" matches extension, but cannot derive a language from it.".format(path)
-            print(verbose_msg)
+            if ldata is not None:
+                result.append(LocalLanguageInfo(path, ldata.isocode))
+                continue
+
+            if user_cfg.verbose:
+                verbose_msg = "File \"{}\" matches extension, but cannot derive a language from it.".format(path)
+                print(verbose_msg)
 
 
     local_files_cache = result
@@ -960,7 +972,14 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
                 path = el.isocode
             else:
                 path = ldata.filename
-            path = user_cfg.lang_dir + os.sep + path + user_cfg.lang_ext
+
+            if ldata.is_stable:
+                path = user_cfg.lang_dir + os.sep + path + user_cfg.lang_ext
+            elif user_cfg.unstable_lang_dir is not None:
+                path = user_cfg.unstable_lang_dir + os.sep + path + user_cfg.lang_ext
+            else:
+                continue
+                
             action = "Created"
             current_strings = set()
 
@@ -1054,6 +1073,10 @@ Getting project information:
     Path of the directory containing the language files at the local disc.
     (Default: "lang")
 
+--unstable-lang-dir=UNSTABLE_LANG_DIR
+    Path of the directory containing the unstable language files at the local disc.
+    (Default: None, no unstable languages are downloaded)
+
 --lang-file-ext=LANG_EXT
     Filename suffix used by the language files. (Default: ".lng")
 
@@ -1096,7 +1119,7 @@ def run():
 
     long_opts = ["user-password-file=", "user=", "password=",
                  "not-interactive", "base-url=", "project=", "project-type=",
-                 "project-desc=", "project-url=", "lang-dir=",
+                 "project-desc=", "project-url=", "lang-dir=", "unstable-lang-dir=",
                  "base-language=",
                  "lang-file-ext=", "credits=", "help", "verbose", "no-write"]
 
@@ -1123,6 +1146,9 @@ def run():
             continue
         if opt == '--lang-dir':
             user_cfg.lang_dir = val
+            continue
+        if opt == '--unstable-lang-dir':
+            user_cfg.unstable_lang_dir = val
             continue
         if opt == '--lang-file-ext':
             user_cfg.lang_ext = val
