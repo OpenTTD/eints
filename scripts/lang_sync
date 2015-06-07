@@ -368,15 +368,11 @@ class EintsLanguageInfo:
 
     @ivar last_change: Last change of the language, if it exists.
     @type last_change: C{None} or C{str}
-
-    @ivar grf_langid: Id of the language according to the NewGRF specification.
-    @type grf_langid: C{int}
     """
-    def __init__(self, isocode, parent_lang, last_change, grf_langid):
+    def __init__(self, isocode, parent_lang, last_change):
         self.isocode = isocode
         self.parent_lang = parent_lang
         self.last_change = last_change
-        self.grf_langid = grf_langid
 # }}}
 # {{{ def get_eints_languages():
 eints_files_cache = None
@@ -397,23 +393,25 @@ def get_eints_languages():
     result = []
     data = get_data(build_url('/download-list/' + user_cfg.project))
     if data is None:
-        print("Error: Could not download the list of languages from Eints.")
+        print("Error: Could not download the list of project languages from Eints.")
         sys.exit(1)
-    for line in data.split('\n'):
-        parts = line.split(',')
-        if len(parts) != 4:
+
+    reader = csv.DictReader(io.StringIO(data), dialect='unix')
+    for line in reader:
+        isocode = line.get('isocode')
+        if isocode is None or len(isocode) == 0:
+            continue;
+
+        plang = line.get('base_isocode')
+        if plang is None:
             continue
-        lname, plang, lstchg, langid = parts
+        if len(plang) == 0:
+            plang = None
 
-        plang = plang.strip()
-        if len(plang) == 0: plang = None
+        last_change = line.get('changetime')
+        # XXX Parse and validate the last change date
 
-        m = hex_pat.match(langid)
-        if not m:
-            continue
-
-        # XXX Parse the last change data (lstchg)
-        el = EintsLanguageInfo(lname, plang, None, int(langid, 16))
+        el = EintsLanguageInfo(isocode, plang, None)
         result.append(el)
 
     eints_files_cache = result
@@ -428,7 +426,7 @@ def get_eints_languages():
                     kind = "(base language)"
                 else:
                     kind = "(translation of {})".format(el.parent_lang)
-                print("\tisocode: {}, lang-id: 0x{:02x} {}".format(el.isocode, el.grf_langid, kind))
+                print("\tisocode: {} {}".format(el.isocode, kind))
             print()
 
     return eints_files_cache

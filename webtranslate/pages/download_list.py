@@ -1,7 +1,9 @@
 """
 Download a list of existing languages.
 Example::
-    en_UK,56767567,http://example.org/download/<prjname>/en_UK
+    isocode,base_isocode,changetime
+    ja_JP,en_GB,2015-06-07T12:36:47.1Z
+    en_GB,,2015-06-07T12:33:35Z
 
 """
 from webtranslate.bottle import route, abort, response
@@ -36,7 +38,7 @@ def download_list(userauth, prjname):
 
     pdata = pmd.pdata
     response.content_type = 'text/plain; charset=UTF-8'
-    lines = []
+    lines = ['isocode,base_isocode,changetime']
     for lng, ldata in pdata.languages.items():
         tstamp = get_newest_change(ldata)
         if tstamp is None:
@@ -49,7 +51,7 @@ def download_list(userauth, prjname):
         else:
             parent_lng = pdata.base_language
 
-        line = "{},{},{},0x{:02x}".format(ldata.name, parent_lng, text, ldata.grflangid)
+        line = "{},{},{}".format(ldata.name, parent_lng, text)
         lines.append(line)
 
     return '\n'.join(lines) + '\n'
