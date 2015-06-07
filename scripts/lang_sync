@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import getopt, re, sys, getpass, codecs, os
+import getopt, re, sys, getpass, codecs, os, csv, io
 import urllib.request
 
 KNOWN_PROJECT_TYPES = ["game-script", "newgrf"]
@@ -649,7 +649,7 @@ def perform_upload(ll_files, is_base):
             print("Error: Failed to upload \"{}\".".format(ll.path_name))
 # }}}
 
-# {{{ LanguageData, language_table
+# {{{ LanguageData, language_table, get_language_data
 class LanguageData:
     """
     Language information.
@@ -662,78 +662,65 @@ class LanguageData:
 
     @ivar filename: Base filename of the language.
     @type filename: C{str}
+
+    @ivar is_stable: Whether the language is considered stable.
+    @type is_stable: C{bool}
     """
-    def __init__(self, grflangid, isocode, filename):
+    def __init__(self, grflangid, isocode, filename, is_stable):
         self.grflangid = grflangid
         self.isocode = isocode
         self.filename = filename
+        self.is_stable = is_stable
 
-language_table = [
-    LanguageData(0x1b, "af_ZA", "afrikaans"), # Afrikaans
-    LanguageData(0x14, "ar_EG", "arabic_egypt"), # Arabic (Egypt)
-    LanguageData(0x21, "eu_ES", "basque"), # Basque
-    LanguageData(0x10, "be_BY", "belarusian"), # Belarusian
-    LanguageData(0x37, "pt_BR", "brazilian_portuguese"), # Portuguese (Brazilian)
-    LanguageData(0x18, "bg_BG", "bulgarian"), # Bulgarian
-    LanguageData(0x22, "ca_ES", "catalan"), # Catalan
-    LanguageData(0x0b, "cv_RU", "chuvash"), # Chuvash
-    LanguageData(0x38, "hr_HR", "croatian"), # Croatian
-    LanguageData(0x15, "cs_CZ", "czech"), # Czech
-    LanguageData(0x2d, "da_DK", "danish"), # Danish
-    LanguageData(0x1f, "nl_NL", "dutch"), # Dutch
-    LanguageData(0x3d, "en_AU", "english_au"), # English (AU)
-    LanguageData(0x01, "en_GB", "english"), # English (UK)
-    LanguageData(0x00, "en_US", "english_us"), # English (US)
-    LanguageData(0x05, "eo_EO", "esperanto"), # Esperanto
-    LanguageData(0x34, "et_EE", "estonian"), # Estonian
-    LanguageData(0x12, "fo_FO", "faroese"), # Faroese
-    LanguageData(0x35, "fi_FI", "finnish"), # Finnish
-    LanguageData(0x03, "fr_FR", "french"), # French
-    LanguageData(0x32, "fy_NL", "frisian"), # Frisian
-    LanguageData(0x13, "gd_GB", "gaelic"), # Scottish Gaelic
-    LanguageData(0x31, "gl_ES", "galician"), # Galician
-    LanguageData(0x02, "de_DE", "german"), # German
-    LanguageData(0x1e, "el_GR", "greek"), # Greek
-    LanguageData(0x61, "he_IL", "hebrew"), # Hebrew
-    LanguageData(0x24, "hu_HU", "hungarian"), # Hungarian
-    LanguageData(0x29, "is_IS", "icelandic"), # Icelandic
-    LanguageData(0x06, "io_IO", "ido"), # Ido
-    LanguageData(0x5a, "id_ID", "indonesian"), # Indonesian
-    LanguageData(0x08, "ga_IE", "irish"), # Irish
-    LanguageData(0x27, "it_IT", "italian"), # Italian
-    LanguageData(0x39, "ja_JP", "japanese"), # Japanese
-    LanguageData(0x3a, "ko_KR", "korean"), # Korean
-    LanguageData(0x66, "la_VA", "latin"), # Latin
-    LanguageData(0x2a, "lv_LV", "latvian"), # Latvian
-    LanguageData(0x2b, "lt_LT", "lithuanian"), # Lithuanian
-    LanguageData(0x23, "lb_LU", "luxembourgish"), # Luxembourgish
-    LanguageData(0x26, "mk_MK", "macedonian"), # Macedonian
-    LanguageData(0x3c, "ms_MY", "malay"), # Malay
-    LanguageData(0x09, "mt_MT", "maltese"), # Maltese
-    LanguageData(0x11, "mr_IN", "marathi"), # Marathi
-    LanguageData(0x2f, "nb_NO", "norwegian_bokmal"), # Norwegian (Bokmal)
-    LanguageData(0x0e, "nn_NO", "norwegian_nynorsk"), # Norwegian (Nynorsk)
-    LanguageData(0x62, "fa_IR", "persian"), # Persian
-    LanguageData(0x30, "pl_PL", "polish"), # Polish
-    LanguageData(0x36, "pt_PT", "portuguese"), # Portuguese
-    LanguageData(0x28, "ro_RO", "romanian"), # Romanian
-    LanguageData(0x07, "ru_RU", "russian"), # Russian
-    LanguageData(0x0d, "sr_RS", "serbian"), # Serbian
-    LanguageData(0x56, "zh_CN", "simplified_chinese"), # Chinese (Simplified)
-    LanguageData(0x16, "sk_SK", "slovak"), # Slovak
-    LanguageData(0x2c, "sl_SI", "slovenian"), # Slovenian
-    LanguageData(0x04, "es_ES", "spanish"), # Spanish
-    LanguageData(0x2e, "sv_SE", "swedish"), # Swedish
-    LanguageData(0x0a, "ta_IN", "tamil"), # Tamil
-    LanguageData(0x42, "th_TH", "thai"), # Thai
-    LanguageData(0x0c, "zh_TW", "traditional_chinese"), # Chinese (Traditional)
-    LanguageData(0x3e, "tr_TR", "turkish"), # Turkish
-    LanguageData(0x33, "uk_UA", "ukrainian"), # Ukrainian
-    LanguageData(0x5c, "ur_PK", "urdu"), # Urdu
-    LanguageData(0x54, "vi_VN", "vietnamese"), # Vietnamese
-    LanguageData(0x0f, "cy_GB", "welsh"), # Welsh
-]
+language_table = []
+
+filename_pattern = re.compile('[0-9a-zA-Z_]+$')
+
+def get_language_data():
+    data = get_data(build_url('/language-list'))
+    if data is None:
+        print("Error: Could not download the list of language definitions from Eints.")
+        sys.exit(1)
+
+    reader = csv.DictReader(io.StringIO(data), dialect='unix')
+    for l in reader:
+        filename = l.get('filename')
+        if filename is None or not filename_pattern.match(filename):
+            continue
+
+        isocode = l.get('isocode')
+        if isocode is None or len(isocode) == 0:
+            continue;
+
+        grflangid = l.get('grflangid')
+        if grflangid is None or not hex_pat.match(grflangid):
+            continue
+        grflangid = int(grflangid, 16)
+        
+        is_stable = l.get('is_stable')
+        if is_stable is None or is_stable not in ['True', 'False']:
+            continue
+        is_stable = is_stable == 'True'
+
+        language_table.append(LanguageData(grflangid, isocode, filename, is_stable))
 # }}}
+
+def get_languagedata_by_isocode(isocode):
+    """
+    Retrieve the language data from the table that matches the L{grflangid} parameter.
+
+    @param isocode: Isocode of the language.
+    @type  isocode: C{str}
+
+    @return: Language data, if available.
+    @rtype:  L{LanguageData} or C{None}
+    """
+    if len(language_table) == 0:
+        get_language_data()
+
+    for ld in language_table:
+        if ld.isocode == isocode: return ld
+    return None
 
 def get_languagedata_by_grflangid(grflangid):
     """
@@ -745,6 +732,9 @@ def get_languagedata_by_grflangid(grflangid):
     @return: Language data, if available.
     @rtype:  L{LanguageData} or C{None}
     """
+    if len(language_table) == 0:
+        get_language_data()
+
     for ld in language_table:
         if ld.grflangid == grflangid: return ld
     return None
@@ -759,6 +749,9 @@ def get_languagedata_by_filename(filename):
     @return: Language data, if available.
     @rtype:  L{LanguageData} or C{None}
     """
+    if len(language_table) == 0:
+        get_language_data()
+
     for ld in language_table:
         if ld.filename == filename: return ld
     return None
