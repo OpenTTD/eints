@@ -11,6 +11,9 @@ isocode = None
 
 class LanguageData:
     """
+    @ivar filename: Name of language file without extension.
+    @type filename: C{str}
+
     @ivar name: Name of the language in English.
     @type name: C{str}
 
@@ -35,7 +38,8 @@ class LanguageData:
     @ivar is_stable: Whether the language is considered to be 'stable'. Default C{True}.
     @type is_stable: C{bool}
     """
-    def __init__(self, found_lines):
+    def __init__(self, filename, found_lines):
+        self.filename = filename
         self.name = found_lines['name']
         self.ownname = found_lines['ownname']
         self.isocode = found_lines['isocode']
@@ -108,7 +112,7 @@ def parse_file(fname):
                 print(msg.format(fname, ll.name))
         sys.exit(1)
 
-    return LanguageData(found_lines)
+    return LanguageData(os.path.splitext(os.path.basename(fname))[0], found_lines)
 
 def load_dir(directory):
     """
