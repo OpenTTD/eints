@@ -520,6 +520,7 @@ class ProjectMetaData:
             else:
                 xloader = data.JsonLoader(False)
 
+            del self.pdata
             self.pdata = xloader.load_project(self.path)
         else:
             assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
@@ -528,6 +529,7 @@ class ProjectMetaData:
             else:
                 xloader = data.JsonLoader(True)
 
+            del self.pdata
             self.pdata = xloader.load_project(os.path.join(self.path, "project_data." + self.data_format))
             for lng_name in self.overview:
                 path = os.path.join(self.path, lng_name + "." + self.data_format)
