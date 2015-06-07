@@ -96,9 +96,6 @@ class UserConfig:
     @ivar base_lang: Grf language id of the base language, if available.
     @type base_lang: C{int} or C{None}
 
-    @ivar langfile_map: Name of the mapping file from language grf id to base filename, if available.
-    @type langfile_map: C{str} or C{None}
-
     @ivar credits_file: If available, path to a file for writing credits for changes in the language files.
     @type credits_file: C{str} or C{None}
 
@@ -118,7 +115,6 @@ class UserConfig:
         self.interactive = True
         self.base_url = None
         self.base_lang = None
-        self.langfile_map = None
         self.credits_file = None
         self.project = None
         self.project_type = "**unset**"
@@ -499,7 +495,6 @@ def get_local_languages():
 
         # If not found, try to derive it from the filename.
         if grflangid is None:
-            load_userdefined_langfile_map()
             ldata = get_languagedata_by_filename(fname[:-len(user_cfg.lang_ext)])
             if ldata is not None: grflangid = ldata.grflangid
 
@@ -768,50 +763,6 @@ def get_languagedata_by_filename(filename):
         if ld.filename == filename: return ld
     return None
 
-loaded_langfile_map = False # Whether the user-supplied language file map has been loaded.
-
-def load_userdefined_langfile_map():
-    """
-    Load the user-define language file map, if available.
-    """
-    global loaded_langfile_map
-
-    if loaded_langfile_map: return
-    loaded_langfile_map = True
-
-    if user_cfg.langfile_map is None: return
-
-    with open(user_cfg.langfile_map, 'r', encoding = 'utf-8') as handle:
-        for idx, line in handle:
-            i = line.find('#')
-            if i >= 0: line = line[:i]
-            line = line.strip()
-            if line == '': continue
-            i = line.find(':')
-            if i < 0:
-                print("Error: Line {} of \"{}\" has no colon.".format(idx + 1, user_cfg.langfile_map))
-                sys.exit(1)
-
-            grfid = line[:i].rstrip()
-            m = hex_pat.match(grfid)
-            if not m:
-                print("Error: Line {} of \"{}\" has no grf language id.".format(idx + 1, user_cfg.langfile_map))
-                sys.exit(1)
-
-            line = line[i+1:].lstrip()
-            if len(line) == 0:
-                print("Error: Line {} of \"{}\" has no base filename.".format(idx + 1, user_cfg.langfile_map))
-                sys.exit(1)
-
-            grfid = int(m.group(1), 16)
-            ldata = get_languagedata_by_grflangid(grfid)
-            if ldata is None:
-                print("Error: NewGRF language ID 0x{:02X} not found.".format(grfid))
-                sys.exit(1)
-
-            ldata.filename = line # Update the filename of the entry.
-
-
 # {{{ def perform_download(ll_files, el_files, credits_handle):
 
 string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
@@ -1010,7 +961,6 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             else:
                 current_strings = load_local_strings(path)
         else:
-            load_userdefined_langfile_map()
             ldata = get_languagedata_by_grflangid(el.grf_langid)
             if ldata is None:
                 path = el.lang_name
@@ -1118,12 +1068,6 @@ Getting project information:
     this option can be used to specify it manually. It must be the same number
     as given at a ##grflangid line (a string of the form "0x[HEX][HEX]".)
 
---language-file-mapping=FNAME
-    The program has a mapping between language names and base filenames. This
-    option can be used to override that, or provide additional languages.
-    Format of the file are lines of the form "0x[HEX][HEX]: basename", '#'
-    starts a line comment and empty lines are ignored.
-
 --credits=FNAME
     Credits for translation string changes are written in the provided FNAME.
 
@@ -1159,7 +1103,7 @@ def run():
     long_opts = ["user-password-file=", "user=", "password=",
                  "not-interactive", "base-url=", "project=", "project-type=",
                  "project-desc=", "project-url=", "lang-dir=",
-                 "base-language=", "language-file-mapping=",
+                 "base-language=",
                  "lang-file-ext=", "credits=", "help", "verbose", "no-write"]
 
     try:
@@ -1186,9 +1130,6 @@ def run():
                 print("\"{}\" is not a grflangid of the form 0x[HEX][HEX].")
                 sys.exit(1)
             user_cfg.base_lang = int(m.group(1), 16)
-            continue
-        if opt == '--language-file-mapping':
-            user_cfg.langfile_map = val
             continue
         if opt == '--lang-dir':
             user_cfg.lang_dir = val
