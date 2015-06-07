@@ -291,8 +291,8 @@ class XmlLoader:
         @param fname: Name of the file to load.
         @type  fname: C{str}
 
-        @return: The loaded project.
-        @rtype:  L{Project}
+        @return: The loaded language.
+        @rtype:  L{Language}
         """
         data = loader.load_dom(fname)
         pnode = loader.get_single_child_node(data, 'language')
@@ -609,7 +609,7 @@ def load_project(xloader, node):
     @param node: Node containing the project.
     @type  node: L{xml.dom.minidom.Node}
 
-    @return: Loaded project
+    @return: The loaded project.
     @rtype:  L{Project}
     """
     assert node.tagName == 'project'
