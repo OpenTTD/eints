@@ -89,7 +89,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
                                 continue
 
                         length = column - len(line)
-                        if length < 1: length = 1
+                        if length < 0: length = 0
                         add_func(lines, skel_type, line + (' ' * length) + ':' + text)
                         if chg.user is not None:
                             add_func(lines, 'credits', chg.user)
