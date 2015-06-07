@@ -8,6 +8,7 @@ from webtranslate.pages import projects
 from webtranslate.pages import project
 from webtranslate.pages import newproject
 from webtranslate.pages import translation
+from webtranslate.pages import language_list
 from webtranslate.pages import language_overview
 from webtranslate.pages import upload_language
 from webtranslate.pages import download_language
