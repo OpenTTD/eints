@@ -365,7 +365,7 @@ class JsonLoader:
         handle = open(fname, 'rt', encoding='utf-8')
         data = json.load(handle)
         handle.close()
-        return load_language_json(projtype, pnode)
+        return load_language_json(projtype, data)
 # }}}
 # {{{ class XmlSaver:
 class XmlSaver:
@@ -1161,8 +1161,8 @@ def load_language_json(projtype, node):
     @return: The loaded language.
     @rtype:  L{Language}
     """
-    assert 'lang_version' in node
-    assert node['lang_version'] == 1
+    assert 'language_version' in node
+    assert node['language_version'] == 1
 
     lng = Language(node['name'])
 
@@ -1177,7 +1177,8 @@ def load_language_json(projtype, node):
     else:
         lng.gender = node['gender'].split(' ')
 
-    if not projtype.allow_case or 'case' not in node or node['case'] == '':
+    case = node.get('cases')
+    if not projtype.allow_case or case is None or case == '':
         lng.case = ['']
     else:
         lng.case = [''] + case.split(' ')
