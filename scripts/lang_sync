@@ -93,8 +93,8 @@ class UserConfig:
     @ivar lang_ext: Extension used by language files.
     @type lang_ext: C{str}
 
-    @ivar base_lang: Grf language id of the base language, if available.
-    @type base_lang: C{int} or C{None}
+    @ivar base_lang: Isocode or grf language id of the base language, if available.
+    @type base_lang: C{str} or C{None}
 
     @ivar credits_file: If available, path to a file for writing credits for changes in the language files.
     @type credits_file: C{str} or C{None}
@@ -360,10 +360,10 @@ class EintsLanguageInfo:
     """
     Language information received from Eints.
 
-    @ivar lang_name: Eints name of the of the language.
-    @type lang_name: C{str}
+    @ivar isocode: Isocode of the of the language.
+    @type isocode: C{str}
 
-    @ivar parent_lang: Language followed by this language, if it exists.
+    @ivar parent_lang: Isocode of the language followed by this language, if it exists.
     @type parent_lang: C{str} or C{None} if it is the root language
 
     @ivar last_change: Last change of the language, if it exists.
@@ -372,8 +372,8 @@ class EintsLanguageInfo:
     @ivar grf_langid: Id of the language according to the NewGRF specification.
     @type grf_langid: C{int}
     """
-    def __init__(self, lang_name, parent_lang, last_change, grf_langid):
-        self.lang_name = lang_name
+    def __init__(self, isocode, parent_lang, last_change, grf_langid):
+        self.isocode = isocode
         self.parent_lang = parent_lang
         self.last_change = last_change
         self.grf_langid = grf_langid
@@ -428,7 +428,7 @@ def get_eints_languages():
                     kind = "(base language)"
                 else:
                     kind = "(translation of {})".format(el.parent_lang)
-                print("\tlang-id: 0x{:02x}, lang-name: {} {}".format(el.grf_langid, el.lang_name, kind))
+                print("\tisocode: {}, lang-id: 0x{:02x} {}".format(el.isocode, el.grf_langid, kind))
             print()
 
     return eints_files_cache
@@ -444,12 +444,12 @@ class LocalLanguageInfo:
     @ivar path_name: The path to the file.
     @type path_name: C{str}
 
-    @ivar grf_langid: Id of the language according to the NewGRF specification.
-    @type grf_langid: C{int}
+    @ivar isocode: Isocode of the language,
+    @type isocode: C{str}
     """
-    def __init__(self, path_name, grf_langid):
+    def __init__(self, path_name, isocode):
         self.path_name = path_name
-        self.grf_langid = grf_langid
+        self.isocode = isocode
 # }}}
 # {{{ def get_local_languages():
 utf8_bom = codecs.BOM_UTF8.decode('utf-8')
@@ -496,14 +496,15 @@ def get_local_languages():
         # If not found, try to derive it from the filename.
         if grflangid is None:
             ldata = get_languagedata_by_filename(fname[:-len(user_cfg.lang_ext)])
-            if ldata is not None: grflangid = ldata.grflangid
+        else:
+            ldata = get_languagedata_by_grflangid(grflangid)
 
-        if grflangid is not None:
-            result.append(LocalLanguageInfo(path, grflangid))
+        if ldata is not None:
+            result.append(LocalLanguageInfo(path, ldata.isocode))
             continue
 
         if user_cfg.verbose:
-            verbose_msg = "File \"{}\" matches extension, but cannot derive a grflangid from it.".format(path)
+            verbose_msg = "File \"{}\" matches extension, but cannot derive a language from it.".format(path)
             print(verbose_msg)
 
 
@@ -515,7 +516,7 @@ def get_local_languages():
         else:
             print("Found local language files:")
             for ll in local_files_cache:
-                print("\tlang-id: 0x{:02x}, path: {}".format(ll.grf_langid, ll.path_name))
+                print("\tisocode: {}, path: {}".format(ll.isocode, ll.path_name))
             print()
 
     return local_files_cache
@@ -552,30 +553,36 @@ def perform_operation(op_type, lang_type, credits_handle):
     ll_files = get_local_languages()
     el_files = get_eints_languages()
 
-    # Find out what the base language id is.
-    blng_grfid = user_cfg.base_lang
+    # Find out what the base language is.
+    blng = user_cfg.base_lang
+    if blng:
+        if hex_pat.match(blng):
+            blng = get_languagedata_by_grflangid(int(blng, 16))
+        else:
+            blng = get_languagedata_by_isocode(blng)
+
     for el in el_files:
         if el.parent_lang is None:
-            if blng_grfid is not None and blng_grfid != el.grf_langid:
-                text = "Error: grf language ids of the base language do not match, --base-lang claims {} while remote claims {}"
-                print(text.format(blng_grfid, el.grf_langid))
+            if blng is not None and blng.isocode != el.isocode:
+                text = "Error: Base languages do not match, --base-lang claims {} while remote claims {}"
+                print(text.format(blng.isocode, el.isocode))
                 sys.exit(1)
-            blng_grfid = el.grf_langid
+            blng = get_languagedata_by_isocode(el.isocode)
             break
 
-    if blng_grfid is None:
-        print("Error: No grf language id of the base language found (neither from Eints nor given with --base-lang)")
+    if blng is None:
+        print("Error: No base language found (neither from Eints nor given with --base-lang)")
         sys.exit(1)
 
     # Filter languages.
     path_base = None
     if lang_type == 'base':
-        ll_files = [ll for ll in ll_files if ll.grf_langid == blng_grfid]
-        el_files = [el for el in el_files if el.grf_langid == blng_grfid]
+        ll_files = [ll for ll in ll_files if ll.isocode == blng.isocode]
+        el_files = [el for el in el_files if el.isocode == blng.isocode]
     else:
-        path_base = next((ll.path_name for ll in ll_files if ll.grf_langid == blng_grfid), None)
-        ll_files = [ll for ll in ll_files if ll.grf_langid != blng_grfid]
-        el_files = [el for el in el_files if el.grf_langid != blng_grfid]
+        path_base = next((ll.path_name for ll in ll_files if ll.isocode == blng.isocode), None)
+        ll_files = [ll for ll in ll_files if ll.isocode != blng.isocode]
+        el_files = [el for el in el_files if el.isocode != blng.isocode]
 
     if op_type == 'upload':
         perform_upload(ll_files, lang_type == 'base')
@@ -638,11 +645,7 @@ def perform_upload(ll_files, is_base):
             if user_cfg.verbose:
                 print("Uploaded \"{}\" to Eints".format(fname))
 
-            ldata = get_languagedata_by_grflangid(ll.grf_langid)
-            if ldata is None:
-                url = build_url('/upload/' + user_cfg.project)
-            else:
-                url = build_url('/upload/' + user_cfg.project + "/" + ldata.isocode)
+            url = build_url('/upload/' + user_cfg.project + "/" + ll.isocode)
             ok = post_form_upload(url, fields, 'langfile', fname, data)
 
         if not ok:
@@ -931,19 +934,19 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
     @param path_base: Local baselang file.
     @type  path_base: C{str} or C{None}
     """
-    local_files = dict((ll.grf_langid, ll) for ll in ll_files) # Mapping of grf lang id to local info.
+    local_files = dict((ll.isocode, ll) for ll in ll_files) # Mapping of isocode to local info.
 
     eolstyle_baselang = None
     if path_base is not None:
         eolstyle_baselang = detect_eolstyle(path_base)
 
     for el in el_files:
-        url = build_url('/annotate/' + user_cfg.project + '/' + el.lang_name)
+        url = build_url('/annotate/' + user_cfg.project + '/' + el.isocode)
         data = get_data(url)
         if data is None:
-            print("Error: Could not download the {} language from Eints.".format(el.lang_name))
+            print("Error: Could not download the {} language from Eints.".format(el.isocode))
             continue
-        ll = local_files.get(el.grf_langid)
+        ll = local_files.get(el.isocode)
         eolstyle = None
         if ll is not None:
             path = ll.path_name
@@ -954,9 +957,9 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             else:
                 current_strings = load_local_strings(path)
         else:
-            ldata = get_languagedata_by_grflangid(el.grf_langid)
+            ldata = get_languagedata_by_isocode(el.isocode)
             if ldata is None:
-                path = el.lang_name
+                path = el.isocode
             else:
                 path = ldata.filename
             path = user_cfg.lang_dir + os.sep + path + user_cfg.lang_ext
@@ -973,7 +976,7 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             if credits_handle is not None:
                 credits = collect_credits(current_strings, parsed)
                 if len(credits) > 0:
-                    credits_handle.write(el.lang_name + ": " + credits + '\n')
+                    credits_handle.write(el.isocode + ": " + credits + '\n')
                     credits_handle.flush() # Flush it to disk, so it is preserved on crash.
             write_parsed_lines(parsed, path, eolstyle)
 
@@ -1058,8 +1061,8 @@ Getting project information:
 
 --base-language=BASE_LANG
     In case Eints does not know the base language (mostly at initial import),
-    this option can be used to specify it manually. It must be the same number
-    as given at a ##grflangid line (a string of the form "0x[HEX][HEX]".)
+    this option can be used to specify it manually. It can either be the isocode,
+    or the ##grflangid (a string of the form "0x[HEX][HEX]").
 
 --credits=FNAME
     Credits for translation string changes are written in the provided FNAME.
@@ -1118,11 +1121,7 @@ def run():
             user_cfg.no_write = True
             continue
         if opt == '--base-language':
-            m = hex_pat.match(val)
-            if not m:
-                print("\"{}\" is not a grflangid of the form 0x[HEX][HEX].")
-                sys.exit(1)
-            user_cfg.base_lang = int(m.group(1), 16)
+            user_cfg.base_lang = val
             continue
         if opt == '--lang-dir':
             user_cfg.lang_dir = val
