@@ -160,6 +160,18 @@ treated.
   the directory, there is a ``project_data.xml`` file, and one for each
   language. Files are only written when modified.
 
+*data-format*
+  This configuration field controls whether XML or JSON is used for storage.
+  It only affects new projects. The field contains either ``xml`` (for XML
+  data format) or ``json`` (for JSON data format).
+
+  XML format has more features, but tends to grow fast in memory requirements
+  with bigger projects. JSON is better for big projects (needs less memory),
+  but lacks (at the time of writing this) support for sharing text strings.
+  That doesn't hurt much if you use ``split-languages`` for the
+  *storage-format* field, as normally, there are not many string shared within
+  a single language.
+
 *language-file-size*
   Eints can download `NML <http://dev.openttdcoop.org/projects/nml>` language files.
   This setting control the maximum size in bytes of such files.

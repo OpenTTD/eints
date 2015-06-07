@@ -174,6 +174,10 @@ class Config:
             print("Unrecognized preferred storage format \"{}\", aborting!".format(storage_type))
             sys.exit(1)
 
+        self.data_format = get_subnode_text(cfg, 'data-format').strip()
+        if self.data_format not in ('xml', 'json'):
+            self.data_format = 'xml'
+
         self.language_file_size = data.convert_num(get_subnode_text(cfg, 'language-file-size'),
                                                    self.language_file_size)
         self.num_backup_files   = data.convert_num(get_subnode_text(cfg, 'num-backup-files'),

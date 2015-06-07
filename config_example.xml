@@ -22,6 +22,9 @@
 	<storage-format>one-file</storage-format> <!-- Standard storage format. -->
 	<!-- <storage-format>split-languages</storage-format> -->
 
+	<data-format>xml</data-format>
+	<!-- <data-format>json</data-format> -->  <!-- Json format does not implement text-sharing in the file -->
+
 	<language-file-size>100000</language-file-size> <!-- about 100K -->
 	<num-backup-files>5</num-backup-files>
 
