@@ -1,7 +1,7 @@
 """
 Project data.
 """
-import time, re, calendar
+import time, re, calendar, json
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from webtranslate import loader, project_type
@@ -321,6 +321,52 @@ class XmlLoader:
         """
         return self.texts[ref]
 # }}}
+# {{{ class JsonLoader:
+class JsonLoader:
+    """
+    Helper class to load a project from a Json file.
+
+    @ivar split_languages: If set, don't expect the languages to be part of the project.
+                           They have been saved separately.
+    @type split_languages: C{bool}
+    """
+    def __init__(self, split_languages):
+        self.split_languages = split_languages
+
+    def load_project(self, fname):
+        """
+        Load a project from the given file.
+
+        @param fname: Name of the file to load.
+        @type  fname: C{str}
+
+        @return: The loaded project. Depending on L{split_languages} set during construction of the
+                 object, the project may not have all languages.
+        @rtype:  L{Project}
+        """
+        handle = open(fname, 'rt', encoding='utf-8')
+        data = json.load(handle)
+        handle.close()
+        return load_project_json(self, data)
+
+    def load_language(self, projtype, fname):
+        """
+        Load a language into the project from the give filename.
+
+        @param projtype: Project type.
+        @type  projtype: L{ProjectType}
+
+        @param fname: Name of the file to load.
+        @type  fname: C{str}
+
+        @return: The loaded language.
+        @rtype:  L{Language}
+        """
+        handle = open(fname, 'rt', encoding='utf-8')
+        data = json.load(handle)
+        handle.close()
+        return load_language_json(projtype, pnode)
+# }}}
 # {{{ class XmlSaver:
 class XmlSaver:
     """
@@ -429,6 +475,53 @@ class XmlSaver:
         self.texts_node.appendChild(node)
         self.texts[text] = ref
         return ref
+# }}}
+# {{{ class JsonSaver:
+class JsonSaver:
+    """
+    Saver helper class.
+
+    @ivar split_languages: If set, don't save the languages as part of the project. They are
+                           saved separately at a later stage.
+    @type split_languages: C{bool}
+    """
+    def __init__(self, split_languages):
+        self.split_languages = split_languages
+
+    def save_project(self, project, fname):
+        """
+        Save a project as an xml doc document.
+
+        @param project: Project to save.
+        @type  project: L{Project}
+
+        @param fname: Name of the file to write.
+        @type  fname: C{str}
+        """
+        node = save_project_json(self, project)
+        handle = open(fname, 'wt', encoding = "utf-8")
+        json.dump(node, handle)
+        handle.close()
+
+    def save_language(self, projtype, lng, fname):
+        """
+        Save a language as xml document.
+
+        @param projtype: Project type.
+        @type  projtype: L{ProjectType}
+
+        @param lng: Language to save.
+        @type  lng: L{Language}
+
+        @param fname: Name of the file to write.
+        @type  fname: C{str}
+        """
+        assert self.split_languages
+
+        node = save_language_json(projtype, lng)
+        handle = open(fname, 'wt', encoding = "utf-8")
+        json.dump(node, handle)
+        handle.close()
 # }}}
 
 # {{{ Project
@@ -645,6 +738,47 @@ def load_project(xloader, node):
         project.skeleton = load_skeleton(xloader, skelnode)
     return project
 
+def load_project_json(jloader, node):
+    """
+    Load the project from the Json format.
+
+    @param jloader: Loader class.
+    @type  jloader: L{JsonLoader}
+
+    @param node: Node in Json format containing the project data.
+    @type  node: C{dict}
+
+    @return: The loaded project.
+    @rtype:  L{Project}
+    """
+    assert node['project_version'] == 1
+    human_name = node['name']
+    projtype = project_type.project_types[node['projtype']]
+    url = node['url']
+    project = Project(human_name, projtype, url)
+
+    project.languages = {}
+    if not jloader.split_languages:
+        langnodes = node['languages']
+        for lnode in langnodes:
+            lng = load_language_json(projtype, lnode)
+            project.languages[lng.name] = lng
+
+    baselang = node['baselang']
+
+    if not jloader.split_languages:
+        if baselang is None or baselang not in project.languages:
+            if len(project.languages) > 0:
+                print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
+                project.languages = {}
+            project.base_language = None
+            return project # Also skip loading the skeleton.
+
+    project.base_language = baselang
+    project.flush_related_cache()
+    project.skeleton = load_skeleton_json(node['skeleton'])
+    return project
+
 def load_skeleton(xloader, node):
     """
     Load the skeleton list from the xml node.
@@ -709,6 +843,39 @@ def save_project(xsaver, proj):
     node.appendChild(skelnode)
     return node
 
+def save_project_json(jsaver, proj):
+    """
+    Save the project in Json.
+
+    @param jsaver: Saver class.
+    @type  jsaver: L{JsonSaver}
+
+    @return: Node containing the project.
+    @rtype:  C{dict}
+    """
+    result = {}
+    result['project_version'] = 1
+    result['name'] = proj.human_name
+    result['projtype'] = proj.projtype.name
+    result['url'] = proj.url
+
+    blng = proj.get_base_language()
+    if blng is not None:
+        blng = blng.name
+    result['baselang'] = blng
+
+    if not jsaver.split_languages:
+        languages = []
+        langs = list(proj.languages.items())
+        langs.sort()
+        for lang in langs:
+            languages.append(save_language_json(proj.projtype, lang[1]))
+        result['languages'] = languages
+
+    result['skeleton'] = save_skeleton_json(proj.skeleton)
+    return result
+
+
 def save_skeleton(xsaver, skel):
     """
     Save the skeleton list.
@@ -737,6 +904,46 @@ def save_skeleton(xsaver, skel):
 
         root.appendChild(node)
     return root
+
+def save_skeleton_json(skel):
+    """
+    Save skeleton file in Json format.
+
+    @param skel: Skeleton list, as described in the L{Project} class.
+    @type  skel: C{list} of (C{str}, C{str})
+
+    @return: Skeleton file in Json format.
+    @rtype:  List of lines.
+    """
+    result = []
+    for stp, sparm in skel:
+        if stp in ('literal', 'pragma', 'grflangid', 'plural', 'case', 'gender'):
+            result.append([stp, sparm])
+        elif stp == 'string':
+            column, sname = sparm
+            result.append([stp, column, sname])
+
+    return result
+
+def load_skeleton_json(node):
+    """
+    Load skeleton file from the Json node.
+
+    @param node: The node with the saved skeleton data in Json format.
+    @type  node: C{list}
+
+    @return: The loaded skeleton data, as described in the L{Project} class.
+    @rtype:  C{list} of (C{str}, C{str})
+    """
+    skeleton = []
+    for line in node:
+        if line[0] in ('literal', 'pragma', 'grflangid', 'plural', 'case', 'gender'):
+            skeleton.append((line[0], line[1]))
+        elif line[0] == 'string':
+            skeleton.append((line[0], (line[1], line[2])))
+
+    return skeleton
+
 
 # }}}
 # {{{ Language
@@ -841,6 +1048,48 @@ def save_language(xsaver, projtype, lang):
                 node.appendChild(cnode)
     return node
 
+def save_language_json(projtype, lang):
+    """
+    Save the language to Json.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
+
+    @param lang: Language to save.
+    @type  lang: L{Language}
+
+    @return: Node containing the language.
+    @rtype:  C{dict}
+    """
+    result = {}
+    result['language_version'] = 1
+    result['name'] = lang.name
+    result['grflangid'] = lang.grflangid
+    result['plural'] = lang.plural
+
+    if projtype.allow_gender and len(lang.gender) > 0:
+        result['gender'] = " ".join(lang.gender)
+
+    cases = [c for c in lang.case if c != '']
+    if len(cases) > 0:
+        result['cases'] = " ".join(cases)
+
+    custom_pragmas = list(lang.custom_pragmas.items())
+    custom_pragmas.sort()
+    result['pragma'] = custom_pragmas
+
+    res_changes = []
+    changes = list(lang.changes.items())
+    changes.sort()
+    for chgs in changes:
+        chgs[1].sort() # Sort changes
+        for chg in chgs[1]:
+            cnode = save_change_json(projtype, chg)
+            if cnode is not None:
+                res_changes.append(cnode)
+    result['change'] = res_changes
+    return result
+
 def load_language(xloader, projtype, node):
     """
     Load a language from the given xml node.
@@ -889,6 +1138,56 @@ def load_language(xloader, projtype, node):
     lng.changes = {}
     for ch_node in loader.get_child_nodes(node, 'change'):
         change = load_change(xloader, ch_node)
+        if not projtype.allow_case and change.case != '':
+            continue
+        chgs = lng.changes.get(change.string_name)
+        if chgs is None:
+            lng.changes[change.string_name] = [change]
+        else:
+            chgs.append(change)
+
+    return lng
+
+def load_language_json(projtype, node):
+    """
+    Load a language from the given Json node.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
+
+    @param node: Node containing the language.
+    @type  node: C{dict}
+
+    @return: The loaded language.
+    @rtype:  L{Language}
+    """
+    assert 'lang_version' in node
+    assert node['lang_version'] == 1
+
+    lng = Language(node['name'])
+
+    assert isinstance(node['grflangid'], int)
+    lng.grflangid = node['grflangid']
+
+    assert isinstance(node['plural'], int)
+    lng.plural = node['plural']
+
+    if not projtype.allow_gender or 'gender' not in node:
+        lng.gender = []
+    else:
+        lng.gender = node['gender'].split(' ')
+
+    if not projtype.allow_case or 'case' not in node or node['case'] == '':
+        lng.case = ['']
+    else:
+        lng.case = [''] + case.split(' ')
+
+    assert isinstance(node['pragma'], list)
+    lng.custom_pragmas = dict(node['pragma'])
+
+    lng.changes = {}
+    for ch_node in node['change']:
+        change = load_change_json(ch_node)
         if not projtype.allow_case and change.case != '':
             continue
         chgs = lng.changes.get(change.string_name)
@@ -992,6 +1291,31 @@ def save_change(xsaver, projtype, change):
     node.appendChild(snode)
     return node
 
+def save_change_json(projtype, change):
+    """
+    Save a change in Json format.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
+
+    @param change: Change to save.
+    @type  change: L{Change}
+
+    @return: Node containing the change, if it was allowed to create.
+    @rtype:  C{list} or C{None}
+    """
+    # Never generate shared strings.
+    base_text = make_text_node_json(change.base_text)
+
+    if change.new_text is None:
+        new_text = None
+    else:
+        new_text = make_text_node_json(change.new_text)
+
+    snode = save_stamp_json(change.stamp)
+    node = [change.string_name, change.last_upload, change.case, change.user, base_text, new_text, snode]
+    return node
+
 def load_change(xloader, node):
     """
     Load a change.
@@ -1028,6 +1352,30 @@ def load_change(xloader, node):
     stamp = loader.get_single_child_node(node, 'stamp')
     stamp = load_stamp(xloader, stamp)
     return Change(strname, case, base_text, new_text, stamp, user, last_upload == 'true')
+
+def load_change_json(node):
+    """
+    Load a change.
+
+    @param node: Node containing the change.
+    @type  node: C{list}
+
+    @return: The loaded change.
+    @rtype:  L{Change}
+    """
+    assert len(node) == 7
+    strname = node[0]
+    last_upload = node[1]
+    case = node[2]
+    user = node[3]
+    base_text = get_text_node_json(node[4])
+
+    new_text = node[5]
+    if new_text is not None:
+        new_text = get_text_node_json(new_text)
+
+    stamp = load_stamp_json(node[6])
+    return Change(strname, case, base_text, new_text, stamp, user, last_upload)
 
 # }}}
 # {{{ Text (references)
@@ -1099,6 +1447,21 @@ def make_text_node(xmlsaver, text, name, number):
     tnode.appendChild(xnode)
     return node, ref
 
+def make_text_node_json(text):
+    """
+    Construct a node containing the provided text.
+
+    @param text: Text to save.
+    @type  text: L{Text}
+
+    @return: Node containing the text.
+    @rtype:  C{list}
+    """
+    # Never generate shared text.
+    stamp = save_stamp_json(text.stamp)
+    node = [text.case, text.text, stamp]
+    return node
+
 def make_ref_text(xsaver, text):
     """
     Construct a reference to a text node.
@@ -1133,6 +1496,24 @@ def get_text_node(xloader, node):
     txt = loader.collect_text_DOM(txt)
     txt = language_file.sanitize_text(txt)
     return Text(txt, case, stamp)
+
+def get_text_node_json(node):
+    """
+    Load text node (written by L{make_text_node_json}).
+
+    @param node: Text node to load.
+    @type  node: C{list}
+
+    @return: Text object.
+    @rtype:  L{Text}
+    """
+    assert len(node) == 3
+    case = node[0]
+    txt = node[1]
+    txt = language_file.sanitize_text(txt)
+    stamp = load_stamp_json(node[2])
+    return Text(txt, case, stamp)
+
 
 def get_text(xloader, ref):
     """
@@ -1220,6 +1601,26 @@ def load_stamp(xloader, node):
     number = int(loader.get_opt_DOMattr(node, 'number', '0'), 10)
     return xloader.get_stamp(seconds, number)
 
+def load_stamp_json(node):
+    """
+    Convert a time stamp loaded from a Json file into a regular L{Stamp} object.
+
+    @param node: Node containing the time stamp in Json format.
+    @type  node: List with two integers (seconds and index).
+
+    @return: The loaded time stamp.
+    @rtype:  L{Stamp}
+    """
+    global last_stamp, last_index
+
+    if last_stamp < node[0]:
+        last_stamp = node[0]
+        last_index = node[1]
+    elif last_stamp == node[0] and last_index < node[1]:
+        last_index = node[1]
+
+    return Stamp(node[0], node[1])
+
 def save_stamp(xsaver, stamp):
     """
     Construct an xml representation of the L{stamp} object.
@@ -1238,6 +1639,18 @@ def save_stamp(xsaver, stamp):
     if stamp.number > 0:
         node.setAttribute('number', str(stamp.number))
     return node
+
+def save_stamp_json(stamp):
+    """
+    Convert time stamp to Json format.
+
+    @param stamp: Time stamp object to save.
+    @type  stamp: L{Stamp}
+
+    @return: The created Json representation.
+    @rtype:  list with 2 integers (seconds and index number).
+    """
+    return [stamp.seconds, stamp.number]
 
 def encode_stamp(stamp):
     """
