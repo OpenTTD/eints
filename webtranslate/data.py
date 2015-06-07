@@ -629,11 +629,11 @@ def load_project(xloader, node):
 
     if not xloader.split_languages:
         if baselang is None or baselang not in project.languages:
-            baselang = None
             if len(project.languages) > 0:
                 print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
                 project.languages = {}
-                return project # Also skip loading the skeleton.
+            project.base_language = None
+            return project # Also skip loading the skeleton.
 
     project.base_language = baselang
     project.flush_related_cache()
