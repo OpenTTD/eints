@@ -2,7 +2,7 @@ import random
 from webtranslate.bottle import route, template, abort, request, redirect
 from webtranslate.protect import protected
 from webtranslate import data, config, utils
-from webtranslate.newgrf import language_file
+from webtranslate.newgrf import language_file, language_info
 
 # Priorities of strings that need editing. Smaller number is more important to do first.
 MISSING_PRIO = 1
@@ -441,8 +441,20 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
         if projtype.allow_case or case == '':
             transl_cases.append(TransLationCase(case, tranls, related_cases[case]))
 
+    related_languages = []
+    if lng.name[:3] != pdata.base_language[:3]:
+        for n, l in pdata.languages.items():
+            if n[:3] != lng.name[:3] or n == lng.name:
+                continue
+
+            related = data.get_newest_change(lng.changes.get(sname), "")
+            if related is not None:
+                related_languages.append((n, related))
+    related_languages.sort()
+
     return template('string_form', proj_name = prjname, pdata = pdata,
-                    lname = lngname, sname = sname, tcs = transl_cases)
+                    lname = lngname, sname = sname, plurals = language_info.all_plurals[lng.plural].description,
+                    genders = lng.gender, cases = lng.case, related_languages = related_languages, tcs = transl_cases)
 
 
 @route('/string/<prjname>/<lngname>/<sname>', method = 'GET')

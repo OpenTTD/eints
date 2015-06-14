@@ -8,6 +8,7 @@
     <!-- load order is significant for css, our over-rides on bootstrap must load after bootstrap -->
     <link type="text/css" href="{{ url('static', path='css/style.css') }}" rel="stylesheet">
     <script type="text/javascript" src="{{ url('static', path='js/jquery-1.9.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url('static', path='js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ url('static', path='js/bootstrap-filestyle-0.1.0.js') }}"></script>
     <script type="text/javascript">
         $(document).ready(function() {
