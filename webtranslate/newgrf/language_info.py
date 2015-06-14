@@ -9,6 +9,42 @@ all_languages = None
 grflangid = None
 isocode = None
 
+class PluralData:
+    """
+    @ivar plural: Plural form number.
+    @type plural: C{int}
+
+    @ivar count: Number of plural forms.
+    @type count: C{int}
+
+    @ivar description: Descriptio of plural forms.
+    @type description: C{list} of C{str}
+    """
+    def __init__(self, plural, description):
+        self.plural = plural
+        self.description = description
+        self.count = len(description)
+
+all_plurals = {
+    None: PluralData(None, []),
+    0:  PluralData( 0, ["1", "other"]),
+    1:  PluralData( 1, ["other"]),
+    2:  PluralData( 2, ["0..1", "other"]),
+    3:  PluralData( 3, ["1,21,31,...", "other", "0"]),
+    4:  PluralData( 4, ["1", "2", "3..6", "7..10", "other"]),
+    5:  PluralData( 5, ["1,21,31,...", "2..9,22..29,32..39,...", "other"]),
+    6:  PluralData( 6, ["1,21,31,...", "2..4,22..24,32..34,...", "other"]),
+    7:  PluralData( 7, ["1", "2..4,22..24,32..34,...", "other"]),
+    8:  PluralData( 8, ["1,101,201,...", "2,102,202,...", "3..4,103..104,203..204,...", "other"]),
+    9:  PluralData( 9, ["1,21,31,...", "other"]),
+    10: PluralData(10, ["1", "2..4", "other"]),
+    11: PluralData(11, ["yeong,il,sam,yuk,chil,pal", "i,sa,o,gu"]),
+    12: PluralData(12, ["1", "0,2..10,102..110,202..210,...", "11..19,111..119,211..219,...", "other"]),
+    13: PluralData(13, ["1,11", "2,12", "3..10,13..19", "other"]),
+}
+
+
+
 class LanguageData:
     """
     @ivar filename: Name of language file without extension.

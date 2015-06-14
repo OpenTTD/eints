@@ -27,8 +27,6 @@ class ErrorMessage:
         self.msg = msg
 
 # {{{ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, save_pieces = False):
-# Number of plural forms for each plural type (C{None} means no plural forms allowed).
-plural_count_map = {None: 0, 0: 2, 1: 1, 2: 2, 3: 3, 4: 5, 5: 3, 6: 3, 7: 3, 8: 4, 9: 2, 10: 3, 11: 2, 12: 4, 13: 4}
 
 param_pat = re.compile('{([0-9]+:)?([A-Z_0-9]+)(\\.[A-Za-z0-9]+)?}')
 gender_assign_pat = re.compile('{G *= *([^ }]+) *}')
@@ -70,7 +68,8 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, sav
 
     if not projtype.allow_extra: extra_commands = set()
     string_info = StringInfo(extra_commands, in_blng, save_pieces)
-    plural_count = plural_count_map[lng.plural]
+    plural_count = language_info.all_plurals[lng.plural].count
+
     pos = 0 # String parameter number.
     idx = 0 # Text string index.
     while idx < len(text):
