@@ -27,9 +27,8 @@
                     <li><a href="/newproject"><i class="icon-plus-sign"></i> New Project</a></li>
                 </ul>
                 <ul class="nav pull-right">
-                    <li>
-                        <a href="/userprofile"><i class="icon-lock"></i> Profile</a>
-                    </li>
+                    <li><a target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/usage.html"><i class="icon-book"></i> Manual</a></li>
+                    <li><a href="/userprofile"><i class="icon-user"></i> Login/Profile</a></li>
                 </ul>
             </div>
         </div>
