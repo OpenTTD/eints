@@ -220,7 +220,7 @@ function updatePlaceholder() {
 function copyText(srcid, destid) {
     var src = document.getElementById(srcid);
     var dest = document.getElementById(destid);
-    dest.value = src.innerHTML;
+    dest.value = src.textContent;
 }
 function copyValue(srcid, destid) {
     var src = document.getElementById(srcid);
