@@ -5,11 +5,12 @@
 </h1>
 <a class="pull-right" target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/strings.html">String editing Manual</a>
 <hr />
-<h2 class="eint-heading-icon eint-icon-document-1-edit">
-    <a class="eint-header-link" href="/translation/{{proj_name}}/{{lname}}">{{lname}}</a> - Edit Strings
-    <span class="muted pull-right">{{sname}}</span>
-</h2>
-<div class="clearfix"/>
+<div class="clearfix">
+    <h2 class="eint-heading-icon eint-icon-document-1-edit">
+        <a class="eint-header-link" href="/translation/{{proj_name}}/{{lname}}">{{lname}}</a> - Edit Strings
+        <span class="muted pull-right">{{sname}}</span>
+    </h2>
+</div>
 <form class="form-horizontal" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
     % for tc in tcs:
         <fieldset class="well">
@@ -19,23 +20,21 @@
                 <div class="control-group">
                     <!-- Display old base language text, if base changed. -->
                     % if tc.transl[0].current_base != tc.transl[0].trans_base:
-                        <div>
+                        <div class="clearfix">
                             <span class="control-label">Previous base language text:</span>
                             <span class="eint-form-value-as-text span8"><strong>{{utils.create_displayed_base_text(pdata, tc.transl[0].trans_base)}}</strong></span>
                         </div>
-                        <div class="clearfix"/>
                     % end
 
                     <!-- Display current base language text. -->
-                    <div>
+                    <div class="clearfix">
                         <span class="control-label">Base lang string:</span>
                         <span class="eint-form-value-as-text span8"><strong id="base_{{tc.case}}">{{utils.create_displayed_base_text(pdata, tc.transl[0].current_base)}}</strong></span>
                     </div>
 
                     <!-- Display current language text of related languages. -->
                     % for rel_lang, rel_text in related_languages:
-                        <div class="clearfix"/>
-                        <div>
+                        <div class="clearfix">
                             <span class="control-label">{{rel_lang}}:</span>
                             <span class="eint-form-value-as-text span8"><strong id="reltrans_{{rel_lang}}">{{rel_text.new_text.text}}</strong></span>
                         </div>
@@ -72,11 +71,11 @@
                 <div class="controls">
                     <textarea class="span8" name="text_{{tc.case}}" id="text_{{tc.case}}" rows="4"
                     % if len(tc.case) == 0:
-                        id="default_case" oninput="updatePlaceholder()"
+                        oninput="updatePlaceholder()"
                     % end
                     >{{tc.transl[0].text.text}}</textarea>
                     % if len(tc.case) == 0:
-                        <p>Allow empty input: <input type="checkbox" name="allow_empty_default"/>
+                        <p>Allow empty input: <input type="checkbox" name="allow_empty_default"/></p>
                     % else:
                         <p>Note: Leave the entry for cases empty, if they shall use the same translation as the default case.</p>
                     % end
@@ -171,7 +170,7 @@
                     <dl class="dl-horizontal">
                         % for rel in tc.related:
                             <dt style="width: 23em; text-align: left"><a href="/string/{{proj_name}}/{{lname}}/{{rel.sname}}" title="{{rel.sname}}">{{rel.sname}}</a></dt>
-                            <dd style="margin-left: 25em">{{rel.text.text}}<p/></dd>
+                            <dd style="margin-left: 25em">{{rel.text.text}}<p></p></dd>
                         % end
                     </dl>
             % end
@@ -212,7 +211,7 @@
 </form>
 <script type="text/javascript" onload="updatePlaceholder()">
 function updatePlaceholder() {
-    var def = document.getElementById("default_case");
+    var def = document.getElementById("text_");
     var text = def.value;
     var areas = document.getElementsByTagName("textarea");
     for (i = 0; i < areas.length; i++) {

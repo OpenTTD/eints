@@ -21,9 +21,10 @@ def get_newest_change(chgs, case):
     @rtype:  C{Change} or C{None}
     """
     best = None
-    for chg in chgs:
-        if chg.case != case: continue
-        if best is None or best.stamp < chg.stamp: best = chg
+    if chgs is not None:
+        for chg in chgs:
+            if chg.case != case: continue
+            if best is None or best.stamp < chg.stamp: best = chg
 
     return best
 
