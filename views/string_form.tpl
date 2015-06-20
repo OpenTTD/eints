@@ -19,8 +19,11 @@
                 <div class="control-group">
                     <!-- Display old base language text, if base changed. -->
                     % if tc.transl[0].current_base != tc.transl[0].trans_base:
-                        <span class="control-label">Previous base language text:</span>
-                        <span class="eint-form-value-as-text span8"><strong>{{utils.create_displayed_base_text(pdata, tc.transl[0].trans_base)}}</strong></span>
+                        <div>
+                            <span class="control-label">Previous base language text:</span>
+                            <span class="eint-form-value-as-text span8"><strong>{{utils.create_displayed_base_text(pdata, tc.transl[0].trans_base)}}</strong></span>
+                        </div>
+                        <div class="clearfix"/>
                     % end
 
                     <!-- Display current base language text. -->
@@ -31,6 +34,7 @@
 
                     <!-- Display current language text of related languages. -->
                     % for rel_lang, rel_text in related_languages:
+                        <div class="clearfix"/>
                         <div>
                             <span class="control-label">{{rel_lang}}:</span>
                             <span class="eint-form-value-as-text span8"><strong id="reltrans_{{rel_lang}}">{{rel_text.new_text.text}}</strong></span>
