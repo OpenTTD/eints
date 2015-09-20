@@ -26,6 +26,7 @@ config.xml
 users.dat
 projects.dat
 rights.dat
+openttd_lang
 
 # Files created by Mac image preview and file browser:
 .DS_Store

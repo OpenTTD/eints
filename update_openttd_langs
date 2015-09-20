@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Update language definitions from OpenTTD SVN
+#
+
+STABLEDIR="stable_languages"
+UNSTABLEDIR="unstable_languages"
+
+SVNURL="svn://svn.openttd.org/trunk/src/lang"
+CHECKOUTDIR="openttd_lang"
+
+
+
+if [ -d ${CHECKOUTDIR} ]
+then svn update ${CHECKOUTDIR}
+else svn checkout ${SVNURL} ${CHECKOUTDIR}
+fi
+
+echo "Checking stable languages"
+scripts/filter_update_langs ${CHECKOUTDIR} ${STABLEDIR}
+
+echo "Checking unstable languages"
+scripts/filter_update_langs ${CHECKOUTDIR}/unfinished ${UNSTABLEDIR}

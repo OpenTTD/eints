@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+
+import sys, os, os.path, getopt
+
+
+
+# Keywords to use from OpenTTD langfiles
+filterkeywords = [ "##name", "##ownname", "##isocode", "##plural", "##grflangid", "##gender", "##case" ]
+
+
+
+def filter_langfile(filename):
+    """
+    Read and filter OpenTTD lang file for required keywords.
+
+    @param filename: File to read.
+    @type  filename: C{str}
+
+    @return: List of keywords lines.
+    @rtype:  C{list} of C{str}
+    """
+    result = []
+    for l in open(filename, 'r', encoding = 'utf-8'):
+        l = l.strip()
+        if len(l) == 0:
+            continue
+
+        if not l.startswith("#"):
+            break
+
+        if not l.startswith("##"):
+            continue
+
+        if any(l.startswith(key) for key in filterkeywords):
+            result.append(l)
+
+    return result
+
+def read_complete_langfile(filename):
+    """
+    Read complete file.
+
+    @param filename: File to read.
+    @type  filename: C{str}
+
+    @return: List of lines.
+    @rtype:  C{list} of C{str}
+    """
+    return [ l.strip() for l in open(filename, 'r', encoding = 'utf-8') ]
+
+def write_langfile(filename, content):
+    """
+    Writes complete file.
+
+    @param filename: File to write.
+    @type  filename: C{str}
+
+    @param content: List of lines.
+    @type  content: C{list} of C{str}
+    """
+    with open(filename, "w", encoding = 'utf-8') as f:
+        f.write("\n".join(content))
+        f.write("\n")
+
+
+
+# Parse arguments
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "h", [ "help" ])
+except getopt.GetoptError as err:
+    print("filter_update_langs: " + str(err) + " (try \"filter_update_langs -h\")")
+    sys.exit(2)
+
+# Check arguments
+for opt, val in opts:
+    if opt in ('--help', '-h'):
+        print("Usage: filter_update_langs <input dir> <output dir>")
+        sys.exit(0)
+    else:
+        assert False # Unknown option
+
+if len(args) != 2:
+    print("Invalid number of parameters, try \"filter_update_langs -h\"")
+    sys.exit(2)
+
+inputdir = args[0]
+outputdir = args[1]
+
+if not os.path.isdir(inputdir):
+    print("Invalid input directory \"{}\"".format(inputdir))
+    sys.exit(2)
+
+if not os.path.isdir(outputdir):
+    print("Invalid output directory \"{}\"".format(outputdir))
+    sys.exit(2)
+
+
+
+# Read input language definitions
+inputlangs = {}
+for f in os.listdir(inputdir):
+    n = os.path.join(inputdir, f)
+    if not os.path.isfile(n):
+        continue
+
+    inputlangs[f] = filter_langfile(n)
+
+
+
+# Scan existing language definitions
+existinglangs = set(f for f in os.listdir(outputdir) if os.path.isfile(os.path.join(outputdir, f)))
+
+newlangs = inputlangs.keys() - existinglangs
+dellangs = existinglangs - inputlangs.keys()
+updlangs = existinglangs & inputlangs.keys()
+
+num_changes = 0
+
+# Copy new languages
+for l in newlangs:
+    print("Adding {}".format(l))
+    write_langfile(os.path.join(outputdir, l), inputlangs[l])
+    num_changes += 1
+
+# Remove old languages
+for l in dellangs:
+    print("Removing {}".format(l))
+    os.remove(os.path.join(outputdir, l))
+    num_changes += 1
+
+# Update altered languages
+for l in updlangs:
+    cur = read_complete_langfile(os.path.join(outputdir, l))
+    new = inputlangs[l]
+    if cur != new:
+        print("Updating {}".format(l))
+        write_langfile(os.path.join(outputdir, l), inputlangs[l])
+        num_changes += 1
+
+# Print summary
+if num_changes > 0:
+    print("{} languages updated. You need to restart Eints".format(num_changes))
+else:
+    print("All languages up to date")
