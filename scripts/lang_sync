@@ -3,10 +3,10 @@
 import getopt, re, sys, getpass, codecs, os, csv, io
 import urllib.request
 
-KNOWN_PROJECT_TYPES = ["game-script", "newgrf"]
+KNOWN_PROJECT_TYPES = ["game-script", "newgrf", 'openttd']
 
 PROJECT_TYPES_TEXT = ['"{}"'.format(pt) for pt in KNOWN_PROJECT_TYPES]
-PROJECT_TYPES_TEXT = PROJECT_TYPES_TEXT[0] + " and " + PROJECT_TYPES_TEXT[-1]
+PROJECT_TYPES_TEXT = ', '.join(PROJECT_TYPES_TEXT[:-1]) + " and " + PROJECT_TYPES_TEXT[-1]
 
 hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
 
