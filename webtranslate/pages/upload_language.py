@@ -211,7 +211,11 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
         lng.set_modified()
 
     config.cache.save_pmd(pmd)
-    pmd.create_statistics(None) # Update all languages.
+
+    if is_base:
+        pmd.create_statistics(None) # Update all languages.
+    else:
+        pmd.create_statistics(lng)
 
     message = "Successfully uploaded language '" + lng.name +"' " + utils.get_datetime_now_formatted()
     redirect("/project/" + projname + '?message=' + message)
