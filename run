@@ -1,3 +1,49 @@
 #!/usr/bin/env python3
+
+import getopt, os, sys
+
 from webtranslate import main
-main.run()
+
+
+def run():
+    """
+    Run the program (it was started from the command line).
+    """
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hp:", ["help", "pidfile="])
+    except getopt.GetoptError as err:
+        print("run: " + str(err) + " (try \"run --help\")")
+        sys.exit(2)
+
+    for opt, val in opts:
+        if opt in ('--help', '-h'):
+            print("""\
+run -- Run eints
+
+run <options>
+
+with <options>:
+
+--help
+-h
+    Get this help text.
+
+--pidfile
+-p
+    Write the current pid to the given file.
+
+""")
+            sys.exit(0)
+
+        if opt in ('-p', '--pidfile'):
+            with open(val, "w") as f:
+                f.write(str(os.getpid()))
+
+    main.run()
+
+    sys.exit(0)
+
+if __name__ == '__main__':
+    run()
+
