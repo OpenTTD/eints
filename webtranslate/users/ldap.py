@@ -87,15 +87,16 @@ def get_authentication(user, pwd):
     # Verify user.
     # Note that failure to authenticate is not fatal, it falls back to an 'unknown' user.
     groups = set()
-    if user is not None and user != "" and pwd is not None:
+    if user is not None and user != "" and pwd is not None and pwd != "":
         global server, ldap_basedn_users, ldap_basedn_groups
         import ldap3
 
         try:
             escaped_user = ldap3.utils.conv.escape_bytes(user)
-            with ldap3.Connection(server, auto_bind=True, client_strategy=ldap3.STRATEGY_SYNC, user="cn="+escaped_user+","+ldap_basedn_users, password=pwd) as c:
-                if c.search(ldap_basedn_groups, '(&(objectClass=posixGroup)(memberUid='+escaped_user+'))', attributes=['cn']):
-                    groups.update(g.get('attributes').get('cn')[0] for g in c.response)
+            with ldap3.Connection(server, auto_bind=True, client_strategy=ldap3.STRATEGY_SYNC, user="uid="+escaped_user+","+ldap_basedn_users, password=pwd) as c:
+                if c.search(ldap_basedn_users, '(uid='+escaped_user+')', attributes=['cn', 'memberOf']):
+                    user = c.response[0]['attributes']['cn'][0]
+                    groups.update(g.split(',')[0].split('=')[1] for g in c.response[0]['attributes']['memberOf'] if g.endswith(ldap_basedn_groups))
 
         except:
             user = None
@@ -106,5 +107,3 @@ def get_authentication(user, pwd):
     if user is None: return LdapUserAuthentication(False, "unknown", set())
 
     return LdapUserAuthentication(True, user, groups)
-
-
