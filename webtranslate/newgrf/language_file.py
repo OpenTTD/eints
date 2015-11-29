@@ -729,7 +729,7 @@ class NewGrfData:
     @type custom_pragmas: C{dict} of C{str} to C{str}
 
     @ivar plural: Plural type, if specified.
-    @type plural: C{int} (0..12 inclusive) or C{None}
+    @type plural: C{int} (key into language_info.all_plurals) or C{None}
 
     @ivar gender: Genders of the language.
     @type gender: C{list} of C{str}
@@ -845,14 +845,14 @@ def handle_pragma(projtype, lnum, line, data):
 
     if line[0] == '##plural':
         if len(line) != 2:
-            data.add_error(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
+            data.add_error(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..{}".format(max(p for p in language_info.all_plurals if p is not None))))
             return
         try:
             val = int(line[1], 10)
         except ValueError:
             val = -1
-        if val < 0 or val > 12:
-            data.add_error(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..12"))
+        if val not in language_info.all_plurals:
+            data.add_error(ErrorMessage(ERROR, lnum, "##plural takes exactly one numeric argument in the range 0..{}".format(max(p for p in language_info.all_plurals if p is not None))))
             return
         data.skeleton.append(('plural', ''))
         data.plural = val
