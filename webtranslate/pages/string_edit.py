@@ -539,7 +539,7 @@ def str_post(userauth, prjname, lngname, sname):
             state, _errors = data.get_string_status(projtype, trl_chg, case, lng, bchg.base_text, binfo)
             if state == data.OUT_OF_DATE:
                 # We displayed a 'this string is correct' checkbox. Was it changed?
-                if request.forms_get('ok_' + case):
+                if request_forms.get('ok_' + case):
                     # Move to latest base language text.
                     if stamp is None: stamp = data.make_stamp()
                     trl_chg.base_text = bchg.base_text
