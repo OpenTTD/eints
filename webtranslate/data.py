@@ -1170,7 +1170,7 @@ def load_language_json(projtype, node):
     assert isinstance(node['grflangid'], int)
     lng.grflangid = node['grflangid']
 
-    assert isinstance(node['plural'], int)
+    assert node['plural'] is None or isinstance(node['plural'], int)
     lng.plural = node['plural']
 
     if not projtype.allow_gender or 'gender' not in node:
