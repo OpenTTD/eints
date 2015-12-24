@@ -75,7 +75,7 @@ except getopt.GetoptError as err:
 for opt, val in opts:
     if opt in ('--help', '-h'):
         print("Usage: filter_update_langs <input dir> <output dir>")
-        sys.exit(0)
+        sys.exit(1)
     else:
         assert False # Unknown option
 
@@ -139,6 +139,7 @@ for l in updlangs:
 
 # Print summary
 if num_changes > 0:
-    print("{} languages updated. You need to restart Eints".format(num_changes))
+    print("{} language(s) updated. You need to restart Eints".format(num_changes))
+    sys.exit(3)
 else:
     print("All languages up to date")
