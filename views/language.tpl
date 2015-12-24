@@ -30,7 +30,7 @@
                 % end
             % else:
                 <td>
-                    % if not utils.lang_is_empty(lstate[5]):
+                    % if not utils.lang_is_empty(lstate):
                         <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
                             <fieldset>
                                 <input type="hidden" name="language_select" value="{{lnginfo.isocode}}"/>
