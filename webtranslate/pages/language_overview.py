@@ -1,6 +1,6 @@
 from webtranslate.bottle import route, template
 from webtranslate.protect import protected
-from webtranslate import config
+from webtranslate import config, data
 from webtranslate.newgrf import language_info
 import operator
 
@@ -28,7 +28,9 @@ def language(userauth, lngname):
         if lstate is not None:
             prjdata.append((pmd, True, lstate))
         else:
-            prjdata.append((pmd, False, ["", "", "", "", pmd.blang_count]))
+            lstate = [ 0 for i in range(data.MAX_STATE) ]
+            lstate[data.MISSING] = pmd.blang_count
+            prjdata.append((pmd, False, lstate))
 
     prjdata.sort(key = lambda p: p[0].human_name.lower())
     return template('language', lnginfo = language_info.isocode.get(lngname), prjdata = prjdata)
