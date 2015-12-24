@@ -50,7 +50,7 @@
                 <td colspan="10" class="alert alert-info">To get started with translation, upload a language file</td>
             </tr>
         % else:
-            % for lngname, counts, needs_fix in transl:
+            % for lng, counts, needs_fix in transl:
                 <tr>
                     <td>
                         % if not needs_fix:
@@ -59,14 +59,14 @@
                             <i class="icon-exclamation-sign"></i>
                         % end
                     </td>
-                    <td><a href="/translation/{{pmd.name}}/{{lngname}}">{{lngname}}</a></td>
+                    <td><a href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.name}}</a></td>
                     % if needs_fix:
-                        <td><a href="/fix/{{pmd.name}}/{{lngname}}">Start Fixing</a></td>
+                        <td><a href="/fix/{{pmd.name}}/{{lng.name}}">Start Fixing</a></td>
                     % else:
                         <td>Done!</td>
                     % end
-                    <td><a class="pull-right" href="/delete/{{pmd.name}}/{{lngname}}"><i class="icon-remove-circle"></i> Delete</a></td>
-                    <td><a class="pull-right" href="/download/{{pmd.name}}/{{lngname}}"><i class="icon-download"></i> Download</a></td>
+                    <td><a class="pull-right" href="/delete/{{pmd.name}}/{{lng.name}}"><i class="icon-remove-circle"></i> Delete</a></td>
+                    <td><a class="pull-right" href="/download/{{pmd.name}}/{{lng.name}}"><i class="icon-download"></i> Download</a></td>
                     <td class="number">{{counts[0]}}</td>
                     <td class="number">{{counts[1]}}</td>
                     <td class="number">{{counts[2]}}</td>

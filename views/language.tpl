@@ -1,7 +1,7 @@
 %rebase('main_template', title='Web translator language overview')
-<h1 class="eint-heading-icon eint-icon-drawer-closed">State of the {{lngname}} language for all projects</h1>
+<h1 class="eint-heading-icon eint-icon-drawer-closed">State of the {{lnginfo.name}} language for all projects</h1>
 % if len(prjdata) == 0:
-    Currently there are no projects that use the {{lngname}} language, perhaps you can
+    Currently there are no projects that use the {{lnginfo.name}} language, perhaps you can
     translate some projects?
 % else:
     <table class="table table-condensed table-striped table-hover">
@@ -22,7 +22,7 @@
             <td><a href="/project/{{pmd.name}}">{{pmd.human_name}}</a></td>
             % if exists:
                 % if lstate[2] > 0 or lstate[3] > 0 or lstate[4] > 0:
-                  <td><a href="/fix/{{pmd.name}}/{{lngname}}">Start fixing</a></td>
+                  <td><a href="/fix/{{pmd.name}}/{{lnginfo.isocode}}">Start fixing</a></td>
                 % else:
                   <td>Done!</td>
                 % end
@@ -36,7 +36,7 @@
                     % if lstate[4] > 0:
                         <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
                             <fieldset>
-                                <input type="hidden" name="language_select" value="{{lngname}}"/>
+                                <input type="hidden" name="language_select" value="{{lnginfo.isocode}}"/>
                                 <button class="btn btn-mini" type="submit">Start new</button>
                             </fieldset>
                         </form>

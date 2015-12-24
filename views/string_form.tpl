@@ -7,11 +7,11 @@
 <hr />
 <div class="clearfix">
     <h2 class="eint-heading-icon eint-icon-document-1-edit">
-        <a class="eint-header-link" href="/translation/{{pmd.name}}/{{lname}}">{{lname}}</a> - Edit Strings
+        <a class="eint-header-link" href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.info.name}}</a> - Edit Strings
         <span class="muted pull-right">{{sname}}</span>
     </h2>
 </div>
-<form class="form-horizontal" action="/string/{{pmd.name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
+<form class="form-horizontal" action="/string/{{pmd.name}}/{{lng.name}}/{{sname}}" method="post" enctype="multipart/form-data">
     % for tc in tcs:
         <fieldset class="well">
 
@@ -33,10 +33,10 @@
                     </div>
 
                     <!-- Display current language text of related languages. -->
-                    % for rel_lang, rel_text in related_languages:
+                    % for rel_lng, rel_text in related_languages:
                         <div class="clearfix">
-                            <span class="control-label">{{rel_lang}}:</span>
-                            <span class="eint-form-value-as-text span8"><strong id="reltrans_{{rel_lang}}">{{rel_text.new_text.text}}</strong></span>
+                            <span class="control-label">{{rel_lng.name}}:</span>
+                            <span class="eint-form-value-as-text span8"><strong id="reltrans_{{rel_lng.name}}">{{rel_text.new_text.text}}</strong></span>
                         </div>
                     % end
                 </div>
@@ -55,8 +55,8 @@
                         % if len(tc.case) != 0:
                             <button class="btn btn-mini" type="button" onclick="copyValue('text_', 'text_{{tc.case}}')">Copy Default</button>
                         % end
-                        % for rel_lang, rel_text in related_languages:
-                            <button class="btn btn-mini" type="button" onclick="copyText('reltrans_{{rel_lang}}', 'text_{{tc.case}}')">Copy {{rel_lang}}</button>
+                        % for rel_lng, rel_text in related_languages:
+                            <button class="btn btn-mini" type="button" onclick="copyText('reltrans_{{rel_lng.name}}', 'text_{{tc.case}}')">Copy {{rel_lng.name}}</button>
                         % end
                         <button class="btn btn-mini" type="button" onclick="copyText('base_', 'text_{{tc.case}}')">Copy Base</button>
                     </span>
@@ -169,7 +169,7 @@
                 <h5>Related Strings</h5>
                     <dl class="dl-horizontal">
                         % for rel in tc.related:
-                            <dt style="width: 23em; text-align: left"><a href="/string/{{pmd.name}}/{{lname}}/{{rel.sname}}" title="{{rel.sname}}">{{rel.sname}}</a></dt>
+                            <dt style="width: 23em; text-align: left"><a href="/string/{{pmd.name}}/{{lng.name}}/{{rel.sname}}" title="{{rel.sname}}">{{rel.sname}}</a></dt>
                             <dd style="margin-left: 25em">{{rel.text.text}}<p></p></dd>
                         % end
                     </dl>
@@ -204,7 +204,7 @@
     % end
     
     <div>
-        <a class="btn btn-primary" href="/fix/{{pmd.name}}/{{lname}}">Get another string</a>
+        <a class="btn btn-primary" href="/fix/{{pmd.name}}/{{lng.name}}">Get another string</a>
         <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
     </div>
     <br />

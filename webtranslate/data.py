@@ -955,6 +955,9 @@ class Language:
     @ivar name: Name of the language (isocode).
     @type name: C{str}
 
+    @ivar info: Vanilla language info. The actually used plurals/genders/cases may differ.
+    @type info: L{LanguageData}
+
     @ivar custom_pragmas: Custom pragmas, which are preserved when uploading languages.
     @type custom_pragmas: C{dict} of C{str} to C{str}
 
@@ -982,6 +985,7 @@ class Language:
     """
     def __init__(self, name):
         self.name = name
+        self.info = language_info.isocode.get(name)
         self.custom_pragmas = {}
         self.grflangid = 0x7F
         self.plural = None

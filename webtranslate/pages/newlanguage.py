@@ -53,7 +53,7 @@ def new_language_post(userauth, prjname):
         abort(404, msg)
         return
 
-    return template('makelanguage', pmd = pmd, lngname = lng_def.isocode)
+    return template('makelanguage', pmd = pmd, lnginfo = lng_def)
 
 
 def get_language(name):

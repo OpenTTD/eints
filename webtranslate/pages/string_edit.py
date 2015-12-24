@@ -447,11 +447,11 @@ def output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname, states = None
 
             related = data.get_newest_change(lng.changes.get(sname), "")
             if related is not None:
-                related_languages.append((n, related))
-    related_languages.sort()
+                related_languages.append((l, related))
+    related_languages.sort(key=lambda x: x[0].name)
 
     return template('string_form', pmd = pmd,
-                    lname = lngname, sname = sname, plurals = language_info.all_plurals[lng.plural].description,
+                    lng = lng, sname = sname, plurals = language_info.all_plurals[lng.plural].description,
                     genders = lng.gender, cases = lng.case, related_languages = related_languages, tcs = transl_cases)
 
 

@@ -19,7 +19,7 @@ def page_get(userauth, prjname):
         return template('upload_lang', pmd = pmd)
     else:
         return template('upload_lang_select', pmd = pmd,
-                    lisos = sorted((linfo.isocode, linfo.name) for linfo in pdata.get_all_languages()))
+                    lnginfos = sorted(pdata.get_all_languages(), lambda l: l.isocode))
 
 @route('/upload/<prjname>/<lngname>', method = 'GET')
 @protected(['upload', 'prjname', '-'])
@@ -34,7 +34,7 @@ def page_get_subdir(userauth, prjname, lngname):
     if linfo is None:
         abort(404, "Page not found")
         return
-    return template('upload_lang_subdir', pmd = pmd, lngname = lngname)
+    return template('upload_lang_subdir', pmd = pmd, lnginfo = linfo)
 
 @route('/upload/<prjname>/<lngname>', method = 'POST')
 @protected(['upload', 'prjname', '-'])

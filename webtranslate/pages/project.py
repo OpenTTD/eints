@@ -41,9 +41,9 @@ def project(userauth, prjname):
         for lname, lng in pdata.languages.items():
             if lng is base_lng: continue
             counts, needs_fixing = get_overview(pmd, lname)
-            transl.append((lname, counts, needs_fixing))
+            transl.append((lng, counts, needs_fixing))
 
-        transl.sort()
+        transl.sort(key=lambda x: x[0].name)
 
         bcounts = get_overview(pmd, base_lng.name)[0]
 

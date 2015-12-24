@@ -11,7 +11,7 @@ def languages(userauth):
     Get an overview of used languages over all projects.
     """
     languages = sorted(language_info.all_languages, key = lambda l: l.isocode)
-    return template('languages', lng_data = languages)
+    return template('languages', lnginfos = languages)
 
 @route('/language/<lngname>', method = 'GET')
 @protected(['language', '-', 'lngname'])
@@ -31,4 +31,4 @@ def language(userauth, lngname):
             prjdata.append((pmd, False, ["", "", "", "", pmd.blang_count]))
 
     prjdata.sort(key = lambda p: p[0].human_name.lower())
-    return template('language', lngname = lngname, prjdata = prjdata)
+    return template('language', lnginfo = language_info.isocode.get(lngname), prjdata = prjdata)

@@ -105,4 +105,4 @@ def project(userauth, prjname, lngname):
         title = data.STATE_MAP[i].name
         strings.append((title, strs))
     return template('translation', pmd = pmd, is_blng = (lng == blng),
-                    language = lngname, strings = strings)
+                    lng = lng, strings = strings)

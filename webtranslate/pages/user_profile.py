@@ -13,7 +13,7 @@ def userprofile(userauth):
     Get an overview of the (write) access rights of a user in every project.
     """
     prjdata = []
-    languages = set()
+    languages = {}
     is_owner = False
     for pmd in config.cache.projects.values():
         owner = userauth.may_read("projsettings", pmd.name, "-")
@@ -35,10 +35,10 @@ def userprofile(userauth):
 
             if translator and not owner:
                 # Collect languages with translator access, but do not spam language list due to owner access
-                languages.add(lngname)
+                languages[lngname] = lang
 
         prjdata.append((pmd, owner, langs))
 
     prjdata.sort(key = lambda p: p[0].human_name.lower())
-    return template('userprofile', userauth = userauth, prjdata = prjdata, is_owner = is_owner, languages = sorted(languages))
+    return template('userprofile', userauth = userauth, prjdata = prjdata, is_owner = is_owner, lnginfos = sorted(languages.values(), key=lambda x:x.isocode))
 
