@@ -1,4 +1,5 @@
 %rebase('main_template', title='Web Translator - {} - Profile'.format(userauth.name))
+%from webtranslate import utils
 <h1 class="eint-heading-icon eint-icon-drawer-closed">Profile of user '{{userauth.name}}'</h1>
 % if not is_owner and len(lnginfos) == 0:
     Sorry, you have no access to any projects.
@@ -33,12 +34,12 @@
                     % if not lang[2]:
                         No access
                     % elif lang[0]:
-                        % if lang[1][2] > 0 or lang[1][3] > 0 or lang[1][4] > 0:
+                        % if utils.lang_needs_fixing(lang[1]):
                             <a href="/translation/{{pmd.name}}/{{lnginfo.isocode}}">Start fixing</a>
                         % else:
                             Done!
                         % end
-                    % elif lang[1][4] > 0:
+                    % elif not utils.lang_is_empty(lang[1]):
                         <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
                             <fieldset>
                                 <input type="hidden" name="language_select" value="{{lnginfo.isocode}}"/>

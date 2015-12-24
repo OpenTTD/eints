@@ -3,26 +3,7 @@ Page of a single project.
 """
 from webtranslate.bottle import route, template, abort
 from webtranslate.protect import protected
-from webtranslate import config
-
-def get_overview(pmd, lang_name):
-    """
-    Get the overview of the strings state of a language.
-
-    @param pmd: Meta data of the project.
-    @type  pmd: L{ProjectMetaData}
-
-    @param lang_name: Name of the language.
-    @type  lang_name: C{str}
-
-    @return: Statistics of the strings of the language, 'needs fixing' flag.
-    @rtype:  C{list} of C{str}, C{bool}
-    """
-    counts = pmd.overview.get(lang_name)
-    if counts is not None:
-        needs_fixing = counts[2] != 0 or counts[3] != 0 or counts[4] != 0
-        return [str(n) for n in counts], needs_fixing
-    return ['?', '?', '?', '?', '?'], False
+from webtranslate import config, data
 
 
 @route('/project/<prjname>', method = 'GET')
@@ -40,12 +21,11 @@ def project(userauth, prjname):
     if base_lng is not None:
         for lname, lng in pdata.languages.items():
             if lng is base_lng: continue
-            counts, needs_fixing = get_overview(pmd, lname)
-            transl.append((lng, counts, needs_fixing))
+            transl.append((lng, pmd.overview.get(lname)))
 
         transl.sort(key=lambda x: x[0].name)
 
-        bcounts = get_overview(pmd, base_lng.name)[0]
+        bcounts = pmd.overview.get(base_lng.name)
 
     return template('project', pmd = pmd,
                     transl = transl, base_lng = base_lng, bcounts = bcounts)

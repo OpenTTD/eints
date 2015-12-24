@@ -1,4 +1,5 @@
 %rebase('main_template', title='Web Translator - {} - {} ({})'.format(pmd.human_name, lng.info.name, lng.name))
+%from webtranslate import data
 <h1>
     <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>
@@ -7,9 +8,9 @@
 <h2 class="eint-heading-icon eint-icon-checklist">{{lng.info.name}} ({{lng.name}}) - Status of Strings</h2>
 <a class="btn pull-right" href="/download/{{pmd.name}}/{{lng.name}}"><i class="icon-download"></i> Download Lang File</a>
 <div class="btn-group">
-% for title, strs in strings:
-    <a class="btn btn-info" href="#{{title}}">{{len(strs)}} {{title}}</a>
-%end
+% for s in data.STATE_DISPLAY:
+    <a class="btn btn-info" href="#{{s.name}}">{{len(stored[s.code])}} {{s.name}}</a>
+% end
 </div>
 <br />
 % if is_blng and pmd.pdata.projtype.is_base_translated():
@@ -18,8 +19,9 @@
     <br />
 %end
 <br />
-% for title, strs in strings:
-    <h3 id="{{title}}">{{title}}</h3>
+% for s in data.STATE_DISPLAY:
+    % strs = stored[s.code]
+    <h3 id="{{s.name}}">{{s.name}}</h3>
     <div class="well">
     % if len(strs) == 0:
         No strings in this category

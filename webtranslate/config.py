@@ -459,7 +459,7 @@ class ProjectMetaData:
     @ivar overview: Overview of the state of the strings in each language, ordered by language name.
                     Entries also define the set of languages to load in case L{storage_format} is
                     L{STORAGE_SEPARATE_LANGUAGES}.
-    @type overview: C{dict} of C{str} to [#UNKNOWN, #UP_TO_DATE, #OUT_OF_DATE, #INVALID, #MISSING]
+    @type overview: C{dict} of C{str} to C{list} of C{int}
 
     @ivar string_avoid_cache: Cache to store which strings to avoid for translating, ordered by
                               language.
@@ -664,7 +664,6 @@ class ProjectMetaData:
                 sstat[:] = sorted((c,se[0]) for c, se in detailed_state.items())
 
         # Construct overview statistics for each language.
-        unknown = data.UNKNOWN
         if parm_lng is None or parm_lng is blng: # Update all languages.
             lngs = pdata.languages.items()
             self.overview = {}
@@ -673,10 +672,10 @@ class ProjectMetaData:
 
         for lname, lng in lngs:
             #if lng is blng: continue
-            counts = [0, 0, 0, 0, 0] # UNKNOWN, UP_TO_DATE, OUT_OF_DATE, INVALID, MISSING
+            counts = [ 0 for i in range(data.MAX_STATE) ]
             for sname in blng.changes:
                 state = max(s[1] for s in pdata.statistics[lname][sname])
-                if state >= unknown: counts[state - unknown] = counts[state - unknown] + 1
+                if state != data.MISSING_OK: counts[state] = counts[state] + 1
             self.overview[lname] = counts
 # }}}
 

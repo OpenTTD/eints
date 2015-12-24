@@ -112,15 +112,6 @@ def get_messages(request):
     else:
         return None
 
-def get_status_definition_strings():
-    """
-    Get the string status descriptions.
-
-    @return: The string status description of the project overview.
-    @rtype:  C{list} of L{StatusDefinition}
-    """
-    return [data.STATE_MAP[code] for code in [data.UNKNOWN, data.UP_TO_DATE, data.OUT_OF_DATE, data.INVALID, data.MISSING]]
-
 def verify_name(name, name_type, is_identifier):
     """
     Check whether a provided name is sane enough to accept as project name.
@@ -187,3 +178,27 @@ def create_displayed_base_text(pdata, text):
     str_info = language_file.check_string(pdata.projtype, text, True, None, blng, True)
     if str_info.has_error or str_info.pieces is None: return text
     return str_info.get_translation_text()
+
+def lang_needs_fixing(overview):
+    """
+    Check whether a language needs fixing.
+
+    @param overview: Number of strings per state, as in ProjectMetaData.overview.
+    @type  overview: C{list} of C{int}
+
+    @return: Whether the language needs fixing.
+    @rtype:  C{bool}
+    """
+    return overview[data.OUT_OF_DATE] != 0 or overview[data.INVALID] != 0 or overview[data.MISSING] != 0
+
+def lang_is_empty(overview):
+    """
+    Check whether a language is complete empty, that is not even missing strings.
+
+    @param overview: Number of strings per state, as in ProjectMetaData.overview.
+    @type  overview: C{list} of C{int}
+
+    @return: Whether the language is empty.
+    @rtype:  C{bool}
+    """
+    return sum(overview) == 0

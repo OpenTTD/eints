@@ -3,7 +3,7 @@ Projects overview page.
 """
 from webtranslate.bottle import route, template
 from webtranslate.protect import protected
-from webtranslate import config
+from webtranslate import config, data
 from webtranslate.newgrf import language_info
 
 @route('/userprofile', method = 'GET')
@@ -28,7 +28,8 @@ def userprofile(userauth):
                 exist = True
                 translator = userauth.may_read("string", pmd.name, lngname)
             else:
-                lstate = ["", "", "", "", pmd.blang_count]
+                lstate = [ 0 for i in range(data.MAX_STATE) ]
+                lstate[data.MISSING] = pmd.blang_count
                 translator = userauth.may_read("makelanguage", pmd.name, lngname)
 
             langs[lngname] = (exist, lstate, translator)

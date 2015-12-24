@@ -67,18 +67,17 @@ def project(userauth, prjname, lngname):
     assert pdata.projtype.allow_case or lng.case == ['']
 
     blng = pdata.get_base_language() # As above we established there is at least one language, this should work.
-    stored = [[], [], [], [], []] # unknown, up-to-date, out-of-date, invalid, missing
+    stored = [ [] for i in range(data.MAX_STATE) ]
     sdict = pdata.statistics
     sdict = sdict.get(lngname) # Statistics dict for the queried language.
     if sdict is None:
         abort(404, "Missing language statistics")
         return
 
-    unknown = data.UNKNOWN
     for sname, bchgs in blng.changes.items():
         cstates = sdict[sname]
         state = max(s[1] for s in cstates)
-        if state >= unknown:
+        if state != data.MISSING_OK:
             bchg = data.get_newest_change(bchgs, '')
             sdd = StringDisplayData(sname, bchg.base_text)
             chgs = lng.changes.get(sname)
@@ -97,12 +96,9 @@ def project(userauth, prjname, lngname):
                         cdd = CaseDisplayData(case, data.STATE_MAP[cstate].name, text)
                         sdd.cases.append(cdd)
 
-            stored[state - unknown].append(sdd)
+            stored[state].append(sdd)
 
-    strings = []
-    for i, strs in enumerate(stored, start = unknown):
+    for strs in stored:
         strs.sort()
-        title = data.STATE_MAP[i].name
-        strings.append((title, strs))
     return template('translation', pmd = pmd, is_blng = (lng == blng),
-                    lng = lng, strings = strings)
+                    lng = lng, stored = stored)

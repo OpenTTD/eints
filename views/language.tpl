@@ -1,4 +1,5 @@
 %rebase('main_template', title='Web Translator - {} ({})'.format(lnginfo.name, lnginfo.isocode))
+%from webtranslate import utils, data
 <h1 class="eint-heading-icon eint-icon-drawer-closed">State of the {{lnginfo.name}} ({{lnginfo.isocode}}) language for all projects</h1>
 % if len(prjdata) == 0:
     Currently there are no projects that use the {{lnginfo.name}} ({{lnginfo.isocode}}) language, perhaps you can
@@ -9,11 +10,9 @@
             <tr>
                 <th>Project</th>
                 <th><i class="icon-cog"></i> Action</th>
-                <th class="number">Unknown</th>
-                <th class="number">Correct</th>
-                <th class="number">Outdated</th>
-                <th class="number">Invalid</th>
-                <th class="number">Missing</th>
+                % for s in reversed(data.STATE_DISPLAY):
+                    <th class="number">{{s.name}}</th>
+                % end
             </tr>
         </thead>
         <tbody>
@@ -21,19 +20,17 @@
             <tr>
             <td><a href="/project/{{pmd.name}}">{{pmd.human_name}}</a></td>
             % if exists:
-                % if lstate[2] > 0 or lstate[3] > 0 or lstate[4] > 0:
+                % if utils.lang_needs_fixing(lstate):
                   <td><a href="/fix/{{pmd.name}}/{{lnginfo.isocode}}">Start fixing</a></td>
                 % else:
                   <td>Done!</td>
                 % end
-                <td class="number">{{lstate[0]}}</td>
-                <td class="number">{{lstate[1]}}</td>
-                <td class="number">{{lstate[2]}}</td>
-                <td class="number">{{lstate[3]}}</td>
-                <td class="number">{{lstate[4]}}</td>
+                % for s in reversed(data.STATE_DISPLAY):
+                    <td class="number">{{lstate[s.code]}}</td>
+                % end
             % else:
                 <td>
-                    % if lstate[4] > 0:
+                    % if not utils.lang_is_empty(lstate[5]):
                         <form style="margin-bottom: 0" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
                             <fieldset>
                                 <input type="hidden" name="language_select" value="{{lnginfo.isocode}}"/>
@@ -42,14 +39,12 @@
                         </form>
                     % end
                 </td>
-                <td class="number"></td>
-                <td class="number"></td>
-                <td class="number"></td>
-                <td class="number"></td>
-                % if lstate[4] > 0:
-                    <td class="number">{{lstate[4]}}</td>
-                % else:
-                    <td class="number"></td>
+                % for s in reversed(data.STATE_DISPLAY):
+                    % if lstate[s.code] > 0:
+                        <td class="number">{{lstate[s.code]}}</td>
+                    % else:
+                        <td class="number"></td>
+                    % end
                 % end
             % end
             </tr>

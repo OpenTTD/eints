@@ -1,5 +1,5 @@
 %rebase('main_template', title='Web Translator - {}'.format(pmd.human_name))
-%from webtranslate import utils
+%from webtranslate import utils, data
 <h1>{{pmd.human_name}}</h1>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
@@ -21,15 +21,13 @@
             <tr>
                 <th colspan="3">Languages ({{len(pmd.pdata.languages)}})</th>
                 <th colspan="3" style="text-align:center;"><i class="icon-cog"></i> Actions</th>
-                <th colspan="5" style="text-align:center;">Strings ({{len(base_lng.changes)}})</th>
+                <th colspan="{{len(data.STATE_DISPLAY)}}" style="text-align:center;">Strings ({{len(base_lng.changes)}})</th>
             </tr>
             <tr>
                 <th colspan="6"></th>
-                <th class="number">Unknown</th>
-                <th class="number">Correct</th>
-                <th class="number">Outdated</th>
-                <th class="number">Invalid</th>
-                <th class="number">Missing</th>
+                % for s in reversed(data.STATE_DISPLAY):
+                    <th class="number">{{s.name}}</th>
+                % end
             </tr>
         </thead>
         <tbody>
@@ -40,21 +38,23 @@
                 <td><strong>(Base Language)</strong></td>
                 <td>-</td>
                 <td><a class="pull-right" href="/download/{{pmd.name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
-                <td class="number"><strong>{{bcounts[0]}}</strong></td>
-                <td class="number"><strong>{{bcounts[1]}}</strong></td>
-                <td class="number"><strong>-</strong></td>
-                <td class="number"><strong>{{bcounts[3]}}</strong></td>
-                <td class="number"><strong>-</strong></td>
+                % for s in reversed(data.STATE_DISPLAY):
+                    % if s.baselng:
+                        <td class="number"><strong>{{bcounts[s.code]}}</strong></td>
+                    % else:
+                        <td class="number"><strong>-</strong></td>
+                    % end
+                % end
             </tr>
         % if len(transl) == 0:
             <tr>
-                <td colspan="11" class="alert alert-info">To get started with translation, upload a language file</td>
+                <td colspan="{{6 + len(data.STATE_DISPLAY)}}" class="alert alert-info">To get started with translation, upload a language file</td>
             </tr>
         % else:
-            % for lng, counts, needs_fix in transl:
+            % for lng, counts in transl:
                 <tr>
                     <td>
-                        % if not needs_fix:
+                        % if not utils.lang_needs_fixing(counts):
                             <i class="icon-ok-circle"></i>
                         % else:
                             <i class="icon-exclamation-sign"></i>
@@ -62,18 +62,16 @@
                     </td>
                     <td><a href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.name}}</a></td>
                     <td><a href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.info.name}}</a></td>
-                    % if needs_fix:
+                    % if utils.lang_needs_fixing(counts):
                         <td><a href="/fix/{{pmd.name}}/{{lng.name}}">Start Fixing</a></td>
                     % else:
                         <td>Done!</td>
                     % end
                     <td><a class="pull-right" href="/delete/{{pmd.name}}/{{lng.name}}"><i class="icon-remove-circle"></i> Delete</a></td>
                     <td><a class="pull-right" href="/download/{{pmd.name}}/{{lng.name}}"><i class="icon-download"></i> Download</a></td>
-                    <td class="number">{{counts[0]}}</td>
-                    <td class="number">{{counts[1]}}</td>
-                    <td class="number">{{counts[2]}}</td>
-                    <td class="number">{{counts[3]}}</td>
-                    <td class="number">{{counts[4]}}</td>
+                    % for s in reversed(data.STATE_DISPLAY):
+                        <td class="number">{{counts[s.code]}}</td>
+                    % end
                 </tr>
             % end
         % end
@@ -81,9 +79,9 @@
     </table>
     <br />
     <dl class="dl-horizontal">
-        % for sd in utils.get_status_definition_strings():
-            <dt>{{sd.name}}</dt>
-            <dd>{{sd.description}}</dd>
+        % for s in reversed(data.STATE_DISPLAY):
+            <dt>{{s.name}}</dt>
+            <dd>{{s.description}}</dd>
         % end
     </dl>
 %end

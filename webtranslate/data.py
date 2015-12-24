@@ -91,11 +91,15 @@ class StatusDefinition:
 
     @ivar description: Description of the string status definition.
     @type description: C{str}
+
+    @ivar baselng: Whether the status exists for base languages.
+    @type baselng: C{bool}
     """
-    def __init__(self, code, name, description):
+    def __init__(self, code, name, description, baselng):
         self.code = code
         self.name = name
         self.description = description
+        self.baselng = baselng
 
 
 MISSING_OK =  0 # String is missing, but that's allowed (non-default case string).
@@ -105,14 +109,18 @@ OUT_OF_DATE = 3 # String is older than the base string.
 INVALID =     4 # String is invalid relative to the base string.
 MISSING =     5 # The default case string is missing.
 
-STATUSES = [StatusDefinition(MISSING_OK,  'Omitted',  'The case was not needed in the translation'),
-            StatusDefinition(UNKNOWN,     'Unknown',  'The state of the translation was not decidable'),
-            StatusDefinition(UP_TO_DATE,  'Correct',  'The string is technically correct and up to date'),
-            StatusDefinition(OUT_OF_DATE, 'Outdated', 'A valid translation exists, but it needs review as a newer base language text is available'),
-            StatusDefinition(INVALID,     'Invalid',  'A translation exists, but its string parameters do not match with the base language'),
-            StatusDefinition(MISSING,     'Missing',  'No translation could be found'),]
+MAX_STATE =   6
+
+STATUSES = [StatusDefinition(MISSING_OK,  'Omitted',  'The case was not needed in the translation',                                                 True),
+            StatusDefinition(UNKNOWN,     'Unknown',  'The state of the translation was not decidable',                                             False),
+            StatusDefinition(UP_TO_DATE,  'Correct',  'The string is technically correct and up to date',                                           True),
+            StatusDefinition(OUT_OF_DATE, 'Outdated', 'A valid translation exists, but it needs review as a newer base language text is available', False),
+            StatusDefinition(INVALID,     'Invalid',  'A translation exists, but its string parameters do not match with the base language',        True),
+            StatusDefinition(MISSING,     'Missing',  'No translation could be found',                                                              False),]
 
 STATE_MAP = dict((sd.code, sd) for sd in STATUSES)
+
+STATE_DISPLAY = [STATE_MAP[s] for s in [MISSING, INVALID, OUT_OF_DATE, UNKNOWN, UP_TO_DATE]]
 
 
 def decide_all_string_status(projtype, base_chg, lng_chgs, lng, binfo):
