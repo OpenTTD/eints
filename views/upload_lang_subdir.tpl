@@ -1,10 +1,10 @@
-%rebase('main_template', title='Upload ' + lngname + ' language for ' + pdata.human_name)
+%rebase('main_template', title='Upload ' + lngname + ' language for ' + pmd.human_name)
 <h1>
-    <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
+    <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>
 <hr />
 <h2 class="eint-heading-icon eint-icon-document-1-upload">Upload {{lngname}} language</h2>
-<form class="form-horizontal well" action="/upload/{{proj_name}}/{{lngname}}" method="post" enctype="multipart/form-data">
+<form class="form-horizontal well" action="/upload/{{pmd.name}}/{{lngname}}" method="post" enctype="multipart/form-data">
     <fieldset style="margin-left:100px;"><!-- center-weight the form - no harm doing this with inline style -->
         <br />
         <br />

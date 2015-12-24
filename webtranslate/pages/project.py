@@ -47,6 +47,6 @@ def project(userauth, prjname):
 
         bcounts = get_overview(pmd, base_lng.name)[0]
 
-    return template('project', proj_name = prjname, pdata = pdata,
+    return template('project', pmd = pmd,
                     transl = transl, base_lng = base_lng, bcounts = bcounts)
 

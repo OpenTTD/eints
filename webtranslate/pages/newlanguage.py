@@ -31,7 +31,7 @@ def new_language_get(userauth, prjname):
     translations.sort(key=lambda x: x.isocode)
     can_be_added.sort(key=lambda x: x.isocode)
 
-    return template('newlanguage', proj_name = prjname, pdata = pdata, base_langs = base_langs,
+    return template('newlanguage', pmd = pmd, base_langs = base_langs,
                     translations = translations, can_be_added = can_be_added)
 
 @route('/newlanguage/<prjname>', method = 'POST')
@@ -45,7 +45,6 @@ def new_language_post(userauth, prjname):
         abort(404, "Project does not exist")
         return
 
-    pdata = pmd.pdata
     new_iso = request.forms.language_select
 
     lng_def = get_language(new_iso)
@@ -54,8 +53,7 @@ def new_language_post(userauth, prjname):
         abort(404, msg)
         return
 
-    return template('makelanguage', prjname = prjname,
-                    pdata = pdata, lngname = lng_def.isocode)
+    return template('makelanguage', pmd = pmd, lngname = lng_def.isocode)
 
 
 def get_language(name):

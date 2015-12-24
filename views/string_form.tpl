@@ -1,17 +1,17 @@
 %rebase('main_template', title='Editing ' + sname)
 %from webtranslate import utils
 <h1>
-    <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
+    <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>
 <a class="pull-right" target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/strings.html">String editing Manual</a>
 <hr />
 <div class="clearfix">
     <h2 class="eint-heading-icon eint-icon-document-1-edit">
-        <a class="eint-header-link" href="/translation/{{proj_name}}/{{lname}}">{{lname}}</a> - Edit Strings
+        <a class="eint-header-link" href="/translation/{{pmd.name}}/{{lname}}">{{lname}}</a> - Edit Strings
         <span class="muted pull-right">{{sname}}</span>
     </h2>
 </div>
-<form class="form-horizontal" action="/string/{{proj_name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
+<form class="form-horizontal" action="/string/{{pmd.name}}/{{lname}}/{{sname}}" method="post" enctype="multipart/form-data">
     % for tc in tcs:
         <fieldset class="well">
 
@@ -22,14 +22,14 @@
                     % if tc.transl[0].current_base != tc.transl[0].trans_base:
                         <div class="clearfix">
                             <span class="control-label">Previous base language text:</span>
-                            <span class="eint-form-value-as-text span8"><strong>{{utils.create_displayed_base_text(pdata, tc.transl[0].trans_base)}}</strong></span>
+                            <span class="eint-form-value-as-text span8"><strong>{{utils.create_displayed_base_text(pmd.pdata, tc.transl[0].trans_base)}}</strong></span>
                         </div>
                     % end
 
                     <!-- Display current base language text. -->
                     <div class="clearfix">
                         <span class="control-label">Base lang string:</span>
-                        <span class="eint-form-value-as-text span8"><strong id="base_{{tc.case}}">{{utils.create_displayed_base_text(pdata, tc.transl[0].current_base)}}</strong></span>
+                        <span class="eint-form-value-as-text span8"><strong id="base_{{tc.case}}">{{utils.create_displayed_base_text(pmd.pdata, tc.transl[0].current_base)}}</strong></span>
                     </div>
 
                     <!-- Display current language text of related languages. -->
@@ -169,7 +169,7 @@
                 <h5>Related Strings</h5>
                     <dl class="dl-horizontal">
                         % for rel in tc.related:
-                            <dt style="width: 23em; text-align: left"><a href="/string/{{proj_name}}/{{lname}}/{{rel.sname}}" title="{{rel.sname}}">{{rel.sname}}</a></dt>
+                            <dt style="width: 23em; text-align: left"><a href="/string/{{pmd.name}}/{{lname}}/{{rel.sname}}" title="{{rel.sname}}">{{rel.sname}}</a></dt>
                             <dd style="margin-left: 25em">{{rel.text.text}}<p></p></dd>
                         % end
                     </dl>
@@ -204,7 +204,7 @@
     % end
     
     <div>
-        <a class="btn btn-primary" href="/fix/{{proj_name}}/{{lname}}">Get another string</a>
+        <a class="btn btn-primary" href="/fix/{{pmd.name}}/{{lname}}">Get another string</a>
         <input class="btn btn-primary pull-right" type="submit" value="Save Changes &amp; Get Next String"/>
     </div>
     <br />

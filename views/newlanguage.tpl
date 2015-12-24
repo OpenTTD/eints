@@ -1,10 +1,10 @@
 %rebase('main_template', title='Add a new translation language')
 <h1>
-    <a class="eint-header-link" href="/project/{{proj_name}}">{{pdata.human_name}}</a>
+    <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>
 <hr />
 <h2 class="eint-heading-icon eint-icon-add">Start New Translation</h2>
-<form class="form-inline well" action="/newlanguage/{{proj_name}}" method="post" enctype="multipart/form-data">
+<form class="form-inline well" action="/newlanguage/{{pmd.name}}" method="post" enctype="multipart/form-data">
     <fieldset>
         <br />
         <div style="width: 60%; margin-left:auto; margin-right:auto;">

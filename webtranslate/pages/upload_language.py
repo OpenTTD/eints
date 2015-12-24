@@ -16,9 +16,9 @@ def page_get(userauth, prjname):
 
     pdata = pmd.pdata
     if pdata.projtype.has_grflangid:
-        return template('upload_lang', proj_name = prjname, pdata = pdata)
+        return template('upload_lang', pmd = pmd)
     else:
-        return template('upload_lang_select', proj_name = prjname, pdata = pdata,
+        return template('upload_lang_select', pmd = pmd,
                     lisos = sorted((linfo.isocode, linfo.name) for linfo in pdata.get_all_languages()))
 
 @route('/upload/<prjname>/<lngname>', method = 'GET')
@@ -34,7 +34,7 @@ def page_get_subdir(userauth, prjname, lngname):
     if linfo is None:
         abort(404, "Page not found")
         return
-    return template('upload_lang_subdir', proj_name = prjname, pdata = pdata, lngname = lngname)
+    return template('upload_lang_subdir', pmd = pmd, lngname = lngname)
 
 @route('/upload/<prjname>/<lngname>', method = 'POST')
 @protected(['upload', 'prjname', '-'])
@@ -111,7 +111,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     # Parse language file, and report any errors.
     ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size, lng_data)
     if len(ng_data.errors) > 0:
-        return template('upload_errors', proj_name = projname, errors = ng_data.errors)
+        return template('upload_errors', pmd = pmd, errors = ng_data.errors)
 
     # Is the language allowed?
     if not pdata.projtype.allow_language(ng_data.language_data):

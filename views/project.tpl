@@ -1,25 +1,25 @@
-%rebase('main_template', title='Web translator - ' + pdata.human_name)
+%rebase('main_template', title='Web translator - ' + pmd.human_name)
 %from webtranslate import utils
-<h1>{{pdata.human_name}}</h1>
+<h1>{{pmd.human_name}}</h1>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
-% if pdata.url is not '':
-    <a class="btn" href="{{pdata.url}}">&#187; Project Website</a> |
+% if pmd.pdata.url is not '':
+    <a class="btn" href="{{pmd.pdata.url}}">&#187; Project Website</a> |
 % end
-    <a class="btn" href="/projsettings/{{proj_name}}"><i class="icon-cog"></i> Project Settings</a>
-    <a class="btn" href="/newlanguage/{{proj_name}}"><i class="icon-plus-sign"></i> Start New Translation</a>
-    <a class="btn" href="/upload/{{proj_name}}"><i class="icon-upload"></i> Upload Language</a>
+    <a class="btn" href="/projsettings/{{pmd.name}}"><i class="icon-cog"></i> Project Settings</a>
+    <a class="btn" href="/newlanguage/{{pmd.name}}"><i class="icon-plus-sign"></i> Start New Translation</a>
+    <a class="btn" href="/upload/{{pmd.name}}"><i class="icon-upload"></i> Upload Language</a>
 </div>
 <h2 class="eint-heading-icon eint-icon-drawer-open">Project Overview</h2>
 % if base_lng is None:
-    <p class="alert alert-info"><strong>To get started, please <a href="/upload/{{proj_name}}">upload a lang file</a> to use as base language.</strong></p>
+    <p class="alert alert-info"><strong>To get started, please <a href="/upload/{{pmd.name}}">upload a lang file</a> to use as base language.</strong></p>
 % else:
     <br />
     <br />
     <table class="table table-condensed table-striped table-hover">
         <thead>
             <tr>
-                <th colspan="2">Languages ({{len(pdata.languages)}})</th>
+                <th colspan="2">Languages ({{len(pmd.pdata.languages)}})</th>
                 <th colspan="3" style="text-align:center;"><i class="icon-cog"></i> Actions</th>
                 <th colspan="5" style="text-align:center;">Strings ({{len(base_lng.changes)}})</th>
             </tr>
@@ -35,10 +35,10 @@
         <tbody>
             <tr>
                 <td><i class="icon-leaf"></i></td>
-                <td><strong><a href="/translation/{{proj_name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
+                <td><strong><a href="/translation/{{pmd.name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
                 <td><strong>(Base Language)</strong></td>
                 <td>-</td>
-                <td><a class="pull-right" href="/download/{{proj_name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
+                <td><a class="pull-right" href="/download/{{pmd.name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
                 <td class="number"><strong>{{bcounts[0]}}</strong></td>
                 <td class="number"><strong>{{bcounts[1]}}</strong></td>
                 <td class="number"><strong>-</strong></td>
@@ -59,14 +59,14 @@
                             <i class="icon-exclamation-sign"></i>
                         % end
                     </td>
-                    <td><a href="/translation/{{proj_name}}/{{lngname}}">{{lngname}}</a></td>
+                    <td><a href="/translation/{{pmd.name}}/{{lngname}}">{{lngname}}</a></td>
                     % if needs_fix:
-                        <td><a href="/fix/{{proj_name}}/{{lngname}}">Start Fixing</a></td>
+                        <td><a href="/fix/{{pmd.name}}/{{lngname}}">Start Fixing</a></td>
                     % else:
                         <td>Done!</td>
                     % end
-                    <td><a class="pull-right" href="/delete/{{proj_name}}/{{lngname}}"><i class="icon-remove-circle"></i> Delete</a></td>
-                    <td><a class="pull-right" href="/download/{{proj_name}}/{{lngname}}"><i class="icon-download"></i> Download</a></td>
+                    <td><a class="pull-right" href="/delete/{{pmd.name}}/{{lngname}}"><i class="icon-remove-circle"></i> Delete</a></td>
+                    <td><a class="pull-right" href="/download/{{pmd.name}}/{{lngname}}"><i class="icon-download"></i> Download</a></td>
                     <td class="number">{{counts[0]}}</td>
                     <td class="number">{{counts[1]}}</td>
                     <td class="number">{{counts[2]}}</td>

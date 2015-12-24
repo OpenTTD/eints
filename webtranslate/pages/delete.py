@@ -24,7 +24,7 @@ def delete_form(userauth, prjname, lngname):
         abort(404, "Cannot delete base language!")
         return
 
-    return template("delete_translation", pdata = pdata, lname = lngname, proj_name = prjname)
+    return template("delete_translation", pmd = pmd, lname = lngname)
 
 @route('/really_delete/<prjname>/<lngname>', method = 'POST')
 @protected(['delete', 'prjname', 'lngname'])

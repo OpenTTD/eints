@@ -13,9 +13,7 @@ def project_get(userauth, prjname):
         abort(404, "Page not found")
         return
 
-    pdata = pmd.pdata
-    return template('projsettings', proj_name = prjname, human_name = pdata.human_name,
-                    url = pdata.url)
+    return template('projsettings', pmd = pmd)
 
 @route('/projsettings/<prjname>', method = 'POST')
 @protected(['projsettings', 'prjname', '-'])

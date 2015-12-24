@@ -345,7 +345,7 @@ def check_page_parameters(prjname, lngname, sname):
 
     return pmd, bchg, lng, binfo
 
-def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, states = None):
+def output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname, states = None):
     """
     Construct a page for editing a string.
 
@@ -358,11 +358,8 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     @param lng: Language being translated.
     @type  lng: L{Language}
 
-    @param prjname: System project name
-    @type  prjname: C{str}
-
-    @param pdata: Project data.
-    @type  pdata: L{Project}
+    @param pmd: Project Meta Data.
+    @type  pmd: L{ProjectMetaData}
 
     @param lngname: Language name.
     @type  lngname: C{str}
@@ -380,6 +377,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
     @rtype:  C{None} or C{str}
     """
     if states is None: states = {}
+    pdata = pmd.pdata
     projtype = pdata.projtype
 
     # Mapping of case to list of related strings.
@@ -452,7 +450,7 @@ def output_string_edit_page(bchg, binfo, lng, prjname, pdata, lngname, sname, st
                 related_languages.append((n, related))
     related_languages.sort()
 
-    return template('string_form', proj_name = prjname, pdata = pdata,
+    return template('string_form', pmd = pmd,
                     lname = lngname, sname = sname, plurals = language_info.all_plurals[lng.plural].description,
                     genders = lng.gender, cases = lng.case, related_languages = related_languages, tcs = transl_cases)
 
@@ -464,7 +462,7 @@ def str_form(userauth, prjname, lngname, sname):
     if parms is None: return
 
     pmd, bchg, lng, binfo = parms
-    return output_string_edit_page(bchg, binfo, lng, prjname, pmd.pdata, lngname, sname, None)
+    return output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname, None)
 
 
 @route('/string/<prjname>/<lngname>/<sname>', method = 'POST')
@@ -561,7 +559,7 @@ def str_post(userauth, prjname, lngname, sname):
     if len(new_state_errors) > 0:
         request.query['message'] = 'There were error(s)' # XXX Needs a better solution (pass message obj to template?)
         request.query['message_class'] = 'error'
-        return output_string_edit_page(bchg, binfo, lng, prjname, pmd.pdata, lngname, sname,
+        return output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname,
                                        new_state_errors)
 
     # No errors, store the changes.
