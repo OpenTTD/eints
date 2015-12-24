@@ -1,4 +1,4 @@
-%rebase('main_template', title='Web translator language overview')
+%rebase('main_template', title='Web Translator - {} ({})'.format(lnginfo.name, lnginfo.isocode))
 <h1 class="eint-heading-icon eint-icon-drawer-closed">State of the {{lnginfo.name}} ({{lnginfo.isocode}}) language for all projects</h1>
 % if len(prjdata) == 0:
     Currently there are no projects that use the {{lnginfo.name}} ({{lnginfo.isocode}}) language, perhaps you can

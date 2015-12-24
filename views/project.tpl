@@ -1,4 +1,4 @@
-%rebase('main_template', title='Web translator - ' + pmd.human_name)
+%rebase('main_template', title='Web Translator - {}'.format(pmd.human_name))
 %from webtranslate import utils
 <h1>{{pmd.human_name}}</h1>
 <hr />

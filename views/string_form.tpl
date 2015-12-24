@@ -1,4 +1,4 @@
-%rebase('main_template', title='Editing ' + sname)
+%rebase('main_template', title='Web Translator - {} - {} ({}) - Editing {}'.format(pmd.human_name, lng.info.name, lng.name, sname))
 %from webtranslate import utils
 <h1>
     <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>

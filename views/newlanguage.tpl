@@ -1,4 +1,4 @@
-%rebase('main_template', title='Add a new translation language')
+%rebase('main_template', title='Web Translator - {} - Start new translation'.format(pmd.human_name))
 <h1>
     <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>

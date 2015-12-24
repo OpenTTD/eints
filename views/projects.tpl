@@ -1,4 +1,4 @@
-%rebase('main_template', title='Web translator projects')
+%rebase('main_template', title='Web Translator - Projects')
 <h1 class="eint-heading-icon eint-icon-drawer-closed">Projects available for translation</h1>
 % if len(projects) > 0:
     <ul>

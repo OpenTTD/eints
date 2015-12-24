@@ -1,4 +1,4 @@
-%rebase('main_template', title='Web translator language overview')
+%rebase('main_template', title='Web Translator - {} - Profile'.format(userauth.name))
 <h1 class="eint-heading-icon eint-icon-drawer-closed">Profile of user '{{userauth.name}}'</h1>
 % if not is_owner and len(lnginfos) == 0:
     Sorry, you have no access to any projects.

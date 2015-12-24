@@ -1,4 +1,4 @@
-%rebase('main_template', title='Web translator - ' + pmd.human_name)
+%rebase('main_template', title='Web Translator - {} - Settings'.format(pmd.human_name))
 <h1>
     <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>
