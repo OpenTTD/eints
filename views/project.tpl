@@ -19,12 +19,12 @@
     <table class="table table-condensed table-striped table-hover">
         <thead>
             <tr>
-                <th colspan="2">Languages ({{len(pmd.pdata.languages)}})</th>
+                <th colspan="3">Languages ({{len(pmd.pdata.languages)}})</th>
                 <th colspan="3" style="text-align:center;"><i class="icon-cog"></i> Actions</th>
                 <th colspan="5" style="text-align:center;">Strings ({{len(base_lng.changes)}})</th>
             </tr>
             <tr>
-                <th colspan="5"></th>
+                <th colspan="6"></th>
                 <th class="number">Unknown</th>
                 <th class="number">Correct</th>
                 <th class="number">Outdated</th>
@@ -36,6 +36,7 @@
             <tr>
                 <td><i class="icon-leaf"></i></td>
                 <td><strong><a href="/translation/{{pmd.name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
+                <td><strong><a href="/translation/{{pmd.name}}/{{base_lng.name}}">{{base_lng.info.name}}</a></strong></td>
                 <td><strong>(Base Language)</strong></td>
                 <td>-</td>
                 <td><a class="pull-right" href="/download/{{pmd.name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
@@ -47,7 +48,7 @@
             </tr>
         % if len(transl) == 0:
             <tr>
-                <td colspan="10" class="alert alert-info">To get started with translation, upload a language file</td>
+                <td colspan="11" class="alert alert-info">To get started with translation, upload a language file</td>
             </tr>
         % else:
             % for lng, counts, needs_fix in transl:
@@ -60,6 +61,7 @@
                         % end
                     </td>
                     <td><a href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.name}}</a></td>
+                    <td><a href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.info.name}}</a></td>
                     % if needs_fix:
                         <td><a href="/fix/{{pmd.name}}/{{lng.name}}">Start Fixing</a></td>
                     % else:

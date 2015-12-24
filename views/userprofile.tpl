@@ -11,7 +11,7 @@
                     <th>Manager</th>
                 % end
                 % for l in lnginfos:
-                    <th>{{l.isocode}}</th>
+                    <th>{{l.name}} ({{l.isocode}})</th>
                 % end
             </tr>
         </thead>

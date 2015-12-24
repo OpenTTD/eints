@@ -7,7 +7,7 @@
 <hr />
 <div class="clearfix">
     <h2 class="eint-heading-icon eint-icon-document-1-edit">
-        <a class="eint-header-link" href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.info.name}}</a> - Edit Strings
+        <a class="eint-header-link" href="/translation/{{pmd.name}}/{{lng.name}}">{{lng.info.name}} ({{lng.name}})</a> - Edit Strings
         <span class="muted pull-right">{{sname}}</span>
     </h2>
 </div>

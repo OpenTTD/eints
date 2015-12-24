@@ -1,7 +1,7 @@
 %rebase('main_template', title='Web translator language overview')
-<h1 class="eint-heading-icon eint-icon-drawer-closed">State of the {{lnginfo.name}} language for all projects</h1>
+<h1 class="eint-heading-icon eint-icon-drawer-closed">State of the {{lnginfo.name}} ({{lnginfo.isocode}}) language for all projects</h1>
 % if len(prjdata) == 0:
-    Currently there are no projects that use the {{lnginfo.name}} language, perhaps you can
+    Currently there are no projects that use the {{lnginfo.name}} ({{lnginfo.isocode}}) language, perhaps you can
     translate some projects?
 % else:
     <table class="table table-condensed table-striped table-hover">

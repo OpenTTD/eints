@@ -1,10 +1,10 @@
-%rebase('main_template', title='language ' + lng.info.name + ' in ' + pmd.human_name)
+%rebase('main_template', title='language ' + lng.info.name + ' (' + lng.name + ') in ' + pmd.human_name)
 <h1>
     <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>
 <hr />
 
-<h2 class="eint-heading-icon eint-icon-checklist">{{lng.info.name}} - Status of Strings</h2>
+<h2 class="eint-heading-icon eint-icon-checklist">{{lng.info.name}} ({{lng.name}}) - Status of Strings</h2>
 <a class="btn pull-right" href="/download/{{pmd.name}}/{{lng.name}}"><i class="icon-download"></i> Download Lang File</a>
 <div class="btn-group">
 % for title, strs in strings:
