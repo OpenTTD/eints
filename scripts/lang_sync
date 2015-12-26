@@ -401,8 +401,9 @@ class EintsLanguageInfo:
     @type last_change: C{None} or C{str}
     """
 
-    def __init__(self, isocode, parent_lang, last_change):
+    def __init__(self, isocode, name, parent_lang, last_change):
         self.isocode = isocode
+        self.name = name
         self.parent_lang = parent_lang
         self.last_change = last_change
 
@@ -435,6 +436,7 @@ def get_eints_languages():
         isocode = line.get("isocode")
         if isocode is None or len(isocode) == 0:
             continue
+        name = line.get("name", isocode)
 
         plang = line.get("base_isocode")
         if plang is None:
@@ -445,7 +447,7 @@ def get_eints_languages():
         # last_change = line.get("changetime")
         # XXX Parse and validate the last change date
 
-        el = EintsLanguageInfo(isocode, plang, None)
+        el = EintsLanguageInfo(isocode, name, plang, None)
         result.append(el)
 
     eints_files_cache = result
@@ -1045,7 +1047,7 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             if credits_handle is not None:
                 credits = collect_credits(current_strings, parsed)
                 if len(credits) > 0:
-                    credits_handle.write(el.isocode + ": " + credits + "\n")
+                    credits_handle.write(el.name.lower() + ": " + credits + "\n")
                     credits_handle.flush()  # Flush it to disk, so it is preserved on crash.
             write_parsed_lines(parsed, path, eolstyle)
 
