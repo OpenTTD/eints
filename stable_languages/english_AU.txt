@@ -2,4 +2,4 @@
 ##ownname English (AU)
 ##isocode en_AU
 ##plural 0
-##grflangid 0x3D
+##grflangid 0x3d

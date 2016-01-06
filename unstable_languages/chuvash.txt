@@ -2,4 +2,4 @@
 ##ownname Чӑвашла
 ##isocode cv_RU
 ##plural 0
-##grflangid 0x0B
+##grflangid 0x0b

@@ -2,4 +2,4 @@
 ##ownname தமிழ்
 ##isocode ta_IN
 ##plural 0
-##grflangid 0x0A
+##grflangid 0x0a
