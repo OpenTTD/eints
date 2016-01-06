@@ -11,7 +11,7 @@ from webtranslate.newgrf import language_file, language_info
 def page_get(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
-        abort(404, "Page not found")
+        abort(404, "Project does not exist")
         return
 
     pdata = pmd.pdata
@@ -26,13 +26,13 @@ def page_get(userauth, prjname):
 def page_get_subdir(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
-        abort(404, "Page not found")
+        abort(404, "Project does not exist")
         return
 
     pdata = pmd.pdata
     linfo = language_info.isocode.get(lngname)
     if linfo is None:
-        abort(404, "Page not found")
+        abort(404, "Language is unknown")
         return
     return template('upload_lang_subdir', pmd = pmd, lnginfo = linfo)
 
@@ -41,12 +41,12 @@ def page_get_subdir(userauth, prjname, lngname):
 def page_post_subdir(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
-        abort(404, "Page not found")
+        abort(404, "Project does not exist")
         return
 
     linfo = language_info.isocode.get(lngname)
     if linfo is None:
-        abort(404, "Language \"{}\" is unknown".format(lngname))
+        abort(404, "Language is unknown")
         return
 
     langfile = request.files.langfile
@@ -59,12 +59,13 @@ def page_post_subdir(userauth, prjname, lngname):
 def page_post(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
-        abort(404, "Page not found")
+        abort(404, "Project does not exist")
         return
 
     pdata = pmd.pdata
     if not pdata.projtype.has_grflangid:
         abort(404, "No language identification provided.")
+        return
 
     langfile = request.files.langfile
     override = request.forms.override

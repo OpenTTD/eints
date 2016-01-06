@@ -129,7 +129,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
 def download(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
-        abort(404, "Page not found")
+        abort(404, "Project does not exist")
         return
 
     pdata = pmd.pdata
@@ -137,7 +137,7 @@ def download(userauth, prjname, lngname):
 
     lng = pdata.languages.get(lngname)
     if lng is None:
-        abort(404, "Language does not exist")
+        abort(404, "Language does not exist in the project")
         return
 
     response.content_type = 'text/plain; charset=UTF-8'
@@ -148,7 +148,7 @@ def download(userauth, prjname, lngname):
 def annotate(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
-        abort(404, "Page not found")
+        abort(404, "Project does not exist")
         return
 
     pdata = pmd.pdata
@@ -156,7 +156,7 @@ def annotate(userauth, prjname, lngname):
 
     lng = pdata.languages.get(lngname)
     if lng is None:
-        abort(404, "Language does not exist")
+        abort(404, "Language does not exist in the project")
         return
 
     response.content_type = 'text/plain; charset=UTF-8'

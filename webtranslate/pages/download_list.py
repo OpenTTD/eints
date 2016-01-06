@@ -33,7 +33,7 @@ def get_newest_change(lang):
 def download_list(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
-        abort(404, "Page not found")
+        abort(404, "Project does not exist")
         return
 
     pdata = pmd.pdata
