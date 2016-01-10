@@ -138,13 +138,14 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
         # Add strings as changes.
         for sv in ng_data.strings:
             sv.text = language_file.sanitize_text(sv.text)
+            chgs = base_language.changes.get(sv.name)
             chg = get_blng_change(sv, base_language)
             if chg is None: # New change.
                 base_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, None, stamp, userauth.name, True)
-                chgs = base_language.changes.get(sv.name)
                 if chgs is None:
-                    base_language.changes[sv.name] = [chg]
+                    chgs = [chg]
+                    base_language.changes[sv.name] = chgs
                 else:
                     for c in chgs:
                         c.last_upload = False
