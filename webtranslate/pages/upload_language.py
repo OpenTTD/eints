@@ -211,6 +211,8 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
             elif override: # Override existing entry.
                 chg.stamp = stamp
                 chg.user = userauth.name
+                for c in chgs:
+                    c.last_upload = (c == chg)
 
         # Update language properties as well.
         copy_lng_properties(ng_data, lng)
