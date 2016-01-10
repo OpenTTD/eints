@@ -191,9 +191,9 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
             # Find base language string for 'sv'.
             bchgs = base_language.changes.get(sv.name)
             if bchgs is None: continue # Translation has a string not in the base language
-            chg = data.get_newest_change(bchgs, '')
-            if chg is None: continue # Nothing to base against.
-            base_text = chg.base_text
+            bchg = data.get_newest_change(bchgs, '')
+            if bchg is None: continue # Nothing to base against.
+            base_text = bchg.base_text
 
             lng_chg  = get_lng_change(sv, lng, base_text)
             if lng_chg is None: # It's a new text or new case.
