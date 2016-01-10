@@ -195,8 +195,8 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
             if bchg is None: continue # Nothing to base against.
             base_text = bchg.base_text
 
-            lng_chg  = get_lng_change(sv, lng, base_text)
-            if lng_chg is None: # It's a new text or new case.
+            chg = get_lng_change(sv, lng, base_text)
+            if chg is None: # It's a new text or new case.
                 lng_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, userauth.name, True)
                 chgs = lng.changes.get(sv.name)
@@ -207,8 +207,8 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                         c.last_upload = False
                     chgs.append(chg)
             elif override: # Override existing entry.
-                lng_chg.stamp = stamp
-                lng_chg.user = userauth.name
+                chg.stamp = stamp
+                chg.user = userauth.name
 
         # Update language properties as well.
         copy_lng_properties(ng_data, lng)
