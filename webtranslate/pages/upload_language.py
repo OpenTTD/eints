@@ -197,11 +197,11 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
             if bchg is None: continue # Nothing to base against.
             base_text = bchg.base_text
 
+            chgs = lng.changes.get(sv.name)
             chg = get_lng_change(sv, lng, base_text)
             if chg is None: # It's a new text or new case.
                 lng_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, userauth.name, True)
-                chgs = lng.changes.get(sv.name)
                 if chgs is None:
                     lng.changes[sv.name] = [chg]
                 else:
