@@ -18,7 +18,7 @@
         <div class="control-group">
             <div class="controls">
                  <label class="checkbox" for="override" class="checkbox">
-                    <input type="checkbox" name="override" id="override" /> Override newer texts
+                    <input type="checkbox" name="override" id="override" /> Override newer texts (only for translations)
                 </label>
             </div>
             <div class="controls">
