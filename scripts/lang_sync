@@ -644,6 +644,11 @@ def perform_upload(ll_files, is_base):
         with open(ll.path_name, 'r', encoding = 'utf-8') as handle:
             data = handle.read()
 
+        data = data.rstrip()
+        if len(data) == 0:
+            print("Warning: Skipping empty \"{}\".".format(ll.path_name))
+            continue
+
         fields = {'override' : '',
                   'base_language' : blng_value}
         fname = os.path.basename(ll.path_name)
