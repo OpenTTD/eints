@@ -1126,20 +1126,25 @@ def load_language(xloader, projtype, node):
     lng.grflangid = int(node.getAttribute('langid'), 10)
     plural = loader.get_opt_DOMattr(node, 'plural', None)
     if plural is not None:
-        plural = int(plural, 10)
-    lng.plural = plural
+        lng.plural = int(plural, 10)
+    else:
+        lng.plural = lng.info.plural
 
     gender = loader.get_opt_DOMattr(node, 'gender', None)
-    if not projtype.allow_gender or gender is None:
+    if not projtype.allow_gender:
         lng.gender = []
-    else:
+    elif gender is not None:
         lng.gender = gender.split(' ')
+    else:
+        lng.gender = lng.info.gender
 
     case = loader.get_opt_DOMattr(node, 'cases', None)
-    if not projtype.allow_case or case is None or case == '':
+    if not projtype.allow_case or case == '':
         lng.case = ['']
-    else:
+    elif case is not None:
         lng.case = [''] + case.split(' ')
+    else:
+        lng.case = lng.info.case
 
     lng.custom_pragmas = {}
     for pragma_node in loader.get_child_nodes(node, 'pragma'):
@@ -1184,17 +1189,23 @@ def load_language_json(projtype, node):
 
     assert node['plural'] is None or isinstance(node['plural'], int)
     lng.plural = node['plural']
+    if lng.plural is None:
+        lng.plural = lng.info.plural
 
-    if not projtype.allow_gender or 'gender' not in node:
+    if not projtype.allow_gender:
         lng.gender = []
-    else:
+    elif 'gender' in node:
         lng.gender = node['gender'].split(' ')
+    else:
+        lng.gender = lng.info.gender
 
     case = node.get('cases')
-    if not projtype.allow_case or case is None or case == '':
+    if not projtype.allow_case or case == '':
         lng.case = ['']
-    else:
+    elif case is not None:
         lng.case = [''] + case.split(' ')
+    else:
+        lng.case = lng.info.case
 
     assert isinstance(node['pragma'], list)
     lng.custom_pragmas = dict(node['pragma'])

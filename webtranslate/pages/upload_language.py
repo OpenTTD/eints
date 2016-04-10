@@ -157,7 +157,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                 c.last_upload = (c == chg)
 
         # Update language properties as well.
-        copy_lng_properties(ng_data, base_language)
+        copy_lng_properties(pdata.projtype, ng_data, base_language)
 
         pdata.skeleton = ng_data.skeleton # Use the new skeleton file.
         pdata.flush_related_cache() # Drop the related strings cache.
@@ -215,7 +215,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                     c.last_upload = (c == chg)
 
         # Update language properties as well.
-        copy_lng_properties(ng_data, lng)
+        copy_lng_properties(pdata.projtype, ng_data, lng)
         lng.set_modified()
 
     config.cache.save_pmd(pmd)
@@ -322,7 +322,7 @@ def add_new_language(ng_data, pdata, base_lang):
 
     lng = data.Language(ng_data.language_data.isocode)
     lng.grflangid = ng_data.grflangid
-    copy_lng_properties(ng_data, lng)
+    copy_lng_properties(pdata.projtype, ng_data, lng)
     lng.changes = {}
     pdata.languages[lng.name] = lng
 
@@ -339,9 +339,12 @@ def add_new_language(ng_data, pdata, base_lang):
     lng.set_modified()
     return (True, lng)
 
-def copy_lng_properties(ng_data, lng):
+def copy_lng_properties(projtype, ng_data, lng):
     """
     Copy language properties from the loaded language file to the language.
+
+    @param projtype: Project type.
+    @type  projtype: L{ProjectType}
 
     @param ng_data: Loaded language file.
     @type  ng_data: L{NewGrfData}
@@ -350,8 +353,25 @@ def copy_lng_properties(ng_data, lng):
     @type  lng: L{Language}
     """
     lng.custom_pragmas = ng_data.custom_pragmas
-    lng.plural = ng_data.plural
-    lng.gender = ng_data.gender
-    lng.case   = ng_data.case
+
+    if ng_data.plural is not None:
+        lng.plural = ng_data.plural
+    else:
+        lng.plural = lng.info.plural
+
+    if not projtype.allow_gender:
+        lng.gender = []
+    elif ng_data.gender is not None:
+        lng.gender = ng_data.gender
+    else:
+        lng.gender = lng.info.gender
+
+    if not projtype.allow_case:
+        lng.case = ['']
+    elif ng_data.case is not None:
+        lng.case = ng_data.case
+    else:
+        lng.case = lng.info.case
+
     lng.set_modified()
 
