@@ -231,6 +231,7 @@ _NEWGRF_PARAMETERS = [
     ParameterInfo("CARGO_LONG",     [P_G, PP_], 1,    False, True ),
     ParameterInfo("CARGO_SHORT",    [P__, PP_], 1,    False, True ), # short cargo description, only ### tons, or ### litres
     ParameterInfo("CARGO_TINY",     [P__, PP_], 1,    False, True ), # tiny cargo description with only the amount
+    ParameterInfo("CARGO_NAME",     [P_G],      None, True,  True ),
     ParameterInfo("HEX",            [PP_],      0,    False, True ),
     ParameterInfo("STRING",         [P_G],      None, True,  True ),
     ParameterInfo("DATE1920_LONG",  [P__],      None, False, True ),
