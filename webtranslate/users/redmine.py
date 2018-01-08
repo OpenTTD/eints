@@ -125,6 +125,7 @@ def _do_command(cmd, parms):
     global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
 
     if db_type == 'postgress':
+        import psycopg2
         cur = db_connection.cursor()
         try:
             cur.execute(cmd, parms)
