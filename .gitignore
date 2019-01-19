@@ -1,0 +1,31 @@
+*.swp
+
+# Ignore generated documentation
+docs/html
+docs/*.html
+docs/*.html
+
+# Ignore frequent development left-overs like
+# editor backups, patches, rejects etc. pp
+*.orig
+*.bak
+*.log
+*.rej
+*.diff
+
+# Don't add python .pyc and .pyo files
+__pycache__
+*.pyc
+*.pyo
+
+# Ignore deployment files and directories
+root_dir
+config.xml
+users.dat
+projects.dat
+rights.dat
+openttd
+
+# Files created by Mac image preview and file browser:
+.DS_Store
+Thumbs.db
