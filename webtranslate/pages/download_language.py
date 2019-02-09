@@ -62,6 +62,12 @@ def make_langfile(pdata, base_lng, lng, add_func):
     else:
         lng_case = [''] # Suppress writing of non-default cases if the project doesn't allow them.
 
+    sdict = pdata.statistics
+    sdict = sdict.get(lng.name) # Statistics dict for the queried language.
+    if sdict is None:
+        abort(404, "Missing language statistics")
+        return
+
     lines = []
     for skel_type, skel_value in pdata.skeleton:
         if skel_type == 'literal':
@@ -71,6 +77,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
             column, sname = skel_value
             chgs = lng.changes.get(sname)
             if chgs is not None:
+                cstates = sdict[sname]
                 # Language has sorted cases, thus the default case comes first.
                 for case in lng_case:
                     chg = data.get_newest_change(chgs, case)
@@ -84,8 +91,12 @@ def make_langfile(pdata, base_lng, lng, add_func):
                             text = chg.base_text.text
                         else:
                             text = chg.new_text.text
-                            if case  != '' and text == '':
+                            if case != '' and text == '':
                                 # Suppress printing of empty non-default cases in translations.
+                                continue
+                            cstate = next(se for c, se in cstates if c == case)
+                            if cstate == data.INVALID:
+                                # Suppress invalid translations.
                                 continue
 
                         length = column - len(line)
