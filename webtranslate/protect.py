@@ -1,7 +1,8 @@
 """
 Bottle authentication decorator.
 """
-from webtranslate.bottle import request, abort, error, response, redirect
+from webtranslate.bottle import request, abort, error, response
+from webtranslate.utils import redirect
 from webtranslate import users, config
 
 @error(401)
@@ -48,10 +49,10 @@ def protected(page_name):
                 abort(401, "Access denied")
             elif prjname is not None and prjname in config.cache.projects:
                 # Valid user, but insufficient permissions: Go to project page.
-                redirect("/project/" + prjname.lower() + '?message=Access denied')
+                redirect("/project/<prjname>", prjname = prjname.lower(), message = 'Access denied')
             else:
                 # Valid user, no project context: Go to project list.
-                redirect("/projects?message=Access denied")
+                redirect("/projects", message = "Access denied")
             return
             
         return wrapper

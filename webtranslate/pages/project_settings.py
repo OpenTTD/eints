@@ -1,7 +1,8 @@
 """
 Settings of a project.
 """
-from webtranslate.bottle import route, template, abort, request, redirect, request, redirect
+from webtranslate.bottle import route, template, abort, request
+from webtranslate.utils import redirect
 from webtranslate.protect import protected
 from webtranslate import config, utils
 
@@ -29,7 +30,7 @@ def project_post(userauth, prjname):
     human_name = request.forms.name.strip()
     acceptance = utils.verify_name(human_name, "Full project name", False)
     if acceptance is not None:
-        redirect('/projsettings/' + prjname + '?message=' + acceptance)
+        redirect('/projsettings/<prjname>', prjname = prjname, message = acceptance)
         return
 
     # Get and check the new url.
@@ -61,6 +62,6 @@ def project_post(userauth, prjname):
 
         config.cache.save_pmd(pmd)
 
-    redirect("/project/" + prjname.lower() + '?message=' + message)
+    redirect("/project/<prjname>", prjname = prjname.lower(), message = message)
 
 

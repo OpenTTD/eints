@@ -1,5 +1,6 @@
 import random
-from webtranslate.bottle import route, template, abort, request, redirect
+from webtranslate.bottle import route, template, abort, request
+from webtranslate.utils import redirect
 from webtranslate.protect import protected
 from webtranslate import data, config, utils
 from webtranslate.newgrf import language_file, language_info
@@ -287,13 +288,13 @@ def fix_string_page(pmd, prjname, lngname, message):
     sname = find_string(pmd, lngname)
     if sname is None:
         if message is None: message = "All strings are up-to-date, perhaps some translations need rewording?"
-        redirect('/translation/{}/{}?message={}'.format(prjname, lngname, message))
+        redirect('/translation/<prjname>/<lngname>', prjname = prjname, lngname = lngname, message = message)
         return
 
     if message is None:
-        redirect('/string/{}/{}/{}'.format(prjname, lngname, sname))
+        redirect('/string/<prjname>/<lngname>/<sname>', prjname = prjname, lngname = lngname, sname = sname)
     else:
-        redirect('/string/{}/{}/{}?message={}'.format(prjname, lngname, sname, message))
+        redirect('/string/<prjname>/<lngname>/<sname>', prjname = prjname, lngname = lngname, sname = sname, message = message)
     return
 
 def check_page_parameters(prjname, lngname, sname):

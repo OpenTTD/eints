@@ -1,7 +1,8 @@
 """
 Create a new project.
 """
-from webtranslate.bottle import route, template, abort, request, redirect
+from webtranslate.bottle import route, template, abort, request
+from webtranslate.utils import redirect
 from webtranslate.protect import protected
 from webtranslate import config, utils, project_type
 
@@ -21,11 +22,11 @@ def page_post(userauth):
     prjname = request.forms.name.lower().strip()
     acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
-        redirect('/newproject?message=' + acceptance)
+        redirect('/newproject', message = acceptance)
         return
 
     if prjname in config.cache.projects:
-        redirect('/newproject?message=' + "Project \"{}\" already exists".format(prjname))
+        redirect('/newproject', message = "Project \"{}\" already exists".format(prjname))
         return
 
     ptype_name = request.forms.projtype_select
@@ -35,7 +36,7 @@ def page_post(userauth):
             projtype = prjtp
             break
     if projtype is None:
-        redirect('/newproject?message=No known project type provided')
+        redirect('/newproject', message = 'No known project type provided')
         return
     return template('createproject_form', projtype_name = projtype.name, prjname = prjname)
 
@@ -44,23 +45,23 @@ def page_post(userauth):
 def create_project(userauth, prjtypename, prjname):
     acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
-        redirect('/newproject?message=' + acceptance)
+        redirect('/newproject', message = acceptance)
         return
 
     if prjname in config.cache.projects:
-        redirect('/newproject?message=' + "Project \"{}\" already exists".format(prjname))
+        redirect('/newproject', message = "Project \"{}\" already exists".format(prjname))
         return
 
     human_name = request.forms.humanname.strip()
     acceptance = utils.verify_name(human_name, "Full project name", False)
     if acceptance is not None:
-        redirect('/newproject?message=' + acceptance)
+        redirect('/newproject', message = acceptance)
         return
 
     url = request.forms.url
     acceptance = utils.verify_url(url)
     if acceptance is not None:
-        redirect('/newproject?message=' + acceptance)
+        redirect('/newproject', message = acceptance)
         return
 
     projtype = project_type.project_types.get(prjtypename)
@@ -74,4 +75,4 @@ def create_project(userauth, prjtypename, prjname):
         return
 
     message = "Successfully created project '" + prjname +"' " + utils.get_datetime_now_formatted()
-    redirect('/project/{}?message={}'.format(prjname.lower(), message))
+    redirect('/project/<prjname>', prjname = prjname.lower(), message = message)
