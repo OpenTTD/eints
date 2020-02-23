@@ -1,4 +1,5 @@
-from webtranslate.bottle import route, template, abort, redirect
+from webtranslate.bottle import route, template, abort
+from webtranslate.utils import redirect
 from webtranslate.protect import protected
 from webtranslate import config
 
@@ -59,5 +60,5 @@ def delete_submit(userauth, prjname, lngname):
     config.cache.save_pmd(pmd)
 
     msg = "Language " + lngname + " is deleted"
-    redirect('/project/{}?message={}'.format(prjname, msg))
+    redirect('/project/<prjname>', prjname = prjname, message = msg)
     return

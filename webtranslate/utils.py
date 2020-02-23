@@ -1,4 +1,4 @@
-from webtranslate import data
+from webtranslate import data, bottle
 from webtranslate.newgrf import language_file
 import re
 
@@ -202,3 +202,16 @@ def lang_is_empty(overview):
     @rtype:  C{bool}
     """
     return sum(overview) == 0
+
+def redirect(path, **kwargs):
+    """
+    Quotes and encodes an URL and sends a redirect response.
+
+    @param path: Route pattern.
+    @type  path: C{str}
+
+    @param kwargs: Route and URL parameters.
+    @type  kwargs: C{dict} of C{str} to C{str}
+    """
+    u = bottle.url(path, **kwargs)
+    bottle.redirect(u)

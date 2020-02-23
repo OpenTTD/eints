@@ -1,7 +1,8 @@
 """
 Upload a language file.
 """
-from webtranslate.bottle import route, template, abort, request, redirect
+from webtranslate.bottle import route, template, abort, request
+from webtranslate.utils import redirect
 from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_file, language_info
@@ -226,7 +227,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
         pmd.create_statistics(lng)
 
     message = "Successfully uploaded language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-    redirect("/project/" + projname + '?message=' + message)
+    redirect("/project/<prjname>", prjname = projname, message = message)
 
 
 def get_blng_change(sv, lng):

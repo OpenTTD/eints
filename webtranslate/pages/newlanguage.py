@@ -1,4 +1,5 @@
-from webtranslate.bottle import route, template, abort, redirect, request
+from webtranslate.bottle import route, template, abort, request
+from webtranslate.utils import redirect
 from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_info
@@ -129,5 +130,5 @@ def make_language_post(userauth, prjname, lngname):
     pmd.create_statistics(lng)
 
     msg = "Successfully created language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-    redirect("/translation/{}/{}?message={}".format(prjname, lng.name, msg))
+    redirect("/translation/<prjname>/<lngname>", prjname = prjname, lngname = lng.name, message = msg)
     return
