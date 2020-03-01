@@ -4,6 +4,9 @@
 * + /languages/-/-/read
 * + /language/-/*/read
 
+* + /login/-/-/*
+* + /logout/-/-/*
+
 * + /projects/-/-/read
 * + /project/*/-/read
 * + /download-list/*/*/read
