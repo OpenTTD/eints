@@ -77,4 +77,12 @@
 		  -->
 	</ldap>
 
+    <github>
+        <!-- Github interfacing -->
+        <organization>OpenTTD</organization> <!-- Organisation with translator teams -->
+        <org-api-token>secret github access token</org-api-token> <!-- API token with scope read:org for the organisation -->
+        <oauth2-client-id>client id of oauth2 app</oauth2-client-id> <!-- redirect URL is https://translator.openttd.org/oauth2 -->
+        <oauth2-client-secret>client secret of oauth2 app</oauth2-client-secret>
+    </github>
+
 </config>

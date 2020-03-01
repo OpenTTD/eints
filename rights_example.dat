@@ -5,6 +5,7 @@
 * + /language/-/*/read
 
 * + /login/-/-/*
+* + /oauth2/-/-/read
 * + /logout/-/-/*
 
 * + /projects/-/-/read
