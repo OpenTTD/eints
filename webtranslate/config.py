@@ -72,7 +72,7 @@ class Config:
     @ivar server_port: Port number of the server host.
     @type server_port: C{int}
 
-    @ivar authentication: Method of authentication, either C{'development'}. C{'redmine'} or C{'ldap'}.
+    @ivar authentication: Method of authentication, either C{'development'}. C{'redmine'}, C{'github'} or C{'ldap'}.
     @type authentication: C{str}
 
     @ivar stable_languages_path: Directory for meta data files of stable languages.
@@ -142,7 +142,7 @@ class Config:
         self.server_host = get_subnode_text(cfg, 'server-host')
         self.server_port = data.convert_num(get_subnode_text(cfg, 'server-port'), 80)
         self.authentication = get_subnode_text(cfg, 'authentication')
-        if self.authentication not in ('development', 'redmine', 'ldap'):
+        if self.authentication not in ('development', 'redmine', 'github', 'ldap'):
             print("Incorrect authentication in the configuration, aborting!")
             sys.exit(1)
 
@@ -200,7 +200,7 @@ class Config:
 
     def load_userauth_from_xml(self):
         """
-        Load 'redmine' and 'ldap' authentication if they exist.
+        Load 'redmine', 'github' and 'ldap' authentication if they exist.
         """
         if not os.path.isfile(self.config_path):
             print("Cannot find configuration file " + self.config_path)
@@ -260,6 +260,16 @@ class Config:
             if redmine.owner_role == "": redmine.owner_role = None
             for iso_code, role_name in list(redmine.translator_roles.items()):
                 if role_name == "": del redmine.translator_roles[iso_code]
+
+        # github configuration.
+        gh_node = loader.get_single_child_node(cfg, 'github', True)
+        if gh_node is not None:
+            from webtranslate.users import github
+
+            github.github_org_api_token = get_subnode_text(gh_node, 'org-api-token')
+            github.github_organization = get_subnode_text(gh_node, 'organization')
+            github.github_oauth_client_id = get_subnode_text(gh_node, 'oauth2-client-id')
+            github.github_oauth_client_secret = get_subnode_text(gh_node, 'oauth2-client-secret')
 
         # Ldap configuration
         ldap_node = loader.get_single_child_node(cfg, 'ldap', True)

@@ -20,12 +20,15 @@ def login(userauth):
 
     if userauth.is_auth:
         login_success(req_redirect)
+    elif users.oauth_redirect:
+        session, url = users.oauth_redirect(req_redirect, req_login)
+        start_session(session)
+        redirect(url)
     elif users.get_authentication:
         return utils.template('login', userauth = userauth, req_login = req_login, req_redirect = req_redirect)
     else:
         abort(500, "No authentication method")
         return
-
 
 @route('/login', method = 'POST')
 @protected(['login', '-', '-'])
@@ -46,6 +49,19 @@ def login(userauth):
             return
 
     return utils.template('login', userauth = userauth, req_login = req_login, req_redirect = req_redirect, message = 'Try harder!', message_class = 'error')
+
+@route("/oauth2", method = 'GET')
+@protected(['oauth2', '-', '-'])
+def oauth(userauth):
+    if not users.oauth_callback:
+        abort(500, "No authentication method")
+        return
+
+    req_redirect = users.oauth_callback(userauth, request.url)
+    if userauth.is_auth:
+        login_success(req_redirect)
+    else:
+        utils.redirect("/", message = 'Try harder!', message_class = 'error')
 
 @route('/logout', method = 'GET')
 def logout():
