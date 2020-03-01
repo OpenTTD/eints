@@ -34,26 +34,29 @@ class RedmineUserAuthentication(userauth.UserAuthentication):
         super(RedmineUserAuthentication, self).__init__(is_auth, name)
         self.project_roles = project_roles
 
-    def may_access(self, pname, prjname, lngname):
-        # Get page access rights for all types of users.
-        accesses = rights.get_accesses(pname, self.name)
-        if accesses[self.name] == True or accesses['SOMEONE'] == True:
-            return True
+    def get_roles(self, prjname, lngname):
+        eints_roles = set()
+        if self.is_auth:
+            eints_roles.add('USER')
 
-        # User must get access through a OWNER or TRANSLATOR role.
-        if prjname is None or self.name == "unknown": return False
+            rm_roles = None
+            if prjname is not None:
+                rm_roles = self.project_roles.get(prjname)
 
-        roles = self.project_roles.get(prjname)
-        if roles is None: return False
+            if rm_roles is not None:
+                if owner_role is not None and owner_role != "" and owner_role in rm_roles:
+                    eints_roles.add('OWNER')
 
-        if lngname is not None and accesses['TRANSLATOR'] == True:
-            rm_role = translator_roles.get(lngname)
-            if rm_role is not None and rm_role != "" and rm_role in roles: return True
+                lang_role = None
+                if lngname is not None:
+                    lang_role = translator_roles.get(lngname)
 
-        if accesses['OWNER'] == True:  # 'prjname is not None' has been already established.
-            if owner_role is not None and owner_role != "" and owner_role in roles: return True
+                if lang_role is not None and lang_role != "" and lang_role in rm_roles:
+                    eints_roles.add('TRANSLATOR')
 
-        return False
+        return eints_roles
+
+
 
 def connect():
     """
