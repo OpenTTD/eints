@@ -23,7 +23,8 @@ def init():
         i = line.find(':')
         if i < 0: continue
         j = line.find(':', i + 1)
-        if j < 0: continue
+        if j < 0:
+            j = len(line)
         uname, pwd = line[:i].strip(), line[i+1:j]
 
         if len(uname) == 0 or len(pwd) == 0: continue
