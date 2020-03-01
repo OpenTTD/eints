@@ -37,25 +37,24 @@ class LdapUserAuthentication(userauth.UserAuthentication):
         super(LdapUserAuthentication, self).__init__(is_auth, name)
         self.groups = groups
 
-    def may_access(self, pname, prjname, lngname):
-        # Get page access rights for all types of users.
-        accesses = rights.get_accesses(pname, self.name)
-        if accesses[self.name] == True or accesses['SOMEONE'] == True:
-            return True
+    def get_roles(self, prjname, lngname):
+        eints_roles = set()
+        if self.is_auth:
+            eints_roles.add('USER')
 
-        # User must get access through a OWNER or TRANSLATOR role.
-        if prjname is None or self.name == "unknown": return False
+            if self.groups is not None:
+                if owner_group is not None and owner_group != "" and owner_group in self.groups:
+                    eints_roles.add('OWNER')
 
-        if self.groups is None: return False
+                lang_group = None
+                if lngname is not None:
+                    lang_group = translator_groups.get(lngname)
 
-        if lngname is not None and accesses['TRANSLATOR'] == True:
-            group = translator_groups.get(lngname)
-            if group is not None and group != "" and group in self.groups: return True
+                if lang_group is not None and lang_group != "" and lang_group in self.groups:
+                    eints_roles.add('TRANSLATOR')
 
-        if accesses['OWNER'] == True:  # 'prjname is not None' has been already established.
-            if owner_group is not None and owner_group != "" and owner_group in self.groups: return True
+        return eints_roles
 
-        return False
 
 
 def init():

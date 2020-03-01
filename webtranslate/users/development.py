@@ -3,7 +3,7 @@ User administration system to use during development.
 
 In particular the user management is very poor.
 """
-import os
+import os, configparser
 from webtranslate import rights, userauth
 
 # Table with user names and plain text passwords.
@@ -55,6 +55,40 @@ def authenticate(user, pwd):
     return (user, pwd) in _users
 
 
+# Table with project user data.
+# Mapping of project names to mapping of roles to users.
+# C{dict} of C{str} to C{dict} of C{str} to C{set} of C{str}
+_projects = {}
+
+PROJECTSFILE = "projects.dat"
+
+def init_projects():
+    """
+    Initialize the projects table (mapping of projects to mapping of roles to users).
+    """
+    global _projects
+
+    # Read projects user data.
+    cfg = configparser.ConfigParser()
+    cfg.optionxform = lambda option: option # Don't convert keys to lowercase.
+    cfg.read(PROJECTSFILE)
+    _projects = {}
+    for pn in cfg.sections():
+        ps = cfg[pn]
+        values = {}
+        for k, ns in ps.items():
+            names = set()
+            for ns2 in ns.split(','):
+                for ns3 in ns2.split(' '):
+                    ns3 = ns3.strip()
+                    if len(ns3) < 3:
+                        # User names should be longer-equal to 3 characters.
+                        print("Username {} ignored (too short)".format(ns3))
+                        continue
+                    names.add(ns3)
+            values[k] = names
+        _projects[pn] = values
+
 
 class DevelopmentUserAuthentication(userauth.UserAuthentication):
     """
@@ -63,16 +97,38 @@ class DevelopmentUserAuthentication(userauth.UserAuthentication):
     def __init__(self, is_auth, name):
         super(DevelopmentUserAuthentication, self).__init__(is_auth, name)
 
-    def may_access(self, pname, prjname, lngname):
-        return rights.may_access(pname, prjname, lngname, self.name)
+    def get_roles(self, prjname, lngname):
+        eints_roles = set()
+        if self.is_auth:
+            eints_roles.add('USER')
+
+            prj_owners = None
+            prj_translators = None
+
+            if prjname is not None:
+                prj_roles = _projects.get(prjname)
+                if prj_roles is not None:
+                    prj_owners = prj_roles.get('owner')
+                    if lngname is not None:
+                        prj_translators = prj_roles.get(lngname)
+
+            if prj_owners is not None and self.name in prj_owners:
+                eints_roles.add('OWNER')
+
+            if prj_translators is not None and self.name in prj_translators:
+                eints_roles.add('TRANSLATOR')
+
+        return eints_roles
+
+
 
 def init():
     """
     Initialize the user admin system.
     """
     init_users()
+    init_projects()
     rights.init_page_access()
-    rights.init_projects()
 
 def get_authentication(user, pwd):
     """
