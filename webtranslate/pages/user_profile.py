@@ -1,7 +1,8 @@
 """
 Projects overview page.
 """
-from webtranslate.bottle import route, template
+from webtranslate.bottle import route
+from webtranslate.utils import template
 from webtranslate.protect import protected
 from webtranslate import config, data
 from webtranslate.newgrf import language_info

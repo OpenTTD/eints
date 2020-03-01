@@ -1,8 +1,8 @@
 """
 Upload a language file.
 """
-from webtranslate.bottle import route, template, abort, request
-from webtranslate.utils import redirect
+from webtranslate.bottle import route, abort, request
+from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_file, language_info
@@ -17,9 +17,9 @@ def page_get(userauth, prjname):
 
     pdata = pmd.pdata
     if pdata.projtype.has_grflangid:
-        return template('upload_lang', pmd = pmd)
+        return template('upload_lang', userauth = userauth, pmd = pmd)
     else:
-        return template('upload_lang_select', pmd = pmd,
+        return template('upload_lang_select', userauth = userauth, pmd = pmd,
                     lnginfos = sorted(pdata.get_all_languages(), lambda l: l.isocode))
 
 @route('/upload/<prjname>/<lngname>', method = 'GET')
@@ -35,7 +35,7 @@ def page_get_subdir(userauth, prjname, lngname):
     if linfo is None:
         abort(404, "Language is unknown")
         return
-    return template('upload_lang_subdir', pmd = pmd, lnginfo = linfo)
+    return template('upload_lang_subdir', userauth = userauth, pmd = pmd, lnginfo = linfo)
 
 @route('/upload/<prjname>/<lngname>', method = 'POST')
 @protected(['upload', 'prjname', '-'])
@@ -113,7 +113,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     # Parse language file, and report any errors.
     ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size, lng_data)
     if len(ng_data.errors) > 0:
-        return template('upload_errors', pmd = pmd, errors = ng_data.errors)
+        return template('upload_errors', userauth = userauth, pmd = pmd, errors = ng_data.errors)
 
     # Is the language allowed?
     if not pdata.projtype.allow_language(ng_data.language_data):

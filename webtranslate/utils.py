@@ -83,16 +83,25 @@ def get_relative_time(old_stamp, now):
 
     return td.to_string(difference)
 
-
-def get_messages(request):
+def template(tpl, **kwargs):
     """
-    Can return an arbitrary number of messages from this method, passed via a number of methods.
+    Build HTML from template
 
-     1. Query string can pass one message.
-     2. UNFINISHED. Pass via template (number of messages unknown).
+    @param tpl: Templatename
+    @type  tpl: C{str}
 
-    Messages can have optional classes, which changes appearance.
+    @param kwargs: Template parameters
+    @type  kwargs: C{dict}
     """
+
+    messages = kwargs.setdefault("messages", [])
+
+    if "message" in kwargs:
+        messages.append({'content': kwargs.get("message"), 'class': kwargs.get('message_class', 'info')})
+
+    query = bottle.request.query
+    if len(query.get('message', '')) > 0:
+        messages.append({'content': query.get("message"), 'class': query.get('message_class', 'info')})
 
     # message classes map to bootstrap css alert style names. n.b. default bootstrap alert is yellow (warning), but our default is blue (info)
     message_classes = {'info': 'alert-info',
@@ -100,17 +109,10 @@ def get_messages(request):
                        'warning':'',
                        'error': 'alert-error'}
 
-    messages = []
-    if len(request.query.get('message', '')) > 0:
-        message = {}
-        message['content'] = request.query.get('message', '')
-        message['class'] = message_classes[request.query.get('message_class', 'info')]
-        messages.append(message)
+    for msg in messages:
+        msg['class'] = message_classes.get(msg.get('class', 'info'), '')
 
-    if len(messages) > 0:
-        return messages
-    else:
-        return None
+    return bottle.template(tpl, **kwargs)
 
 def verify_name(name, name_type, is_identifier):
     """

@@ -1,5 +1,5 @@
-from webtranslate.bottle import route, template, abort
-from webtranslate.utils import redirect
+from webtranslate.bottle import route, abort
+from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import config
 
@@ -25,7 +25,7 @@ def delete_form(userauth, prjname, lngname):
         abort(404, "Cannot delete base language!")
         return
 
-    return template("delete_translation", pmd = pmd, lng = lng)
+    return template("delete_translation", userauth = userauth, pmd = pmd, lng = lng)
 
 @route('/really_delete/<prjname>/<lngname>', method = 'POST')
 @protected(['delete', 'prjname', 'lngname'])

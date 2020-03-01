@@ -1,6 +1,5 @@
 %from urllib.parse import quote
 %from webtranslate.bottle import url, request
-%from webtranslate import utils
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -29,20 +28,20 @@
                 </ul>
                 <ul class="nav pull-right">
                     <li><a target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/usage.html"><i class="icon-book"></i> Manual</a></li>
-                    <li><a href="/userprofile"><i class="icon-user"></i> Profile</a></li>
-                    <li><a href="/logout"><i class="icon-user"></i> Logout</a></li>
-                    <li><a href="/login?redirect={{ quote(request.path) }}"><i class="icon-user"></i> Login</a></li>
+                    %if userauth.is_auth:
+                        <li><a href="/userprofile"><i class="icon-user"></i> Profile ({{ userauth.name }})</a></li>
+                        <li><a href="/logout"><i class="icon-user"></i> Logout</a></li>
+                    %else:
+                        <li><a href="/login?redirect={{ quote(request.path) }}"><i class="icon-user"></i> Login</a></li>
+                    %end
                 </ul>
             </div>
         </div>
 
-        %messages = utils.get_messages(request)
-        %if messages is not None:
-            %for message in messages:
+        %for message in messages:
             <div id="message-slot" class="alert {{message['class']}}">
                 {{message['content']}}
             </div>
-            %end
         %end
         <!-- content from calling template -->
         {{!base}}

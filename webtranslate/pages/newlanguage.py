@@ -1,5 +1,5 @@
-from webtranslate.bottle import route, template, abort, request
-from webtranslate.utils import redirect
+from webtranslate.bottle import route, abort, request
+from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_info
@@ -32,7 +32,7 @@ def new_language_get(userauth, prjname):
     translations.sort(key=lambda x: x.isocode)
     can_be_added.sort(key=lambda x: x.isocode)
 
-    return template('newlanguage', pmd = pmd, base_langs = base_langs,
+    return template('newlanguage', userauth = userauth, pmd = pmd, base_langs = base_langs,
                     translations = translations, can_be_added = can_be_added)
 
 @route('/newlanguage/<prjname>', method = 'POST')
@@ -54,7 +54,7 @@ def new_language_post(userauth, prjname):
         abort(404, msg)
         return
 
-    return template('makelanguage', pmd = pmd, lnginfo = lng_def)
+    return template('makelanguage', userauth = userauth, pmd = pmd, lnginfo = lng_def)
 
 
 def get_language(name):

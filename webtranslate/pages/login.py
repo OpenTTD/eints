@@ -2,7 +2,7 @@
 Login/logout
 """
 from urllib.parse import quote
-from webtranslate.bottle import route, template, request, redirect
+from webtranslate.bottle import route, request, redirect
 from webtranslate.protect import protected, start_session, stop_session
 from webtranslate import utils, users
 
@@ -21,7 +21,7 @@ def login(userauth):
     if userauth.is_auth:
         login_success(req_redirect)
     elif users.get_authentication:
-        return template('login', req_login = req_login, req_redirect = req_redirect)
+        return utils.template('login', userauth = userauth, req_login = req_login, req_redirect = req_redirect)
     else:
         abort(500, "No authentication method")
         return
@@ -45,9 +45,7 @@ def login(userauth):
             login_success(req_redirect)
             return
 
-    request.query['message'] = 'Try harder!' # XXX Needs a better solution (pass message obj to template?)
-    request.query['message_class'] = 'error'
-    return template('login', req_login = req_login, req_redirect = req_redirect)
+    return utils.template('login', userauth = userauth, req_login = req_login, req_redirect = req_redirect, message = 'Try harder!', message_class = 'error')
 
 @route('/logout', method = 'GET')
 def logout():

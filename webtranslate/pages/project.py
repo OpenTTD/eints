@@ -1,7 +1,8 @@
 """
 Page of a single project.
 """
-from webtranslate.bottle import route, template, abort
+from webtranslate.bottle import route, abort
+from webtranslate.utils import template
 from webtranslate.protect import protected
 from webtranslate import config, data
 
@@ -27,6 +28,6 @@ def project(userauth, prjname):
 
         bcounts = pmd.overview.get(base_lng.name)
 
-    return template('project', pmd = pmd,
+    return template('project', userauth = userauth, pmd = pmd,
                     transl = transl, base_lng = base_lng, bcounts = bcounts)
 

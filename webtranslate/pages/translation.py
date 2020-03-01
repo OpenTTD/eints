@@ -1,4 +1,5 @@
-from webtranslate.bottle import route, template, abort
+from webtranslate.bottle import route, abort
+from webtranslate.utils import template
 from webtranslate.protect import protected
 from webtranslate import data, config
 
@@ -100,5 +101,5 @@ def project(userauth, prjname, lngname):
 
     for strs in stored:
         strs.sort()
-    return template('translation', pmd = pmd, is_blng = (lng == blng),
+    return template('translation', userauth = userauth, pmd = pmd, is_blng = (lng == blng),
                     lng = lng, stored = stored)

@@ -1,4 +1,5 @@
-from webtranslate.bottle import route, abort, template
+from webtranslate.bottle import route, abort
+from webtranslate.utils import template
 from webtranslate.protect import protected
 from webtranslate import config, data
 from webtranslate.newgrf import language_info
@@ -11,7 +12,7 @@ def languages(userauth):
     Get an overview of used languages over all projects.
     """
     languages = sorted(language_info.all_languages, key = lambda l: l.isocode)
-    return template('languages', lnginfos = languages)
+    return template('languages', userauth = userauth, lnginfos = languages)
 
 @route('/language/<lngname>', method = 'GET')
 @protected(['language', '-', 'lngname'])
@@ -39,4 +40,4 @@ def language(userauth, lngname):
             prjdata.append((pmd, False, lstate))
 
     prjdata.sort(key = lambda p: p[0].human_name.lower())
-    return template('language', lnginfo = lnginfo, prjdata = prjdata)
+    return template('language', userauth = userauth, lnginfo = lnginfo, prjdata = prjdata)
