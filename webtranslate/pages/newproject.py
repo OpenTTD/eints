@@ -1,8 +1,8 @@
 """
 Create a new project.
 """
-from webtranslate.bottle import route, template, abort, request
-from webtranslate.utils import redirect
+from webtranslate.bottle import route, abort, request
+from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import config, utils, project_type
 
@@ -14,7 +14,7 @@ def page_get(userauth):
         if projtype.name in config.cfg.project_types:
             all_ptype_names.append(projtype.human_name)
     all_ptype_names.sort()
-    return template('newproject_form', all_ptype_names = all_ptype_names)
+    return template('newproject_form', userauth = userauth, all_ptype_names = all_ptype_names)
 
 @route('/createproject', method = 'POST')
 @protected(['createproject', '-', '-'])
@@ -38,7 +38,7 @@ def page_post(userauth):
     if projtype is None:
         redirect('/newproject', message = 'No known project type provided')
         return
-    return template('createproject_form', projtype_name = projtype.name, prjname = prjname)
+    return template('createproject_form', userauth = userauth, projtype_name = projtype.name, prjname = prjname)
 
 @route('/makeproject/<prjtypename>/<prjname>', method = 'POST')
 @protected(['makeproject', 'prjname', '-'])

@@ -1,7 +1,8 @@
 """
 Projects overview page.
 """
-from webtranslate.bottle import route, template
+from webtranslate.bottle import route
+from webtranslate.utils import template
 from webtranslate.protect import protected
 from webtranslate import config
 
@@ -10,5 +11,5 @@ from webtranslate import config
 def root(userauth):
     # projs: C{list} of L{ProjectMetaData}
     projs = sorted(config.cache.projects.values(), key=lambda p: p.human_name.lower())
-    return template('projects', projects = projs)
+    return template('projects', userauth = userauth, projects = projs)
 

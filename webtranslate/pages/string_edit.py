@@ -1,6 +1,6 @@
 import random
-from webtranslate.bottle import route, template, abort, request
-from webtranslate.utils import redirect
+from webtranslate.bottle import route, abort, request
+from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import data, config, utils
 from webtranslate.newgrf import language_file, language_info
@@ -346,7 +346,7 @@ def check_page_parameters(prjname, lngname, sname):
 
     return pmd, bchg, lng, binfo
 
-def output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname, states = None):
+def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, states = None, messages = []):
     """
     Construct a page for editing a string.
 
@@ -451,9 +451,9 @@ def output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname, states = None
                 related_languages.append((l, related))
     related_languages.sort(key=lambda x: x[0].name)
 
-    return template('string_form', pmd = pmd,
+    return template('string_form', userauth = userauth, pmd = pmd,
                     lng = lng, sname = sname, plurals = language_info.all_plurals[lng.plural].description,
-                    genders = lng.gender, cases = lng.case, related_languages = related_languages, tcs = transl_cases)
+                    genders = lng.gender, cases = lng.case, related_languages = related_languages, tcs = transl_cases, messages = messages)
 
 
 @route('/string/<prjname>/<lngname>/<sname>', method = 'GET')
@@ -463,7 +463,7 @@ def str_form(userauth, prjname, lngname, sname):
     if parms is None: return
 
     pmd, bchg, lng, binfo = parms
-    return output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname, None)
+    return output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, None)
 
 
 @route('/string/<prjname>/<lngname>/<sname>', method = 'POST')
@@ -558,10 +558,11 @@ def str_post(userauth, prjname, lngname, sname):
         continue # Not really needed.
 
     if len(new_state_errors) > 0:
-        request.query['message'] = 'There were error(s)' # XXX Needs a better solution (pass message obj to template?)
-        request.query['message_class'] = 'error'
-        return output_string_edit_page(bchg, binfo, lng, pmd, lngname, sname,
-                                       new_state_errors)
+        msg = {}
+        msg['message'] = 'There were error(s)'
+        msg['message_class'] = 'error'
+        return output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname,
+                                       new_state_errors, messages = [msg])
 
     # No errors, store the changes.
     for tchg in new_changes:

@@ -1,8 +1,8 @@
 """
 Settings of a project.
 """
-from webtranslate.bottle import route, template, abort, request
-from webtranslate.utils import redirect
+from webtranslate.bottle import route, abort, request
+from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import config, utils
 
@@ -14,7 +14,7 @@ def project_get(userauth, prjname):
         abort(404, "Project does not exist")
         return
 
-    return template('projsettings', pmd = pmd)
+    return template('projsettings', userauth = userauth, pmd = pmd)
 
 @route('/projsettings/<prjname>', method = 'POST')
 @protected(['projsettings', 'prjname', '-'])
