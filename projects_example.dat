@@ -1,0 +1,9 @@
+# User roles of the development user system.
+#
+# List of projects, their roles, and associated users.
+#
+# [project]
+# owner=user1, user2
+# nl_NL=user3, user4
+# de_DE=user5
+#

@@ -1,4 +1,6 @@
-# User data base of the silly user system.
+# User data base of the development user system.
 # THIS DATA IS NOT SECURE.
 # DO NOT USE FOR STORING IMPORTANT PASSWORDS
 #
+# One line per user:
+# username:password
