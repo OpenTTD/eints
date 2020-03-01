@@ -19,7 +19,7 @@ Internally, it uses:
 - [Bottle](http://bottlepy.org/), a Python framework for writing web applications.
     - Location: webtranslate/bottle.py
     - Licensed under [MIT License](http://bottlepy.org/docs/dev/#license)
-- [Twitter Boostrap](http://twitter.github.com/bootstrap/), a CSS, JS and glyphicon framework
+- [Twitter Bootstrap](http://twitter.github.com/bootstrap/), a CSS, JS and glyphicon framework
   for web application user interfaces.
     - Locations: static/css static/img static/js
     - Code licensed under [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0),
