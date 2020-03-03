@@ -675,6 +675,7 @@ class StringInfo:
 
                 if pos < 0 or pos >= len(base_info.commands):
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos_name)))
+                    ok = False
                     continue
 
                 cmd = base_info.commands[pos]
@@ -685,6 +686,7 @@ class StringInfo:
 
                 if not cmd.use_gender(sub):
                     self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos_name)))
+                    ok = False
 
         return ok
 # }}}
