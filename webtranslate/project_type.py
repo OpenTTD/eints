@@ -247,8 +247,10 @@ NEWGRF_PARAMETERS = dict((x.literal, x) for x in _NEWGRF_PARAMETERS)
 # {{{ GS_PARAMETERS
 # Based on OpenTTD src/tables/strgen_tables.h r26050
 _GS_PARAMETERS = [
+    ParameterInfo("NORMAL_FONT",       [], None, False, True ),
     ParameterInfo("TINY_FONT",         [], None, False, True ),
     ParameterInfo("BIG_FONT",          [], None, False, True ),
+    ParameterInfo("MONO_FONT",         [], None, False, True ),
 
     ParameterInfo("BLUE",              [], None, False, False),
     ParameterInfo("SILVER",            [], None, False, False),
