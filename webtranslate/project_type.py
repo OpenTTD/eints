@@ -217,6 +217,8 @@ _NEWGRF_PARAMETERS = [
     ParameterInfo("GRAY",           [], None, False, True ),
     ParameterInfo("DKBLUE",         [], None, False, True ),
     ParameterInfo("BLACK",          [], None, False, True ),
+    ParameterInfo("PUSH_COLOUR",    [], None, False, True ),
+    ParameterInfo("POP_COLOUR",     [], None, False, True ),
 
     ParameterInfo("COMMA",          [PP_],      0,    False, True ),
     ParameterInfo("SIGNED_WORD",    [PP_],      0,    False, True ),
@@ -269,6 +271,8 @@ _GS_PARAMETERS = [
     ParameterInfo("GRAY",              [], None, False, False),
     ParameterInfo("DKBLUE",            [], None, False, False),
     ParameterInfo("BLACK",             [], None, False, False),
+    ParameterInfo("PUSH_COLOUR",       [], None, False, False),
+    ParameterInfo("POP_COLOUR",        [], None, False, False),
 
     ParameterInfo("STRING1",           [P_G, PPG],                               None, True,  True,  "STRING"),
     ParameterInfo("STRING2",           [P_G, PPG, PPG],                          None, True,  True,  "STRING"),
