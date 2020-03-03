@@ -639,54 +639,53 @@ class StringInfo:
         @rtype:  C{bool}
         """
         ok = True
-        if ok:
-            for pos, sub in self.plurals:
-                pos_name = str(pos)
-                if sub is not None:
-                    pos_name += ":" + str(sub)
 
-                if pos < 0 or pos >= len(base_info.commands):
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos_name)))
-                    ok = False
-                    continue
+        for pos, sub in self.plurals:
+            pos_name = str(pos)
+            if sub is not None:
+                pos_name += ":" + str(sub)
 
-                cmd = base_info.commands[pos]
-                if cmd is None:
-                    self.add_error(ErrorMessage(ERROR, None, "Plural query {{P ..}} references non-existing parameter {}.".format(pos_name)))
-                    ok = False
-                    continue
+            if pos < 0 or pos >= len(base_info.commands):
+                self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for plural queries {{P ..}}".format(pos_name)))
+                ok = False
+                continue
 
-                if sub is None:
-                    sub = cmd.default_plural_pos
-                elif sub < 0 or sub >= len(cmd.parameters):
-                    self.add_error(ErrorMessage(ERROR, None, "Plural query {{P ..}} references non-existing parameter {}.".format(pos_name)))
-                    ok = False
-                    continue
+            cmd = base_info.commands[pos]
+            if cmd is None:
+                self.add_error(ErrorMessage(ERROR, None, "Plural query {{P ..}} references non-existing parameter {}.".format(pos_name)))
+                ok = False
+                continue
 
-                if sub is None or not cmd.use_plural(sub):
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos_name)))
-                    ok = False
+            if sub is None:
+                sub = cmd.default_plural_pos
+            elif sub < 0 or sub >= len(cmd.parameters):
+                self.add_error(ErrorMessage(ERROR, None, "Plural query {{P ..}} references non-existing parameter {}.".format(pos_name)))
+                ok = False
+                continue
 
-        if ok:
-            for pos, sub in self.genders:
-                pos_name = str(pos)
-                if sub > 0:
-                    pos_name += ":" + str(sub)
+            if sub is None or not cmd.use_plural(sub):
+                self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for plural queries {{P ..}}".format(pos_name)))
+                ok = False
 
-                if pos < 0 or pos >= len(base_info.commands):
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos_name)))
-                    ok = False
-                    continue
+        for pos, sub in self.genders:
+            pos_name = str(pos)
+            if sub > 0:
+                pos_name += ":" + str(sub)
 
-                cmd = base_info.commands[pos]
-                if cmd is None or sub < 0 or sub >= len(cmd.parameters):
-                    self.add_error(ErrorMessage(ERROR, None, "Gender query {{G ..}} references non-existing parameter {}.".format(pos_name)))
-                    ok = False
-                    continue              
+            if pos < 0 or pos >= len(base_info.commands):
+                self.add_error(ErrorMessage(ERROR, None, "String parameter {} is out of bounds for gender queries {{G ..}}".format(pos_name)))
+                ok = False
+                continue
 
-                if not cmd.use_gender(sub):
-                    self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos_name)))
-                    ok = False
+            cmd = base_info.commands[pos]
+            if cmd is None or sub < 0 or sub >= len(cmd.parameters):
+                self.add_error(ErrorMessage(ERROR, None, "Gender query {{G ..}} references non-existing parameter {}.".format(pos_name)))
+                ok = False
+                continue
+
+            if not cmd.use_gender(sub):
+                self.add_error(ErrorMessage(ERROR, None, "String parameter {} may not be used for gender queries {{G ..}}".format(pos_name)))
+                ok = False
 
         return ok
 # }}}
