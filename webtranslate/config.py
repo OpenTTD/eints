@@ -276,11 +276,13 @@ class Config:
         gh_node = loader.get_single_child_node(cfg, "github", True)
         if gh_node is not None:
             from webtranslate.users import github
+            from webtranslate import protect
 
             github.github_org_api_token = get_subnode_text(gh_node, "org-api-token")
             github.github_organization = get_subnode_text(gh_node, "organization")
             github.github_oauth_client_id = get_subnode_text(gh_node, "oauth2-client-id")
             github.github_oauth_client_secret = get_subnode_text(gh_node, "oauth2-client-secret")
+            protect.translators_password = get_subnode_text(gh_node, "translators-password")
 
         # Ldap configuration
         ldap_node = loader.get_single_child_node(cfg, "ldap", True)

@@ -57,6 +57,7 @@ CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 @click.option("--github-org-api-token", help="Valid PAT with scope read:org of the organization.")
 @click.option("--github-oauth2-client-id", help="Client ID for the GitHub OAuth2 Application.")
 @click.option("--github-oauth2-client-secret", help="Client Secret for the GitHub OAuth2 Application.")
+@click.option("--translators-password", help="Password for the translators account.")
 @click.option("--sentry-dsn", help="Sentry DSN.")
 @click.option(
     "--sentry-environment",
@@ -84,6 +85,7 @@ def run(
     github_org_api_token,
     github_oauth2_client_id,
     github_oauth2_client_secret,
+    translators_password,
     sentry_dsn,
     sentry_environment,
 ):
@@ -120,6 +122,7 @@ def run(
             fp.write(f"    <org-api-token>{github_org_api_token}</org-api-token>\n")
             fp.write(f"    <oauth2-client-id>{github_oauth2_client_id}</oauth2-client-id>\n")
             fp.write(f"    <oauth2-client-secret>{github_oauth2_client_secret}</oauth2-client-secret>\n")
+            fp.write(f"    <translators-password>{translators_password}</translators-password>\n")
             fp.write("  </github>\n")
 
         fp.write("</config>\n")
