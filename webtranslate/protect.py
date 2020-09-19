@@ -7,6 +7,23 @@ from webtranslate.bottle import request, response, abort
 from webtranslate.utils import redirect
 from webtranslate import config, userauth
 
+
+class ScriptAuth(userauth.UserAuthentication):
+    """
+    Authentication used by sync-script on localhost
+    """
+
+    def __init__(self):
+        super().__init__(True, "translators")
+        self.roles = {"USER", "OWNER"}
+
+    def get_roles(self, prjname, lngname):
+        return self.roles
+
+
+_script_auth = ScriptAuth()
+translators_password = None
+
 _sessions = dict()
 SESSION_COOKIE = "eints_sid"
 MAX_SESSION_AGE = datetime.timedelta(hours=16)
@@ -65,7 +82,16 @@ def protected(page_name):
             pname = [ka.get(p, p) for p in page_name] + [METHODS.get(request.method, "-")]
             prjname = ka.get("prjname")
             lngname = ka.get("lngname")
-            userauth = get_session()
+
+            if (
+                request.auth
+                and translators_password
+                and request.auth[0] == "translators"
+                and request.auth[1] == translators_password
+            ):
+                userauth = _script_auth
+            else:
+                userauth = get_session()
 
             # We must read all uploaded content before returning a response.
             # Otherwise the connection may be closed by the server and the client aborts.
