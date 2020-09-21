@@ -3,16 +3,17 @@
 import getopt, re, sys, getpass, codecs, os, csv, io
 import urllib.request
 
-KNOWN_PROJECT_TYPES = ["game-script", "newgrf", 'openttd']
+KNOWN_PROJECT_TYPES = ["game-script", "newgrf", "openttd"]
 
 PROJECT_TYPES_TEXT = ['"{}"'.format(pt) for pt in KNOWN_PROJECT_TYPES]
-PROJECT_TYPES_TEXT = ', '.join(PROJECT_TYPES_TEXT[:-1]) + " and " + PROJECT_TYPES_TEXT[-1]
+PROJECT_TYPES_TEXT = ", ".join(PROJECT_TYPES_TEXT[:-1]) + " and " + PROJECT_TYPES_TEXT[-1]
 
-hex_pat = re.compile('0x([0-9A-Fa-f][0-9A-Fa-f]?)$')
+hex_pat = re.compile("0x([0-9A-Fa-f][0-9A-Fa-f]?)$")
 
 # Configuration.
 # {{{ def check_project_name(name):
-project_pat = re.compile('[-A-Za-z0-9_]+$')
+project_pat = re.compile("[-A-Za-z0-9_]+$")
+
 
 def check_project_name(name):
     """
@@ -25,6 +26,8 @@ def check_project_name(name):
     @rtype:  C{bool}
     """
     return project_pat.match(name.strip())
+
+
 # }}}
 # {{{ def check_project_name(name):
 def check_human_name(name):
@@ -38,6 +41,8 @@ def check_human_name(name):
     @rtype:  C{bool}
     """
     return len(name.strip()) != 0
+
+
 # }}}
 # {{{ def check_project_url(url):
 def check_project_url(url):
@@ -50,10 +55,15 @@ def check_project_url(url):
     @return: Whether the provided url is valid.
     @rtype:  C{bool}
     """
-    if url == '': return True
-    if url.startswith('http://'): return True
-    if url.startswith('https://'): return True
+    if url == "":
+        return True
+    if url.startswith("http://"):
+        return True
+    if url.startswith("https://"):
+        return True
     return False
+
+
 # }}}
 # {{{ class UserConfig:
 class UserConfig:
@@ -111,6 +121,7 @@ class UserConfig:
     @ivar operations: Upload and download actions to perform.
     @type operations: C{list} of C{str}
     """
+
     def __init__(self):
         self.filename = None
         self.user = None
@@ -122,7 +133,7 @@ class UserConfig:
         self.project = None
         self.project_type = "**unset**"
         self.project_desc = None
-        self.project_url = ''
+        self.project_url = ""
         self.lang_dir = "lang"
         self.unstable_lang_dir = None
         self.lang_ext = ".lng"
@@ -142,19 +153,20 @@ class UserConfig:
             print("Error: Missing Eints project identifier (add it with --project=PROJ_ID).")
             sys.exit(1)
         if not check_project_name(self.project):
-            print("Error: Project identifier \"{}\" is not valid.".format(self.project))
+            print('Error: Project identifier "{}" is not valid.'.format(self.project))
             sys.exit(1)
         if self.project_desc is not None and not check_human_name(self.project_desc):
-            print("Error: Project description \"{}\" is not valid.".format(self.project_desc))
+            print('Error: Project description "{}" is not valid.'.format(self.project_desc))
             sys.exit(1)
         if not check_project_url(self.project_url):
-            print("Error: Project url \"{}\" is not valid.".format(self.project_url))
+            print('Error: Project url "{}" is not valid.'.format(self.project_url))
             sys.exit(1)
         if len(self.operations) == 0:
             print("Warning: No operations to perform, finishing now.")
             sys.exit(0)
 
-user_cfg = None #: Global user configuration.
+
+user_cfg = None  #: Global user configuration.
 
 # }}}
 
@@ -168,30 +180,30 @@ def setup_auth():
 
     user, passwd = None, None
 
-    #Read the file if provided.
+    # Read the file if provided.
     if user_cfg.filename is not None:
         if not os.path.isfile(user_cfg.filename):
-            print("Error: File \"{}\" does not exist or is not a file.".format(user_cfg.filename))
+            print('Error: File "{}" does not exist or is not a file.'.format(user_cfg.filename))
             sys.exit(1)
-        with open(user_cfg.filename, 'r', encoding = 'utf-8') as handle:
+        with open(user_cfg.filename, "r", encoding="utf-8") as handle:
             for line in handle:
                 line = line.strip()
 
                 # Check for a well-known prefix.
-                if line.startswith('username'):
-                    prefix = 'u'
+                if line.startswith("username"):
+                    prefix = "u"
                     line = line[8:].lstrip()
-                elif line.startswith('user'):
-                    prefix = 'u'
+                elif line.startswith("user"):
+                    prefix = "u"
                     line = line[4:].lstrip()
-                elif line.startswith('password'):
-                    prefix = 'p'
+                elif line.startswith("password"):
+                    prefix = "p"
                     line = line[8:].lstrip()
-                elif line.startswith('pwd'):
-                    prefix = 'p'
+                elif line.startswith("pwd"):
+                    prefix = "p"
                     line = line[3:].lstrip()
                 else:
-                    continue # No match for user or password
+                    continue  # No match for user or password
 
                 # Silently drop the : or = delimiter.
                 if line[0] in ":=":
@@ -200,7 +212,7 @@ def setup_auth():
                 if len(line) > 0 and line[0] in ('"', "'") and line[0] == line[-1]:
                     line = line[1:-1]
 
-                if prefix == 'u':
+                if prefix == "u":
                     user = line
                 else:
                     passwd = line
@@ -220,7 +232,7 @@ def setup_auth():
     if user is not None and passwd is not None:
         # If both a user and a password, we can usefully setup authentication.
         pwd_manager = urllib.request.HTTPPasswordMgr()
-        realm = 'Web translator'
+        realm = "Web translator"
         pwd_manager.add_password(realm, user_cfg.base_url, user, passwd)
         auth_handler = urllib.request.HTTPBasicAuthHandler(pwd_manager)
         opener = urllib.request.build_opener(auth_handler)
@@ -233,11 +245,15 @@ def setup_auth():
 
     if user_cfg.verbose:
         text = "Skipped installing authentication"
-        if user is None: text = text + ", user was not set"
-        if passwd is None: text = text + ", password was not set"
+        if user is None:
+            text = text + ", user was not set"
+        if passwd is None:
+            text = text + ", password was not set"
         text = text + "."
         print(text)
         print()
+
+
 # }}}
 # {{{ def build_url(suffix):
 def build_url(suffix):
@@ -249,11 +265,13 @@ def build_url(suffix):
     """
     global user_cfg
 
-    assert suffix[0] == '/'
-    if user_cfg.base_url[-1] == '/':
+    assert suffix[0] == "/"
+    if user_cfg.base_url[-1] == "/":
         return user_cfg.base_url + suffix[1:]
     else:
         return user_cfg.base_url + suffix
+
+
 # }}}
 # {{{ def get_data(url):
 def get_data(url):
@@ -268,16 +286,20 @@ def get_data(url):
     """
     try:
         with urllib.request.urlopen(url) as resp:
-            if resp.status != 200: return None
+            if resp.status != 200:
+                return None
 
-            ctype = resp.getheader('Content-Type')
-            if ctype is None or ctype != 'text/plain; charset=UTF-8': return None
+            ctype = resp.getheader("Content-Type")
+            if ctype is None or ctype != "text/plain; charset=UTF-8":
+                return None
 
-            data = resp.read().decode('utf-8')
+            data = resp.read().decode("utf-8")
             return data
     except:
         print("Error: Failing URL: {}".format(url))
         return None
+
+
 # }}}
 # {{{ def post_form(url, form_data):
 def post_form(url, form_data):
@@ -293,8 +315,8 @@ def post_form(url, form_data):
     @return: Whether the from was posted correctly.
     @rtype:  C{bool}
     """
-    headers = {"Content-Type" : " application/x-www-form-urlencoded; charset=utf-8"}
-    form = urllib.parse.urlencode(form_data).encode('utf-8')
+    headers = {"Content-Type": " application/x-www-form-urlencoded; charset=utf-8"}
+    form = urllib.parse.urlencode(form_data).encode("utf-8")
     req = urllib.request.Request(url, form, headers)
 
     # Perform the request, and read the returned data.
@@ -304,6 +326,8 @@ def post_form(url, form_data):
 
         resp.read()
         return True
+
+
 # }}}
 # {{{ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
 def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
@@ -329,24 +353,24 @@ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
 
     data = []
     for field, value in form_data.items():
-        data.append('--' + boundary)
+        data.append("--" + boundary)
         data.append('Content-Disposition: form-data; name="{}"'.format(field))
-        data.append('')
+        data.append("")
         data.append(value)
 
-    data.append('--' + boundary)
+    data.append("--" + boundary)
     data.append('Content-Disposition: form-data; name="{}"; filename="{}"'.format(form_fentry, form_fname))
-    data.append('Content-Type: text/plain')
-    data.append('')
+    data.append("Content-Type: text/plain")
+    data.append("")
     data.append(fdata)
-    if fdata[-1] != '\n':
-        data.append('') # Add a \n ourselves
+    if fdata[-1] != "\n":
+        data.append("")  # Add a \n ourselves
 
-    data.append('--' + boundary + "--\n")
+    data.append("--" + boundary + "--\n")
 
     # Send the data.
-    headers = {"Content-Type" : " multipart/form-data; charset=utf-8; boundary={}".format(boundary)}
-    data = '\n'.join(data).encode('utf-8')
+    headers = {"Content-Type": " multipart/form-data; charset=utf-8; boundary={}".format(boundary)}
+    data = "\n".join(data).encode("utf-8")
     req = urllib.request.Request(url, data, headers)
 
     # Perform the request, and return the read data.
@@ -356,6 +380,8 @@ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
 
         data = resp.read()
         return True
+
+
 # }}}
 
 # Remote language files.
@@ -373,13 +399,17 @@ class EintsLanguageInfo:
     @ivar last_change: Last change of the language, if it exists.
     @type last_change: C{None} or C{str}
     """
+
     def __init__(self, isocode, parent_lang, last_change):
         self.isocode = isocode
         self.parent_lang = parent_lang
         self.last_change = last_change
+
+
 # }}}
 # {{{ def get_eints_languages():
 eints_files_cache = None
+
 
 def get_eints_languages():
     """
@@ -390,29 +420,30 @@ def get_eints_languages():
     """
     global user_cfg, eints_files_cache
 
-    if eints_files_cache is not None: return eints_files_cache
+    if eints_files_cache is not None:
+        return eints_files_cache
 
     if user_cfg.verbose:
         print("Getting available language files from Eints.")
     result = []
-    data = get_data(build_url('/download-list/' + user_cfg.project))
+    data = get_data(build_url("/download-list/" + user_cfg.project))
     if data is None:
         print("Error: Could not download the list of project languages from Eints.")
         sys.exit(1)
 
-    reader = csv.DictReader(io.StringIO(data), dialect='unix')
+    reader = csv.DictReader(io.StringIO(data), dialect="unix")
     for line in reader:
-        isocode = line.get('isocode')
+        isocode = line.get("isocode")
         if isocode is None or len(isocode) == 0:
-            continue;
+            continue
 
-        plang = line.get('base_isocode')
+        plang = line.get("base_isocode")
         if plang is None:
             continue
         if len(plang) == 0:
             plang = None
 
-        last_change = line.get('changetime')
+        last_change = line.get("changetime")
         # XXX Parse and validate the last change date
 
         el = EintsLanguageInfo(isocode, plang, None)
@@ -435,6 +466,7 @@ def get_eints_languages():
 
     return eints_files_cache
 
+
 # }}}
 
 # Local language files.
@@ -449,13 +481,17 @@ class LocalLanguageInfo:
     @ivar isocode: Isocode of the language,
     @type isocode: C{str}
     """
+
     def __init__(self, path_name, isocode):
         self.path_name = path_name
         self.isocode = isocode
+
+
 # }}}
 # {{{ def get_local_languages():
-utf8_bom = codecs.BOM_UTF8.decode('utf-8')
+utf8_bom = codecs.BOM_UTF8.decode("utf-8")
 local_files_cache = None
+
 
 def get_local_languages():
     """
@@ -466,20 +502,25 @@ def get_local_languages():
     """
     global user_cfg, local_files_cache
 
-    if local_files_cache is not None: return local_files_cache
+    if local_files_cache is not None:
+        return local_files_cache
 
     if user_cfg.verbose:
         print("Getting available language files from the local file system.")
     result = []
-    grflangid_pattern = re.compile('##grflangid\\s+0[xX]([0-9A-Fa-f][0-9A-Fa-f]?)\\s*$')
+    grflangid_pattern = re.compile("##grflangid\\s+0[xX]([0-9A-Fa-f][0-9A-Fa-f]?)\\s*$")
     if not os.path.isdir(user_cfg.lang_dir):
-        print("Error: \"{}\" is not a directory. (Is the --lang-dir option correct?)".format(user_cfg.lang_dir))
+        print('Error: "{}" is not a directory. (Is the --lang-dir option correct?)'.format(user_cfg.lang_dir))
         sys.exit(1)
     if user_cfg.unstable_lang_dir is not None and not os.path.isdir(user_cfg.lang_dir):
-        print("Error: \"{}\" is not a directory. (Is the --unstable-lang-dir option correct?)".format(user_cfg.unstable_lang_dir))
+        print(
+            'Error: "{}" is not a directory. (Is the --unstable-lang-dir option correct?)'.format(
+                user_cfg.unstable_lang_dir
+            )
+        )
         sys.exit(1)
 
-    searchpaths = [ user_cfg.lang_dir ]
+    searchpaths = [user_cfg.lang_dir]
     if user_cfg.unstable_lang_dir is not None:
         searchpaths.append(user_cfg.unstable_lang_dir)
 
@@ -488,14 +529,14 @@ def get_local_languages():
             if not fname.endswith(user_cfg.lang_ext):
                 continue
             path = os.path.join(spath, fname)
-            verbose_msg = "File \"{}\" matches extension".format(path)
+            verbose_msg = 'File "{}" matches extension'.format(path)
 
             # Try reading the grflangid from the file.
             grflangid = None
-            handle = open(path, 'r', encoding = 'utf-8')
+            handle = open(path, "r", encoding="utf-8")
             for line in handle:
                 if line.startswith(utf8_bom):
-                    line = line[len(utf8_bom):]
+                    line = line[len(utf8_bom) :]
                 m = grflangid_pattern.match(line)
                 if m:
                     grflangid = int(m.group(1), 16)
@@ -505,7 +546,7 @@ def get_local_languages():
 
             # If not found, try to derive it from the filename.
             if grflangid is None:
-                ldata = get_languagedata_by_filename(fname[:-len(user_cfg.lang_ext)])
+                ldata = get_languagedata_by_filename(fname[: -len(user_cfg.lang_ext)])
             else:
                 ldata = get_languagedata_by_grflangid(grflangid)
 
@@ -514,9 +555,8 @@ def get_local_languages():
                 continue
 
             if user_cfg.verbose:
-                verbose_msg = "File \"{}\" matches extension, but cannot derive a language from it.".format(path)
+                verbose_msg = 'File "{}" matches extension, but cannot derive a language from it.'.format(path)
                 print(verbose_msg)
-
 
     local_files_cache = result
 
@@ -530,6 +570,8 @@ def get_local_languages():
             print()
 
     return local_files_cache
+
+
 # }}}
 
 # Upload and download operations.
@@ -549,8 +591,8 @@ def perform_operation(op_type, lang_type, credits_handle):
     """
     global user_cfg
 
-    if op_type == 'create':
-        assert lang_type == 'project'
+    if op_type == "create":
+        assert lang_type == "project"
         # Project creation operation.
         if user_cfg.project_desc is None:
             print("Error: Missing project description (add it with --project-desc).")
@@ -586,7 +628,7 @@ def perform_operation(op_type, lang_type, credits_handle):
 
     # Filter languages.
     path_base = None
-    if lang_type == 'base':
+    if lang_type == "base":
         ll_files = [ll for ll in ll_files if ll.isocode == blng.isocode]
         el_files = [el for el in el_files if el.isocode == blng.isocode]
     else:
@@ -594,10 +636,12 @@ def perform_operation(op_type, lang_type, credits_handle):
         ll_files = [ll for ll in ll_files if ll.isocode != blng.isocode]
         el_files = [el for el in el_files if el.isocode != blng.isocode]
 
-    if op_type == 'upload':
-        perform_upload(ll_files, lang_type == 'base')
+    if op_type == "upload":
+        perform_upload(ll_files, lang_type == "base")
     else:
         perform_download(ll_files, el_files, credits_handle, path_base)
+
+
 # }}}
 # {{{ def perform_create_project():
 def perform_create_project():
@@ -609,20 +653,21 @@ def perform_create_project():
     assert user_cfg.project_desc is not None
 
     if user_cfg.project_type not in KNOWN_PROJECT_TYPES:
-        print("Error: Project type \"{}\" is not known.".format(user_cfg.project_type))
+        print('Error: Project type "{}" is not known.'.format(user_cfg.project_type))
         sys.exit(1)
 
-    fields = {'humanname' : user_cfg.project_desc,
-              'url' : user_cfg.project_url}
-    url = build_url('/makeproject/' + user_cfg.project_type + "/" + user_cfg.project)
+    fields = {"humanname": user_cfg.project_desc, "url": user_cfg.project_url}
+    url = build_url("/makeproject/" + user_cfg.project_type + "/" + user_cfg.project)
     if user_cfg.no_write:
-        print("Skipped creation of project \"{}\".".format(user_cfg.project))
+        print('Skipped creation of project "{}".'.format(user_cfg.project))
     else:
         if not post_form(url, fields):
-            print("Project creation of \"{}\" failed.".format(user_cfg.project))
+            print('Project creation of "{}" failed.'.format(user_cfg.project))
             sys.exit(1)
         if user_cfg.verbose:
-            print("Created project \"{}\".".format(user_cfg.project))
+            print('Created project "{}".'.format(user_cfg.project))
+
+
 # }}}
 # {{{ def perform_upload(ll_files, el_files):
 def perform_upload(ll_files, is_base):
@@ -641,30 +686,31 @@ def perform_upload(ll_files, is_base):
         blng_value = ""
 
     for ll in ll_files:
-        with open(ll.path_name, 'r', encoding = 'utf-8') as handle:
+        with open(ll.path_name, "r", encoding="utf-8") as handle:
             data = handle.read()
 
         data = data.rstrip()
         if len(data) == 0:
-            print("Warning: Skipping empty \"{}\".".format(ll.path_name))
+            print('Warning: Skipping empty "{}".'.format(ll.path_name))
             continue
 
-        fields = {'override' : '',
-                  'base_language' : blng_value}
+        fields = {"override": "", "base_language": blng_value}
         fname = os.path.basename(ll.path_name)
         if user_cfg.no_write:
             if user_cfg.verbose:
-                print("Skipped upload of \"{}\"".format(fname))
+                print('Skipped upload of "{}"'.format(fname))
             ok = True
         else:
             if user_cfg.verbose:
-                print("Uploaded \"{}\" to Eints".format(fname))
+                print('Uploaded "{}" to Eints'.format(fname))
 
-            url = build_url('/upload/' + user_cfg.project + "/" + ll.isocode)
-            ok = post_form_upload(url, fields, 'langfile', fname, data)
+            url = build_url("/upload/" + user_cfg.project + "/" + ll.isocode)
+            ok = post_form_upload(url, fields, "langfile", fname, data)
 
         if not ok:
-            print("Error: Failed to upload \"{}\".".format(ll.path_name))
+            print('Error: Failed to upload "{}".'.format(ll.path_name))
+
+
 # }}}
 
 # {{{ LanguageData, language_table, get_language_data
@@ -684,44 +730,50 @@ class LanguageData:
     @ivar is_stable: Whether the language is considered stable.
     @type is_stable: C{bool}
     """
+
     def __init__(self, grflangid, isocode, filename, is_stable):
         self.grflangid = grflangid
         self.isocode = isocode
         self.filename = filename
         self.is_stable = is_stable
 
+
 language_table = []
 
-filename_pattern = re.compile('[0-9a-zA-Z_]+$')
+filename_pattern = re.compile("[0-9a-zA-Z_]+$")
+
 
 def get_language_data():
-    data = get_data(build_url('/language-list'))
+    data = get_data(build_url("/language-list"))
     if data is None:
         print("Error: Could not download the list of language definitions from Eints.")
         sys.exit(1)
 
-    reader = csv.DictReader(io.StringIO(data), dialect='unix')
+    reader = csv.DictReader(io.StringIO(data), dialect="unix")
     for l in reader:
-        filename = l.get('filename')
+        filename = l.get("filename")
         if filename is None or not filename_pattern.match(filename):
             continue
 
-        isocode = l.get('isocode')
+        isocode = l.get("isocode")
         if isocode is None or len(isocode) == 0:
-            continue;
+            continue
 
-        grflangid = l.get('grflangid')
+        grflangid = l.get("grflangid")
         if grflangid is None or not hex_pat.match(grflangid):
             continue
         grflangid = int(grflangid, 16)
-        
-        is_stable = l.get('is_stable')
-        if is_stable is None or is_stable not in ['True', 'False']:
+
+        is_stable = l.get("is_stable")
+        if is_stable is None or is_stable not in ["True", "False"]:
             continue
-        is_stable = is_stable == 'True'
+        is_stable = is_stable == "True"
 
         language_table.append(LanguageData(grflangid, isocode, filename, is_stable))
+
+
 # }}}
+
 
 def get_languagedata_by_isocode(isocode):
     """
@@ -737,8 +789,10 @@ def get_languagedata_by_isocode(isocode):
         get_language_data()
 
     for ld in language_table:
-        if ld.isocode == isocode: return ld
+        if ld.isocode == isocode:
+            return ld
     return None
+
 
 def get_languagedata_by_grflangid(grflangid):
     """
@@ -754,8 +808,10 @@ def get_languagedata_by_grflangid(grflangid):
         get_language_data()
 
     for ld in language_table:
-        if ld.grflangid == grflangid: return ld
+        if ld.grflangid == grflangid:
+            return ld
     return None
+
 
 def get_languagedata_by_filename(filename):
     """
@@ -771,12 +827,15 @@ def get_languagedata_by_filename(filename):
         get_language_data()
 
     for ld in language_table:
-        if ld.filename == filename: return ld
+        if ld.filename == filename:
+            return ld
     return None
+
 
 # {{{ def perform_download(ll_files, el_files, credits_handle):
 
-string_pat = re.compile('^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$')
+string_pat = re.compile("^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$")
+
 
 def parse_string(line):
     """
@@ -789,12 +848,14 @@ def parse_string(line):
     @rtype:  (C{str}, C{str}) or C{None}
     """
     m = string_pat.match(line)
-    if not m: return None
+    if not m:
+        return None
 
     if m.group(2) is None:
         return m.group(1), m.group(3).rstrip()
     else:
         return m.group(1) + m.group(2), m.group(3).rstrip()
+
 
 def load_local_strings(path):
     """
@@ -807,12 +868,14 @@ def load_local_strings(path):
     @rtype:  C{set} of C{str}
     """
     strings = set()
-    with open(path, 'r', encoding = 'utf-8') as handle:
+    with open(path, "r", encoding="utf-8") as handle:
         for line in handle:
             value = parse_string(line)
-            if value is not None: strings.add(value)
+            if value is not None:
+                strings.add(value)
 
     return strings
+
 
 def parse_annotated_langfile(data):
     """
@@ -831,41 +894,42 @@ def parse_annotated_langfile(data):
     string_text = None
     for line in data.splitlines():
         if string_text is not None:
-            if line.startswith('credits:'):
-                parsed.append(('string', string_text, line[8:]))
+            if line.startswith("credits:"):
+                parsed.append(("string", string_text, line[8:]))
                 string_text = None
                 continue
-            parsed.append(('string', string_text, None))
+            parsed.append(("string", string_text, None))
             string_text = None
 
-        if line.startswith('string:'):
-            string_text = line[7:] # Temporary store the string, to check for credits at the next line.
+        if line.startswith("string:"):
+            string_text = line[7:]  # Temporary store the string, to check for credits at the next line.
             continue
 
-        if line.startswith('literal:'):
-            parsed.append(('text', line[8:]))
+        if line.startswith("literal:"):
+            parsed.append(("text", line[8:]))
             continue
 
-        if line.startswith('pragma:'):
-            parsed.append(('text', line[7:]))
+        if line.startswith("pragma:"):
+            parsed.append(("text", line[7:]))
             continue
 
-        if line.startswith('gender:') or line.startswith('plural:'):
-            parsed.append(('text', line[7:]))
+        if line.startswith("gender:") or line.startswith("plural:"):
+            parsed.append(("text", line[7:]))
             continue
 
-        if line.startswith('case:'):
-            parsed.append(('text', line[5:]))
+        if line.startswith("case:"):
+            parsed.append(("text", line[5:]))
             continue
 
-        if line.startswith('grflangid:'):
-            parsed.append(('text', line[10:]))
+        if line.startswith("grflangid:"):
+            parsed.append(("text", line[10:]))
             continue
 
     if string_text is not None:
-        parsed.append(('string', string_text, None))
+        parsed.append(("string", string_text, None))
 
     return parsed
+
 
 def collect_credits(strings, parsed):
     """
@@ -879,9 +943,11 @@ def collect_credits(strings, parsed):
     """
     credits = {}
     for p in parsed:
-        if p[0] != 'string': continue # Not a string.
+        if p[0] != "string":
+            continue  # Not a string.
         value = parse_string(p[1])
-        if value is None or p[2] is None or value in strings: continue
+        if value is None or p[2] is None or value in strings:
+            continue
 
         n = credits.get(p[2])
         if n is None:
@@ -896,7 +962,8 @@ def collect_credits(strings, parsed):
         else:
             persons.append((count, str(count) + " changes by " + user))
 
-    return ", ".join(p[1] for p in sorted(persons, reverse = True))
+    return ", ".join(p[1] for p in sorted(persons, reverse=True))
+
 
 def detect_eolstyle(path):
     """
@@ -908,7 +975,7 @@ def detect_eolstyle(path):
     @return: EOL style. '\n', '\r' or '\r\n' or None for unknown (no linebreaks at all).
     @rtype:  C{str}
     """
-    with open(path, 'r', encoding = 'utf-8') as f:
+    with open(path, "r", encoding="utf-8") as f:
         f.readline()
         if type(f.newlines) == tuple:
             return f.newlines[0]
@@ -929,9 +996,10 @@ def write_parsed_lines(parsed, path, eolstyle):
     @param eolstyle: EOL style. '\n', '\r' or '\r\n' or None for native.
     @type  eolstyle: C{str} or C{None}
     """
-    with open(path, 'w', encoding = 'utf-8', newline=eolstyle) as handle:
-        handle.write('\n'.join(p[1] for p in parsed))
-        handle.write('\n')
+    with open(path, "w", encoding="utf-8", newline=eolstyle) as handle:
+        handle.write("\n".join(p[1] for p in parsed))
+        handle.write("\n")
+
 
 def perform_download(ll_files, el_files, credits_handle, path_base):
     """
@@ -949,14 +1017,14 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
     @param path_base: Local baselang file.
     @type  path_base: C{str} or C{None}
     """
-    local_files = dict((ll.isocode, ll) for ll in ll_files) # Mapping of isocode to local info.
+    local_files = dict((ll.isocode, ll) for ll in ll_files)  # Mapping of isocode to local info.
 
     eolstyle_baselang = None
     if path_base is not None:
         eolstyle_baselang = detect_eolstyle(path_base)
 
     for el in el_files:
-        url = build_url('/annotate/' + user_cfg.project + '/' + el.isocode)
+        url = build_url("/annotate/" + user_cfg.project + "/" + el.isocode)
         data = get_data(url)
         if data is None:
             print("Error: Could not download the {} language from Eints.".format(el.isocode))
@@ -968,7 +1036,7 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             eolstyle = detect_eolstyle(path)
             action = "Wrote"
             if credits_handle is None:
-                current_strings = None # Causes a crash if you try to use it.
+                current_strings = None  # Causes a crash if you try to use it.
             else:
                 current_strings = load_local_strings(path)
         else:
@@ -984,7 +1052,7 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
                 path = user_cfg.unstable_lang_dir + os.sep + path + user_cfg.lang_ext
             else:
                 continue
-                
+
             action = "Created"
             current_strings = set()
 
@@ -998,17 +1066,20 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             if credits_handle is not None:
                 credits = collect_credits(current_strings, parsed)
                 if len(credits) > 0:
-                    credits_handle.write(el.isocode + ": " + credits + '\n')
-                    credits_handle.flush() # Flush it to disk, so it is preserved on crash.
+                    credits_handle.write(el.isocode + ": " + credits + "\n")
+                    credits_handle.flush()  # Flush it to disk, so it is preserved on crash.
             write_parsed_lines(parsed, path, eolstyle)
 
         if user_cfg.verbose:
-            print("{} language file \"{}\"".format(action, path))
+            print('{} language file "{}"'.format(action, path))
+
+
 # }}}
 
 # {{{ def run():
 # {{{ USAGE_TEXT = ...
-USAGE_TEXT = """\
+USAGE_TEXT = (
+    """\
 lang_sync -- Synchronize language files between the project and Eints.
 
 lang_sync <options> <operations>
@@ -1064,8 +1135,10 @@ Getting project information:
     Name of the project in Eints (may contain letters, digits, and dashes).
 
 --project-type=PROJECT_TYPE
-    Type of the project. Accepted values are """ + PROJECT_TYPES_TEXT + "." + \
-"""
+    Type of the project. Accepted values are """
+    + PROJECT_TYPES_TEXT
+    + "."
+    + """
 
 --project-desc=PROJECT_DESCRIPTION
     For project creation, a longer title of the project (may contain letters,
@@ -1114,7 +1187,9 @@ create-project
 
 You can give several operations at the command line, order is significant.
 """
+)
 # }}}
+
 
 def run():
     """
@@ -1122,21 +1197,35 @@ def run():
     """
     global user_cfg
 
-    long_opts = ["user-password-file=", "user=", "password=",
-                 "not-interactive", "base-url=", "project=", "project-type=",
-                 "project-desc=", "project-url=", "lang-dir=", "unstable-lang-dir=",
-                 "base-language=",
-                 "lang-file-ext=", "credits=", "help", "verbose", "no-write"]
+    long_opts = [
+        "user-password-file=",
+        "user=",
+        "password=",
+        "not-interactive",
+        "base-url=",
+        "project=",
+        "project-type=",
+        "project-desc=",
+        "project-url=",
+        "lang-dir=",
+        "unstable-lang-dir=",
+        "base-language=",
+        "lang-file-ext=",
+        "credits=",
+        "help",
+        "verbose",
+        "no-write",
+    ]
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "h", long_opts)
     except getopt.GetoptError as err:
-        print("lang_sync: " + str(err) + " (try \"lang_sync --help\")")
+        print("lang_sync: " + str(err) + ' (try "lang_sync --help")')
         sys.exit(2)
 
     user_cfg = UserConfig()
     for opt, val in opts:
-        if opt in ('--help', '-h'):
+        if opt in ("--help", "-h"):
             print(USAGE_TEXT)
             sys.exit(0)
 
@@ -1146,46 +1235,46 @@ def run():
         if opt == "--no-write":
             user_cfg.no_write = True
             continue
-        if opt == '--base-language':
+        if opt == "--base-language":
             user_cfg.base_lang = val
             continue
-        if opt == '--lang-dir':
+        if opt == "--lang-dir":
             user_cfg.lang_dir = val
             continue
-        if opt == '--unstable-lang-dir':
+        if opt == "--unstable-lang-dir":
             user_cfg.unstable_lang_dir = val
             continue
-        if opt == '--lang-file-ext':
+        if opt == "--lang-file-ext":
             user_cfg.lang_ext = val
             continue
-        if opt == '--base-url':
+        if opt == "--base-url":
             user_cfg.base_url = val
             continue
-        if opt == '--credits':
+        if opt == "--credits":
             user_cfg.credits_file = val
             continue
-        if opt == '--project':
+        if opt == "--project":
             user_cfg.project = val
             continue
-        if opt == '--project-type':
+        if opt == "--project-type":
             user_cfg.project_type = val
             continue
-        if opt == '--project-desc':
+        if opt == "--project-desc":
             user_cfg.project_desc = val
             continue
-        if opt == '--project-url':
+        if opt == "--project-url":
             user_cfg.project_url = val
             continue
-        if opt == '--user-password-file':
+        if opt == "--user-password-file":
             user_cfg.filename = val
             continue
-        if opt == '--user':
+        if opt == "--user":
             user_cfg.user = val
             continue
-        if opt == '--password':
+        if opt == "--password":
             user_cfg.passwd = val
             continue
-        if opt == '--not-interactive':
+        if opt == "--not-interactive":
             user_cfg.interactive = False
             continue
 
@@ -1198,20 +1287,20 @@ def run():
         updown = None
         if arg == "download-base":
             done_down_base = True
-            user_cfg.operations.append(('download', 'base'))
+            user_cfg.operations.append(("download", "base"))
         elif arg == "download-translations":
             done_down_trans = True
-            user_cfg.operations.append(('download', 'translations'))
+            user_cfg.operations.append(("download", "translations"))
         elif arg == "upload-base":
             if done_down_base:
                 print("Warning: Uploading the base language after downloading it does not copy local changes.")
-            user_cfg.operations.append(('upload', 'base'))
+            user_cfg.operations.append(("upload", "base"))
         elif arg == "upload-translations":
             if done_down_trans:
                 print("Warning: Uploading the translations after downloading them does not copy local changes.")
-            user_cfg.operations.append(('upload', 'translations'))
+            user_cfg.operations.append(("upload", "translations"))
         elif arg == "create-project":
-            user_cfg.operations.append(('create', 'project'))
+            user_cfg.operations.append(("create", "project"))
         else:
             text = "Argument \"{}\" is not a valid synchronization operation.  Try 'lang_sync --help' for more information."
             text = text.format(arg)
@@ -1225,11 +1314,11 @@ def run():
     if user_cfg.credits_file is None:
         credits_handle = None
     else:
-        credits_handle = open(user_cfg.credits_file, 'w', encoding = 'utf-8')
+        credits_handle = open(user_cfg.credits_file, "w", encoding="utf-8")
 
     for op_type, lng_type in user_cfg.operations:
         if user_cfg.verbose:
-            print("Performing \"{}-{}\"".format(op_type, lng_type))
+            print('Performing "{}-{}"'.format(op_type, lng_type))
         perform_operation(op_type, lng_type, credits_handle)
 
     if credits_handle is not None:
@@ -1237,8 +1326,8 @@ def run():
 
     sys.exit(0)
 
+
 # }}}
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()
-

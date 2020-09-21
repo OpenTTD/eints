@@ -5,6 +5,7 @@ from webtranslate.bottle import route, abort, response
 from webtranslate.protect import protected
 from webtranslate import config, data
 
+
 def plain_langfile(lines, text_type, text):
     """
     Add the L{text} to the L{lines} to give a normal language file.
@@ -18,8 +19,10 @@ def plain_langfile(lines, text_type, text):
     @param text: Actual text (of type L{text_type}) to add.
     @type  text: C{str}
     """
-    if text_type == 'credits': return
+    if text_type == "credits":
+        return
     lines.append(text)
+
 
 def annotated_langfile(lines, text_type, text):
     """
@@ -60,20 +63,20 @@ def make_langfile(pdata, base_lng, lng, add_func):
     if projtype.allow_case:
         lng_case = lng.case
     else:
-        lng_case = [''] # Suppress writing of non-default cases if the project doesn't allow them.
+        lng_case = [""]  # Suppress writing of non-default cases if the project doesn't allow them.
 
     sdict = pdata.statistics
-    sdict = sdict.get(lng.name) # Statistics dict for the queried language.
+    sdict = sdict.get(lng.name)  # Statistics dict for the queried language.
     if sdict is None:
         abort(404, "Missing language statistics")
         return
 
     lines = []
     for skel_type, skel_value in pdata.skeleton:
-        if skel_type == 'literal':
+        if skel_type == "literal":
             add_func(lines, skel_type, skel_value)
             continue
-        if skel_type == 'string':
+        if skel_type == "string":
             column, sname = skel_value
             chgs = lng.changes.get(sname)
             if chgs is not None:
@@ -82,7 +85,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
                 for case in lng_case:
                     chg = data.get_newest_change(chgs, case)
                     if chg is not None:
-                        if case == '':
+                        if case == "":
                             line = sname
                         else:
                             line = sname + "." + case
@@ -91,7 +94,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
                             text = chg.base_text.text
                         else:
                             text = chg.new_text.text
-                            if case != '' and text == '':
+                            if case != "" and text == "":
                                 # Suppress printing of empty non-default cases in translations.
                                 continue
                             cstate = next(se for c, se in cstates if c == case)
@@ -100,43 +103,44 @@ def make_langfile(pdata, base_lng, lng, add_func):
                                 continue
 
                         length = column - len(line)
-                        if length < 0: length = 0
-                        add_func(lines, skel_type, line + (' ' * length) + ':' + text)
+                        if length < 0:
+                            length = 0
+                        add_func(lines, skel_type, line + (" " * length) + ":" + text)
                         if chg.user is not None:
-                            add_func(lines, 'credits', chg.user)
+                            add_func(lines, "credits", chg.user)
             continue
 
-        if projtype.has_grflangid and skel_type == 'grflangid':
-            add_func(lines, skel_type, '##grflangid 0x{:02x}'.format(lng.grflangid))
+        if projtype.has_grflangid and skel_type == "grflangid":
+            add_func(lines, skel_type, "##grflangid 0x{:02x}".format(lng.grflangid))
             continue
 
-        if skel_type == 'plural':
+        if skel_type == "plural":
             if lng.plural is not None:
-                add_func(lines, skel_type, '##plural {:d}'.format(lng.plural))
+                add_func(lines, skel_type, "##plural {:d}".format(lng.plural))
             continue
 
-        if skel_type == 'case':
-            cases = [c for c in lng.case if c != '']
+        if skel_type == "case":
+            cases = [c for c in lng.case if c != ""]
             if projtype.allow_case and len(cases) > 0:
-                add_func(lines, skel_type, '##case ' + ' '.join(cases))
+                add_func(lines, skel_type, "##case " + " ".join(cases))
             continue
 
-        if skel_type == 'gender':
+        if skel_type == "gender":
             if projtype.allow_gender and len(lng.gender) > 0:
-                add_func(lines, skel_type, '##gender ' + ' '.join(lng.gender))
+                add_func(lines, skel_type, "##gender " + " ".join(lng.gender))
             continue
 
-        if skel_type == 'pragma':
+        if skel_type == "pragma":
             content = lng.custom_pragmas.get(skel_value)
             if content is not None:
                 add_func(lines, skel_type, content)
             continue
 
-    return '\n'.join(lines) + '\n'
+    return "\n".join(lines) + "\n"
 
 
-@route('/download/<prjname>/<lngname>', method = 'GET')
-@protected(['download', 'prjname', 'lngname'])
+@route("/download/<prjname>/<lngname>", method="GET")
+@protected(["download", "prjname", "lngname"])
 def download(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -151,11 +155,12 @@ def download(userauth, prjname, lngname):
         abort(404, "Language does not exist in the project")
         return
 
-    response.content_type = 'text/plain; charset=UTF-8'
+    response.content_type = "text/plain; charset=UTF-8"
     return make_langfile(pdata, base_lng, lng, plain_langfile)
 
-@route('/annotate/<prjname>/<lngname>', method = 'GET')
-@protected(['annotate', 'prjname', 'lngname'])
+
+@route("/annotate/<prjname>/<lngname>", method="GET")
+@protected(["annotate", "prjname", "lngname"])
 def annotate(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -170,6 +175,5 @@ def annotate(userauth, prjname, lngname):
         abort(404, "Language does not exist in the project")
         return
 
-    response.content_type = 'text/plain; charset=UTF-8'
+    response.content_type = "text/plain; charset=UTF-8"
     return make_langfile(pdata, base_lng, lng, annotated_langfile)
-

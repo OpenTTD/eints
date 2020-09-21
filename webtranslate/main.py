@@ -23,11 +23,12 @@ from webtranslate.pages import user_profile
 from webtranslate.pages import login
 
 # Get template files from 'views' only.
-bottle.TEMPLATE_PATH = ['./views/']
+bottle.TEMPLATE_PATH = ["./views/"]
+
 
 def run():
     # Load basic settings from the configuration (in particular, language meta-data directories).
-    config.cfg = config.Config('config.xml')
+    config.cfg = config.Config("config.xml")
     config.cfg.load_settings_from_xml()
 
     # Load language meta-information.
@@ -60,12 +61,9 @@ def run():
 
     # Start the web service
     debug = False
-    if config.cfg.server_mode == 'development': debug = True
+    if config.cfg.server_mode == "development":
+        debug = True
 
     # With 'mod_wsgi', application does not run from here.
-    if config.cfg.server_mode != 'mod_wsgi':
-        bottle.run(reloader = False,
-                   debug = debug,
-                   host = config.cfg.server_host,
-                   port = config.cfg.server_port)
-
+    if config.cfg.server_mode != "mod_wsgi":
+        bottle.run(reloader=False, debug=debug, host=config.cfg.server_host, port=config.cfg.server_port)

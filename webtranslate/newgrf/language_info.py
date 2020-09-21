@@ -9,6 +9,7 @@ all_languages = None
 grflangid = None
 isocode = None
 
+
 class PluralData:
     """
     @ivar plural: Plural form number.
@@ -20,29 +21,30 @@ class PluralData:
     @ivar description: Descriptio of plural forms.
     @type description: C{list} of C{str}
     """
+
     def __init__(self, plural, description):
         self.plural = plural
         self.description = description
         self.count = len(description)
 
+
 all_plurals = {
     None: PluralData(None, []),
-    0:  PluralData( 0, ["1", "other"]),
-    1:  PluralData( 1, ["other"]),
-    2:  PluralData( 2, ["0..1", "other"]),
-    3:  PluralData( 3, ["1,21,31,...", "other", "0"]),
-    4:  PluralData( 4, ["1", "2", "3..6", "7..10", "other"]),
-    5:  PluralData( 5, ["1,21,31,...", "2..9,22..29,32..39,...", "other"]),
-    6:  PluralData( 6, ["1,21,31,...", "2..4,22..24,32..34,...", "other"]),
-    7:  PluralData( 7, ["1", "2..4,22..24,32..34,...", "other"]),
-    8:  PluralData( 8, ["1,101,201,...", "2,102,202,...", "3..4,103..104,203..204,...", "other"]),
-    9:  PluralData( 9, ["1,21,31,...", "other"]),
+    0: PluralData(0, ["1", "other"]),
+    1: PluralData(1, ["other"]),
+    2: PluralData(2, ["0..1", "other"]),
+    3: PluralData(3, ["1,21,31,...", "other", "0"]),
+    4: PluralData(4, ["1", "2", "3..6", "7..10", "other"]),
+    5: PluralData(5, ["1,21,31,...", "2..9,22..29,32..39,...", "other"]),
+    6: PluralData(6, ["1,21,31,...", "2..4,22..24,32..34,...", "other"]),
+    7: PluralData(7, ["1", "2..4,22..24,32..34,...", "other"]),
+    8: PluralData(8, ["1,101,201,...", "2,102,202,...", "3..4,103..104,203..204,...", "other"]),
+    9: PluralData(9, ["1,21,31,...", "other"]),
     10: PluralData(10, ["1", "2..4", "other"]),
     11: PluralData(11, ["yeong,il,sam,yuk,chil,pal", "i,sa,o,gu"]),
     12: PluralData(12, ["1", "0,2..10,102..110,202..210,...", "11..19,111..119,211..219,...", "other"]),
     13: PluralData(13, ["1,11", "2,12", "3..10,13..19", "other"]),
 }
-
 
 
 class LanguageData:
@@ -74,46 +76,55 @@ class LanguageData:
     @ivar is_stable: Whether the language is considered to be 'stable'. Default C{True}.
     @type is_stable: C{bool}
     """
+
     def __init__(self, filename, found_lines):
         self.filename = filename
-        self.name = found_lines['name']
-        self.ownname = found_lines['ownname']
-        self.isocode = found_lines['isocode']
-        self.plural = found_lines['plural']
-        self.grflangid = found_lines['grflangid']
+        self.name = found_lines["name"]
+        self.ownname = found_lines["ownname"]
+        self.isocode = found_lines["isocode"]
+        self.plural = found_lines["plural"]
+        self.grflangid = found_lines["grflangid"]
 
-        gender = found_lines.get('gender')
-        if gender is None: gender = []
+        gender = found_lines.get("gender")
+        if gender is None:
+            gender = []
         self.gender = gender
 
-        case = found_lines.get('case')
-        if case is None: case = []
-        if '' not in case: case.append('')
+        case = found_lines.get("case")
+        if case is None:
+            case = []
+        if "" not in case:
+            case.append("")
         self.case = case
-        self.is_stable = True # By default, all languages are stable.
+        self.is_stable = True  # By default, all languages are stable.
+
 
 def as_str(text):
     return text.strip()
 
+
 def as_int(text):
-    if text[:2] in ('0x', '0X'):
+    if text[:2] in ("0x", "0X"):
         return int(text, base=16)
     else:
         return int(text, base=10)
 
+
 def as_strlist(text):
     return list(set(text.split()))
 
+
 # Recognized lines in a language file.
-LanguageLine = namedtuple('LanguageLine', ['name', 'pattern', 'convert', 'required'])
+LanguageLine = namedtuple("LanguageLine", ["name", "pattern", "convert", "required"])
 recognized = [
-    LanguageLine('name',      re.compile('##name +(.*) *$'),                        as_str,     True),
-    LanguageLine('ownname',   re.compile('##ownname +(.*) *$'),                     as_str,     True),
-    LanguageLine('isocode',   re.compile('##isocode +([a-z][a-z]_[A-Z][A-Z]) *$'),  as_str,     True),
-    LanguageLine('plural',    re.compile('##plural +((0[xX])?[0-9A-Fa-f]+) *$'),    as_int,     True),
-    LanguageLine('grflangid', re.compile('##grflangid +((0[xX])?[0-9A-Fa-f]+) *$'), as_int,     True),
-    LanguageLine('gender',    re.compile('##gender +(.*) *$'),                      as_strlist, False),
-    LanguageLine('case',      re.compile('##case +(.*) *$'),                        as_strlist, False)]
+    LanguageLine("name", re.compile("##name +(.*) *$"), as_str, True),
+    LanguageLine("ownname", re.compile("##ownname +(.*) *$"), as_str, True),
+    LanguageLine("isocode", re.compile("##isocode +([a-z][a-z]_[A-Z][A-Z]) *$"), as_str, True),
+    LanguageLine("plural", re.compile("##plural +((0[xX])?[0-9A-Fa-f]+) *$"), as_int, True),
+    LanguageLine("grflangid", re.compile("##grflangid +((0[xX])?[0-9A-Fa-f]+) *$"), as_int, True),
+    LanguageLine("gender", re.compile("##gender +(.*) *$"), as_strlist, False),
+    LanguageLine("case", re.compile("##case +(.*) *$"), as_strlist, False),
+]
 
 
 def parse_file(fname):
@@ -129,7 +140,7 @@ def parse_file(fname):
     handle = open(fname, "rt", encoding="utf-8")
     found_lines = {}
     for line in handle:
-        if not line.startswith('##'):
+        if not line.startswith("##"):
             continue
 
         line = line.rstrip()
@@ -144,11 +155,12 @@ def parse_file(fname):
     if not all(ll.name in found_lines for ll in recognized if ll.required):
         for ll in recognized:
             if ll.required and ll.name not in found_lines:
-                msg = "File \"{}\" is missing required language line ##{} (or it has the wrong format)"
+                msg = 'File "{}" is missing required language line ##{} (or it has the wrong format)'
                 print(msg.format(fname, ll.name))
         sys.exit(1)
 
     return LanguageData(os.path.splitext(os.path.basename(fname))[0], found_lines)
+
 
 def load_dir(directory):
     """
@@ -163,10 +175,11 @@ def load_dir(directory):
     """
     result = []
     for fname in os.listdir(directory):
-        if fname.lower().endswith('.txt'):
+        if fname.lower().endswith(".txt"):
             result.append(parse_file(os.path.join(directory, fname)))
 
     return result
+
 
 def set_all_languages(lang_infos):
     """
@@ -184,4 +197,3 @@ def set_all_languages(lang_infos):
 
     isocode = dict((x.isocode, x) for x in all_languages)
     assert len(all_languages) == len(isocode)
-

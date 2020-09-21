@@ -6,12 +6,10 @@ import configparser, os, json, requests, requests_oauthlib
 from webtranslate import rights, userauth
 
 
-
 github_organization = None
 github_org_api_token = None
 github_oauth_client_id = None
 github_oauth_client_secret = None
-
 
 
 def request_teams(name):
@@ -30,13 +28,17 @@ def request_teams(name):
 
     try:
         query = """query($org:String!, $user:String!) { organization(login: $org) { teams(first: 100, userLogins: [$user]) { nodes { name } } } }"""
-        variables = { "org": github_organization, "user": name }
-        r = requests.post("https://api.github.com/graphql", headers = { "Authorization": "bearer " + github_org_api_token }, json={'query': query, 'variables': variables})
+        variables = {"org": github_organization, "user": name}
+        r = requests.post(
+            "https://api.github.com/graphql",
+            headers={"Authorization": "bearer " + github_org_api_token},
+            json={"query": query, "variables": variables},
+        )
         if r.status_code != 200:
             raise RuntimeError("HTTP request returned status {}".format(r.status_code))
 
         r = r.json()
-        teams = set( t["name"] for t in r["data"]["organization"]["teams"]["nodes"] )
+        teams = set(t["name"] for t in r["data"]["organization"]["teams"]["nodes"])
         return teams
     except Exception as ex:
         print(ex)
@@ -47,6 +49,7 @@ class GithubUserAuthentication(userauth.UserAuthentication):
     """
     Implementation of UserAuthentication for Github authentication system.
     """
+
     def __init__(self):
         super(GithubUserAuthentication, self).__init__(False, "unknown")
         self.teams = set()
@@ -58,9 +61,9 @@ class GithubUserAuthentication(userauth.UserAuthentication):
         self.redirect = req_redirect
         oauth = requests_oauthlib.OAuth2Session(github_oauth_client_id)
         if req_login is not None:
-            url, self.state = oauth.authorization_url('https://github.com/login/oauth/authorize', login = req_login)
+            url, self.state = oauth.authorization_url("https://github.com/login/oauth/authorize", login=req_login)
         else:
-            url, self.state = oauth.authorization_url('https://github.com/login/oauth/authorize')
+            url, self.state = oauth.authorization_url("https://github.com/login/oauth/authorize")
         return url
 
     def callback(self, request_url):
@@ -68,15 +71,19 @@ class GithubUserAuthentication(userauth.UserAuthentication):
             return None
 
         try:
-            oauth = requests_oauthlib.OAuth2Session(github_oauth_client_id, state = self.state)
-            self.state = None # single use, forget now
+            oauth = requests_oauthlib.OAuth2Session(github_oauth_client_id, state=self.state)
+            self.state = None  # single use, forget now
 
-            oauth.fetch_token('https://github.com/login/oauth/access_token', client_secret = github_oauth_client_secret, authorization_response = request_url)
+            oauth.fetch_token(
+                "https://github.com/login/oauth/access_token",
+                client_secret=github_oauth_client_secret,
+                authorization_response=request_url,
+            )
             if oauth.authorized:
-                info = oauth.get('https://api.github.com/user').json()
+                info = oauth.get("https://api.github.com/user").json()
 
-                self.name = info["login"] # can be changed, and reassigned to someone else
-                self.userid = int(info["id"]) # persistent
+                self.name = info["login"]  # can be changed, and reassigned to someone else
+                self.userid = int(info["id"])  # persistent
 
                 # All necessary data is available, now the user is considered authorized
                 self.is_auth = True
@@ -92,13 +99,12 @@ class GithubUserAuthentication(userauth.UserAuthentication):
     def get_roles(self, prjname, lngname):
         eints_roles = set()
         if self.is_auth:
-            eints_roles.add('USER')
+            eints_roles.add("USER")
 
             if lngname is not None and lngname in self.teams:
-                eints_roles.add('TRANSLATOR')
+                eints_roles.add("TRANSLATOR")
 
         return eints_roles
-
 
 
 def init():
@@ -107,7 +113,8 @@ def init():
     """
     rights.init_page_access()
 
-def oauth_redirect(req_redirect = None, req_login = None):
+
+def oauth_redirect(req_redirect=None, req_login=None):
     """
     Redirect for authentication.
 
@@ -122,6 +129,7 @@ def oauth_redirect(req_redirect = None, req_login = None):
     """
     userauth = GithubUserAuthentication()
     return (userauth, userauth.start_oauth(req_redirect, req_login))
+
 
 def oauth_callback(userauth, request_url):
     """

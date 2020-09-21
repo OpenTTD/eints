@@ -13,23 +13,23 @@ get_authentication = None
 oauth_redirect = None
 oauth_callback = None
 
+
 def init(auth):
     """
     Setup authentication.
     """
     global get_authentication, oauth_redirect, oauth_callback
 
-    if auth == 'development':
+    if auth == "development":
         get_authentication = development.get_authentication
         development.init()
-    elif auth == 'redmine':
+    elif auth == "redmine":
         get_authentication = redmine.get_authentication
         redmine.init()
-    elif auth == 'github':
+    elif auth == "github":
         oauth_redirect = github.oauth_redirect
         oauth_callback = github.oauth_callback
         github.init()
-    elif auth == 'ldap':
+    elif auth == "ldap":
         get_authentication = ldap.get_authentication
         ldap.init()
-

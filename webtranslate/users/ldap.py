@@ -17,9 +17,10 @@ ldap_basedn_users = None
 ldap_basedn_groups = None
 
 owner_group = None
-translator_groups = {} # Mapping of iso language name to role name.
+translator_groups = {}  # Mapping of iso language name to role name.
 
 server = None
+
 
 class LdapUserAuthentication(userauth.UserAuthentication):
     """
@@ -31,8 +32,9 @@ class LdapUserAuthentication(userauth.UserAuthentication):
     @ivar name: Username, "unknown" for annoymous access.
     @type name: C{str}
 
-    @ivar groups: 
+    @ivar groups:
     """
+
     def __init__(self, is_auth, name, groups):
         super(LdapUserAuthentication, self).__init__(is_auth, name)
         self.groups = groups
@@ -40,21 +42,20 @@ class LdapUserAuthentication(userauth.UserAuthentication):
     def get_roles(self, prjname, lngname):
         eints_roles = set()
         if self.is_auth:
-            eints_roles.add('USER')
+            eints_roles.add("USER")
 
             if self.groups is not None:
                 if owner_group is not None and owner_group != "" and owner_group in self.groups:
-                    eints_roles.add('OWNER')
+                    eints_roles.add("OWNER")
 
                 lang_group = None
                 if lngname is not None:
                     lang_group = translator_groups.get(lngname)
 
                 if lang_group is not None and lang_group != "" and lang_group in self.groups:
-                    eints_roles.add('TRANSLATOR')
+                    eints_roles.add("TRANSLATOR")
 
         return eints_roles
-
 
 
 def init():
@@ -92,10 +93,20 @@ def get_authentication(user, pwd):
 
         try:
             escaped_user = ldap3.utils.conv.escape_bytes(user)
-            with ldap3.Connection(server, auto_bind=True, client_strategy=ldap3.STRATEGY_SYNC, user="uid="+escaped_user+","+ldap_basedn_users, password=pwd) as c:
-                if c.search(ldap_basedn_users, '(uid='+escaped_user+')', attributes=['cn', 'memberOf']):
-                    user = c.response[0]['attributes']['cn'][0]
-                    groups.update(g.split(',')[0].split('=')[1] for g in c.response[0]['attributes']['memberOf'] if g.endswith(ldap_basedn_groups))
+            with ldap3.Connection(
+                server,
+                auto_bind=True,
+                client_strategy=ldap3.STRATEGY_SYNC,
+                user="uid=" + escaped_user + "," + ldap_basedn_users,
+                password=pwd,
+            ) as c:
+                if c.search(ldap_basedn_users, "(uid=" + escaped_user + ")", attributes=["cn", "memberOf"]):
+                    user = c.response[0]["attributes"]["cn"][0]
+                    groups.update(
+                        g.split(",")[0].split("=")[1]
+                        for g in c.response[0]["attributes"]["memberOf"]
+                        if g.endswith(ldap_basedn_groups)
+                    )
 
         except:
             user = None
@@ -103,6 +114,7 @@ def get_authentication(user, pwd):
     else:
         user = None
 
-    if user is None: return LdapUserAuthentication(False, "unknown", set())
+    if user is None:
+        return LdapUserAuthentication(False, "unknown", set())
 
     return LdapUserAuthentication(True, user, groups)

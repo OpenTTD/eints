@@ -6,18 +6,20 @@ from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import config, utils
 
-@route('/projsettings/<prjname>', method = 'GET')
-@protected(['projsettings', 'prjname', '-'])
+
+@route("/projsettings/<prjname>", method="GET")
+@protected(["projsettings", "prjname", "-"])
 def project_get(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
         return
 
-    return template('projsettings', userauth = userauth, pmd = pmd)
+    return template("projsettings", userauth=userauth, pmd=pmd)
 
-@route('/projsettings/<prjname>', method = 'POST')
-@protected(['projsettings', 'prjname', '-'])
+
+@route("/projsettings/<prjname>", method="POST")
+@protected(["projsettings", "prjname", "-"])
 def project_post(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -30,7 +32,7 @@ def project_post(userauth, prjname):
     human_name = request.forms.name.strip()
     acceptance = utils.verify_name(human_name, "Full project name", False)
     if acceptance is not None:
-        redirect('/projsettings/<prjname>', prjname = prjname, message = acceptance)
+        redirect("/projsettings/<prjname>", prjname=prjname, message=acceptance)
         return
 
     # Get and check the new url.
@@ -42,7 +44,7 @@ def project_post(userauth, prjname):
     message_parts = []
     if pdata.human_name != human_name:
         pdata.human_name = human_name
-        pmd.human_name = human_name # Also assign the new name to the meta-data storage.
+        pmd.human_name = human_name  # Also assign the new name to the meta-data storage.
         message_parts.append("name")
     if pdata.url != url:
         pdata.url = url
@@ -62,6 +64,4 @@ def project_post(userauth, prjname):
 
         config.cache.save_pmd(pmd)
 
-    redirect("/project/<prjname>", prjname = prjname.lower(), message = message)
-
-
+    redirect("/project/<prjname>", prjname=prjname.lower(), message=message)

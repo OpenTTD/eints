@@ -4,8 +4,9 @@ from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_info
 
-@route('/newlanguage/<prjname>', method = 'GET')
-@protected(['newlanguage', 'prjname', '-'])
+
+@route("/newlanguage/<prjname>", method="GET")
+@protected(["newlanguage", "prjname", "-"])
 def new_language_get(userauth, prjname):
     """
     Form to add another language to the project.
@@ -32,11 +33,18 @@ def new_language_get(userauth, prjname):
     translations.sort(key=lambda x: x.isocode)
     can_be_added.sort(key=lambda x: x.isocode)
 
-    return template('newlanguage', userauth = userauth, pmd = pmd, base_langs = base_langs,
-                    translations = translations, can_be_added = can_be_added)
+    return template(
+        "newlanguage",
+        userauth=userauth,
+        pmd=pmd,
+        base_langs=base_langs,
+        translations=translations,
+        can_be_added=can_be_added,
+    )
 
-@route('/newlanguage/<prjname>', method = 'POST')
-@protected(['newlanguage', 'prjname', '-'])
+
+@route("/newlanguage/<prjname>", method="POST")
+@protected(["newlanguage", "prjname", "-"])
 def new_language_post(userauth, prjname):
     """
     Construct the requested language.
@@ -54,7 +62,7 @@ def new_language_post(userauth, prjname):
         abort(404, msg)
         return
 
-    return template('makelanguage', userauth = userauth, pmd = pmd, lnginfo = lng_def)
+    return template("makelanguage", userauth=userauth, pmd=pmd, lnginfo=lng_def)
 
 
 def get_language(name):
@@ -73,8 +81,8 @@ def get_language(name):
     return None
 
 
-@route('/makelanguage/<prjname>/<lngname>', method = 'POST')
-@protected(['makelanguage', 'prjname', 'lngname'])
+@route("/makelanguage/<prjname>/<lngname>", method="POST")
+@protected(["makelanguage", "prjname", "lngname"])
 def make_language_post(userauth, prjname, lngname):
     """
     Create the requested language.
@@ -98,12 +106,12 @@ def make_language_post(userauth, prjname, lngname):
 
     pdata = pmd.pdata
     if lng_def.isocode in pdata.languages:
-        abort(404, "Language \"{}\" already exists".format(lng_def.isocode))
+        abort(404, 'Language "{}" already exists'.format(lng_def.isocode))
         return
 
     projtype = pdata.projtype
     if not projtype.allow_language(lng_def):
-        msg = "Language \"{}\" may not be created in this project".format(lng_def.isocode)
+        msg = 'Language "{}" may not be created in this project'.format(lng_def.isocode)
         abort(404, msg)
         return
 
@@ -120,7 +128,7 @@ def make_language_post(userauth, prjname, lngname):
     if projtype.allow_case:
         lng.case = lng_def.case
     else:
-        lng.case = ['']
+        lng.case = [""]
 
     pdata.languages[lng.name] = lng
     pdata.set_modified()
@@ -129,6 +137,6 @@ def make_language_post(userauth, prjname, lngname):
     config.cache.save_pmd(pmd)
     pmd.create_statistics(lng)
 
-    msg = "Successfully created language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-    redirect("/translation/<prjname>/<lngname>", prjname = prjname, lngname = lng.name, message = msg)
+    msg = "Successfully created language '" + lng.name + "' " + utils.get_datetime_now_formatted()
+    redirect("/translation/<prjname>/<lngname>", prjname=prjname, lngname=lng.name, message=msg)
     return

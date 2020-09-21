@@ -3,8 +3,9 @@ from webtranslate.utils import redirect, template
 from webtranslate.protect import protected
 from webtranslate import config
 
-@route('/delete/<prjname>/<lngname>', method = 'GET')
-@protected(['delete', 'prjname', 'lngname'])
+
+@route("/delete/<prjname>/<lngname>", method="GET")
+@protected(["delete", "prjname", "lngname"])
 def delete_form(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -25,10 +26,11 @@ def delete_form(userauth, prjname, lngname):
         abort(404, "Cannot delete base language!")
         return
 
-    return template("delete_translation", userauth = userauth, pmd = pmd, lng = lng)
+    return template("delete_translation", userauth=userauth, pmd=pmd, lng=lng)
 
-@route('/really_delete/<prjname>/<lngname>', method = 'POST')
-@protected(['delete', 'prjname', 'lngname'])
+
+@route("/really_delete/<prjname>/<lngname>", method="POST")
+@protected(["delete", "prjname", "lngname"])
 def delete_submit(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -56,9 +58,9 @@ def delete_submit(userauth, prjname, lngname):
     if lngname in pmd.overview:
         del pmd.overview[lngname]
 
-    config.process_project_changes(pdata) # Update changes of the project.
+    config.process_project_changes(pdata)  # Update changes of the project.
     config.cache.save_pmd(pmd)
 
     msg = "Language " + lngname + " is deleted"
-    redirect('/project/<prjname>', prjname = prjname, message = msg)
+    redirect("/project/<prjname>", prjname=prjname, message=msg)
     return

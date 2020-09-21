@@ -39,16 +39,26 @@ from webtranslate import config, data
 from webtranslate.newgrf import language_info
 from csv import DictWriter
 
-@route('/language-list', method = 'GET')
-@protected(['language-list', '-', '-'])
-def language_list(userauth):
-    response.content_type = 'text/plain; charset=UTF-8'
 
-    lines = ['isocode,grflangid,filename,is_stable,name,ownname,plural,gender,case']
-    langs = sorted(language_info.all_languages, key = lambda l: l.isocode)
+@route("/language-list", method="GET")
+@protected(["language-list", "-", "-"])
+def language_list(userauth):
+    response.content_type = "text/plain; charset=UTF-8"
+
+    lines = ["isocode,grflangid,filename,is_stable,name,ownname,plural,gender,case"]
+    langs = sorted(language_info.all_languages, key=lambda l: l.isocode)
     for lng in langs:
-        line = "{},0x{:02x},{},{},{},{},{},{},{}".format(lng.isocode, lng.grflangid, lng.filename, lng.is_stable, lng.name, lng.ownname, lng.plural, ' '.join(lng.gender), ' '.join(lng.case))
+        line = "{},0x{:02x},{},{},{},{},{},{},{}".format(
+            lng.isocode,
+            lng.grflangid,
+            lng.filename,
+            lng.is_stable,
+            lng.name,
+            lng.ownname,
+            lng.plural,
+            " ".join(lng.gender),
+            " ".join(lng.case),
+        )
         lines.append(line)
 
-    return '\n'.join(lines) + '\n'
-
+    return "\n".join(lines) + "\n"
