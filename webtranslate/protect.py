@@ -1,9 +1,9 @@
 """
 Bottle authentication decorator.
 """
-import secrets, datetime
-from urllib.parse import quote
-from webtranslate.bottle import request, response, abort, error, response
+import secrets
+import datetime
+from webtranslate.bottle import request, response, abort
 from webtranslate.utils import redirect
 from webtranslate import config, userauth
 

@@ -3,7 +3,7 @@ Login/logout
 """
 from urllib.parse import quote
 from webtranslate.bottle import route, request, redirect
-from webtranslate.protect import protected, start_session, stop_session
+from webtranslate.protect import abort, protected, start_session, stop_session
 from webtranslate import utils, users
 
 
@@ -35,7 +35,7 @@ def login(userauth):
 
 @route("/login", method="POST")
 @protected(["login", "-", "-"])
-def login(userauth):
+def login_post(userauth):
     if not users.get_authentication:
         abort(500, "No authentication method")
         return

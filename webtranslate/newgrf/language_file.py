@@ -1,7 +1,8 @@
 """
 Language file processing.
 """
-import re, codecs
+import re
+import codecs
 from webtranslate import project_type
 from webtranslate.newgrf import language_info
 
@@ -1136,7 +1137,7 @@ def load_language_file(projtype, handle, max_size, lng_data=None):
                     continue
             sv = StringValue(lnum, m.group(1), m2, m.group(3))
             data.strings.append(sv)
-            if m2 is "":
+            if m2 == "":
                 if m.group(1) in skeleton_strings:
                     data.add_error(ErrorMessage(ERROR, lnum, "String name {} is already used.".format(m.group(1))))
                     continue
@@ -1194,7 +1195,8 @@ def sanitize_text(txt):
 # {{{ def compare_info(base_info, lng_info):
 def compare_info(projtype, base_info, lng_info):
     """
-    Compare both string uses with each other. Errors found during the comparison are added to the translation L{lng_info}.
+    Compare both string uses with each other.
+    Errors found during the comparison are added to the translation L{lng_info}.
 
     @param projtype: Project type.
     @type  projtype: L{ProjectType}

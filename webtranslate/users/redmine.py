@@ -9,7 +9,8 @@ A lot of the magic in this file has been copied from hgweb.py in https://bitbuck
 
 This code is not thread-safe!!
 """
-import hashlib, time
+import hashlib
+import time
 from webtranslate import rights, userauth
 
 # Also initialized in the config loader.
@@ -76,7 +77,9 @@ def connect():
 
     # Setup connection.
     if db_type == "postgress":
-        import psycopg2, psycopg2.extras, psycopg2.extensions
+        import psycopg2
+        import psycopg2.extras
+        import psycopg2.extensions
 
         psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 

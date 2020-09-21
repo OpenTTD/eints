@@ -113,7 +113,8 @@ def template(tpl, **kwargs):
     if len(query.get("message", "")) > 0:
         messages.append({"content": query.get("message"), "class": query.get("message_class", "info")})
 
-    # message classes map to bootstrap css alert style names. n.b. default bootstrap alert is yellow (warning), but our default is blue (info)
+    # message classes map to bootstrap css alert style names.
+    # n.b. default bootstrap alert is yellow (warning), but our default is blue (info)
     message_classes = {"info": "alert-info", "success": "alert-success", "warning": "", "error": "alert-error"}
 
     for msg in messages:

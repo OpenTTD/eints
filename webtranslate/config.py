@@ -1,7 +1,8 @@
 """
 Configuration and global routines of the translator service.
 """
-import os, sys, glob
+import os
+import sys
 from webtranslate import data, loader, project_type
 from webtranslate.newgrf import language_info, language_file
 
@@ -263,7 +264,7 @@ class Config:
                 redmine.db_name == ""
                 or redmine.db_user == ""
                 or redmine.db_host == ""
-                or redmine.db_port == None
+                or redmine.db_port is None
                 or redmine.db_port == 0
             ):
                 redmine.db_name = None
@@ -760,7 +761,6 @@ def find_project_files(root):
             found_format = None
             found_languages = []
             for sub_name in os.listdir(path):
-                sub_path = os.path.join(path, sub_name)
                 if sub_name.endswith(".xml"):
                     sub_name = sub_name[:-4]
                     data_format = "xml"

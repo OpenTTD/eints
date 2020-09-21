@@ -1,7 +1,10 @@
 """
 Project data.
 """
-import time, re, calendar, json
+import time
+import re
+import calendar
+import json
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from webtranslate import loader, project_type

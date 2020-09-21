@@ -2,7 +2,8 @@
 User authentication and authorization via github teams.
 
 """
-import configparser, os, json, requests, requests_oauthlib
+import requests
+import requests_oauthlib
 from webtranslate import rights, userauth
 
 
@@ -27,7 +28,18 @@ def request_teams(name):
         return set()
 
     try:
-        query = """query($org:String!, $user:String!) { organization(login: $org) { teams(first: 100, userLogins: [$user]) { nodes { name } } } }"""
+        query = """
+        query($org:String!, $user:String!) {
+            organization(login: $org) {
+                teams(first: 100, userLogins: [$user]) {
+                    nodes {
+                        name
+                    }
+                }
+            }
+        }
+        """
+
         variables = {"org": github_organization, "user": name}
         r = requests.post(
             "https://api.github.com/graphql",

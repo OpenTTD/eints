@@ -3,7 +3,8 @@ User administration system to use during development.
 
 In particular the user management is very poor.
 """
-import os, configparser
+import os
+import configparser
 from webtranslate import rights, userauth
 
 # Table with user names and plain text passwords.
