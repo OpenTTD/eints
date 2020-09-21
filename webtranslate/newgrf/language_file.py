@@ -3,7 +3,10 @@ Language file processing.
 """
 import re
 import codecs
-from webtranslate import project_type
+from webtranslate.parameter_info_table import (
+    CURLY_PARAMETER,
+    NL_PARAMETER,
+)
 from webtranslate.newgrf import language_info
 
 ERROR = "Error"
@@ -89,12 +92,12 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, sav
 
         # text[idx] == '{', now find matching '}'
         if text.startswith("{}", idx):
-            string_info.add_nonpositional(project_type.NL_PARAMETER)
+            string_info.add_nonpositional(NL_PARAMETER)
             idx = idx + 2
             continue
 
         if text.startswith("{{}", idx):
-            string_info.add_nonpositional(project_type.CURLY_PARAMETER)
+            string_info.add_nonpositional(CURLY_PARAMETER)
             idx = idx + 3
             continue
 
@@ -1271,9 +1274,9 @@ def is_critical_non_positional(projtype, name):
     @rtype:  C{bool}
     """
     if name == "":
-        sc = project_type.NL_PARAMETER
+        sc = NL_PARAMETER
     elif name == "{":
-        sc = project_type.CURLY_PARAMETER
+        sc = CURLY_PARAMETER
     else:
         sc = projtype.text_commands.get(name)
         if sc is None:
