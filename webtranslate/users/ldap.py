@@ -9,8 +9,6 @@ Note that the groups resp. group membership is not project specific.
 
 from webtranslate import rights, userauth
 
-import traceback
-
 # Also initialized in the config loader.
 ldap_host = None
 ldap_basedn_users = None
@@ -108,7 +106,7 @@ def get_authentication(user, pwd):
                         if g.endswith(ldap_basedn_groups)
                     )
 
-        except:
+        except Exception:
             user = None
 
     else:

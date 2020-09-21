@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
-import getopt, re, sys, getpass, codecs, os, csv, io
+import getopt
+import re
+import sys
+import getpass
+import codecs
+import os
+import csv
+import io
 import urllib.request
 
 KNOWN_PROJECT_TYPES = ["game-script", "newgrf", "openttd"]
@@ -168,6 +175,7 @@ class UserConfig:
 
 user_cfg = None  #: Global user configuration.
 
+
 # }}}
 
 # Network access code.
@@ -295,7 +303,7 @@ def get_data(url):
 
             data = resp.read().decode("utf-8")
             return data
-    except:
+    except Exception:
         print("Error: Failing URL: {}".format(url))
         return None
 
@@ -443,7 +451,7 @@ def get_eints_languages():
         if len(plang) == 0:
             plang = None
 
-        last_change = line.get("changetime")
+        # last_change = line.get("changetime")
         # XXX Parse and validate the last change date
 
         el = EintsLanguageInfo(isocode, plang, None)
@@ -750,21 +758,21 @@ def get_language_data():
         sys.exit(1)
 
     reader = csv.DictReader(io.StringIO(data), dialect="unix")
-    for l in reader:
-        filename = l.get("filename")
+    for line in reader:
+        filename = line.get("filename")
         if filename is None or not filename_pattern.match(filename):
             continue
 
-        isocode = l.get("isocode")
+        isocode = line.get("isocode")
         if isocode is None or len(isocode) == 0:
             continue
 
-        grflangid = l.get("grflangid")
+        grflangid = line.get("grflangid")
         if grflangid is None or not hex_pat.match(grflangid):
             continue
         grflangid = int(grflangid, 16)
 
-        is_stable = l.get("is_stable")
+        is_stable = line.get("is_stable")
         if is_stable is None or is_stable not in ["True", "False"]:
             continue
         is_stable = is_stable == "True"
@@ -1284,7 +1292,6 @@ def run():
     done_down_base = False
     done_down_trans = False
     for arg in args:
-        updown = None
         if arg == "download-base":
             done_down_base = True
             user_cfg.operations.append(("download", "base"))
@@ -1302,7 +1309,10 @@ def run():
         elif arg == "create-project":
             user_cfg.operations.append(("create", "project"))
         else:
-            text = "Argument \"{}\" is not a valid synchronization operation.  Try 'lang_sync --help' for more information."
+            text = (
+                'Argument "{}" is not a valid synchronization operation.  '
+                "Try 'lang_sync --help' for more information."
+            )
             text = text.format(arg)
             print(text)
             sys.exit(1)

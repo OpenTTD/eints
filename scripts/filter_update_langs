@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-import sys, os, os.path, getopt
+import sys
+import os
+import os.path
+import getopt
 
 
 # Keywords to use from OpenTTD langfiles
@@ -18,19 +21,19 @@ def filter_langfile(filename):
     @rtype:  C{list} of C{str}
     """
     result = []
-    for l in open(filename, "r", encoding="utf-8"):
-        l = l.strip()
-        if len(l) == 0:
+    for line in open(filename, "r", encoding="utf-8"):
+        line = line.strip()
+        if not line:
             continue
 
-        if not l.startswith("#"):
+        if not line.startswith("#"):
             break
 
-        if not l.startswith("##"):
+        if not line.startswith("##"):
             continue
 
-        if any(l.startswith(key) for key in filterkeywords):
-            result.append(l)
+        if any(line.startswith(key) for key in filterkeywords):
+            result.append(line)
 
     return result
 
@@ -45,7 +48,7 @@ def read_complete_langfile(filename):
     @return: List of lines.
     @rtype:  C{list} of C{str}
     """
-    return [l.strip() for l in open(filename, "r", encoding="utf-8")]
+    return [line.strip() for line in open(filename, "r", encoding="utf-8")]
 
 
 def write_langfile(filename, content):
@@ -114,24 +117,24 @@ updlangs = existinglangs & inputlangs.keys()
 num_changes = 0
 
 # Copy new languages
-for l in newlangs:
-    print("Adding {}".format(l))
-    write_langfile(os.path.join(outputdir, l), inputlangs[l])
+for line in newlangs:
+    print("Adding {}".format(line))
+    write_langfile(os.path.join(outputdir, line), inputlangs[line])
     num_changes += 1
 
 # Remove old languages
-for l in dellangs:
-    print("Removing {}".format(l))
-    os.remove(os.path.join(outputdir, l))
+for line in dellangs:
+    print("Removing {}".format(line))
+    os.remove(os.path.join(outputdir, line))
     num_changes += 1
 
 # Update altered languages
-for l in updlangs:
-    cur = read_complete_langfile(os.path.join(outputdir, l))
-    new = inputlangs[l]
+for line in updlangs:
+    cur = read_complete_langfile(os.path.join(outputdir, line))
+    new = inputlangs[line]
     if cur != new:
-        print("Updating {}".format(l))
-        write_langfile(os.path.join(outputdir, l), inputlangs[l])
+        print("Updating {}".format(line))
+        write_langfile(os.path.join(outputdir, line), inputlangs[line])
         num_changes += 1
 
 # Print summary

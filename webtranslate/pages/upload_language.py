@@ -36,7 +36,6 @@ def page_get_subdir(userauth, prjname, lngname):
         abort(404, "Project does not exist")
         return
 
-    pdata = pmd.pdata
     linfo = language_info.isocode.get(lngname)
     if linfo is None:
         abort(404, "Language is unknown")

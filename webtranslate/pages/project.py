@@ -4,7 +4,7 @@ Page of a single project.
 from webtranslate.bottle import route, abort
 from webtranslate.utils import template
 from webtranslate.protect import protected
-from webtranslate import config, data
+from webtranslate import config
 
 
 @route("/project/<prjname>", method="GET")

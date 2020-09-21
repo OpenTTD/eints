@@ -1,26 +1,29 @@
 """
 Main program.
 """
-from webtranslate import bottle, protect, config, static, users, project_type
+from webtranslate import bottle, config, users, project_type
 from webtranslate.newgrf import language_info
 
 # Import all pages, so they register their endpoints.
-from webtranslate.pages import root
-from webtranslate.pages import projects
-from webtranslate.pages import project
-from webtranslate.pages import newproject
-from webtranslate.pages import translation
-from webtranslate.pages import language_list
-from webtranslate.pages import language_overview
-from webtranslate.pages import upload_language
-from webtranslate.pages import download_language
-from webtranslate.pages import download_list
-from webtranslate.pages import string_edit
-from webtranslate.pages import delete
-from webtranslate.pages import newlanguage
-from webtranslate.pages import project_settings
-from webtranslate.pages import user_profile
-from webtranslate.pages import login
+from webtranslate import static  # noqa
+from webtranslate.pages import (  # noqa
+    root,
+    projects,
+    project,
+    newproject,
+    translation,
+    language_list,
+    language_overview,
+    upload_language,
+    download_language,
+    download_list,
+    string_edit,
+    delete,
+    newlanguage,
+    project_settings,
+    user_profile,
+    login,
+)
 
 # Get template files from 'views' only.
 bottle.TEMPLATE_PATH = ["./views/"]

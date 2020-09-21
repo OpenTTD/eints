@@ -2,7 +2,7 @@
 Download a list of language definitions.
 Example::
     isocode,grflangid,filename,is_stable,name,ownname,plural,gender,case
-    la_VA,0x66,latin,True,Latin,Latina,0,fp f m n mp np,acc dat abl gen 
+    la_VA,0x66,latin,True,Latin,Latina,0,fp f m n mp np,acc dat abl gen
 
     @ivar filename: Name of language file without extension.
     @type filename: C{str}
@@ -33,11 +33,9 @@ Example::
 
 
 """
-from webtranslate.bottle import route, abort, response
+from webtranslate.bottle import route, response
 from webtranslate.protect import protected
-from webtranslate import config, data
 from webtranslate.newgrf import language_info
-from csv import DictWriter
 
 
 @route("/language-list", method="GET")

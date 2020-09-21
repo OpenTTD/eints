@@ -2,7 +2,9 @@
 Meta information about languages.
 """
 from collections import namedtuple
-import os, re, sys
+import os
+import re
+import sys
 
 # Global variables initialized with L{set_all_languages}.
 all_languages = None
