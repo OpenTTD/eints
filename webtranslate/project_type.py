@@ -211,7 +211,6 @@ PPG = (True, True)  # Parameter suitable for both plural and gender
 # Keep the format of the next three tables
 # fmt: off
 
-# {{{ NEWGRF_PARAMETERS
 _NEWGRF_PARAMETERS = [
     ParameterInfo("NBSP",           [], None, False, False),
     ParameterInfo("COPYRIGHT",      [], None, False, True ),
@@ -268,8 +267,7 @@ _NEWGRF_PARAMETERS = [
 ]
 
 NEWGRF_PARAMETERS = dict((x.literal, x) for x in _NEWGRF_PARAMETERS)
-# }}}
-# {{{ GS_PARAMETERS
+
 # Based on OpenTTD src/tables/strgen_tables.h r26050
 _GS_PARAMETERS = [
     ParameterInfo("NORMAL_FONT",       [], None, False, True ),
@@ -368,8 +366,7 @@ _GS_PARAMETERS = [
 ]
 
 GS_PARAMETERS = dict((x.literal, x) for x in _GS_PARAMETERS)
-# }}}
-# {{{ OPENTTD_PARAMETERS
+
 # Based on OpenTTD src/tables/strgen_tables.h r26050
 _OPENTTD_PARAMETERS = [
     # Some string parameters are only allowed in the OpenTTD project.
@@ -392,7 +389,6 @@ _OPENTTD_PARAMETERS = [
 
 OPENTTD_PARAMETERS = dict((x.literal, x) for x in _OPENTTD_PARAMETERS)
 OPENTTD_PARAMETERS.update((x.literal, x) for x in _GS_PARAMETERS)
-# }}}
 
 NL_PARAMETER = ParameterInfo("", [], None, False, False)
 CURLY_PARAMETER = ParameterInfo("{", [], None, False, False)

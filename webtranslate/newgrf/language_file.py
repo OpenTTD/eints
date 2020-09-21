@@ -30,8 +30,6 @@ class ErrorMessage:
         self.msg = msg
 
 
-# {{{ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, save_pieces = False):
-
 param_pat = re.compile("{([0-9]+:)?([A-Z_0-9]+)(\\.[A-Za-z0-9]+)?}")
 gender_assign_pat = re.compile("{G *= *([^ }]+) *}")
 argument_pat = re.compile('[ \\t]+([^"][^ \\t}]*|"[^"}]*")')
@@ -311,7 +309,6 @@ def check_string(projtype, text, default_case, extra_commands, lng, in_blng, sav
     return string_info
 
 
-# {{{ def get_arguments(text, cmd, idx, string_info):
 def get_arguments(text, cmd, idx, string_info):
     """
     Get arguments of a C{"{P"} or C{"{G"}.
@@ -357,9 +354,6 @@ def get_arguments(text, cmd, idx, string_info):
     return None
 
 
-# }}}
-# {{{ class StringInfo:
-# {{{ String pieces (for storing parsed strings)
 class StringPiece:
     """
     Base class for storing a piece of the string.
@@ -509,7 +503,6 @@ class GenderAssignPiece(StringPiece):
         return "{G=" + self.gender + "}"
 
 
-# }}}
 class StringInfo:
     """
     Collected information about a string.
@@ -823,10 +816,6 @@ class StringInfo:
         return ok
 
 
-# }}}
-# }}}
-
-# {{{ class StringValue:
 class StringValue:
     """
     Value of a string.
@@ -851,8 +840,6 @@ class StringValue:
         self.text = text
 
 
-# }}}
-# {{{ class NewGrfData:
 class NewGrfData:
     """
     Data of a NewGRF language.
@@ -933,10 +920,6 @@ class NewGrfData:
             del self.skeleton[-1]
 
 
-# }}}
-
-# {{{ def load_language_file(projtype, handle, max_size, lng_data = None):
-# {{{ def handle_pragma(projtype, lnum, line, data):
 def handle_pragma(projtype, lnum, line, data):
     """
     Handle a pragma line.
@@ -1044,8 +1027,6 @@ def handle_pragma(projtype, lnum, line, data):
     data.custom_pragmas[line[0]] = " ".join(line)
     return
 
-
-# }}}
 
 string_pat = re.compile("^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$")
 bom = codecs.BOM_UTF8.decode("utf-8")
@@ -1166,9 +1147,6 @@ def load_language_file(projtype, handle, max_size, lng_data=None):
     return data
 
 
-# }}}
-
-
 def sanitize_text(txt):
     """
     Perform some small safe normalizations on the text of a string.
@@ -1192,7 +1170,6 @@ def sanitize_text(txt):
 
 
 # Get string information
-# {{{ def compare_info(base_info, lng_info):
 def compare_info(projtype, base_info, lng_info):
     """
     Compare both string uses with each other.
@@ -1303,6 +1280,3 @@ def is_critical_non_positional(projtype, name):
             return True
 
     return sc.critical
-
-
-# }}}
