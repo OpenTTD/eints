@@ -1,3 +1,4 @@
 click
 requests
 requests_oauthlib
+sentry-sdk
