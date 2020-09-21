@@ -7,4 +7,6 @@ inline-quotes = double
 ignore = E203, W503
 
 # bottle is an external library
-exclude = webtranslate/bottle.py
+exclude =
+    webtranslate/bottle.py
+    webtranslate/parameter_info_table.py
