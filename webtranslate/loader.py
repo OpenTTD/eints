@@ -18,7 +18,6 @@ def load_dom(fname):
     return dom
 
 
-# {{{ def get_opt_DOMattr(node, name, default):
 def get_opt_DOMattr(node, name, default):
     """
     Get an optional value from the DOM node.
@@ -40,8 +39,6 @@ def get_opt_DOMattr(node, name, default):
     return default
 
 
-# }}}
-# {{{ def collect_text_DOM(node):
 def collect_text_DOM(node):
     """
     Collect all text of this node.
@@ -55,8 +52,6 @@ def collect_text_DOM(node):
     return "".join(n.data for n in node.childNodes if n.nodeType == Node.TEXT_NODE)
 
 
-# }}}
-# {{{ def get_child_nodes(node, name):
 def get_child_nodes(node, name):
     """
     Get all direct child nodes with a given name.
@@ -81,8 +76,6 @@ def get_child_nodes(node, name):
     return result
 
 
-# }}}
-# {{{ def get_single_child_node(node, name, optional=False):
 def get_single_child_node(node, name, optional=False):
     """
     Get the child node with the given name (there should be exactly one).
@@ -107,6 +100,3 @@ def get_single_child_node(node, name, optional=False):
 
     print('ERROR: Failed to find precisely one child node named "' + name + '"')
     return None
-
-
-# }}}

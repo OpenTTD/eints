@@ -243,7 +243,6 @@ def convert_num(txt, default):
     return int(txt, 10)
 
 
-# {{{ class XmlLoader:
 class XmlLoader:
     """
     Helper class to load a project from an XML file.
@@ -358,8 +357,6 @@ class XmlLoader:
         return self.texts[ref]
 
 
-# }}}
-# {{{ class JsonLoader:
 class JsonLoader:
     """
     Helper class to load a project from a Json file.
@@ -407,8 +404,6 @@ class JsonLoader:
         return load_language_json(projtype, data)
 
 
-# }}}
-# {{{ class XmlSaver:
 class XmlSaver:
     """
     Saver helper class, storing the top-level document, and the referenced texts.
@@ -520,8 +515,6 @@ class XmlSaver:
         return ref
 
 
-# }}}
-# {{{ class JsonSaver:
 class JsonSaver:
     """
     Saver helper class.
@@ -570,9 +563,6 @@ class JsonSaver:
         handle.close()
 
 
-# }}}
-
-# {{{ Project
 class Project:
     """
     Project object.
@@ -1008,8 +998,6 @@ def load_skeleton_json(node):
     return skeleton
 
 
-# }}}
-# {{{ Language
 class Language:
     """
     A language in a project.
@@ -1283,8 +1271,6 @@ def load_language_json(projtype, node):
     return lng
 
 
-# }}}
-# {{{ Change
 class Change:
     """
     A change (adding a new string in the base language, adding or updating a
@@ -1473,8 +1459,6 @@ def load_change_json(node):
     return Change(strname, case, base_text, new_text, stamp, user, last_upload)
 
 
-# }}}
-# {{{ Text (references)
 class Text:
     """
     Text of a string in a language.
@@ -1634,8 +1618,6 @@ def get_text(xloader, ref):
     return xloader.get_textref(ref)
 
 
-# }}}
-# {{{ Time stamps
 class Stamp:
     """
     Time stamp.
@@ -1806,6 +1788,3 @@ def decode_stamp(text):
 
     secs = calendar.timegm(elems)
     return Stamp(secs, val)
-
-
-# }}}

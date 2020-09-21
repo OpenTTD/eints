@@ -18,7 +18,6 @@ PROJECT_TYPES_TEXT = ", ".join(PROJECT_TYPES_TEXT[:-1]) + " and " + PROJECT_TYPE
 hex_pat = re.compile("0x([0-9A-Fa-f][0-9A-Fa-f]?)$")
 
 # Configuration.
-# {{{ def check_project_name(name):
 project_pat = re.compile("[-A-Za-z0-9_]+$")
 
 
@@ -35,8 +34,6 @@ def check_project_name(name):
     return project_pat.match(name.strip())
 
 
-# }}}
-# {{{ def check_project_name(name):
 def check_human_name(name):
     """
     Check whether L{name} can be a valid human project name.
@@ -50,8 +47,6 @@ def check_human_name(name):
     return len(name.strip()) != 0
 
 
-# }}}
-# {{{ def check_project_url(url):
 def check_project_url(url):
     """
     Check whether the given L{url} is valid.
@@ -71,8 +66,6 @@ def check_project_url(url):
     return False
 
 
-# }}}
-# {{{ class UserConfig:
 class UserConfig:
     """
     Configuration and actions to do by the program.
@@ -176,10 +169,7 @@ class UserConfig:
 user_cfg = None  #: Global user configuration.
 
 
-# }}}
-
 # Network access code.
-# {{{ def setup_auth():
 def setup_auth():
     """
     Setup the authentication for connecting to Eints.
@@ -262,8 +252,6 @@ def setup_auth():
         print()
 
 
-# }}}
-# {{{ def build_url(suffix):
 def build_url(suffix):
     """
     Extend the base url with the provided suffix.
@@ -280,8 +268,6 @@ def build_url(suffix):
         return user_cfg.base_url + suffix
 
 
-# }}}
-# {{{ def get_data(url):
 def get_data(url):
     """
     Read and return the data read from the L{url}.
@@ -308,8 +294,6 @@ def get_data(url):
         return None
 
 
-# }}}
-# {{{ def post_form(url, form_data):
 def post_form(url, form_data):
     """
     Post the form.
@@ -336,8 +320,6 @@ def post_form(url, form_data):
         return True
 
 
-# }}}
-# {{{ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
 def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
     """
     Post the form with the uploaded files.
@@ -390,10 +372,7 @@ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
         return True
 
 
-# }}}
-
 # Remote language files.
-# {{{ class EintsLanguageInfo:
 class EintsLanguageInfo:
     """
     Language information received from Eints.
@@ -414,8 +393,6 @@ class EintsLanguageInfo:
         self.last_change = last_change
 
 
-# }}}
-# {{{ def get_eints_languages():
 eints_files_cache = None
 
 
@@ -475,10 +452,7 @@ def get_eints_languages():
     return eints_files_cache
 
 
-# }}}
-
 # Local language files.
-# {{{ class LocalLanguageInfo:
 class LocalLanguageInfo:
     """
     Information about a local language file.
@@ -495,8 +469,6 @@ class LocalLanguageInfo:
         self.isocode = isocode
 
 
-# }}}
-# {{{ def get_local_languages():
 utf8_bom = codecs.BOM_UTF8.decode("utf-8")
 local_files_cache = None
 
@@ -580,10 +552,7 @@ def get_local_languages():
     return local_files_cache
 
 
-# }}}
-
 # Upload and download operations.
-# {{{ def perform_operation(op_type, lang_type, credits_handle):
 def perform_operation(op_type, lang_type, credits_handle):
     """
     Perform a synchronization operation.
@@ -650,8 +619,6 @@ def perform_operation(op_type, lang_type, credits_handle):
         perform_download(ll_files, el_files, credits_handle, path_base)
 
 
-# }}}
-# {{{ def perform_create_project():
 def perform_create_project():
     """
     Create a new project in Eints.
@@ -676,8 +643,6 @@ def perform_create_project():
             print('Created project "{}".'.format(user_cfg.project))
 
 
-# }}}
-# {{{ def perform_upload(ll_files, el_files):
 def perform_upload(ll_files, is_base):
     """
     Perform upload of local files to Eints.
@@ -719,9 +684,6 @@ def perform_upload(ll_files, is_base):
             print('Error: Failed to upload "{}".'.format(ll.path_name))
 
 
-# }}}
-
-# {{{ LanguageData, language_table, get_language_data
 class LanguageData:
     """
     Language information.
@@ -780,9 +742,6 @@ def get_language_data():
         language_table.append(LanguageData(grflangid, isocode, filename, is_stable))
 
 
-# }}}
-
-
 def get_languagedata_by_isocode(isocode):
     """
     Retrieve the language data from the table that matches the L{grflangid} parameter.
@@ -839,8 +798,6 @@ def get_languagedata_by_filename(filename):
             return ld
     return None
 
-
-# {{{ def perform_download(ll_files, el_files, credits_handle):
 
 string_pat = re.compile("^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$")
 
@@ -1082,10 +1039,6 @@ def perform_download(ll_files, el_files, credits_handle, path_base):
             print('{} language file "{}"'.format(action, path))
 
 
-# }}}
-
-# {{{ def run():
-# {{{ USAGE_TEXT = ...
 USAGE_TEXT = (
     """\
 lang_sync -- Synchronize language files between the project and Eints.
@@ -1196,7 +1149,6 @@ create-project
 You can give several operations at the command line, order is significant.
 """
 )
-# }}}
 
 
 def run():
@@ -1336,8 +1288,6 @@ def run():
 
     sys.exit(0)
 
-
-# }}}
 
 if __name__ == "__main__":
     run()

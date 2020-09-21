@@ -6,7 +6,6 @@ import sys
 from webtranslate import data, loader, project_type
 from webtranslate.newgrf import language_info, language_file
 
-# {{{ class ProjectStorage
 # Recognized types of project disk storage.
 STORAGE_ONE_FILE = "One large file for the entire project"
 STORAGE_SEPARATE_LANGUAGES = "Directory with project_data.[xml|json] and a set of language files"
@@ -40,9 +39,6 @@ class ProjectStorage:
         self.data_format = data_format
 
 
-# }}}
-
-# {{{ def get_subnode_text(node, tag):
 def get_subnode_text(node, tag):
     """
     Get the text of a child node of L{node}.
@@ -62,9 +58,6 @@ def get_subnode_text(node, tag):
     return loader.collect_text_DOM(child).strip()
 
 
-# }}}
-
-# {{{ class Config:
 class Config:
     """
     Service configuration.
@@ -331,8 +324,6 @@ class Config:
                     del ldap.translator_groups[iso_code]
 
 
-# }}}
-# {{{ class ProjectCache:
 class ProjectCache:
     """
     Cache for project data.
@@ -484,8 +475,6 @@ class ProjectCache:
         pmd.save()
 
 
-# }}}
-# {{{ class ProjectMetaData:
 class ProjectMetaData:
     """
     Some project meta data for the translation service.
@@ -722,9 +711,6 @@ class ProjectMetaData:
             self.overview[lname] = counts
 
 
-# }}}
-
-# {{{ def find_project_files(root):
 def find_project_files(root):
     """
     Find projects at the disk, starting from the L{root} directory.
@@ -797,8 +783,6 @@ def find_project_files(root):
     return projects
 
 
-# }}}
-# {{{ def may_create_project(root, name)
 def may_create_project(root, name):
     """
     Can a project named L{name} be safely created at the disk?
@@ -829,9 +813,6 @@ def may_create_project(root, name):
     return True
 
 
-# }}}
-
-# {{{ def process_changes(lchgs, cases, stamp, used_basetexts):
 def process_changes(lchgs, cases, stamp, used_basetexts):
     """
     Check whether the changes should all still be kept.
@@ -882,8 +863,6 @@ def process_changes(lchgs, cases, stamp, used_basetexts):
     return newchgs
 
 
-# }}}
-# {{{ def process_project_changes(pdata):
 def process_project_changes(pdata):
     """
     Update the changes of the texts in the project.
@@ -942,8 +921,6 @@ def process_project_changes(pdata):
     return modified
 
 
-# }}}
-# {{{ def rotate_files(fpath):
 def rotate_files(fpath):
     """
     Rotate backup files of the provided filename path. It is assumed a C{fpath + ".new"} file exists
@@ -1008,8 +985,6 @@ def rotate_files(fpath):
         elif cmd[0] == "rm":
             os.unlink(cmd[1])
 
-
-# }}}
 
 cfg = None
 cache = ProjectCache()
