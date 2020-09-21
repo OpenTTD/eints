@@ -4,6 +4,7 @@ Helper functions for loading an Xml tree.
 from xml.dom import minidom
 from xml.dom.minidom import Node
 
+
 def load_dom(fname):
     """
     Load the XML file as DOM into memory.
@@ -15,6 +16,7 @@ def load_dom(fname):
     """
     dom = minidom.parse(fname)
     return dom
+
 
 # {{{ def get_opt_DOMattr(node, name, default):
 def get_opt_DOMattr(node, name, default):
@@ -33,8 +35,10 @@ def get_opt_DOMattr(node, name, default):
     @return: The requested value.
     @rtype:  C{unicode}
     """
-    if node.hasAttribute(name): return node.getAttribute(name)
+    if node.hasAttribute(name):
+        return node.getAttribute(name)
     return default
+
 
 # }}}
 # {{{ def collect_text_DOM(node):
@@ -49,6 +53,8 @@ def collect_text_DOM(node):
     @rtype:  C{unicode}
     """
     return "".join(n.data for n in node.childNodes if n.nodeType == Node.TEXT_NODE)
+
+
 # }}}
 # {{{ def get_child_nodes(node, name):
 def get_child_nodes(node, name):
@@ -64,13 +70,17 @@ def get_child_nodes(node, name):
     @return: All direct child nodes with the given name.
     @rtype:  C{list} of L{xml.dom.minidom.Node}
     """
-    if not node.hasChildNodes(): return []
+    if not node.hasChildNodes():
+        return []
     result = []
     for n in node.childNodes:
-        if n.nodeType != Node.ELEMENT_NODE: continue
+        if n.nodeType != Node.ELEMENT_NODE:
+            continue
         if n.tagName == name:
             result.append(n)
     return result
+
+
 # }}}
 # {{{ def get_single_child_node(node, name, optional=False):
 def get_single_child_node(node, name, optional=False):
@@ -90,10 +100,13 @@ def get_single_child_node(node, name, optional=False):
     @rtype:  L{xml.dom.minidom.Node} or C{None}
     """
     result = get_child_nodes(node, name)
-    if len(result) == 1: return result[0]
-    if optional and len(result) == 0: return None
+    if len(result) == 1:
+        return result[0]
+    if optional and len(result) == 0:
+        return None
 
-    print("ERROR: Failed to find precisely one child node named \"" + name + "\"")
+    print('ERROR: Failed to find precisely one child node named "' + name + '"')
     return None
-# }}}
 
+
+# }}}

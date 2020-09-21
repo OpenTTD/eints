@@ -11,6 +11,7 @@ _users = None
 
 FILENAME = "users.dat"
 
+
 def init_users():
     """
     Initialize the user authentication system.
@@ -18,23 +19,28 @@ def init_users():
     global _users
 
     _users = set()
-    if not os.path.isfile(FILENAME): return
+    if not os.path.isfile(FILENAME):
+        return
 
-    handle = open(FILENAME, "r", encoding = "utf-8")
+    handle = open(FILENAME, "r", encoding="utf-8")
     for line in handle:
         line = line.rstrip()
-        if len(line) == 0 or line[0] == '#': continue
-        i = line.find(':')
-        if i < 0: continue
-        j = line.find(':', i + 1)
+        if len(line) == 0 or line[0] == "#":
+            continue
+        i = line.find(":")
+        if i < 0:
+            continue
+        j = line.find(":", i + 1)
         if j < 0:
             j = len(line)
-        uname, pwd = line[:i].strip(), line[i+1:j]
+        uname, pwd = line[:i].strip(), line[i + 1 : j]
 
-        if len(uname) == 0 or len(pwd) == 0: continue
+        if len(uname) == 0 or len(pwd) == 0:
+            continue
         _users.add((uname, pwd))
 
     handle.close()
+
 
 def authenticate(user, pwd):
     """
@@ -51,7 +57,8 @@ def authenticate(user, pwd):
     """
     global _users
 
-    if len(pwd) == 0: return False
+    if len(pwd) == 0:
+        return False
     return (user, pwd) in _users
 
 
@@ -62,6 +69,7 @@ _projects = {}
 
 PROJECTSFILE = "projects.dat"
 
+
 def init_projects():
     """
     Initialize the projects table (mapping of projects to mapping of roles to users).
@@ -70,7 +78,7 @@ def init_projects():
 
     # Read projects user data.
     cfg = configparser.ConfigParser()
-    cfg.optionxform = lambda option: option # Don't convert keys to lowercase.
+    cfg.optionxform = lambda option: option  # Don't convert keys to lowercase.
     cfg.read(PROJECTSFILE)
     _projects = {}
     for pn in cfg.sections():
@@ -78,8 +86,8 @@ def init_projects():
         values = {}
         for k, ns in ps.items():
             names = set()
-            for ns2 in ns.split(','):
-                for ns3 in ns2.split(' '):
+            for ns2 in ns.split(","):
+                for ns3 in ns2.split(" "):
                     ns3 = ns3.strip()
                     if len(ns3) < 3:
                         # User names should be longer-equal to 3 characters.
@@ -94,13 +102,14 @@ class DevelopmentUserAuthentication(userauth.UserAuthentication):
     """
     Implementation of UserAuthentication for Development authentication system.
     """
+
     def __init__(self, is_auth, name):
         super(DevelopmentUserAuthentication, self).__init__(is_auth, name)
 
     def get_roles(self, prjname, lngname):
         eints_roles = set()
         if self.is_auth:
-            eints_roles.add('USER')
+            eints_roles.add("USER")
 
             prj_owners = None
             prj_translators = None
@@ -108,18 +117,17 @@ class DevelopmentUserAuthentication(userauth.UserAuthentication):
             if prjname is not None:
                 prj_roles = _projects.get(prjname)
                 if prj_roles is not None:
-                    prj_owners = prj_roles.get('owner')
+                    prj_owners = prj_roles.get("owner")
                     if lngname is not None:
                         prj_translators = prj_roles.get(lngname)
 
             if prj_owners is not None and self.name in prj_owners:
-                eints_roles.add('OWNER')
+                eints_roles.add("OWNER")
 
             if prj_translators is not None and self.name in prj_translators:
-                eints_roles.add('TRANSLATOR')
+                eints_roles.add("TRANSLATOR")
 
         return eints_roles
-
 
 
 def init():
@@ -129,6 +137,7 @@ def init():
     init_users()
     init_projects()
     rights.init_page_access()
+
 
 def get_authentication(user, pwd):
     """

@@ -10,6 +10,7 @@ from webtranslate.bottle import route, abort, response
 from webtranslate.protect import protected
 from webtranslate import config, data
 
+
 def get_newest_change(lang):
     """
     Decide when the provided language was last changed.
@@ -28,8 +29,9 @@ def get_newest_change(lang):
                 newest = chg.stamp
     return newest
 
-@route('/download-list/<prjname>', method = 'GET')
-@protected(['download-list', 'prjname', '-'])
+
+@route("/download-list/<prjname>", method="GET")
+@protected(["download-list", "prjname", "-"])
 def download_list(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -37,8 +39,8 @@ def download_list(userauth, prjname):
         return
 
     pdata = pmd.pdata
-    response.content_type = 'text/plain; charset=UTF-8'
-    lines = ['isocode,base_isocode,changetime']
+    response.content_type = "text/plain; charset=UTF-8"
+    lines = ["isocode,base_isocode,changetime"]
     for lng, ldata in pdata.languages.items():
         tstamp = get_newest_change(ldata)
         if tstamp is None:
@@ -47,12 +49,11 @@ def download_list(userauth, prjname):
             text = data.encode_stamp(tstamp)
 
         if pdata.base_language == lng:
-            parent_lng = ''
+            parent_lng = ""
         else:
             parent_lng = pdata.base_language
 
         line = "{},{},{}".format(ldata.name, parent_lng, text)
         lines.append(line)
 
-    return '\n'.join(lines) + '\n'
-
+    return "\n".join(lines) + "\n"

@@ -7,6 +7,7 @@ from xml.dom.minidom import Node
 from webtranslate import loader, project_type
 from webtranslate.newgrf import language_file, language_info
 
+
 def get_newest_change(chgs, case):
     """
     Get the newest change matching the case.
@@ -23,10 +24,13 @@ def get_newest_change(chgs, case):
     best = None
     if chgs is not None:
         for chg in chgs:
-            if chg.case != case: continue
-            if best is None or best.stamp < chg.stamp: best = chg
+            if chg.case != case:
+                continue
+            if best is None or best.stamp < chg.stamp:
+                best = chg
 
     return best
+
 
 def get_all_changes(chgs, cases, bchg):
     """
@@ -48,14 +52,17 @@ def get_all_changes(chgs, cases, bchg):
 
     if chgs is not None:
         for chg in chgs:
-            if bchg is not None and chg.base_text != bchg.base_text: continue
+            if bchg is not None and chg.base_text != bchg.base_text:
+                continue
             clist = cases.get(chg.case)
-            if clist is not None: clist.append(chg)
+            if clist is not None:
+                clist.append(chg)
 
     for clist in cases.values():
         clist.sort()
 
     return cases
+
 
 def get_all_newest_changes(chgs, cases):
     """
@@ -71,13 +78,14 @@ def get_all_newest_changes(chgs, cases):
     @rtype:  C{dict} of C{str} to (L{Change} or C{None})
     """
     cases = dict((c, None) for c in cases)
-    cases[''] = None
+    cases[""] = None
 
     for chg in chgs:
         if chg.case in cases:
             if cases[chg.case] is None or cases[chg.case].stamp < chg.stamp:
                 cases[chg.case] = chg
     return cases
+
 
 class StatusDefinition:
     """
@@ -95,6 +103,7 @@ class StatusDefinition:
     @ivar baselng: Whether the status exists for base languages.
     @type baselng: C{bool}
     """
+
     def __init__(self, code, name, description, baselng):
         self.code = code
         self.name = name
@@ -102,21 +111,30 @@ class StatusDefinition:
         self.baselng = baselng
 
 
-MISSING_OK =  0 # String is missing, but that's allowed (non-default case string).
-UNKNOWN =     1 # String has unknown state.
-UP_TO_DATE =  2 # String is newer than the base string.
-OUT_OF_DATE = 3 # String is older than the base string.
-INVALID =     4 # String is invalid relative to the base string.
-MISSING =     5 # The default case string is missing.
+MISSING_OK = 0  # String is missing, but that's allowed (non-default case string).
+UNKNOWN = 1  # String has unknown state.
+UP_TO_DATE = 2  # String is newer than the base string.
+OUT_OF_DATE = 3  # String is older than the base string.
+INVALID = 4  # String is invalid relative to the base string.
+MISSING = 5  # The default case string is missing.
 
-MAX_STATE =   6
+MAX_STATE = 6
 
-STATUSES = [StatusDefinition(MISSING_OK,  'Omitted',  'The case was not needed in the translation',                                                 True),
-            StatusDefinition(UNKNOWN,     'Unknown',  'The state of the translation was not decidable',                                             False),
-            StatusDefinition(UP_TO_DATE,  'Correct',  'The string is technically correct and up to date',                                           True),
-            StatusDefinition(OUT_OF_DATE, 'Outdated', 'A valid translation exists, but it needs review as a newer base language text is available', False),
-            StatusDefinition(INVALID,     'Invalid',  'A translation exists, but its string parameters do not match with the base language',        True),
-            StatusDefinition(MISSING,     'Missing',  'No translation could be found',                                                              False),]
+STATUSES = [
+    StatusDefinition(MISSING_OK, "Omitted", "The case was not needed in the translation", True),
+    StatusDefinition(UNKNOWN, "Unknown", "The state of the translation was not decidable", False),
+    StatusDefinition(UP_TO_DATE, "Correct", "The string is technically correct and up to date", True),
+    StatusDefinition(
+        OUT_OF_DATE,
+        "Outdated",
+        "A valid translation exists, but it needs review as a newer base language text is available",
+        False,
+    ),
+    StatusDefinition(
+        INVALID, "Invalid", "A translation exists, but its string parameters do not match with the base language", True
+    ),
+    StatusDefinition(MISSING, "Missing", "No translation could be found", False),
+]
 
 STATE_MAP = dict((sd.code, sd) for sd in STATUSES)
 
@@ -151,10 +169,11 @@ def decide_all_string_status(projtype, base_chg, lng_chgs, lng, binfo):
 
     results = {}
     for case, chg in lng_chgs.items():
-        if not projtype.allow_case and case != '':
+        if not projtype.allow_case and case != "":
             continue
         results[case] = get_string_status(projtype, chg, case, lng, base_text, binfo)
     return results
+
 
 def get_string_status(projtype, lchg, case, lng, btext, binfo):
     """
@@ -181,10 +200,10 @@ def get_string_status(projtype, lchg, case, lng, btext, binfo):
     @return: State of the translated string and any errors.
     @rtype:  C{tuple} (C{int}, C{list} of L{ErrorMessage})
     """
-    if case == '':
+    if case == "":
         if lchg is None:
             return MISSING, []
-    elif lchg is None or lchg.new_text.text == '':
+    elif lchg is None or lchg.new_text.text == "":
         return MISSING_OK, []
 
     if lchg.base_text != btext or lchg.stamp < btext.stamp:
@@ -192,12 +211,13 @@ def get_string_status(projtype, lchg, case, lng, btext, binfo):
     else:
         state = UP_TO_DATE
 
-    assert projtype.allow_case or lchg.case == ''
-    linfo = language_file.check_string(projtype, lchg.new_text.text, lchg.case == '', binfo.extra_commands, lng, False)
+    assert projtype.allow_case or lchg.case == ""
+    linfo = language_file.check_string(projtype, lchg.new_text.text, lchg.case == "", binfo.extra_commands, lng, False)
     if not language_file.compare_info(projtype, binfo, linfo):
         state = INVALID
 
     return state, linfo.errors
+
 
 def convert_num(txt, default):
     """
@@ -212,10 +232,13 @@ def convert_num(txt, default):
     @return: The numeric value of the number if it is convertible.
     @rtype:  C{int} or the provided default
     """
-    if txt is None: return default
+    if txt is None:
+        return default
     m = re.match("\\d+$", txt)
-    if not m: return default
+    if not m:
+        return default
     return int(txt, 10)
+
 
 # {{{ class XmlLoader:
 class XmlLoader:
@@ -232,6 +255,7 @@ class XmlLoader:
                            They have been saved separately.
     @type split_languages: C{bool}
     """
+
     def __init__(self, split_languages):
         self.stamps = {}
         self.texts = {}
@@ -276,16 +300,16 @@ class XmlLoader:
         @rtype:  L{Project}
         """
         data = loader.load_dom(fname)
-        pnode = loader.get_single_child_node(data, 'project')
+        pnode = loader.get_single_child_node(data, "project")
         self.stamps = {}
 
         # Load texts. If cases are not allowed, loading the texts from here is no problem, as they are
         # discarded after loading the change.
         self.texts = {}
-        texts = loader.get_single_child_node(pnode, 'texts', True)
+        texts = loader.get_single_child_node(pnode, "texts", True)
         if texts is not None:
-            for node in loader.get_child_nodes(texts, 'string'):
-                ref = node.getAttribute('ref')
+            for node in loader.get_child_nodes(texts, "string"):
+                ref = node.getAttribute("ref")
                 self.texts[ref] = get_text_node(self, node)
 
         return load_project(self, pnode)
@@ -304,16 +328,16 @@ class XmlLoader:
         @rtype:  L{Language}
         """
         data = loader.load_dom(fname)
-        pnode = loader.get_single_child_node(data, 'language')
+        pnode = loader.get_single_child_node(data, "language")
         self.stamps = {}
 
         # Load texts. If cases are not allowed, loading the texts from here is no problem, as they are
         # discarded after loading the change.
         self.texts = {}
-        texts = loader.get_single_child_node(pnode, 'texts', True)
+        texts = loader.get_single_child_node(pnode, "texts", True)
         if texts is not None:
-            for node in loader.get_child_nodes(texts, 'string'):
-                ref = node.getAttribute('ref')
+            for node in loader.get_child_nodes(texts, "string"):
+                ref = node.getAttribute("ref")
                 self.texts[ref] = get_text_node(self, node)
 
         return load_language(self, projtype, pnode)
@@ -329,6 +353,8 @@ class XmlLoader:
         @rtype:  L{Text}
         """
         return self.texts[ref]
+
+
 # }}}
 # {{{ class JsonLoader:
 class JsonLoader:
@@ -339,6 +365,7 @@ class JsonLoader:
                            They have been saved separately.
     @type split_languages: C{bool}
     """
+
     def __init__(self, split_languages):
         self.split_languages = split_languages
 
@@ -353,7 +380,7 @@ class JsonLoader:
                  object, the project may not have all languages.
         @rtype:  L{Project}
         """
-        handle = open(fname, 'rt', encoding='utf-8')
+        handle = open(fname, "rt", encoding="utf-8")
         data = json.load(handle)
         handle.close()
         return load_project_json(self, data)
@@ -371,10 +398,12 @@ class JsonLoader:
         @return: The loaded language.
         @rtype:  L{Language}
         """
-        handle = open(fname, 'rt', encoding='utf-8')
+        handle = open(fname, "rt", encoding="utf-8")
         data = json.load(handle)
         handle.close()
         return load_language_json(projtype, data)
+
+
 # }}}
 # {{{ class XmlSaver:
 class XmlSaver:
@@ -400,6 +429,7 @@ class XmlSaver:
     @ivar number: Number for creating unique text references.
     @type number: C{int}
     """
+
     def __init__(self, split_languages, share_text):
         self.doc = None
         self.texts_node = None
@@ -420,7 +450,7 @@ class XmlSaver:
         """
         self.doc = minidom.Document()
         if self.share_text:
-            self.texts_node = self.doc.createElement('texts')
+            self.texts_node = self.doc.createElement("texts")
             self.texts = {}
             self.number = 1
 
@@ -429,7 +459,7 @@ class XmlSaver:
             node.appendChild(self.texts_node)
 
         self.doc.appendChild(node)
-        handle = open(fname, 'w', encoding = "utf-8")
+        handle = open(fname, "w", encoding="utf-8")
         handle.write(self.doc.toprettyxml())
         handle.close()
 
@@ -450,7 +480,7 @@ class XmlSaver:
 
         self.doc = minidom.Document()
         if self.share_text:
-            self.texts_node = self.doc.createElement('texts')
+            self.texts_node = self.doc.createElement("texts")
             self.texts = {}
             self.number = 1
 
@@ -459,7 +489,7 @@ class XmlSaver:
             node.appendChild(self.texts_node)
 
         self.doc.appendChild(node)
-        handle = open(fname, 'w', encoding = "utf-8")
+        handle = open(fname, "w", encoding="utf-8")
         handle.write(self.doc.toprettyxml())
         handle.close()
 
@@ -476,7 +506,8 @@ class XmlSaver:
         assert self.share_text
 
         ref = self.texts.get(text)
-        if ref is not None: return ref
+        if ref is not None:
+            return ref
 
         node, ref = make_text_node(self, text, "string", self.number)
         self.number = self.number + 1
@@ -484,6 +515,8 @@ class XmlSaver:
         self.texts_node.appendChild(node)
         self.texts[text] = ref
         return ref
+
+
 # }}}
 # {{{ class JsonSaver:
 class JsonSaver:
@@ -494,6 +527,7 @@ class JsonSaver:
                            saved separately at a later stage.
     @type split_languages: C{bool}
     """
+
     def __init__(self, split_languages):
         self.split_languages = split_languages
 
@@ -508,7 +542,7 @@ class JsonSaver:
         @type  fname: C{str}
         """
         node = save_project_json(self, project)
-        handle = open(fname, 'wt', encoding = "utf-8")
+        handle = open(fname, "wt", encoding="utf-8")
         json.dump(node, handle)
         handle.close()
 
@@ -528,9 +562,11 @@ class JsonSaver:
         assert self.split_languages
 
         node = save_language_json(projtype, lng)
-        handle = open(fname, 'wt', encoding = "utf-8")
+        handle = open(fname, "wt", encoding="utf-8")
         json.dump(node, handle)
         handle.close()
+
+
 # }}}
 
 # {{{ Project
@@ -582,7 +618,8 @@ class Project:
                     - 'gender'    Gender line
                     - 'pragma'    Custom pragma with specific name
     """
-    def __init__(self, human_name, projtype, url=''):
+
+    def __init__(self, human_name, projtype, url=""):
         self.human_name = human_name
         self.projtype = projtype
         self.url = url
@@ -590,7 +627,7 @@ class Project:
         self.languages = {}
         self.base_language = None
         self.modified = False
-        self.normalized = None # Created while creating 'word_scores'
+        self.normalized = None  # Created while creating 'word_scores'
         self.word_scores = None
 
         self.skeleton = []
@@ -608,7 +645,8 @@ class Project:
         @return: The base language of the project, if it exists.
         @rtype:  L{Language} or C{None}
         """
-        if self.base_language is None: return None
+        if self.base_language is None:
+            return None
         return self.languages.get(self.base_language)
 
     def flush_related_cache(self):
@@ -622,16 +660,18 @@ class Project:
         """
         Build the L{word_scores} variable.
         """
-        if self.word_scores is not None: return
+        if self.word_scores is not None:
+            return
         blng = self.get_base_language()
-        if blng is None: return
+        if blng is None:
+            return
 
-        self.normalized = {} # Mapping of string name to its words.
+        self.normalized = {}  # Mapping of string name to its words.
         for sname, chgs in blng.changes.items():
-            chg = get_newest_change(chgs, '')
+            chg = get_newest_change(chgs, "")
             assert chg is not None
-            line = re.sub('{([^}]*)}', " ", chg.base_text.text)
-            words = [word.lower() for word in re.split('\\W+', line) if len(word) > 3]
+            line = re.sub("{([^}]*)}", " ", chg.base_text.text)
+            words = [word.lower() for word in re.split("\\W+", line) if len(word) > 3]
             if len(words) > 0:
                 self.normalized[sname] = words
 
@@ -643,7 +683,7 @@ class Project:
                 if scores is None:
                     scores = {}
                     self.word_scores[w] = scores
-                scores[sname] = 1.0 # The string has this word.
+                scores[sname] = 1.0  # The string has this word.
 
         # To get rid of differences for singular vs plural forms, we also accept
         # substrings of a word too, but at a lower score (namely the fraction of matching).
@@ -666,12 +706,14 @@ class Project:
         @rtype:  C{list} of C{str}
         """
         self.build_related_string_map()
-        if self.word_scores is None: return []
+        if self.word_scores is None:
+            return []
 
         words = self.normalized.get(sname)
-        if words is None: return []
+        if words is None:
+            return []
 
-        strings = {} # Mapping of other strings to cumulative score.
+        strings = {}  # Mapping of other strings to cumulative score.
         for word in words:
             for sname2, score2 in self.word_scores[word].items():
                 if sname != sname2:
@@ -680,7 +722,7 @@ class Project:
         best = (None, 0.0)
         best = [best, best, best, best, best]
         for sname, score in strings.items():
-            i = 5 # Position of the entry is 'i'
+            i = 5  # Position of the entry is 'i'
             while i > 0 and score > best[i - 1][1]:
                 i = i - 1
             if i > 4:
@@ -701,6 +743,7 @@ class Project:
         """
         return (linfo for linfo in language_info.all_languages if self.projtype.allow_language(linfo))
 
+
 def load_project(xloader, node):
     """
     Load a project node from the Xml file.
@@ -714,38 +757,39 @@ def load_project(xloader, node):
     @return: The loaded project.
     @rtype:  L{Project}
     """
-    assert node.tagName == 'project'
-    human_name = node.getAttribute('name')
-    projtype = project_type.project_types[loader.get_opt_DOMattr(node, 'projtype', 'newgrf')]
-    url = node.getAttribute('url')
+    assert node.tagName == "project"
+    human_name = node.getAttribute("name")
+    projtype = project_type.project_types[loader.get_opt_DOMattr(node, "projtype", "newgrf")]
+    url = node.getAttribute("url")
     project = Project(human_name, projtype, url)
 
     project.languages = {}
     if not xloader.split_languages:
-        langnodes = loader.get_child_nodes(node, 'language')
+        langnodes = loader.get_child_nodes(node, "language")
         for lnode in langnodes:
             lng = load_language(xloader, projtype, lnode)
             project.languages[lng.name] = lng
 
-    baselang = loader.get_opt_DOMattr(node, 'baselang', None)
+    baselang = loader.get_opt_DOMattr(node, "baselang", None)
 
     if not xloader.split_languages:
         if baselang is None or baselang not in project.languages:
             if len(project.languages) > 0:
-                print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
+                print('Project "' + project.human_name + '" has no base language, dropping all translations')
                 project.languages = {}
             project.base_language = None
-            return project # Also skip loading the skeleton.
+            return project  # Also skip loading the skeleton.
 
     project.base_language = baselang
     project.flush_related_cache()
 
-    skelnode = loader.get_single_child_node(node, 'skeleton')
+    skelnode = loader.get_single_child_node(node, "skeleton")
     if skelnode is None:
         project.skeleton = []
     else:
         project.skeleton = load_skeleton(xloader, skelnode)
     return project
+
 
 def load_project_json(jloader, node):
     """
@@ -760,33 +804,34 @@ def load_project_json(jloader, node):
     @return: The loaded project.
     @rtype:  L{Project}
     """
-    assert node['project_version'] == 1
-    human_name = node['name']
-    projtype = project_type.project_types[node['projtype']]
-    url = node['url']
+    assert node["project_version"] == 1
+    human_name = node["name"]
+    projtype = project_type.project_types[node["projtype"]]
+    url = node["url"]
     project = Project(human_name, projtype, url)
 
     project.languages = {}
     if not jloader.split_languages:
-        langnodes = node['languages']
+        langnodes = node["languages"]
         for lnode in langnodes:
             lng = load_language_json(projtype, lnode)
             project.languages[lng.name] = lng
 
-    baselang = node['baselang']
+    baselang = node["baselang"]
 
     if not jloader.split_languages:
         if baselang is None or baselang not in project.languages:
             if len(project.languages) > 0:
-                print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
+                print('Project "' + project.human_name + '" has no base language, dropping all translations')
                 project.languages = {}
             project.base_language = None
-            return project # Also skip loading the skeleton.
+            return project  # Also skip loading the skeleton.
 
     project.base_language = baselang
     project.flush_related_cache()
-    project.skeleton = load_skeleton_json(node['skeleton'])
+    project.skeleton = load_skeleton_json(node["skeleton"])
     return project
+
 
 def load_skeleton(xloader, node):
     """
@@ -801,23 +846,26 @@ def load_skeleton(xloader, node):
     @return: The loaded skeleton data, as described in the L{Project} class.
     @rtype:  C{list} of (C{str}, C{str})
     """
-    assert node.tagName == 'skeleton'
+    assert node.tagName == "skeleton"
     skeleton = []
     for lnode in node.childNodes:
-        if lnode.nodeType != Node.ELEMENT_NODE: continue
-        if lnode.tagName == 'literal':
+        if lnode.nodeType != Node.ELEMENT_NODE:
+            continue
+        if lnode.tagName == "literal":
             text = loader.collect_text_DOM(lnode)
-            skeleton.append(('literal', text))
-        elif lnode.tagName == 'string':
-            column = convert_num(loader.get_opt_DOMattr(lnode, 'column', '40'), 40)
-            name = lnode.getAttribute('name')
-            if name is not None: skeleton.append(('string', (column, name)))
-        elif lnode.tagName == 'pragma':
-            name = lnode.getAttribute('name')
-            skeleton.append(('pragma', name))
-        elif lnode.tagName in ('grflangid', 'plural', 'case', 'gender'):
-            skeleton.append((lnode.tagName, ''))
+            skeleton.append(("literal", text))
+        elif lnode.tagName == "string":
+            column = convert_num(loader.get_opt_DOMattr(lnode, "column", "40"), 40)
+            name = lnode.getAttribute("name")
+            if name is not None:
+                skeleton.append(("string", (column, name)))
+        elif lnode.tagName == "pragma":
+            name = lnode.getAttribute("name")
+            skeleton.append(("pragma", name))
+        elif lnode.tagName in ("grflangid", "plural", "case", "gender"):
+            skeleton.append((lnode.tagName, ""))
     return skeleton
+
 
 def save_project(xsaver, proj):
     """
@@ -832,13 +880,13 @@ def save_project(xsaver, proj):
     @return: Node containing the project.
     @rtype:  L{xml.dom.minidom.Node}
     """
-    node = xsaver.doc.createElement('project')
-    node.setAttribute('name', proj.human_name)
-    node.setAttribute('projtype', proj.projtype.name)
-    node.setAttribute('url', proj.url)
+    node = xsaver.doc.createElement("project")
+    node.setAttribute("name", proj.human_name)
+    node.setAttribute("projtype", proj.projtype.name)
+    node.setAttribute("url", proj.url)
     blng = proj.get_base_language()
     if blng is not None:
-        node.setAttribute('baselang', blng.name)
+        node.setAttribute("baselang", blng.name)
 
     # Save languages in alphabetical order
     if not xsaver.split_languages:
@@ -852,6 +900,7 @@ def save_project(xsaver, proj):
     node.appendChild(skelnode)
     return node
 
+
 def save_project_json(jsaver, proj):
     """
     Save the project in Json.
@@ -863,15 +912,15 @@ def save_project_json(jsaver, proj):
     @rtype:  C{dict}
     """
     result = {}
-    result['project_version'] = 1
-    result['name'] = proj.human_name
-    result['projtype'] = proj.projtype.name
-    result['url'] = proj.url
+    result["project_version"] = 1
+    result["name"] = proj.human_name
+    result["projtype"] = proj.projtype.name
+    result["url"] = proj.url
 
     blng = proj.get_base_language()
     if blng is not None:
         blng = blng.name
-    result['baselang'] = blng
+    result["baselang"] = blng
 
     if not jsaver.split_languages:
         languages = []
@@ -879,9 +928,9 @@ def save_project_json(jsaver, proj):
         langs.sort()
         for lang in langs:
             languages.append(save_language_json(proj.projtype, lang[1]))
-        result['languages'] = languages
+        result["languages"] = languages
 
-    result['skeleton'] = save_skeleton_json(proj.skeleton)
+    result["skeleton"] = save_skeleton_json(proj.skeleton)
     return result
 
 
@@ -898,21 +947,22 @@ def save_skeleton(xsaver, skel):
     @return: The skeleton data as xml node.
     @rtype:  L{xml.dom.minidom.Node}
     """
-    root = xsaver.doc.createElement('skeleton')
+    root = xsaver.doc.createElement("skeleton")
     for stp, sparm in skel:
         node = xsaver.doc.createElement(stp)
-        if stp == 'literal' and len(sparm) > 0:
+        if stp == "literal" and len(sparm) > 0:
             txt = xsaver.doc.createTextNode(sparm)
             node.appendChild(txt)
-        elif stp == 'string':
+        elif stp == "string":
             column, sname = sparm
-            node.setAttribute('name', sname)
-            node.setAttribute('column', str(column))
-        elif stp == 'pragma':
-            node.setAttribute('name', sparm)
+            node.setAttribute("name", sname)
+            node.setAttribute("column", str(column))
+        elif stp == "pragma":
+            node.setAttribute("name", sparm)
 
         root.appendChild(node)
     return root
+
 
 def save_skeleton_json(skel):
     """
@@ -926,13 +976,14 @@ def save_skeleton_json(skel):
     """
     result = []
     for stp, sparm in skel:
-        if stp in ('literal', 'pragma', 'grflangid', 'plural', 'case', 'gender'):
+        if stp in ("literal", "pragma", "grflangid", "plural", "case", "gender"):
             result.append([stp, sparm])
-        elif stp == 'string':
+        elif stp == "string":
             column, sname = sparm
             result.append([stp, column, sname])
 
     return result
+
 
 def load_skeleton_json(node):
     """
@@ -946,9 +997,9 @@ def load_skeleton_json(node):
     """
     skeleton = []
     for line in node:
-        if line[0] in ('literal', 'pragma', 'grflangid', 'plural', 'case', 'gender'):
+        if line[0] in ("literal", "pragma", "grflangid", "plural", "case", "gender"):
             skeleton.append((line[0], line[1]))
-        elif line[0] == 'string':
+        elif line[0] == "string":
             skeleton.append((line[0], (line[1], line[2])))
 
     return skeleton
@@ -991,6 +1042,7 @@ class Language:
     @note: L{case} is sorted to make 'download language' output the default case first,
            which makes NML more happy.
     """
+
     def __init__(self, name):
         self.name = name
         self.info = language_info.isocode.get(name)
@@ -998,7 +1050,7 @@ class Language:
         self.grflangid = 0x7F
         self.plural = None
         self.gender = []
-        self.case  = ['']
+        self.case = [""]
         self.modified = False
         self.changes = {}
 
@@ -1007,6 +1059,7 @@ class Language:
         Mark the language as modified (and needs to be written to disk).
         """
         self.modified = True
+
 
 def save_language(xsaver, projtype, lang):
     """
@@ -1030,23 +1083,23 @@ def save_language(xsaver, projtype, lang):
     for c in lang.case:
         assert " " not in c
 
-    node = xsaver.doc.createElement('language')
-    node.setAttribute('name', lang.name)
-    node.setAttribute('langid', str(lang.grflangid))
+    node = xsaver.doc.createElement("language")
+    node.setAttribute("name", lang.name)
+    node.setAttribute("langid", str(lang.grflangid))
     if lang.plural is not None:
-        node.setAttribute('plural', str(lang.plural))
+        node.setAttribute("plural", str(lang.plural))
     if projtype.allow_gender and len(lang.gender) > 0:
-        node.setAttribute('gender', " ".join(lang.gender))
-    cases = [c for c in lang.case if c != '']
+        node.setAttribute("gender", " ".join(lang.gender))
+    cases = [c for c in lang.case if c != ""]
     if len(cases) > 0:
-        node.setAttribute('cases', " ".join(cases))
+        node.setAttribute("cases", " ".join(cases))
 
     # Sort the custom pragmas.
     custom_pragmas = list(lang.custom_pragmas.items())
     custom_pragmas.sort()
     for pname, pvalue in custom_pragmas:
-        pragma_node = xsaver.doc.createElement('pragma')
-        pragma_node.setAttribute('name', pname)
+        pragma_node = xsaver.doc.createElement("pragma")
+        pragma_node.setAttribute("name", pname)
         pragma_node.appendChild(xsaver.doc.createTextNode(pvalue))
         node.appendChild(pragma_node)
 
@@ -1054,12 +1107,13 @@ def save_language(xsaver, projtype, lang):
     changes = list(lang.changes.items())
     changes.sort()
     for chgs in changes:
-        chgs[1].sort() # Sort changes
+        chgs[1].sort()  # Sort changes
         for chg in chgs[1]:
             cnode = save_change(xsaver, projtype, chg)
             if cnode is not None:
                 node.appendChild(cnode)
     return node
+
 
 def save_language_json(projtype, lang):
     """
@@ -1075,33 +1129,34 @@ def save_language_json(projtype, lang):
     @rtype:  C{dict}
     """
     result = {}
-    result['language_version'] = 1
-    result['name'] = lang.name
-    result['grflangid'] = lang.grflangid
-    result['plural'] = lang.plural
+    result["language_version"] = 1
+    result["name"] = lang.name
+    result["grflangid"] = lang.grflangid
+    result["plural"] = lang.plural
 
     if projtype.allow_gender and len(lang.gender) > 0:
-        result['gender'] = " ".join(lang.gender)
+        result["gender"] = " ".join(lang.gender)
 
-    cases = [c for c in lang.case if c != '']
+    cases = [c for c in lang.case if c != ""]
     if len(cases) > 0:
-        result['cases'] = " ".join(cases)
+        result["cases"] = " ".join(cases)
 
     custom_pragmas = list(lang.custom_pragmas.items())
     custom_pragmas.sort()
-    result['pragma'] = custom_pragmas
+    result["pragma"] = custom_pragmas
 
     res_changes = []
     changes = list(lang.changes.items())
     changes.sort()
     for chgs in changes:
-        chgs[1].sort() # Sort changes
+        chgs[1].sort()  # Sort changes
         for chg in chgs[1]:
             cnode = save_change_json(projtype, chg)
             if cnode is not None:
                 res_changes.append(cnode)
-    result['change'] = res_changes
+    result["change"] = res_changes
     return result
+
 
 def load_language(xloader, projtype, node):
     """
@@ -1119,44 +1174,44 @@ def load_language(xloader, projtype, node):
     @return: The loaded language.
     @rtype:  L{Language}
     """
-    assert node.tagName == 'language'
-    name = node.getAttribute('name')
+    assert node.tagName == "language"
+    name = node.getAttribute("name")
 
     lng = Language(name)
-    lng.grflangid = int(node.getAttribute('langid'), 10)
-    plural = loader.get_opt_DOMattr(node, 'plural', None)
+    lng.grflangid = int(node.getAttribute("langid"), 10)
+    plural = loader.get_opt_DOMattr(node, "plural", None)
     if plural is not None:
         lng.plural = int(plural, 10)
     else:
         lng.plural = lng.info.plural
 
-    gender = loader.get_opt_DOMattr(node, 'gender', None)
+    gender = loader.get_opt_DOMattr(node, "gender", None)
     if not projtype.allow_gender:
         lng.gender = []
     elif gender is not None:
-        lng.gender = gender.split(' ')
+        lng.gender = gender.split(" ")
     else:
         lng.gender = lng.info.gender
 
-    case = loader.get_opt_DOMattr(node, 'cases', None)
-    if not projtype.allow_case or case == '':
-        lng.case = ['']
+    case = loader.get_opt_DOMattr(node, "cases", None)
+    if not projtype.allow_case or case == "":
+        lng.case = [""]
     elif case is not None:
-        lng.case = [''] + case.split(' ')
+        lng.case = [""] + case.split(" ")
     else:
         lng.case = lng.info.case
 
     lng.custom_pragmas = {}
-    for pragma_node in loader.get_child_nodes(node, 'pragma'):
-        pname = pragma_node.getAttribute('name')
+    for pragma_node in loader.get_child_nodes(node, "pragma"):
+        pname = pragma_node.getAttribute("name")
         pvalue = loader.collect_text_DOM(pragma_node)
         pvalue = language_file.sanitize_text(pvalue)
         lng.custom_pragmas[pname] = pvalue
 
     lng.changes = {}
-    for ch_node in loader.get_child_nodes(node, 'change'):
+    for ch_node in loader.get_child_nodes(node, "change"):
         change = load_change(xloader, ch_node)
-        if not projtype.allow_case and change.case != '':
+        if not projtype.allow_case and change.case != "":
             continue
         chgs = lng.changes.get(change.string_name)
         if chgs is None:
@@ -1165,6 +1220,7 @@ def load_language(xloader, projtype, node):
             chgs.append(change)
 
     return lng
+
 
 def load_language_json(projtype, node):
     """
@@ -1179,41 +1235,41 @@ def load_language_json(projtype, node):
     @return: The loaded language.
     @rtype:  L{Language}
     """
-    assert 'language_version' in node
-    assert node['language_version'] == 1
+    assert "language_version" in node
+    assert node["language_version"] == 1
 
-    lng = Language(node['name'])
+    lng = Language(node["name"])
 
-    assert isinstance(node['grflangid'], int)
-    lng.grflangid = node['grflangid']
+    assert isinstance(node["grflangid"], int)
+    lng.grflangid = node["grflangid"]
 
-    assert node['plural'] is None or isinstance(node['plural'], int)
-    lng.plural = node['plural']
+    assert node["plural"] is None or isinstance(node["plural"], int)
+    lng.plural = node["plural"]
     if lng.plural is None:
         lng.plural = lng.info.plural
 
     if not projtype.allow_gender:
         lng.gender = []
-    elif 'gender' in node:
-        lng.gender = node['gender'].split(' ')
+    elif "gender" in node:
+        lng.gender = node["gender"].split(" ")
     else:
         lng.gender = lng.info.gender
 
-    case = node.get('cases')
-    if not projtype.allow_case or case == '':
-        lng.case = ['']
+    case = node.get("cases")
+    if not projtype.allow_case or case == "":
+        lng.case = [""]
     elif case is not None:
-        lng.case = [''] + case.split(' ')
+        lng.case = [""] + case.split(" ")
     else:
         lng.case = lng.info.case
 
-    assert isinstance(node['pragma'], list)
-    lng.custom_pragmas = dict(node['pragma'])
+    assert isinstance(node["pragma"], list)
+    lng.custom_pragmas = dict(node["pragma"])
 
     lng.changes = {}
-    for ch_node in node['change']:
+    for ch_node in node["change"]:
         change = load_change_json(ch_node)
-        if not projtype.allow_case and change.case != '':
+        if not projtype.allow_case and change.case != "":
             continue
         chgs = lng.changes.get(change.string_name)
         if chgs is None:
@@ -1222,6 +1278,8 @@ def load_language_json(projtype, node):
             chgs.append(change)
 
     return lng
+
+
 # }}}
 # {{{ Change
 class Change:
@@ -1254,7 +1312,8 @@ class Change:
 
     @note: There is at most one L{last_upload} change for each string in each language.
     """
-    def __init__(self, string_name, case, base_text, new_text, stamp, user, last_upload = False):
+
+    def __init__(self, string_name, case, base_text, new_text, stamp, user, last_upload=False):
         assert string_name is not None
         self.string_name = string_name
         self.case = case
@@ -1268,11 +1327,13 @@ class Change:
         return "Change('{}', base={}, new={})".format(self.string_name, str(self.base_text), str(self.new_text))
 
     def __lt__(self, other):
-        if not isinstance(other, Change): return
+        if not isinstance(other, Change):
+            return
         return self.stamp < other.stamp
 
     def __eq__(self, other):
-        if not isinstance(other, Change): return
+        if not isinstance(other, Change):
+            return
         return self.stamp == other.stamp
 
 
@@ -1292,29 +1353,33 @@ def save_change(xsaver, projtype, change):
     @return: Xml node containing the change, if it was allowed to create.
     @rtype:  L{xml.dom.minidom.Node} or C{None}
     """
-    if change.case != '' and not projtype.allow_case:
+    if change.case != "" and not projtype.allow_case:
         return None
 
-    node = xsaver.doc.createElement('change')
-    node.setAttribute('strname', change.string_name)
-    if change.last_upload: node.setAttribute('last_upload', 'true')
-    if change.case != '': node.setAttribute('case', change.case)
-    if change.user is not None: node.setAttribute('user', change.user)
+    node = xsaver.doc.createElement("change")
+    node.setAttribute("strname", change.string_name)
+    if change.last_upload:
+        node.setAttribute("last_upload", "true")
+    if change.case != "":
+        node.setAttribute("case", change.case)
+    if change.user is not None:
+        node.setAttribute("user", change.user)
 
     if xsaver.share_text:
-        node.setAttribute('basetext', make_ref_text(xsaver, change.base_text))
+        node.setAttribute("basetext", make_ref_text(xsaver, change.base_text))
     else:
-        node.appendChild(make_text_node(xsaver, change.base_text, 'basetext', None)[0])
+        node.appendChild(make_text_node(xsaver, change.base_text, "basetext", None)[0])
 
     if change.new_text is not None:
         if xsaver.share_text:
-            node.setAttribute('newtext', make_ref_text(xsaver, change.new_text))
+            node.setAttribute("newtext", make_ref_text(xsaver, change.new_text))
         else:
-            node.appendChild(make_text_node(xsaver, change.new_text, 'newtext', None)[0])
+            node.appendChild(make_text_node(xsaver, change.new_text, "newtext", None)[0])
 
     snode = save_stamp(xsaver, change.stamp)
     node.appendChild(snode)
     return node
+
 
 def save_change_json(projtype, change):
     """
@@ -1341,6 +1406,7 @@ def save_change_json(projtype, change):
     node = [change.string_name, change.last_upload, change.case, change.user, base_text, new_text, snode]
     return node
 
+
 def load_change(xloader, node):
     """
     Load a change.
@@ -1354,29 +1420,30 @@ def load_change(xloader, node):
     @return: The loaded change.
     @rtype:  L{Change}
     """
-    assert node.tagName == 'change'
-    strname = node.getAttribute('strname')
-    last_upload = loader.get_opt_DOMattr(node, 'last_upload', '')
-    case = loader.get_opt_DOMattr(node, 'case', '')
-    user = loader.get_opt_DOMattr(node, 'user', None)
+    assert node.tagName == "change"
+    strname = node.getAttribute("strname")
+    last_upload = loader.get_opt_DOMattr(node, "last_upload", "")
+    case = loader.get_opt_DOMattr(node, "case", "")
+    user = loader.get_opt_DOMattr(node, "user", None)
 
-    base_text = loader.get_opt_DOMattr(node, 'basetext', None)
+    base_text = loader.get_opt_DOMattr(node, "basetext", None)
     if base_text is not None:
         base_text = get_text(xloader, base_text)
     else:
-        base_text = get_text_node(xloader, loader.get_single_child_node(node, 'basetext'))
+        base_text = get_text_node(xloader, loader.get_single_child_node(node, "basetext"))
 
-    new_text = loader.get_opt_DOMattr(node, 'newtext', None)
+    new_text = loader.get_opt_DOMattr(node, "newtext", None)
     if new_text is not None:
         new_text = get_text(xloader, new_text)
     else:
-        new_text = loader.get_single_child_node(node, 'newtext', True)
+        new_text = loader.get_single_child_node(node, "newtext", True)
         if new_text is not None:
             new_text = get_text_node(xloader, new_text)
 
-    stamp = loader.get_single_child_node(node, 'stamp')
+    stamp = loader.get_single_child_node(node, "stamp")
     stamp = load_stamp(xloader, stamp)
-    return Change(strname, case, base_text, new_text, stamp, user, last_upload == 'true')
+    return Change(strname, case, base_text, new_text, stamp, user, last_upload == "true")
+
 
 def load_change_json(node):
     """
@@ -1402,6 +1469,7 @@ def load_change_json(node):
     stamp = load_stamp_json(node[6])
     return Change(strname, case, base_text, new_text, stamp, user, last_upload)
 
+
 # }}}
 # {{{ Text (references)
 class Text:
@@ -1417,6 +1485,7 @@ class Text:
     @ivar stamp: Time stamp of creation of this text.
     @type stamp: L{Stamp}
     """
+
     def __init__(self, text, case, stamp):
         self.text = text
         self.case = case
@@ -1426,7 +1495,8 @@ class Text:
         return "Text(text={!r}, case={!r})".format(self.text, self.case)
 
     def __eq__(self, other):
-        if not isinstance(other, Text): return
+        if not isinstance(other, Text):
+            return
         return self.text == other.text and self.case == other.case and self.stamp == other.stamp
 
     def __ne__(self, other):
@@ -1456,21 +1526,23 @@ def make_text_node(xmlsaver, text, name, number):
     @rtype:  L{xml.dom.minidom.Node}, (C{str} or C{None})
     """
     node = xmlsaver.doc.createElement(name)
-    if text.case != '': node.setAttribute('case', text.case)
+    if text.case != "":
+        node.setAttribute("case", text.case)
 
     if number is not None:
         ref = "text_{:04d}".format(number)
-        node.setAttribute('ref', ref)
+        node.setAttribute("ref", ref)
     else:
         ref = None
 
     stamp = save_stamp(xmlsaver, text.stamp)
     node.appendChild(stamp)
-    tnode = xmlsaver.doc.createElement('text')
+    tnode = xmlsaver.doc.createElement("text")
     node.appendChild(tnode)
     xnode = xmlsaver.doc.createTextNode(text.text)
     tnode.appendChild(xnode)
     return node, ref
+
 
 def make_text_node_json(text):
     """
@@ -1487,6 +1559,7 @@ def make_text_node_json(text):
     node = [text.case, text.text, stamp]
     return node
 
+
 def make_ref_text(xsaver, text):
     """
     Construct a reference to a text node.
@@ -1502,6 +1575,7 @@ def make_ref_text(xsaver, text):
     """
     return xsaver.get_textref(text)
 
+
 def get_text_node(xloader, node):
     """
     Load a text node (written by L{make_text_node}).
@@ -1515,12 +1589,13 @@ def get_text_node(xloader, node):
     @return: Text object.
     @rtype:  L{Text}
     """
-    case = loader.get_opt_DOMattr(node, 'case', '')
-    stamp = load_stamp(xloader, loader.get_single_child_node(node, 'stamp'))
-    txt = loader.get_single_child_node(node, 'text')
+    case = loader.get_opt_DOMattr(node, "case", "")
+    stamp = load_stamp(xloader, loader.get_single_child_node(node, "stamp"))
+    txt = loader.get_single_child_node(node, "text")
     txt = loader.collect_text_DOM(txt)
     txt = language_file.sanitize_text(txt)
     return Text(txt, case, stamp)
+
 
 def get_text_node_json(node):
     """
@@ -1555,6 +1630,7 @@ def get_text(xloader, ref):
     """
     return xloader.get_textref(ref)
 
+
 # }}}
 # {{{ Time stamps
 class Stamp:
@@ -1567,17 +1643,19 @@ class Stamp:
     @ivar number: Index number, to allow more than one operation in a second.
     @type number: C{int}
     """
+
     def __init__(self, seconds, number):
         self.seconds = seconds
         self.number = number
 
     def __lt__(self, other):
-        if not isinstance(other, Stamp): return
-        return self.seconds < other.seconds or \
-               (self.seconds == other.seconds and self.number < other.number)
+        if not isinstance(other, Stamp):
+            return
+        return self.seconds < other.seconds or (self.seconds == other.seconds and self.number < other.number)
 
     def __eq__(self, other):
-        if not isinstance(other, Stamp): return
+        if not isinstance(other, Stamp):
+            return
         return self.seconds == other.seconds and self.number == other.number
 
     def __str__(self):
@@ -1586,8 +1664,10 @@ class Stamp:
     def __hash__(self):
         return (self.seconds << 4) | self.number
 
-last_stamp = 0 # A loooooong time ago.
+
+last_stamp = 0  # A loooooong time ago.
 last_index = -1
+
 
 def make_stamp():
     """
@@ -1621,10 +1701,11 @@ def load_stamp(xloader, node):
     @return: Loaded time stamp.
     @rtype:  L{Stamp}
     """
-    assert node.tagName == 'stamp'
-    seconds = int(node.getAttribute('second'), 10)
-    number = int(loader.get_opt_DOMattr(node, 'number', '0'), 10)
+    assert node.tagName == "stamp"
+    seconds = int(node.getAttribute("second"), 10)
+    number = int(loader.get_opt_DOMattr(node, "number", "0"), 10)
     return xloader.get_stamp(seconds, number)
+
 
 def load_stamp_json(node):
     """
@@ -1646,6 +1727,7 @@ def load_stamp_json(node):
 
     return Stamp(node[0], node[1])
 
+
 def save_stamp(xsaver, stamp):
     """
     Construct an xml representation of the L{stamp} object.
@@ -1659,11 +1741,12 @@ def save_stamp(xsaver, stamp):
     @return: The created xml representation.
     @rtype:  L{xml.dom.minidom.Node}
     """
-    node = xsaver.doc.createElement('stamp')
-    node.setAttribute('second', str(stamp.seconds))
+    node = xsaver.doc.createElement("stamp")
+    node.setAttribute("second", str(stamp.seconds))
     if stamp.number > 0:
-        node.setAttribute('number', str(stamp.number))
+        node.setAttribute("number", str(stamp.number))
     return node
+
 
 def save_stamp_json(stamp):
     """
@@ -1676,6 +1759,7 @@ def save_stamp_json(stamp):
     @rtype:  list with 2 integers (seconds and index number).
     """
     return [stamp.seconds, stamp.number]
+
 
 def encode_stamp(stamp):
     """
@@ -1692,7 +1776,8 @@ def encode_stamp(stamp):
     text = text.format(elems.tm_year, elems.tm_mon, elems.tm_mday, elems.tm_hour, elems.tm_min, elems.tm_sec)
     if stamp.number == 0:
         return text + "Z"
-    return text + ".{:d}Z".format(stamp.number) # No comma, since the text is put into a CSV line.
+    return text + ".{:d}Z".format(stamp.number)  # No comma, since the text is put into a CSV line.
+
 
 def decode_stamp(text):
     """
@@ -1704,10 +1789,10 @@ def decode_stamp(text):
     @return: Decode time stamp, if it could be decoded.
     @rtype:  L{Stamp} or C{None}
     """
-    m = re.search('\\.([0-9]+)Z$', text)
+    m = re.search("\\.([0-9]+)Z$", text)
     if m:
-        val =  int(m.group(1), 10)
-        text = text[:m.start(0)] + 'Z'
+        val = int(m.group(1), 10)
+        text = text[: m.start(0)] + "Z"
     else:
         val = 0
 
@@ -1719,5 +1804,5 @@ def decode_stamp(text):
     secs = calendar.timegm(elems)
     return Stamp(secs, val)
 
-# }}}
 
+# }}}

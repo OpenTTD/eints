@@ -22,14 +22,16 @@ db_host = None
 db_port = None
 
 owner_role = None
-translator_roles = {} # Mapping of iso language name to role name.
+translator_roles = {}  # Mapping of iso language name to role name.
 
 db_connection = None
+
 
 class RedmineUserAuthentication(userauth.UserAuthentication):
     """
     Implementation of UserAuthentication for Redmine authentication system.
     """
+
     def __init__(self, is_auth, name, project_roles):
         super(RedmineUserAuthentication, self).__init__(is_auth, name)
         self.project_roles = project_roles
@@ -37,7 +39,7 @@ class RedmineUserAuthentication(userauth.UserAuthentication):
     def get_roles(self, prjname, lngname):
         eints_roles = set()
         if self.is_auth:
-            eints_roles.add('USER')
+            eints_roles.add("USER")
 
             rm_roles = None
             if prjname is not None:
@@ -45,17 +47,16 @@ class RedmineUserAuthentication(userauth.UserAuthentication):
 
             if rm_roles is not None:
                 if owner_role is not None and owner_role != "" and owner_role in rm_roles:
-                    eints_roles.add('OWNER')
+                    eints_roles.add("OWNER")
 
                 lang_role = None
                 if lngname is not None:
                     lang_role = translator_roles.get(lngname)
 
                 if lang_role is not None and lang_role != "" and lang_role in rm_roles:
-                    eints_roles.add('TRANSLATOR')
+                    eints_roles.add("TRANSLATOR")
 
         return eints_roles
-
 
 
 def connect():
@@ -67,16 +68,21 @@ def connect():
     """
     global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
 
-    if db_connection is not None: return True # Already connected.
+    if db_connection is not None:
+        return True  # Already connected.
 
-    if db_name is None or db_name == "": return
+    if db_name is None or db_name == "":
+        return
 
     # Setup connection.
-    if db_type == 'postgress':
+    if db_type == "postgress":
         import psycopg2, psycopg2.extras, psycopg2.extensions
+
         psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
-        dsn = "dbname='{}' user='{}' host='{}' password='{}' port={}".format(db_name, db_user, db_host, db_password, db_port)
+        dsn = "dbname='{}' user='{}' host='{}' password='{}' port={}".format(
+            db_name, db_user, db_host, db_password, db_port
+        )
         # In case the db is down, we probably get an error here.
         # try:
         db_connection = psycopg2.connect(dsn)
@@ -84,7 +90,7 @@ def connect():
         #   db_connection = None
         #   return False
 
-        db_connection.set_client_encoding('UTF-8')
+        db_connection.set_client_encoding("UTF-8")
 
         if db_schema is not None and db_schema != "":
             try:
@@ -96,13 +102,15 @@ def connect():
 
         return True
 
-    elif db_type == 'mysql':
+    elif db_type == "mysql":
         import MySQLdb
 
-        db_connection = MySQLdb.connect(user=db_user, passwd=db_password, host=db_host, port=db_port, db=db_name, use_unicode=True)
+        db_connection = MySQLdb.connect(
+            user=db_user, passwd=db_password, host=db_host, port=db_port, db=db_name, use_unicode=True
+        )
         return True
 
-    elif db_type == 'sqlite3':
+    elif db_type == "sqlite3":
         import sqlite3
 
         db_connection = sqlite3.connect(db_name)
@@ -111,6 +119,7 @@ def connect():
     else:
         db_connection = None
         return False
+
 
 def _do_command(cmd, parms):
     """
@@ -127,8 +136,9 @@ def _do_command(cmd, parms):
     """
     global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
 
-    if db_type == 'postgress':
+    if db_type == "postgress":
         import psycopg2
+
         cur = db_connection.cursor()
         try:
             cur.execute(cmd, parms)
@@ -143,6 +153,7 @@ def _do_command(cmd, parms):
         cur = db_connection.cursor()
         cur.execute(cmd, parms)
         return cur
+
 
 def query(cmd, parms):
     """
@@ -165,7 +176,7 @@ def query(cmd, parms):
         if db_connection is None:
             if not connect():
                 print("Eints: Failed to connect to the data base.")
-                time.sleep(10) # Avoid flooding.
+                time.sleep(10)  # Avoid flooding.
                 return None
 
             assert db_connection is not None
@@ -178,7 +189,7 @@ def query(cmd, parms):
         time.sleep(10)
         count = count + 1
 
-    return None # 3 Failures, not going to work.
+    return None  # 3 Failures, not going to work.
 
 
 def init():
@@ -190,7 +201,7 @@ def init():
     rights.init_page_access()
 
     db_connection = None
-    connect() # Not really needed, but perhaps useful?
+    connect()  # Not really needed, but perhaps useful?
 
 
 def get_authentication(user, pwd):
@@ -212,14 +223,14 @@ def get_authentication(user, pwd):
     # Verify user.
     # Note that failure to authenticate is not fatal, it falls back to an 'unknown' user.
     if user is not None and user != "" and pwd is not None:
-        if db_type == 'postgress' or db_type == 'mysql':
+        if db_type == "postgress" or db_type == "mysql":
             cur = query("SELECT users.hashed_password, users.salt FROM users WHERE users.login=%s", (user,))
             if cur is None:
                 return RedmineUserAuthentication(False, "unknown", dict())
 
             row = cur.fetchone()
 
-        elif db_type == 'sqlite3':
+        elif db_type == "sqlite3":
             cur = query("SELECT users.hashed_password, users.salt FROM users WHERE users.login=?", (user,))
             if cur is None:
                 return RedmineUserAuthentication(False, "unknown", dict())
@@ -231,24 +242,28 @@ def get_authentication(user, pwd):
         if not row:
             user = None
         else:
-            hashed_password = hashlib.sha1(pwd.encode('utf-8')).hexdigest()
+            hashed_password = hashlib.sha1(pwd.encode("utf-8")).hexdigest()
             result_hash = row[0]
             result_salt = row[1]
-            salted_hash = hashlib.sha1((result_salt + hashed_password).encode('ascii')).hexdigest()
+            salted_hash = hashlib.sha1((result_salt + hashed_password).encode("ascii")).hexdigest()
             if salted_hash != result_hash:
                 user = None
     else:
         user = None
 
-    if user is None: return RedmineUserAuthentication(False, "unknown", dict())
+    if user is None:
+        return RedmineUserAuthentication(False, "unknown", dict())
 
     # Fetch roles from database
-    cur = query("""SELECT projects.identifier, roles.name FROM users, members, projects, member_roles, roles
+    cur = query(
+        """SELECT projects.identifier, roles.name FROM users, members, projects, member_roles, roles
                    WHERE users.login=%s
                      AND users.id = members.user_id
                      AND projects.id = members.project_id
                      AND members.id = member_roles.member_id
-                     AND member_roles.role_id = roles.id""", (user,))
+                     AND member_roles.role_id = roles.id""",
+        (user,),
+    )
     if cur is None:
         return RedmineUserAuthentication(False, "unknown", dict())
 

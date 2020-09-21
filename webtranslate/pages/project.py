@@ -7,8 +7,8 @@ from webtranslate.protect import protected
 from webtranslate import config, data
 
 
-@route('/project/<prjname>', method = 'GET')
-@protected(['project', 'prjname', '-'])
+@route("/project/<prjname>", method="GET")
+@protected(["project", "prjname", "-"])
 def project(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -21,13 +21,12 @@ def project(userauth, prjname):
     bcounts = None
     if base_lng is not None:
         for lname, lng in pdata.languages.items():
-            if lng is base_lng: continue
+            if lng is base_lng:
+                continue
             transl.append((lng, pmd.overview.get(lname)))
 
         transl.sort(key=lambda x: x[0].name)
 
         bcounts = pmd.overview.get(base_lng.name)
 
-    return template('project', userauth = userauth, pmd = pmd,
-                    transl = transl, base_lng = base_lng, bcounts = bcounts)
-
+    return template("project", userauth=userauth, pmd=pmd, transl=transl, base_lng=base_lng, bcounts=bcounts)

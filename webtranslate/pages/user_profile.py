@@ -7,8 +7,9 @@ from webtranslate.protect import protected
 from webtranslate import config, data
 from webtranslate.newgrf import language_info
 
-@route('/userprofile', method = 'GET')
-@protected(['userprofile', '-', '-'])
+
+@route("/userprofile", method="GET")
+@protected(["userprofile", "-", "-"])
 def userprofile(userauth):
     """
     Get an overview of the (write) access rights of a user in every project.
@@ -29,7 +30,7 @@ def userprofile(userauth):
                 exist = True
                 translator = userauth.may_read("string", pmd.name, lngname)
             else:
-                lstate = [ 0 for i in range(data.MAX_STATE) ]
+                lstate = [0 for i in range(data.MAX_STATE)]
                 lstate[data.MISSING] = pmd.blang_count
                 translator = userauth.may_read("makelanguage", pmd.name, lngname)
 
@@ -41,6 +42,11 @@ def userprofile(userauth):
 
         prjdata.append((pmd, owner, langs))
 
-    prjdata.sort(key = lambda p: p[0].human_name.lower())
-    return template('userprofile', userauth = userauth, prjdata = prjdata, is_owner = is_owner, lnginfos = sorted(languages.values(), key=lambda x:x.isocode))
-
+    prjdata.sort(key=lambda p: p[0].human_name.lower())
+    return template(
+        "userprofile",
+        userauth=userauth,
+        prjdata=prjdata,
+        is_owner=is_owner,
+        lnginfos=sorted(languages.values(), key=lambda x: x.isocode),
+    )

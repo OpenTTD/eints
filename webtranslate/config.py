@@ -7,8 +7,9 @@ from webtranslate.newgrf import language_info, language_file
 
 # {{{ class ProjectStorage
 # Recognized types of project disk storage.
-STORAGE_ONE_FILE = 'One large file for the entire project'
-STORAGE_SEPARATE_LANGUAGES = 'Directory with project_data.[xml|json] and a set of language files'
+STORAGE_ONE_FILE = "One large file for the entire project"
+STORAGE_SEPARATE_LANGUAGES = "Directory with project_data.[xml|json] and a set of language files"
+
 
 class ProjectStorage:
     """
@@ -29,12 +30,15 @@ class ProjectStorage:
     @ivar data_format: Used data format.
     @type data_format: C{str} (C{xml} or C{json}
     """
+
     def __init__(self, path, name, languages, storage_type, data_format):
         self.path = path
         self.name = name
         self.languages = languages
         self.storage_type = storage_type
         self.data_format = data_format
+
+
 # }}}
 
 # {{{ def get_subnode_text(node, tag):
@@ -55,6 +59,8 @@ def get_subnode_text(node, tag):
     if child is None:
         return ""
     return loader.collect_text_DOM(child).strip()
+
+
 # }}}
 
 # {{{ class Config:
@@ -111,6 +117,7 @@ class Config:
                                    can be considered old enough to discard.
     @type change_stabilizing_time: C{int}
     """
+
     def __init__(self, config_path):
         self.config_path = config_path
         self.language_file_size = 10000
@@ -120,7 +127,7 @@ class Config:
         self.num_backup_files = 5
         self.max_number_changes = 5
         self.min_number_changes = 1
-        self.change_stabilizing_time = 1000000 # 11 days, 13 hours, 46 minutes, and 40 seconds.
+        self.change_stabilizing_time = 1000000  # 11 days, 13 hours, 46 minutes, and 40 seconds.
         self.data_format = "xml"
 
     def load_settings_from_xml(self):
@@ -132,70 +139,69 @@ class Config:
             return
 
         cfg = loader.load_dom(self.config_path)
-        cfg = loader.get_single_child_node(cfg, 'config')
+        cfg = loader.get_single_child_node(cfg, "config")
 
-        self.server_mode = get_subnode_text(cfg, 'server-mode')
-        if self.server_mode not in ('development', 'production', 'mod_wsgi'):
+        self.server_mode = get_subnode_text(cfg, "server-mode")
+        if self.server_mode not in ("development", "production", "mod_wsgi"):
             print("Incorrect server-mode in the configuration, aborting!")
             sys.exit(1)
 
-        self.server_host = get_subnode_text(cfg, 'server-host')
-        self.server_port = data.convert_num(get_subnode_text(cfg, 'server-port'), 80)
-        self.authentication = get_subnode_text(cfg, 'authentication')
-        if self.authentication not in ('development', 'redmine', 'github', 'ldap'):
+        self.server_host = get_subnode_text(cfg, "server-host")
+        self.server_port = data.convert_num(get_subnode_text(cfg, "server-port"), 80)
+        self.authentication = get_subnode_text(cfg, "authentication")
+        if self.authentication not in ("development", "redmine", "github", "ldap"):
             print("Incorrect authentication in the configuration, aborting!")
             sys.exit(1)
 
-        self.stable_languages_path = get_subnode_text(cfg, 'stable-languages')
+        self.stable_languages_path = get_subnode_text(cfg, "stable-languages")
         if self.stable_languages_path == "":
             self.stable_languages_path = None
 
-        self.unstable_languages_path = get_subnode_text(cfg, 'unstable-languages')
+        self.unstable_languages_path = get_subnode_text(cfg, "unstable-languages")
         if self.unstable_languages_path == "":
             self.unstable_languages_path = None
 
-        self.project_root = get_subnode_text(cfg, 'project-root')
+        self.project_root = get_subnode_text(cfg, "project-root")
         if self.project_root is None or self.project_root == "":
             print("No project root found, aborting!")
             sys.exit(1)
 
-        self.project_types = get_subnode_text(cfg, 'project-types').split()
+        self.project_types = get_subnode_text(cfg, "project-types").split()
         self.project_types = set(ptype for ptype in self.project_types if ptype in project_type.project_types)
         if len(self.project_types) == 0:
             print("No valid project types found, aborting!")
             sys.exit(1)
 
-        storage_type = get_subnode_text(cfg, 'storage-format').strip()
-        if storage_type == 'one-file':
+        storage_type = get_subnode_text(cfg, "storage-format").strip()
+        if storage_type == "one-file":
             self.storage_format = STORAGE_ONE_FILE
-        elif storage_type == 'split-languages':
+        elif storage_type == "split-languages":
             self.storage_format = STORAGE_SEPARATE_LANGUAGES
         else:
-            print("Unrecognized preferred storage format \"{}\", aborting!".format(storage_type))
+            print('Unrecognized preferred storage format "{}", aborting!'.format(storage_type))
             sys.exit(1)
 
-        self.data_format = get_subnode_text(cfg, 'data-format').strip()
-        if self.data_format not in ('xml', 'json'):
-            self.data_format = 'xml'
+        self.data_format = get_subnode_text(cfg, "data-format").strip()
+        if self.data_format not in ("xml", "json"):
+            self.data_format = "xml"
 
-        self.language_file_size = data.convert_num(get_subnode_text(cfg, 'language-file-size'),
-                                                   self.language_file_size)
-        self.num_backup_files   = data.convert_num(get_subnode_text(cfg, 'num-backup-files'),
-                                                   self.num_backup_files)
+        self.language_file_size = data.convert_num(get_subnode_text(cfg, "language-file-size"), self.language_file_size)
+        self.num_backup_files = data.convert_num(get_subnode_text(cfg, "num-backup-files"), self.num_backup_files)
         # To limit it two digits in backup files.
-        if self.num_backup_files > 100: self.num_backup_files = 100
+        if self.num_backup_files > 100:
+            self.num_backup_files = 100
 
-        self.max_number_changes = data.convert_num(get_subnode_text(cfg, 'max-num-changes'),
-                                                   self.max_number_changes)
-        self.min_number_changes = data.convert_num(get_subnode_text(cfg, 'min-num-changes'),
-                                                   self.min_number_changes)
+        self.max_number_changes = data.convert_num(get_subnode_text(cfg, "max-num-changes"), self.max_number_changes)
+        self.min_number_changes = data.convert_num(get_subnode_text(cfg, "min-num-changes"), self.min_number_changes)
         # You do want to keep the latest version.
-        if self.min_number_changes < 1: self.min_number_changes = 1
+        if self.min_number_changes < 1:
+            self.min_number_changes = 1
 
-        self.change_stabilizing_time = data.convert_num(get_subnode_text(cfg, 'change-stable-age'),
-                                                        self.change_stabilizing_time)
+        self.change_stabilizing_time = data.convert_num(
+            get_subnode_text(cfg, "change-stable-age"), self.change_stabilizing_time
+        )
 
-        cache_size = data.convert_num(get_subnode_text(cfg, 'project-cache'), 10)
+        cache_size = data.convert_num(get_subnode_text(cfg, "project-cache"), 10)
         cache.init(self.project_root, cache_size)
 
     def load_userauth_from_xml(self):
@@ -207,13 +213,13 @@ class Config:
             return
 
         cfg = loader.load_dom(self.config_path)
-        cfg = loader.get_single_child_node(cfg, 'config')
-
+        cfg = loader.get_single_child_node(cfg, "config")
 
         # Redmine configuration.
-        rm_node = loader.get_single_child_node(cfg, 'redmine', True)
+        rm_node = loader.get_single_child_node(cfg, "redmine", True)
         if rm_node is not None:
             from webtranslate.users import redmine
+
             # Initialize the redmine fields.
             redmine.db_type = None
             redmine.db_schema = None
@@ -225,56 +231,68 @@ class Config:
             redmine.owner_role = None
             redmine.translator_roles = {}
 
-            redmine.db_type = get_subnode_text(rm_node, 'db-type')
-            if redmine.db_type not in ('postgress', 'mysql', 'sqlite3'):
+            redmine.db_type = get_subnode_text(rm_node, "db-type")
+            if redmine.db_type not in ("postgress", "mysql", "sqlite3"):
                 print("Unknown db type in config, aborting!")
                 sys.exit(1)
-            redmine.db_schema = get_subnode_text(rm_node, 'db-schema')
-            redmine.db_name = get_subnode_text(rm_node, 'db-name')
-            redmine.db_user = get_subnode_text(rm_node, 'db-user')
-            redmine.db_password = get_subnode_text(rm_node, 'db-password')
-            redmine.db_host = get_subnode_text(rm_node, 'db-host')
-            redmine.db_port = data.convert_num(get_subnode_text(rm_node, 'db-port'), None)
-            redmine.owner_role = get_subnode_text(rm_node, 'owner-role')
+            redmine.db_schema = get_subnode_text(rm_node, "db-schema")
+            redmine.db_name = get_subnode_text(rm_node, "db-name")
+            redmine.db_user = get_subnode_text(rm_node, "db-user")
+            redmine.db_password = get_subnode_text(rm_node, "db-password")
+            redmine.db_host = get_subnode_text(rm_node, "db-host")
+            redmine.db_port = data.convert_num(get_subnode_text(rm_node, "db-port"), None)
+            redmine.owner_role = get_subnode_text(rm_node, "owner-role")
 
             iso_codes = set(li.isocode for li in language_info.all_languages)
-            for node in loader.get_child_nodes(rm_node, 'translator-role'):
-                iso_code = node.getAttribute('language')
+            for node in loader.get_child_nodes(rm_node, "translator-role"):
+                iso_code = node.getAttribute("language")
                 if iso_code not in iso_codes:
-                    print("Language \"" + iso_code + "\" in translator roles is not known, ignored the entry.")
+                    print('Language "' + iso_code + '" in translator roles is not known, ignored the entry.')
                     continue
                 if iso_code in redmine.translator_roles:
-                    print("Language \"" + iso_code + "\" in translator roles is already defined, ignoring the other entry.")
+                    print(
+                        'Language "' + iso_code + '" in translator roles is already defined, ignoring the other entry.'
+                    )
                     continue
                 redmine.translator_roles[iso_code] = loader.collect_text_DOM(node).strip()
 
             # Do some sanity checking.
-            if redmine.db_schema == "": redmine.db_schema = None
-            if redmine.db_name == "" or redmine.db_user == "" or redmine.db_host == "" or redmine.db_port == None or redmine.db_port == 0:
+            if redmine.db_schema == "":
+                redmine.db_schema = None
+            if (
+                redmine.db_name == ""
+                or redmine.db_user == ""
+                or redmine.db_host == ""
+                or redmine.db_port == None
+                or redmine.db_port == 0
+            ):
                 redmine.db_name = None
                 redmine.db_user = None
                 redmine.db_password = None
                 redmine.db_host = None
                 redmine.db_port = None
 
-            if redmine.owner_role == "": redmine.owner_role = None
+            if redmine.owner_role == "":
+                redmine.owner_role = None
             for iso_code, role_name in list(redmine.translator_roles.items()):
-                if role_name == "": del redmine.translator_roles[iso_code]
+                if role_name == "":
+                    del redmine.translator_roles[iso_code]
 
         # github configuration.
-        gh_node = loader.get_single_child_node(cfg, 'github', True)
+        gh_node = loader.get_single_child_node(cfg, "github", True)
         if gh_node is not None:
             from webtranslate.users import github
 
-            github.github_org_api_token = get_subnode_text(gh_node, 'org-api-token')
-            github.github_organization = get_subnode_text(gh_node, 'organization')
-            github.github_oauth_client_id = get_subnode_text(gh_node, 'oauth2-client-id')
-            github.github_oauth_client_secret = get_subnode_text(gh_node, 'oauth2-client-secret')
+            github.github_org_api_token = get_subnode_text(gh_node, "org-api-token")
+            github.github_organization = get_subnode_text(gh_node, "organization")
+            github.github_oauth_client_id = get_subnode_text(gh_node, "oauth2-client-id")
+            github.github_oauth_client_secret = get_subnode_text(gh_node, "oauth2-client-secret")
 
         # Ldap configuration
-        ldap_node = loader.get_single_child_node(cfg, 'ldap', True)
+        ldap_node = loader.get_single_child_node(cfg, "ldap", True)
         if ldap_node is not None:
             from webtranslate.users import ldap
+
             # Initialize the ldap fields.
             ldap.ldap_host = None
             ldap.ldap_basedn_users = None
@@ -282,20 +300,22 @@ class Config:
             ldap.owner_group = None
             ldap.translator_groups = {}
 
-            ldap.ldap_host = get_subnode_text(ldap_node, 'host')
-            ldap.ldap_basedn_users = get_subnode_text(ldap_node, 'basedn-users')
-            ldap.ldap_basedn_groups = get_subnode_text(ldap_node, 'basedn-groups')
+            ldap.ldap_host = get_subnode_text(ldap_node, "host")
+            ldap.ldap_basedn_users = get_subnode_text(ldap_node, "basedn-users")
+            ldap.ldap_basedn_groups = get_subnode_text(ldap_node, "basedn-groups")
 
-            ldap.owner_group = get_subnode_text(ldap_node, 'owner-group')
+            ldap.owner_group = get_subnode_text(ldap_node, "owner-group")
 
             iso_codes = set(li.isocode for li in language_info.all_languages)
-            for node in loader.get_child_nodes(ldap_node, 'translator-group'):
-                iso_code = node.getAttribute('language')
+            for node in loader.get_child_nodes(ldap_node, "translator-group"):
+                iso_code = node.getAttribute("language")
                 if iso_code not in iso_codes:
-                    print("Language \"" + iso_code + "\" in translator groups is not known, ignored the entry.")
+                    print('Language "' + iso_code + '" in translator groups is not known, ignored the entry.')
                     continue
                 if iso_code in ldap.translator_groups:
-                    print("Language \"" + iso_code + "\" in translator groups is already defined, ignoring the other entry.")
+                    print(
+                        'Language "' + iso_code + '" in translator groups is already defined, ignoring the other entry.'
+                    )
                     continue
                 ldap.translator_groups[iso_code] = loader.collect_text_DOM(node).strip()
 
@@ -303,9 +323,13 @@ class Config:
             if ldap.ldap_host == "":
                 ldap.ldap_host = None
 
-            if ldap.owner_group == "": ldap.owner_group = None
+            if ldap.owner_group == "":
+                ldap.owner_group = None
             for iso_code, group_name in list(ldap.translator_groups.items()):
-                if group_name == "": del ldap.translator_groups[iso_code]
+                if group_name == "":
+                    del ldap.translator_groups[iso_code]
+
+
 # }}}
 # {{{ class ProjectCache:
 class ProjectCache:
@@ -324,9 +348,10 @@ class ProjectCache:
     @ivar lru: LRU storage of loaded projects.
     @type lru: C{list} of L{ProjectMetaData}
     """
+
     def __init__(self):
         self.project_root = None
-        self.cache_size = 0 # Disable cache
+        self.cache_size = 0  # Disable cache
         self.projects = {}
         self.lru = []
 
@@ -373,10 +398,10 @@ class ProjectCache:
         @rtype:  C{str} or C{None}
         """
         if disk_name in self.projects:
-            return "A project named \"{}\" already exists".format(disk_name)
+            return 'A project named "{}" already exists'.format(disk_name)
 
         if not may_create_project(self.project_root, disk_name):
-            return "A project file named \"{}\" already exists".format(disk_name)
+            return 'A project file named "{}" already exists'.format(disk_name)
 
         # Construct a new project from scratch.
         storage = cfg.storage_format
@@ -418,7 +443,8 @@ class ProjectCache:
         if pmd.pdata is not None:
             lru = [pmd]
             for p in self.lru:
-                if p != pmd: lru.append(p)
+                if p != pmd:
+                    lru.append(p)
             assert len(lru) == len(self.lru)
             self.lru = lru
             return pmd
@@ -439,7 +465,8 @@ class ProjectCache:
         # XXX to add the requested project.
         lru = [pmd]
         for p in self.lru:
-            if p is not None: lru.append(p)
+            if p is not None:
+                lru.append(p)
         self.lru = lru
 
         pmd.load()
@@ -454,6 +481,8 @@ class ProjectCache:
         @type  pmd: L{ProjectMetaData}
         """
         pmd.save()
+
+
 # }}}
 # {{{ class ProjectMetaData:
 class ProjectMetaData:
@@ -493,6 +522,7 @@ class ProjectMetaData:
     @ivar data_format: Data format used to store the data.
     @type data_format: C{str}, either 'xml', or 'json'
     """
+
     def __init__(self, proj_store, human_name=None):
         self.pdata = None
         self.name = proj_store.name
@@ -516,16 +546,16 @@ class ProjectMetaData:
         self.data_format = proj_store.data_format
 
         if self.storage_type == STORAGE_SEPARATE_LANGUAGES:
-            assert not self.path.endswith('.xml') and not self.path.endswith('.json')
+            assert not self.path.endswith(".xml") and not self.path.endswith(".json")
         else:
             assert self.storage_type == STORAGE_ONE_FILE
-            assert self.path.endswith('.xml') or self.path.endswith('.json')
+            assert self.path.endswith(".xml") or self.path.endswith(".json")
 
     def load(self):
         assert self.pdata is None
 
         if self.storage_type == STORAGE_ONE_FILE:
-            if self.data_format == 'xml':
+            if self.data_format == "xml":
                 xloader = data.XmlLoader(False)
             else:
                 xloader = data.JsonLoader(False)
@@ -534,7 +564,7 @@ class ProjectMetaData:
             self.pdata = xloader.load_project(self.path)
         else:
             assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
-            if self.data_format == 'xml':
+            if self.data_format == "xml":
                 xloader = data.XmlLoader(True)
             else:
                 xloader = data.JsonLoader(True)
@@ -550,11 +580,11 @@ class ProjectMetaData:
             if project.get_base_language() is None:
                 project.base_language = None
                 if len(self.pdata.languages) > 0:
-                    print("Project \"" + project.human_name + "\" has no base language, dropping all translations")
+                    print('Project "' + project.human_name + '" has no base language, dropping all translations')
                 project.languages = {}
 
         process_project_changes(self.pdata)
-        self.human_name = self.pdata.human_name # Copy the human-readable name from the project data.
+        self.human_name = self.pdata.human_name  # Copy the human-readable name from the project data.
 
     def unload(self):
         # XXX Unlink the data
@@ -573,7 +603,7 @@ class ProjectMetaData:
                         break
 
             if needs_save:
-                if self.data_format == 'xml':
+                if self.data_format == "xml":
                     xsaver = data.XmlSaver(False, True)
                 else:
                     xsaver = data.JsonSaver(False)
@@ -587,7 +617,7 @@ class ProjectMetaData:
         else:
             # Project directory should already exist, created as part of project creation.
             assert self.storage_type == STORAGE_SEPARATE_LANGUAGES
-            if self.data_format == 'xml':
+            if self.data_format == "xml":
                 xsaver = data.XmlSaver(True, False)
             else:
                 xsaver = data.JsonSaver(True)
@@ -605,8 +635,7 @@ class ProjectMetaData:
                     rotate_files(path)
                     lng.modified = False
 
-
-    def create_statistics(self, parm_lng = None):
+    def create_statistics(self, parm_lng=None):
         """
         Construct overview statistics of the project.
 
@@ -616,12 +645,13 @@ class ProjectMetaData:
         pdata = self.pdata
 
         blng = pdata.get_base_language()
-        if blng is None: return
+        if blng is None:
+            return
 
         self.blang_name = blng.name
         self.blang_count = len(blng.changes)
 
-        if parm_lng is None or parm_lng is blng: # Update all languages.
+        if parm_lng is None or parm_lng is blng:  # Update all languages.
             pdata.statistics = {}
 
         # Get the pdata.statistics[lname] map for the base language.
@@ -635,21 +665,22 @@ class ProjectMetaData:
         # First construct detailed information in the project
         for sname, bchgs in blng.changes.items():
             # Check newest base language string.
-            bchg = data.get_newest_change(bchgs, '')
+            bchg = data.get_newest_change(bchgs, "")
             binfo = language_file.check_string(projtype, bchg.base_text.text, True, None, blng, True)
             if binfo.has_error:
-                bstat[sname] = [('', data.INVALID)]
+                bstat[sname] = [("", data.INVALID)]
             else:
-                bstat[sname] = [('', data.UP_TO_DATE)]
+                bstat[sname] = [("", data.UP_TO_DATE)]
 
-            if parm_lng is None or parm_lng is blng: # Update all languages.
+            if parm_lng is None or parm_lng is blng:  # Update all languages.
                 lngs = pdata.languages.items()
             else:
-                lngs = [(parm_lng.name, parm_lng)] # Update just 'parm_lng'
+                lngs = [(parm_lng.name, parm_lng)]  # Update just 'parm_lng'
 
             for lname, lng in lngs:
-                assert projtype.allow_case or lng.case == ['']
-                if lng is blng: continue
+                assert projtype.allow_case or lng.case == [""]
+                if lng is blng:
+                    continue
                 # Get the pdata.statistics[lname][sname] list.
                 lstat = pdata.statistics.get(lname)
                 if lstat is None:
@@ -660,33 +691,36 @@ class ProjectMetaData:
                     sstat = []
                     lstat[sname] = sstat
 
-                if binfo is None: # Base string is broken, cannot judge translations.
-                    sstat[:] = [('', data.UNKNOWN)]
+                if binfo is None:  # Base string is broken, cannot judge translations.
+                    sstat[:] = [("", data.UNKNOWN)]
                     continue
 
                 chgs = lng.changes.get(sname)
-                if chgs is None: # No translation at all
-                    sstat[:] = [('', data.MISSING)]
+                if chgs is None:  # No translation at all
+                    sstat[:] = [("", data.MISSING)]
                     continue
 
                 chgs = data.get_all_newest_changes(chgs, lng.case)
                 detailed_state = data.decide_all_string_status(projtype, bchg, chgs, lng, binfo)
-                sstat[:] = sorted((c,se[0]) for c, se in detailed_state.items())
+                sstat[:] = sorted((c, se[0]) for c, se in detailed_state.items())
 
         # Construct overview statistics for each language.
-        if parm_lng is None or parm_lng is blng: # Update all languages.
+        if parm_lng is None or parm_lng is blng:  # Update all languages.
             lngs = pdata.languages.items()
             self.overview = {}
         else:
-            lngs = [(parm_lng.name, parm_lng)] # Update just 'parm_lng'
+            lngs = [(parm_lng.name, parm_lng)]  # Update just 'parm_lng'
 
         for lname, lng in lngs:
-            #if lng is blng: continue
-            counts = [ 0 for i in range(data.MAX_STATE) ]
+            # if lng is blng: continue
+            counts = [0 for i in range(data.MAX_STATE)]
             for sname in blng.changes:
                 state = max(s[1] for s in pdata.statistics[lname][sname])
-                if state != data.MISSING_OK: counts[state] = counts[state] + 1
+                if state != data.MISSING_OK:
+                    counts[state] = counts[state] + 1
             self.overview[lname] = counts
+
+
 # }}}
 
 # {{{ def find_project_files(root):
@@ -706,12 +740,12 @@ def find_project_files(root):
     for name in os.listdir(root):
         path = os.path.join(root, name)
         if os.path.isfile(path):
-            if name.endswith('.xml'):
+            if name.endswith(".xml"):
                 name = name[:-4]
-                data_format = 'xml'
-            elif name.endswith('.json'):
+                data_format = "xml"
+            elif name.endswith(".json"):
                 name = name[:-5]
-                data_format = 'json'
+                data_format = "json"
             else:
                 continue
 
@@ -719,7 +753,7 @@ def find_project_files(root):
             continue
 
         elif os.path.isdir(path):
-            if name == 'projects':
+            if name == "projects":
                 # Ignore obsolete 'projects' sub-directory, projects should be moved.
                 continue
 
@@ -727,16 +761,16 @@ def find_project_files(root):
             found_languages = []
             for sub_name in os.listdir(path):
                 sub_path = os.path.join(path, sub_name)
-                if sub_name.endswith('.xml'):
+                if sub_name.endswith(".xml"):
                     sub_name = sub_name[:-4]
-                    data_format = 'xml'
-                elif sub_name.endswith('.json'):
+                    data_format = "xml"
+                elif sub_name.endswith(".json"):
                     sub_name = sub_name[:-5]
-                    data_format = 'json'
+                    data_format = "json"
                 else:
                     continue
 
-                if sub_name == 'project_data':
+                if sub_name == "project_data":
                     found_format = data_format
                 elif sub_name in language_info.isocode:
                     found_languages.append(sub_name)
@@ -749,7 +783,7 @@ def find_project_files(root):
     found_error = False
     for p in projects:
         if p.name in pnames:
-            msg = "Error: Project \"{}\" exists twice (as \"{}\" and as \"{}\"), please fix."
+            msg = 'Error: Project "{}" exists twice (as "{}" and as "{}"), please fix.'
             msg = msg.format(p.name, p.path, pnames[p.name].path)
             print(msg)
             found_error = True
@@ -761,6 +795,8 @@ def find_project_files(root):
         sys.exit(1)
 
     return projects
+
+
 # }}}
 # {{{ def may_create_project(root, name)
 def may_create_project(root, name):
@@ -776,13 +812,13 @@ def may_create_project(root, name):
     @return: Whether a project with the provided name can be safely created.
     @rtype:  C{bool}
     """
-    if name == 'projects': # Don't allow legacy directory name at all.
+    if name == "projects":  # Don't allow legacy directory name at all.
         return False
 
     path = os.path.join(root, name)
 
     # Does a L{STORAGE_ONE_FILE} project with the given name exists?
-    if os.path.exists(path + ".xml") or os.path.exists(path + '.json'):
+    if os.path.exists(path + ".xml") or os.path.exists(path + ".json"):
         return False
 
     # Does a L{STORAGE_SEPARATE_LANGUAGES} project with the give name exists?
@@ -791,6 +827,8 @@ def may_create_project(root, name):
         return False
 
     return True
+
+
 # }}}
 
 # {{{ def process_changes(lchgs, cases, stamp, used_basetexts):
@@ -822,7 +860,9 @@ def process_changes(lchgs, cases, stamp, used_basetexts):
     for i in range(len(lchgs)):
         chg = lchgs[i]
         case_count = cases[chg.case]
-        if chg.last_upload or (stamp.seconds - chg.stamp.seconds < cfg.change_stabilizing_time and case_count <= cfg.max_number_changes):
+        if chg.last_upload or (
+            stamp.seconds - chg.stamp.seconds < cfg.change_stabilizing_time and case_count <= cfg.max_number_changes
+        ):
             # Last uploaded change, or still too young to throw away.
             newchgs.append(chg)
             cases[chg.case] = case_count + 1
@@ -831,7 +871,8 @@ def process_changes(lchgs, cases, stamp, used_basetexts):
     # Second round, copy more if there is room.
     for i in range(len(lchgs)):
         chg = lchgs[i]
-        if i in done: continue
+        if i in done:
+            continue
         case_count = cases[chg.case]
         if case_count < cfg.min_number_changes:
             newchgs.append(chg)
@@ -839,6 +880,8 @@ def process_changes(lchgs, cases, stamp, used_basetexts):
             used_basetexts.add(chg.base_text)
 
     return newchgs
+
+
 # }}}
 # {{{ def process_project_changes(pdata):
 def process_project_changes(pdata):
@@ -855,11 +898,12 @@ def process_project_changes(pdata):
     stamp = data.make_stamp()
     modified = False
     if pdata.base_language is None:
-        return False # No base language -> nothing to do.
+        return False  # No base language -> nothing to do.
 
     # Update translation changes.
     for lname, lng in pdata.languages.items():
-        if lname == pdata.base_language: continue
+        if lname == pdata.base_language:
+            continue
         lng_modified = False
         for chgs in lng.changes.values():
             nchgs = process_changes(chgs, lng.case, stamp, used_basetexts)
@@ -896,6 +940,8 @@ def process_project_changes(pdata):
         blng.set_modified()
 
     return modified
+
+
 # }}}
 # {{{ def rotate_files(fpath):
 def rotate_files(fpath):
@@ -907,13 +953,14 @@ def rotate_files(fpath):
     @type  fpath: C{str}
     """
     dirname, filename = os.path.split(fpath)
-    assert dirname != '' and filename != '' # Assume it is a path with a / in it.
+    assert dirname != "" and filename != ""  # Assume it is a path with a / in it.
 
     data_files = {}
     new_name = filename + ".new"
     bup_name = filename + ".bup"
     for name in os.listdir(dirname):
-        if not name.startswith(filename): continue
+        if not name.startswith(filename):
+            continue
 
         path = os.path.join(dirname, name)
         if name == filename:
@@ -923,11 +970,12 @@ def rotate_files(fpath):
             data_files[-1] = path
 
         elif name.startswith(bup_name):
-            num = data.convert_num(name[len(bup_name):], None)
-            if num is None or num <= 0: continue
+            num = data.convert_num(name[len(bup_name) :], None)
+            if num is None or num <= 0:
+                continue
             data_files[num] = path
 
-    assert -1 in data_files # We should have a '.new' file.
+    assert -1 in data_files  # We should have a '.new' file.
     missing = 0
     while missing in data_files and missing < 99 and missing < cfg.num_backup_files:
         missing = missing + 1
@@ -936,7 +984,7 @@ def rotate_files(fpath):
     if missing in data_files:
         # Missing isn't really missing, loop ended due to upper bound check.
         # Remove the 'missing' file to make room.
-        cmds.append(('rm', data_files[missing]))
+        cmds.append(("rm", data_files[missing]))
     else:
         # 'missing' was really missing, add it so it can be used below.
         if missing == 0:
@@ -947,18 +995,20 @@ def rotate_files(fpath):
     # Generate mv and rm commands for the data files.
     num = missing - 1
     while num >= -1:
-        cmds.append(('mv', data_files[num], data_files[num + 1]))
+        cmds.append(("mv", data_files[num], data_files[num + 1]))
         num = num - 1
     for num, path in data_files.items():
         if num > cfg.num_backup_files:
-            cmds.append(('rm', path))
+            cmds.append(("rm", path))
 
     # Execute the commands.
     for cmd in cmds:
-        if cmd[0] == 'mv':
+        if cmd[0] == "mv":
             os.rename(cmd[1], cmd[2])
-        elif cmd[0] == 'rm':
+        elif cmd[0] == "rm":
             os.unlink(cmd[1])
+
+
 # }}}
 
 cfg = None

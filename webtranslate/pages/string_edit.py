@@ -10,6 +10,7 @@ MISSING_PRIO = 1
 INVALID_PRIO = 2
 OUTDATED_PRIO = 3
 
+
 class Translation:
     """
     All information of a translation.
@@ -41,6 +42,7 @@ class Translation:
     @ivar saved: Translation is saved in the project data (strings being edited but having errors are not saved).
     @type saved: C{bool}
     """
+
     def __init__(self, bchg, lchg, now, saved):
         """
         Constructor.
@@ -64,7 +66,8 @@ class Translation:
 
         if lchg is not None:
             user = lchg.user
-            if user is None: user = "unknown"
+            if user is None:
+                user = "unknown"
             self.user = user
             self.trans_base = lchg.base_text
             self.text = lchg.new_text
@@ -75,12 +78,13 @@ class Translation:
                 self.stamp_desc = None
                 self.stamp = None
         else:
-            self.user = 'none'
+            self.user = "none"
             self.trans_base = self.current_base
-            txt = data.Text('', '', None) # This breaks assumptions on the Text class.
+            txt = data.Text("", "", None)  # This breaks assumptions on the Text class.
             self.text = txt
             self.stamp_desc = None
             self.stamp = None
+
 
 class RelatedString:
     """
@@ -93,9 +97,11 @@ class RelatedString:
     @ivar text: Current text of the related string.
     @type text: C{Text}
     """
+
     def __init__(self, sname, text):
         self.sname = sname
         self.text = text
+
 
 class TransLationCase:
     """
@@ -110,17 +116,20 @@ class TransLationCase:
     @ivar related: Related strings.
     @type related: C{list} of L{RelatedString}
     """
+
     def __init__(self, case, transl, related):
         self.case = case
         self.transl = transl
         self.related = related
 
     def get_stringname(self, sname):
-        if self.case == '': return sname
-        return sname + '.' + self.case
+        if self.case == "":
+            return sname
+        return sname + "." + self.case
 
     def __repr__(self):
         return "TransLationCase({}, {}, {})".format(repr(self.case), repr(self.transl), repr(self.related))
+
 
 class StringAvoidanceCache:
     """
@@ -132,6 +141,7 @@ class StringAvoidanceCache:
     @ivar cache: Cached items (string names to avoid).
     @type cache: C{dict} of C{str} to C{int}
     """
+
     AVOID_MAXLEN = 5
 
     def __init__(self):
@@ -145,13 +155,15 @@ class StringAvoidanceCache:
         @type  name: C{str}
         """
         i = self.cache.get(name)
-        if i == 0: return
+        if i == 0:
+            return
 
         new_cache = {name: 0}
         for nm, idx in self.cache.items():
             if i is None or idx < i:
                 new_idx = idx + 1
-                if new_idx < self.AVOID_MAXLEN: new_cache[nm] = new_idx
+                if new_idx < self.AVOID_MAXLEN:
+                    new_cache[nm] = new_idx
             elif idx > i:
                 new_cache[nm] = idx
 
@@ -186,33 +198,40 @@ def find_string(pmd, lngname):
     """
     pdata = pmd.pdata
     blng = pdata.get_base_language()
-    if blng is None: return None # No strings to translate without base language.
+    if blng is None:
+        return None  # No strings to translate without base language.
     ldict = pdata.statistics.get(lngname)
-    if ldict is None: return None # Unsupported language.
+    if ldict is None:
+        return None  # Unsupported language.
 
     str_lists = {}
     str_lists[MISSING_PRIO] = []
     str_lists[INVALID_PRIO] = []
     str_lists[OUTDATED_PRIO] = []
 
-    prio_map = {data.MISSING: str_lists[MISSING_PRIO],
-                data.INVALID: str_lists[INVALID_PRIO],
-                data.OUT_OF_DATE: str_lists[OUTDATED_PRIO]}
+    prio_map = {
+        data.MISSING: str_lists[MISSING_PRIO],
+        data.INVALID: str_lists[INVALID_PRIO],
+        data.OUT_OF_DATE: str_lists[OUTDATED_PRIO],
+    }
 
     # Collect all strings that need work in the above list(s).
     for sname in blng.changes:
         state = max(s[1] for s in pdata.statistics[lngname][sname])
         str_coll = prio_map.get(state)
-        if str_coll is None: continue
+        if str_coll is None:
+            continue
         str_coll.append(sname)
 
     # Collect high priority strings, until we have enough, or we run out of strings.
     cur_strings = set()
     for _prio, strs in sorted(str_lists.items()):
         cur_strings.update(strs)
-        if len(cur_strings) > StringAvoidanceCache.AVOID_MAXLEN: break # Sounds like enough.
+        if len(cur_strings) > StringAvoidanceCache.AVOID_MAXLEN:
+            break  # Sounds like enough.
 
-    if len(cur_strings) == 0: return None
+    if len(cur_strings) == 0:
+        return None
 
     sac = pmd.string_avoid_cache.get(lngname)
     if sac is None:
@@ -238,8 +257,9 @@ def find_string(pmd, lngname):
         sac.add(best_name)
         return best_name
 
-@route('/fix/<prjname>/<lngname>', method = 'GET')
-@protected(['string', 'prjname', 'lngname'])
+
+@route("/fix/<prjname>/<lngname>", method="GET")
+@protected(["string", "prjname", "lngname"])
 def fix_string(userauth, prjname, lngname):
     """
     Fix a random string.
@@ -287,15 +307,17 @@ def fix_string_page(pmd, prjname, lngname, message):
     """
     sname = find_string(pmd, lngname)
     if sname is None:
-        if message is None: message = "All strings are up-to-date, perhaps some translations need rewording?"
-        redirect('/translation/<prjname>/<lngname>', prjname = prjname, lngname = lngname, message = message)
+        if message is None:
+            message = "All strings are up-to-date, perhaps some translations need rewording?"
+        redirect("/translation/<prjname>/<lngname>", prjname=prjname, lngname=lngname, message=message)
         return
 
     if message is None:
-        redirect('/string/<prjname>/<lngname>/<sname>', prjname = prjname, lngname = lngname, sname = sname)
+        redirect("/string/<prjname>/<lngname>/<sname>", prjname=prjname, lngname=lngname, sname=sname)
     else:
-        redirect('/string/<prjname>/<lngname>/<sname>', prjname = prjname, lngname = lngname, sname = sname, message = message)
+        redirect("/string/<prjname>/<lngname>/<sname>", prjname=prjname, lngname=lngname, sname=sname, message=message)
     return
+
 
 def check_page_parameters(prjname, lngname, sname):
     """
@@ -324,7 +346,7 @@ def check_page_parameters(prjname, lngname, sname):
     if lng is None:
         abort(404, "Language does not exist in the project")
         return None
-    assert pdata.projtype.allow_case or lng.case == ['']
+    assert pdata.projtype.allow_case or lng.case == [""]
 
     blng = pdata.get_base_language()
     if blng == lng:
@@ -346,7 +368,8 @@ def check_page_parameters(prjname, lngname, sname):
 
     return pmd, bchg, lng, binfo
 
-def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, states = None, messages = []):
+
+def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, states=None, messages=[]):
     """
     Construct a page for editing a string.
 
@@ -377,7 +400,8 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
     @return: Either an error, or an instantiated template.
     @rtype:  C{None} or C{str}
     """
-    if states is None: states = {}
+    if states is None:
+        states = {}
     pdata = pmd.pdata
     projtype = pdata.projtype
 
@@ -393,7 +417,6 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
                     if rc is not None:
                         rc.append(RelatedString(rel_sname, chg.new_text))
 
-
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, None)
     now = data.make_stamp()
 
@@ -401,14 +424,15 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
     for case in lng.case:
         tranls = []
 
-        cchgs = [(cchg, True) for cchg in case_chgs[case]] # Tuples (case-change, 'saved translation')
+        cchgs = [(cchg, True) for cchg in case_chgs[case]]  # Tuples (case-change, 'saved translation')
         chg_err_state = states.get(case)
-        if chg_err_state is not None: cchgs.append((chg_err_state[0], False))
+        if chg_err_state is not None:
+            cchgs.append((chg_err_state[0], False))
         if len(cchgs) == 0:
             # No changes for this case, make a dummy one to display the base data.
             tra = Translation(bchg, None, now, False)
-            if case == '':
-                tra.errors = [language_file.ErrorMessage(language_file.ERROR, None, 'String is missing')]
+            if case == "":
+                tra.errors = [language_file.ErrorMessage(language_file.ERROR, None, "String is missing")]
                 tra.state = data.STATE_MAP[data.MISSING].name
             else:
                 tra.errors = []
@@ -437,7 +461,7 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
 
                 tranls.append(tra)
 
-        if projtype.allow_case or case == '':
+        if projtype.allow_case or case == "":
             transl_cases.append(TransLationCase(case, tranls, related_cases[case]))
 
     related_languages = []
@@ -451,33 +475,45 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
                 related_languages.append((l, related))
     related_languages.sort(key=lambda x: x[0].name)
 
-    return template('string_form', userauth = userauth, pmd = pmd,
-                    lng = lng, sname = sname, plurals = language_info.all_plurals[lng.plural].description,
-                    genders = lng.gender, cases = lng.case, related_languages = related_languages, tcs = transl_cases, messages = messages)
+    return template(
+        "string_form",
+        userauth=userauth,
+        pmd=pmd,
+        lng=lng,
+        sname=sname,
+        plurals=language_info.all_plurals[lng.plural].description,
+        genders=lng.gender,
+        cases=lng.case,
+        related_languages=related_languages,
+        tcs=transl_cases,
+        messages=messages,
+    )
 
 
-@route('/string/<prjname>/<lngname>/<sname>', method = 'GET')
-@protected(['string', 'prjname', 'lngname'])
+@route("/string/<prjname>/<lngname>/<sname>", method="GET")
+@protected(["string", "prjname", "lngname"])
 def str_form(userauth, prjname, lngname, sname):
     parms = check_page_parameters(prjname, lngname, sname)
-    if parms is None: return
+    if parms is None:
+        return
 
     pmd, bchg, lng, binfo = parms
     return output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, None)
 
 
-@route('/string/<prjname>/<lngname>/<sname>', method = 'POST')
-@protected(['string', 'prjname', 'lngname'])
+@route("/string/<prjname>/<lngname>/<sname>", method="POST")
+@protected(["string", "prjname", "lngname"])
 def str_post(userauth, prjname, lngname, sname):
     parms = check_page_parameters(prjname, lngname, sname)
-    if parms is None: return
+    if parms is None:
+        return
 
     pmd, bchg, lng, binfo = parms
 
-    request.forms.recode_unicode = False # Allow Unicode input
-    request_forms = request.forms.decode() # Convert dict to Unicode.
+    request.forms.recode_unicode = False  # Allow Unicode input
+    request_forms = request.forms.decode()  # Convert dict to Unicode.
 
-    base_str = request_forms.get('base') # Base text translated against in the form.
+    base_str = request_forms.get("base")  # Base text translated against in the form.
     if base_str is None or base_str != bchg.base_text.text:
         abort(404, "Base language has been changed, please translate the newer version instead")
         return
@@ -486,24 +522,30 @@ def str_post(userauth, prjname, lngname, sname):
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, bchg)
     projtype = pmd.pdata.projtype
 
-    stamp = None # Assigned a stamp object when a change is made in the translation.
+    stamp = None  # Assigned a stamp object when a change is made in the translation.
 
     # Collected output data
     new_changes = []
     new_state_errors = {}
 
     for case in lng.case:
-        trl_str = request_forms.get('text_' + case) # Translation text in the form.
-        if trl_str is None: continue # It's missing from the form data.
+        trl_str = request_forms.get("text_" + case)  # Translation text in the form.
+        if trl_str is None:
+            continue  # It's missing from the form data.
 
         trl_str = language_file.sanitize_text(trl_str)
-        if case == '' and trl_str == '' and bchg.base_text != '':
+        if case == "" and trl_str == "" and bchg.base_text != "":
             # Empty base case for a non-empty string, was the "allow empty base translation" flag set?
-            if request_forms.get('allow_empty_default') != 'on':
-                if stamp is None: stamp = data.make_stamp()
+            if request_forms.get("allow_empty_default") != "on":
+                if stamp is None:
+                    stamp = data.make_stamp()
                 txt = data.Text(trl_str, case, stamp)
                 tchg = data.Change(sname, case, bchg.base_text, txt, stamp, userauth.name)
-                error = language_file.ErrorMessage(language_file.ERROR, None, "Empty default case is not allowed (enable by setting 'Allow empty input').")
+                error = language_file.ErrorMessage(
+                    language_file.ERROR,
+                    None,
+                    "Empty default case is not allowed (enable by setting 'Allow empty input').",
+                )
                 new_state_errors[case] = (tchg, data.INVALID, [error])
                 continue
 
@@ -515,11 +557,12 @@ def str_post(userauth, prjname, lngname, sname):
                 break
 
         if trl_chg is None:
-            if case != '' and trl_str == '' and len(case_chgs[case]) == 0:
-                continue # Skip adding empty non-base cases if there are no strings.
+            if case != "" and trl_str == "" and len(case_chgs[case]) == 0:
+                continue  # Skip adding empty non-base cases if there are no strings.
 
             # A new translation against bchg!
-            if stamp is None: stamp = data.make_stamp()
+            if stamp is None:
+                stamp = data.make_stamp()
             txt = data.Text(trl_str, case, stamp)
             tchg = data.Change(sname, case, bchg.base_text, txt, stamp, userauth.name)
             state, errors = data.get_string_status(projtype, tchg, case, lng, bchg.base_text, binfo)
@@ -533,21 +576,23 @@ def str_post(userauth, prjname, lngname, sname):
         # Found a match with an existing translation text
         if case_chgs[case][-1] == trl_chg:
             # Latest translation.
-            if trl_chg.base_text == bchg.base_text: # And also the latest base language!
+            if trl_chg.base_text == bchg.base_text:  # And also the latest base language!
                 continue
             state, _errors = data.get_string_status(projtype, trl_chg, case, lng, bchg.base_text, binfo)
             if state == data.OUT_OF_DATE:
                 # We displayed a 'this string is correct' checkbox. Was it changed?
-                if request_forms.get('ok_' + case):
+                if request_forms.get("ok_" + case):
                     # Move to latest base language text.
-                    if stamp is None: stamp = data.make_stamp()
+                    if stamp is None:
+                        stamp = data.make_stamp()
                     trl_chg.base_text = bchg.base_text
                     trl_chg.stamp = stamp
                     trl_chg.user = userauth.name
             continue
 
         # We got an older translation instead.
-        if stamp is None: stamp = data.make_stamp()
+        if stamp is None:
+            stamp = data.make_stamp()
         tchg = data.Change(sname, case, bchg.base_text, trl_chg.new_text, stamp, userauth.name)
         state, errors = data.get_string_status(projtype, tchg, case, lng, bchg.base_text, binfo)
         if state == data.MISSING or state == data.INVALID:
@@ -555,14 +600,15 @@ def str_post(userauth, prjname, lngname, sname):
         else:
             new_changes.append(tchg)
 
-        continue # Not really needed.
+        continue  # Not really needed.
 
     if len(new_state_errors) > 0:
         msg = {}
-        msg['message'] = 'There were error(s)'
-        msg['message_class'] = 'error'
-        return output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname,
-                                       new_state_errors, messages = [msg])
+        msg["message"] = "There were error(s)"
+        msg["message_class"] = "error"
+        return output_string_edit_page(
+            userauth, bchg, binfo, lng, pmd, lngname, sname, new_state_errors, messages=[msg]
+        )
 
     # No errors, store the changes.
     for tchg in new_changes:
@@ -572,14 +618,14 @@ def str_post(userauth, prjname, lngname, sname):
             lng.changes[sname] = [tchg]
         lng.set_modified()
 
-    modified = config.process_project_changes(pmd.pdata) # Update changes of the project.
+    modified = config.process_project_changes(pmd.pdata)  # Update changes of the project.
     if modified or stamp is not None:
         config.cache.save_pmd(pmd)
         pmd.create_statistics(lng)
 
     # Construct a message that the string is changed.
     if len(new_changes) > 0:
-        message = "Successfully updated string '" + sname +"' " + utils.get_datetime_now_formatted()
+        message = "Successfully updated string '" + sname + "' " + utils.get_datetime_now_formatted()
     else:
         message = None
     return fix_string_page(pmd, prjname, lngname, message)

@@ -5,6 +5,7 @@ Supplies user and authentication context for requests.
 """
 from webtranslate import rights
 
+
 class UserAuthentication:
     """
     @ivar is_auth: Whether the user authenticated successfully. False for anonymous access.
@@ -13,6 +14,7 @@ class UserAuthentication:
     @ivar name: Username, "unknown" for anonymous access.
     @type name: C{str}
     """
+
     def __init__(self, is_auth, name):
         self.is_auth = is_auth
         self.name = name
@@ -66,4 +68,4 @@ class UserAuthentication:
         @return: Whether the user may access the page.
         @rtype:  C{bool}
         """
-        return self.may_access([prefix, prjname, lngname, 'read'], prjname, lngname)
+        return self.may_access([prefix, prjname, lngname, "read"], prjname, lngname)

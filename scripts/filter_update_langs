@@ -3,10 +3,8 @@
 import sys, os, os.path, getopt
 
 
-
 # Keywords to use from OpenTTD langfiles
-filterkeywords = [ "##name", "##ownname", "##isocode", "##plural", "##grflangid", "##gender", "##case" ]
-
+filterkeywords = ["##name", "##ownname", "##isocode", "##plural", "##grflangid", "##gender", "##case"]
 
 
 def filter_langfile(filename):
@@ -20,7 +18,7 @@ def filter_langfile(filename):
     @rtype:  C{list} of C{str}
     """
     result = []
-    for l in open(filename, 'r', encoding = 'utf-8'):
+    for l in open(filename, "r", encoding="utf-8"):
         l = l.strip()
         if len(l) == 0:
             continue
@@ -36,6 +34,7 @@ def filter_langfile(filename):
 
     return result
 
+
 def read_complete_langfile(filename):
     """
     Read complete file.
@@ -46,7 +45,8 @@ def read_complete_langfile(filename):
     @return: List of lines.
     @rtype:  C{list} of C{str}
     """
-    return [ l.strip() for l in open(filename, 'r', encoding = 'utf-8') ]
+    return [l.strip() for l in open(filename, "r", encoding="utf-8")]
+
 
 def write_langfile(filename, content):
     """
@@ -58,42 +58,40 @@ def write_langfile(filename, content):
     @param content: List of lines.
     @type  content: C{list} of C{str}
     """
-    with open(filename, "w", encoding = 'utf-8') as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.write("\n".join(content))
         f.write("\n")
 
 
-
 # Parse arguments
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "h", [ "help" ])
+    opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
 except getopt.GetoptError as err:
-    print("filter_update_langs: " + str(err) + " (try \"filter_update_langs -h\")")
+    print("filter_update_langs: " + str(err) + ' (try "filter_update_langs -h")')
     sys.exit(2)
 
 # Check arguments
 for opt, val in opts:
-    if opt in ('--help', '-h'):
+    if opt in ("--help", "-h"):
         print("Usage: filter_update_langs <input dir> <output dir>")
         sys.exit(1)
     else:
-        assert False # Unknown option
+        assert False  # Unknown option
 
 if len(args) != 2:
-    print("Invalid number of parameters, try \"filter_update_langs -h\"")
+    print('Invalid number of parameters, try "filter_update_langs -h"')
     sys.exit(2)
 
 inputdir = args[0]
 outputdir = args[1]
 
 if not os.path.isdir(inputdir):
-    print("Invalid input directory \"{}\"".format(inputdir))
+    print('Invalid input directory "{}"'.format(inputdir))
     sys.exit(2)
 
 if not os.path.isdir(outputdir):
-    print("Invalid output directory \"{}\"".format(outputdir))
+    print('Invalid output directory "{}"'.format(outputdir))
     sys.exit(2)
-
 
 
 # Read input language definitions
@@ -104,7 +102,6 @@ for f in os.listdir(inputdir):
         continue
 
     inputlangs[f] = filter_langfile(n)
-
 
 
 # Scan existing language definitions

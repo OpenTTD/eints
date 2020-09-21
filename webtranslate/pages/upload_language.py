@@ -7,8 +7,9 @@ from webtranslate.protect import protected
 from webtranslate import config, data, utils
 from webtranslate.newgrf import language_file, language_info
 
-@route('/upload/<prjname>', method = 'GET')
-@protected(['upload', 'prjname', '-'])
+
+@route("/upload/<prjname>", method="GET")
+@protected(["upload", "prjname", "-"])
 def page_get(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -17,13 +18,18 @@ def page_get(userauth, prjname):
 
     pdata = pmd.pdata
     if pdata.projtype.has_grflangid:
-        return template('upload_lang', userauth = userauth, pmd = pmd)
+        return template("upload_lang", userauth=userauth, pmd=pmd)
     else:
-        return template('upload_lang_select', userauth = userauth, pmd = pmd,
-                    lnginfos = sorted(pdata.get_all_languages(), lambda l: l.isocode))
+        return template(
+            "upload_lang_select",
+            userauth=userauth,
+            pmd=pmd,
+            lnginfos=sorted(pdata.get_all_languages(), lambda l: l.isocode),
+        )
 
-@route('/upload/<prjname>/<lngname>', method = 'GET')
-@protected(['upload', 'prjname', '-'])
+
+@route("/upload/<prjname>/<lngname>", method="GET")
+@protected(["upload", "prjname", "-"])
 def page_get_subdir(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -35,10 +41,11 @@ def page_get_subdir(userauth, prjname, lngname):
     if linfo is None:
         abort(404, "Language is unknown")
         return
-    return template('upload_lang_subdir', userauth = userauth, pmd = pmd, lnginfo = linfo)
+    return template("upload_lang_subdir", userauth=userauth, pmd=pmd, lnginfo=linfo)
 
-@route('/upload/<prjname>/<lngname>', method = 'POST')
-@protected(['upload', 'prjname', '-'])
+
+@route("/upload/<prjname>/<lngname>", method="POST")
+@protected(["upload", "prjname", "-"])
 def page_post_subdir(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -52,11 +59,12 @@ def page_post_subdir(userauth, prjname, lngname):
 
     langfile = request.files.langfile
     override = request.forms.override
-    is_base  = request.forms.base_language
+    is_base = request.forms.base_language
     return handle_upload(userauth, pmd, prjname, langfile, override, is_base, linfo)
 
-@route('/upload/<prjname>', method = 'POST')
-@protected(['upload', 'prjname', '-'])
+
+@route("/upload/<prjname>", method="POST")
+@protected(["upload", "prjname", "-"])
 def page_post(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -70,7 +78,7 @@ def page_post(userauth, prjname):
 
     langfile = request.files.langfile
     override = request.forms.override
-    is_base  = request.forms.base_language
+    is_base = request.forms.base_language
     return handle_upload(userauth, pmd, prjname, langfile, override, is_base, None)
 
 
@@ -113,23 +121,24 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     # Parse language file, and report any errors.
     ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size, lng_data)
     if len(ng_data.errors) > 0:
-        return template('upload_errors', userauth = userauth, pmd = pmd, errors = ng_data.errors)
+        return template("upload_errors", userauth=userauth, pmd=pmd, errors=ng_data.errors)
 
     # Is the language allowed?
     if not pdata.projtype.allow_language(ng_data.language_data):
-        abort(404, "Language \"{}\" may not be uploaded".format(ng_data.language_data.isocode))
+        abort(404, 'Language "{}" may not be uploaded'.format(ng_data.language_data.isocode))
         return
 
     stamp = data.make_stamp()
 
     lng = pdata.languages.get(ng_data.language_data.isocode)
-    if lng is None: # New language being added.
+    if lng is None:  # New language being added.
         result = add_new_language(ng_data, pdata, is_base)
         if not result[0]:
             abort(404, result[0])
             return
         lng = result[1]
-        if is_base and base_language is None: base_language = lng
+        if is_base and base_language is None:
+            base_language = lng
 
     if is_base:
         if base_language is not None and base_language != lng:
@@ -141,7 +150,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
             sv.text = language_file.sanitize_text(sv.text)
             chgs = base_language.changes.get(sv.name)
             chg = get_blng_change(sv, base_language)
-            if chg is None: # New change.
+            if chg is None:  # New change.
                 base_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, None, stamp, userauth.name, True)
                 if chgs is None:
@@ -155,13 +164,13 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                 chg.user = userauth.name
 
             for c in chgs:
-                c.last_upload = (c == chg)
+                c.last_upload = c == chg
 
         # Update language properties as well.
         copy_lng_properties(pdata.projtype, ng_data, base_language)
 
-        pdata.skeleton = ng_data.skeleton # Use the new skeleton file.
-        pdata.flush_related_cache() # Drop the related strings cache.
+        pdata.skeleton = ng_data.skeleton  # Use the new skeleton file.
+        pdata.flush_related_cache()  # Drop the related strings cache.
         pdata.set_modified()
 
         # Push the new set of string-names to all languages (this includes the base language).
@@ -171,8 +180,9 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
             not_seen = str_names.copy()
             for sn in list(lang.changes.keys()):
                 not_seen.discard(sn)
-                if sn in str_names: continue # Name is kept.
-                del lang.changes[sn] # Old string, delete
+                if sn in str_names:
+                    continue  # Name is kept.
+                del lang.changes[sn]  # Old string, delete
                 lng_modified = True
             for sn in not_seen:
                 # Missing translation are not saved, so no set_modified here.
@@ -180,7 +190,6 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
 
             if lng_modified:
                 lang.set_modified()
-
 
     else:
         # Not a base language -> it is a translation.
@@ -193,14 +202,16 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
 
             # Find base language string for 'sv'.
             bchgs = base_language.changes.get(sv.name)
-            if bchgs is None: continue # Translation has a string not in the base language
-            bchg = data.get_newest_change(bchgs, '')
-            if bchg is None: continue # Nothing to base against.
+            if bchgs is None:
+                continue  # Translation has a string not in the base language
+            bchg = data.get_newest_change(bchgs, "")
+            if bchg is None:
+                continue  # Nothing to base against.
             base_text = bchg.base_text
 
             chgs = lng.changes.get(sv.name)
             chg = get_lng_change(sv, lng, base_text)
-            if chg is None: # It's a new text or new case.
+            if chg is None:  # It's a new text or new case.
                 lng_text = data.Text(sv.text, sv.case, stamp)
                 chg = data.Change(sv.name, sv.case, base_text, lng_text, stamp, userauth.name, True)
                 if chgs is None:
@@ -209,11 +220,11 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                     for c in chgs:
                         c.last_upload = False
                     chgs.append(chg)
-            elif override: # Override existing entry.
+            elif override:  # Override existing entry.
                 chg.stamp = stamp
                 chg.user = userauth.name
                 for c in chgs:
-                    c.last_upload = (c == chg)
+                    c.last_upload = c == chg
 
         # Update language properties as well.
         copy_lng_properties(pdata.projtype, ng_data, lng)
@@ -222,12 +233,12 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     config.cache.save_pmd(pmd)
 
     if is_base:
-        pmd.create_statistics(None) # Update all languages.
+        pmd.create_statistics(None)  # Update all languages.
     else:
         pmd.create_statistics(lng)
 
-    message = "Successfully uploaded language '" + lng.name +"' " + utils.get_datetime_now_formatted()
-    redirect("/project/<prjname>", prjname = projname, message = message)
+    message = "Successfully uploaded language '" + lng.name + "' " + utils.get_datetime_now_formatted()
+    redirect("/project/<prjname>", prjname=projname, message=message)
 
 
 def get_blng_change(sv, lng):
@@ -246,15 +257,20 @@ def get_blng_change(sv, lng):
     """
     assert lng is not None
     chgs = lng.changes.get(sv.name)
-    if chgs is None or len(chgs) == 0: return None
+    if chgs is None or len(chgs) == 0:
+        return None
 
     best = None
     for chg in chgs:
-        if sv.case != chg.case: continue
-        if sv.text != chg.base_text.text: continue
-        if best is None or best.stamp < chg.stamp: best = chg
+        if sv.case != chg.case:
+            continue
+        if sv.text != chg.base_text.text:
+            continue
+        if best is None or best.stamp < chg.stamp:
+            best = chg
 
     return best
+
 
 def get_lng_change(sv, lng, base_text):
     """
@@ -275,12 +291,15 @@ def get_lng_change(sv, lng, base_text):
     """
     assert lng is not None
     chgs = lng.changes.get(sv.name)
-    if chgs is None or len(chgs) == 0: return None
+    if chgs is None or len(chgs) == 0:
+        return None
 
-    best, best_prio = None, 5 # Smaller prio is better.
+    best, best_prio = None, 5  # Smaller prio is better.
     for chg in chgs:
-        if sv.case != chg.case: continue
-        if chg.new_text is None or sv.text != chg.new_text.text: continue
+        if sv.case != chg.case:
+            continue
+        if chg.new_text is None or sv.text != chg.new_text.text:
+            continue
 
         # Calculate priority.
         if chg.base_text == base_text:
@@ -288,15 +307,19 @@ def get_lng_change(sv, lng, base_text):
         else:
             new_prio = 3
 
-        if not chg.last_upload: new_prio = new_prio + 1
+        if not chg.last_upload:
+            new_prio = new_prio + 1
 
         if best is not None:
-            if new_prio > best_prio: continue
-            if new_prio == best_prio and best.stamp < chg.stamp: continue
+            if new_prio > best_prio:
+                continue
+            if new_prio == best_prio and best.stamp < chg.stamp:
+                continue
 
         best, best_prio = chg, new_prio
 
     return best
+
 
 def add_new_language(ng_data, pdata, base_lang):
     """
@@ -318,7 +341,7 @@ def add_new_language(ng_data, pdata, base_lang):
     if ng_data.language_data.isocode in pdata.languages:
         return (False, "Language {} already exists".format(ng_data.language_data.isocode))
 
-    if pdata.base_language is None and not base_lang: # We don't have a base language, and this is not one either.
+    if pdata.base_language is None and not base_lang:  # We don't have a base language, and this is not one either.
         return (False, "Project has no base language yet, so translations are not possible")
 
     lng = data.Language(ng_data.language_data.isocode)
@@ -335,10 +358,12 @@ def add_new_language(ng_data, pdata, base_lang):
 
     # Add the current string names to the new language.
     for stp, sparam in pdata.skeleton:
-        if stp == 'string': lng.changes[sparam[1]] = []
+        if stp == "string":
+            lng.changes[sparam[1]] = []
 
     lng.set_modified()
     return (True, lng)
+
 
 def copy_lng_properties(projtype, ng_data, lng):
     """
@@ -368,11 +393,10 @@ def copy_lng_properties(projtype, ng_data, lng):
         lng.gender = lng.info.gender
 
     if not projtype.allow_case:
-        lng.case = ['']
+        lng.case = [""]
     elif ng_data.case is not None:
         lng.case = ng_data.case
     else:
         lng.case = lng.info.case
 
     lng.set_modified()
-

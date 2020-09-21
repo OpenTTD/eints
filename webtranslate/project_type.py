@@ -2,6 +2,7 @@
 The type of project decides what language string primitives exist, and how they should be used.
 """
 
+
 class ProjectType:
     """
     Base class of the project type.
@@ -33,8 +34,10 @@ class ProjectType:
     @ivar base_is_translated_cache: Whether string commands in the base language may be rewritten before display.
     @type base_is_translated_cache: C{None} means 'unknown', otherwise C{bool}.
     """
-    def __init__(self, name, human_name, text_commands, allow_gender,
-                 allow_case, allow_extra, allow_unstable_lng, has_grflangid):
+
+    def __init__(
+        self, name, human_name, text_commands, allow_gender, allow_case, allow_extra, allow_unstable_lng, has_grflangid
+    ):
         self.name = name
         self.human_name = human_name
         self.text_commands = text_commands
@@ -76,50 +79,63 @@ class ProjectType:
         """
         return linfo.is_stable or self.allow_unstable_lng
 
+
 class NewGRFProject(ProjectType):
     """
     Project type for NewGRF strings.
     """
+
     def __init__(self):
-        ProjectType.__init__(self,
-            name = "newgrf",
-            human_name = "NewGrf",
-            text_commands = NEWGRF_PARAMETERS,
-            allow_gender = True,
-            allow_case = True,
-            allow_extra = True,
-            allow_unstable_lng = False,
-            has_grflangid = True)
+        ProjectType.__init__(
+            self,
+            name="newgrf",
+            human_name="NewGrf",
+            text_commands=NEWGRF_PARAMETERS,
+            allow_gender=True,
+            allow_case=True,
+            allow_extra=True,
+            allow_unstable_lng=False,
+            has_grflangid=True,
+        )
+
 
 class GameScriptProject(ProjectType):
     """
     Project type for game script strings.
     """
+
     def __init__(self):
-        ProjectType.__init__(self,
-            name = "game-script",
-            human_name = "GameScript",
-            text_commands = GS_PARAMETERS,
-            allow_gender = False,
-            allow_case = False,
-            allow_extra = False,
-            allow_unstable_lng = False,
-            has_grflangid = False)
+        ProjectType.__init__(
+            self,
+            name="game-script",
+            human_name="GameScript",
+            text_commands=GS_PARAMETERS,
+            allow_gender=False,
+            allow_case=False,
+            allow_extra=False,
+            allow_unstable_lng=False,
+            has_grflangid=False,
+        )
+
 
 class OpenTTDProject(ProjectType):
     """
     Project type for OpenTTD strings.
     """
+
     def __init__(self):
-        ProjectType.__init__(self,
-            name = "openttd",
-            human_name = "OpenTTD",
-            text_commands = OPENTTD_PARAMETERS,
-            allow_gender = True,
-            allow_case = True,
-            allow_extra = False,
-            allow_unstable_lng = True,
-            has_grflangid = True)
+        ProjectType.__init__(
+            self,
+            name="openttd",
+            human_name="OpenTTD",
+            text_commands=OPENTTD_PARAMETERS,
+            allow_gender=True,
+            allow_case=True,
+            allow_extra=False,
+            allow_unstable_lng=True,
+            has_grflangid=True,
+        )
+
 
 class ParameterInfo:
     """
@@ -141,7 +157,8 @@ class ParameterInfo:
     @ivar translated_cmd: For commands in the base language, command to use checking and displaying.
     @type translated_cmd: C{str} or C{None} (the latter means use C{self})
     """
-    def __init__(self, literal, parameters, default_plural_pos, allow_case, critical, translated_cmd = None):
+
+    def __init__(self, literal, parameters, default_plural_pos, allow_case, critical, translated_cmd=None):
         self.literal = literal
         self.parameters = parameters
         self.default_plural_pos = default_plural_pos
@@ -181,13 +198,18 @@ class ParameterInfo:
         @return: The command name to use for a translation.
         @rtype:  C{str}
         """
-        if self.translated_cmd is None: return self.literal
+        if self.translated_cmd is None:
+            return self.literal
         return self.translated_cmd
 
-P__ = (False, False) # Parameter, not suitable for plural or gender
-PP_ = (True,  False) # Parameter suitable for plural
+
+P__ = (False, False)  # Parameter, not suitable for plural or gender
+PP_ = (True, False)  # Parameter suitable for plural
 P_G = (False, True)  # Parameter suitable for gender
-PPG = (True,  True)  # Parameter suitable for both plural and gender
+PPG = (True, True)  # Parameter suitable for both plural and gender
+
+# Keep the format of the next three tables
+# fmt: off
 
 # {{{ NEWGRF_PARAMETERS
 _NEWGRF_PARAMETERS = [
@@ -232,8 +254,8 @@ _NEWGRF_PARAMETERS = [
     ParameterInfo("WEIGHT",         [PP_],      0,    False, True ),
     ParameterInfo("WEIGHT_SHORT",   [PP_],      0,    False, True ),
     ParameterInfo("CARGO_LONG",     [P_G, PP_], 1,    False, True ),
-    ParameterInfo("CARGO_SHORT",    [P__, PP_], 1,    False, True ), # short cargo description, only ### tons, or ### litres
-    ParameterInfo("CARGO_TINY",     [P__, PP_], 1,    False, True ), # tiny cargo description with only the amount
+    ParameterInfo("CARGO_SHORT",    [P__, PP_], 1,    False, True ),  # short cargo description, only ### tons, or ### litres
+    ParameterInfo("CARGO_TINY",     [P__, PP_], 1,    False, True ),  # tiny cargo description with only the amount
     ParameterInfo("CARGO_NAME",     [P_G],      None, True,  True ),
     ParameterInfo("HEX",            [PP_],      0,    False, True ),
     ParameterInfo("STRING",         [P_G],      None, True,  True ),
@@ -283,10 +305,10 @@ _GS_PARAMETERS = [
     ParameterInfo("STRING6",           [P_G, PPG, PPG, PPG, PPG, PPG, PPG],      None, True,  True,  "STRING"),
     ParameterInfo("STRING7",           [P_G, PPG, PPG, PPG, PPG, PPG, PPG, PPG], None, True,  True,  "STRING"),
 
-    ParameterInfo("INDUSTRY",          [P_G],      None, True,  True ), # takes an industry number.
+    ParameterInfo("INDUSTRY",          [P_G],      None, True,  True ),  # takes an industry number.
     ParameterInfo("CARGO_LONG",        [P_G, PP_], 1,    False, True ),
-    ParameterInfo("CARGO_SHORT",       [P__, PP_], 1,    False, True ), # short cargo description, only ### tons, or ### litres
-    ParameterInfo("CARGO_TINY",        [P__, PP_], 1,    False, True ), # tiny cargo description with only the amount
+    ParameterInfo("CARGO_SHORT",       [P__, PP_], 1,    False, True ),  # short cargo description, only ### tons, or ### litres
+    ParameterInfo("CARGO_TINY",        [P__, PP_], 1,    False, True ),  # tiny cargo description with only the amount
     ParameterInfo("CARGO_LIST",        [P__],      None, True,  True ),
     ParameterInfo("POWER",             [PP_],      0,    False, True ),
     ParameterInfo("VOLUME_LONG",       [PP_],      0,    False, True ),
@@ -304,17 +326,17 @@ _GS_PARAMETERS = [
     ParameterInfo("STRING",            [P_G],      None, True,  True ),
     ParameterInfo("RAW_STRING",        [P_G],      None, False, True,  "STRING"),
 
-    ParameterInfo("COMMA",             [PP_],      0,    False, True ), # Number with comma
-    ParameterInfo("DECIMAL",           [PP_, P__], 0,    False, True ), # Number with comma and fractional part.
-    ParameterInfo("NUM",               [PP_],      0,    False, True ), # Signed number
-    ParameterInfo("ZEROFILL_NUM",      [PP_, P__], 0,    False, True ), # Unsigned number with zero fill, e.g. "02".
-    ParameterInfo("BYTES",             [PP_],      0,    False, True ), # Unsigned number with "bytes", i.e. "1.02 MiB or 123 KiB"
-    ParameterInfo("HEX",               [PP_],      0,    False, True ), # Hexadecimally printed number
+    ParameterInfo("COMMA",             [PP_],      0,    False, True ),  # Number with comma
+    ParameterInfo("DECIMAL",           [PP_, P__], 0,    False, True ),  # Number with comma and fractional part.
+    ParameterInfo("NUM",               [PP_],      0,    False, True ),  # Signed number
+    ParameterInfo("ZEROFILL_NUM",      [PP_, P__], 0,    False, True ),  # Unsigned number with zero fill, e.g. "02".
+    ParameterInfo("BYTES",             [PP_],      0,    False, True ),  # Unsigned number with "bytes", i.e. "1.02 MiB or 123 KiB"
+    ParameterInfo("HEX",               [PP_],      0,    False, True ),  # Hexadecimally printed number
 
     ParameterInfo("CURRENCY_LONG",     [PP_],      0,    False, True ),
-    ParameterInfo("CURRENCY_SHORT",    [PP_],      0,    False, True ), # compact currency
+    ParameterInfo("CURRENCY_SHORT",    [PP_],      0,    False, True ),  # compact currency
 
-    ParameterInfo("WAYPOINT",          [P_G],      None, False, True ), # waypoint name
+    ParameterInfo("WAYPOINT",          [P_G],      None, False, True ),  # waypoint name
     ParameterInfo("STATION",           [P_G],      None, False, True ),
     ParameterInfo("DEPOT",             [P_G, P__], None, False, True ),
     ParameterInfo("TOWN",              [P_G],      None, False, True ),
@@ -354,23 +376,25 @@ _OPENTTD_PARAMETERS = [
     # While they technically also work in Game Scripts, disencourage the usage.
     # This also includes the "sprite" characters.
     ParameterInfo("REV",               [],    None, False, True ),
-    ParameterInfo("STATION_FEATURES",  [P__], None, False, True ), # station features string, icons of the features
+    ParameterInfo("STATION_FEATURES",  [P__], None, False, True ),  # station features string, icons of the features
     ParameterInfo("UP_ARROW",          [],    None, False, True ),
     ParameterInfo("SMALL_UP_ARROW",    [],    None, False, True ),
     ParameterInfo("SMALL_DOWN_ARROW",  [],    None, False, True ),
     ParameterInfo("DOWN_ARROW",        [],    None, False, True ),
     ParameterInfo("CHECKMARK",         [],    None, False, True ),
     ParameterInfo("CROSS",             [],    None, False, True ),
-    ParameterInfo("RIGHT_ARROW",       [],    None, False, False), # left/right arrows are not critical due to LTR/RTL languages
+    ParameterInfo("RIGHT_ARROW",       [],    None, False, False),  # left/right arrows are not critical due to LTR/RTL languages
     ParameterInfo("SMALL_LEFT_ARROW",  [],    None, False, False),
     ParameterInfo("SMALL_RIGHT_ARROW", [],    None, False, False),
 ]
+
+# fmt: on
 
 OPENTTD_PARAMETERS = dict((x.literal, x) for x in _OPENTTD_PARAMETERS)
 OPENTTD_PARAMETERS.update((x.literal, x) for x in _GS_PARAMETERS)
 # }}}
 
-NL_PARAMETER    = ParameterInfo("",  [], None, False, False)
+NL_PARAMETER = ParameterInfo("", [], None, False, False)
 CURLY_PARAMETER = ParameterInfo("{", [], None, False, False)
 
 
@@ -378,4 +402,3 @@ CURLY_PARAMETER = ParameterInfo("{", [], None, False, False)
 project_types = {}
 for pt in [NewGRFProject(), GameScriptProject(), OpenTTDProject()]:
     project_types[pt.name] = pt
-

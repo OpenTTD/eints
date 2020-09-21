@@ -13,12 +13,13 @@ def run():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hp:", ["help", "pidfile="])
     except getopt.GetoptError as err:
-        print("run: " + str(err) + " (try \"run --help\")")
+        print("run: " + str(err) + ' (try "run --help")')
         sys.exit(2)
 
     for opt, val in opts:
-        if opt in ('--help', '-h'):
-            print("""\
+        if opt in ("--help", "-h"):
+            print(
+                """\
 run -- Run eints
 
 run <options>
@@ -33,10 +34,11 @@ with <options>:
 -p
     Write the current pid to the given file.
 
-""")
+"""
+            )
             sys.exit(0)
 
-        if opt in ('-p', '--pidfile'):
+        if opt in ("-p", "--pidfile"):
             with open(val, "w") as f:
                 f.write(str(os.getpid()))
 
@@ -44,6 +46,6 @@ with <options>:
 
     sys.exit(0)
 
-if __name__ == '__main__':
-    run()
 
+if __name__ == "__main__":
+    run()

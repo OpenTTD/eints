@@ -3,6 +3,7 @@ from webtranslate.utils import template
 from webtranslate.protect import protected
 from webtranslate import data, config
 
+
 class CaseDisplayData:
     """
     All data to display a single case of a string.
@@ -16,14 +17,17 @@ class CaseDisplayData:
     @ivar text: Text of the string.
     @type text: C{str}
     """
+
     def __init__(self, case, state, text):
         self.case = case
         self.state = state
         self.text = text
 
     def get_str_casename(self, sname):
-        if self.case == '': return sname
+        if self.case == "":
+            return sname
         return sname + "." + self.case
+
 
 class StringDisplayData:
     """
@@ -38,22 +42,25 @@ class StringDisplayData:
     @ivar cases: Cases, sorted on case name.
     @type cases: C{list} of L{CaseDisplayData}
     """
+
     def __init__(self, sname, base):
         self.sname = sname
         self.base = base
         self.cases = []
 
     def __lt__(self, other):
-        if not isinstance(other, StringDisplayData): return False
+        if not isinstance(other, StringDisplayData):
+            return False
         return self.sname < other.sname
 
     def __eq__(self, other):
-        if not isinstance(other, StringDisplayData): return False
+        if not isinstance(other, StringDisplayData):
+            return False
         return self.sname == other.sname
 
 
-@route('/translation/<prjname>/<lngname>', method = 'GET')
-@protected(['translation', 'prjname', 'lngname'])
+@route("/translation/<prjname>/<lngname>", method="GET")
+@protected(["translation", "prjname", "lngname"])
 def project(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
@@ -65,12 +72,12 @@ def project(userauth, prjname, lngname):
     if lng is None:
         abort(404, "Language does not exist in the project")
         return
-    assert pdata.projtype.allow_case or lng.case == ['']
+    assert pdata.projtype.allow_case or lng.case == [""]
 
-    blng = pdata.get_base_language() # As above we established there is at least one language, this should work.
-    stored = [ [] for i in range(data.MAX_STATE) ]
+    blng = pdata.get_base_language()  # As above we established there is at least one language, this should work.
+    stored = [[] for i in range(data.MAX_STATE)]
     sdict = pdata.statistics
-    sdict = sdict.get(lngname) # Statistics dict for the queried language.
+    sdict = sdict.get(lngname)  # Statistics dict for the queried language.
     if sdict is None:
         abort(404, "Missing language statistics")
         return
@@ -79,7 +86,7 @@ def project(userauth, prjname, lngname):
         cstates = sdict[sname]
         state = max(s[1] for s in cstates)
         if state != data.MISSING_OK:
-            bchg = data.get_newest_change(bchgs, '')
+            bchg = data.get_newest_change(bchgs, "")
             sdd = StringDisplayData(sname, bchg.base_text)
             chgs = lng.changes.get(sname)
             if chgs is not None:
@@ -91,7 +98,7 @@ def project(userauth, prjname, lngname):
                             text = chg.base_text.text
                         else:
                             text = chg.new_text.text
-                            if text == '' and case != '':
+                            if text == "" and case != "":
                                 # Suppress empty non-default case from translations.
                                 continue
                         cdd = CaseDisplayData(case, data.STATE_MAP[cstate].name, text)
@@ -101,5 +108,4 @@ def project(userauth, prjname, lngname):
 
     for strs in stored:
         strs.sort()
-    return template('translation', userauth = userauth, pmd = pmd, is_blng = (lng == blng),
-                    lng = lng, stored = stored)
+    return template("translation", userauth=userauth, pmd=pmd, is_blng=(lng == blng), lng=lng, stored=stored)

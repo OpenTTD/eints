@@ -2,6 +2,7 @@ from webtranslate import data, bottle
 from webtranslate.newgrf import language_file
 import re
 
+
 def get_datetime_now_formatted():
     """
     Output a string denoting 'now' in time,
@@ -12,6 +13,7 @@ def get_datetime_now_formatted():
     """
     stamp = data.make_stamp()
     return str(stamp)
+
 
 class TimeDescription:
     """
@@ -27,6 +29,7 @@ class TimeDescription:
     @ivar max_count: Maximum number of units that should be counted.
     @type max_count: C{int}
     """
+
     def __init__(self, name, fixed, size, count):
         self.unit_name = name
         self.name_fixed = fixed
@@ -43,21 +46,26 @@ class TimeDescription:
         @return: Short description of the difference.
         @rtype:  C{str}
         """
-        if self.name_fixed: return self.unit_name
+        if self.name_fixed:
+            return self.unit_name
 
         difference = difference // self.unit_size
         return "{:d} {}".format(difference, self.unit_name)
 
+
 # I am aware the unit sizes are not exact.
 # If you consider the difference relevant, max_count is not big enough for you.
-time_descriptions = [TimeDescription("Just now", True,              1, 3),
-                     TimeDescription("seconds",  False,             1, 59),
-                     TimeDescription("minutes",  False,            60, 59),
-                     TimeDescription("hours",    False,         60*60, 48),
-                     TimeDescription("days",     False,      24*60*60, 14),
-                     TimeDescription("weeks",    False,    7*24*60*60, 6),
-                     TimeDescription("months",   False, 30*7*24*60*60, 24),
-                     TimeDescription("years",    False, 52*7*24*60*60, 10000)]
+time_descriptions = [
+    TimeDescription("Just now", True, 1, 3),
+    TimeDescription("seconds", False, 1, 59),
+    TimeDescription("minutes", False, 60, 59),
+    TimeDescription("hours", False, 60 * 60, 48),
+    TimeDescription("days", False, 24 * 60 * 60, 14),
+    TimeDescription("weeks", False, 7 * 24 * 60 * 60, 6),
+    TimeDescription("months", False, 30 * 7 * 24 * 60 * 60, 24),
+    TimeDescription("years", False, 52 * 7 * 24 * 60 * 60, 10000),
+]
+
 
 def get_relative_time(old_stamp, now):
     """
@@ -77,11 +85,13 @@ def get_relative_time(old_stamp, now):
     i = 0
     td = time_descriptions[i]
     while i + 1 < len(time_descriptions):
-        if difference < td.unit_size * td.max_count: break
+        if difference < td.unit_size * td.max_count:
+            break
         i = i + 1
         td = time_descriptions[i]
 
     return td.to_string(difference)
+
 
 def template(tpl, **kwargs):
     """
@@ -97,22 +107,20 @@ def template(tpl, **kwargs):
     messages = kwargs.setdefault("messages", [])
 
     if "message" in kwargs:
-        messages.append({'content': kwargs.get("message"), 'class': kwargs.get('message_class', 'info')})
+        messages.append({"content": kwargs.get("message"), "class": kwargs.get("message_class", "info")})
 
     query = bottle.request.query
-    if len(query.get('message', '')) > 0:
-        messages.append({'content': query.get("message"), 'class': query.get('message_class', 'info')})
+    if len(query.get("message", "")) > 0:
+        messages.append({"content": query.get("message"), "class": query.get("message_class", "info")})
 
     # message classes map to bootstrap css alert style names. n.b. default bootstrap alert is yellow (warning), but our default is blue (info)
-    message_classes = {'info': 'alert-info',
-                       'success': 'alert-success',
-                       'warning':'',
-                       'error': 'alert-error'}
+    message_classes = {"info": "alert-info", "success": "alert-success", "warning": "", "error": "alert-error"}
 
     for msg in messages:
-        msg['class'] = message_classes.get(msg.get('class', 'info'), '')
+        msg["class"] = message_classes.get(msg.get("class", "info"), "")
 
     return bottle.template(tpl, **kwargs)
+
 
 def verify_name(name, name_type, is_identifier):
     """
@@ -133,12 +141,13 @@ def verify_name(name, name_type, is_identifier):
     if not name:
         return "{} missing".format(name_type)
     if is_identifier:
-        if not re.match('[-A-Za-z0-9_]+$', name):
+        if not re.match("[-A-Za-z0-9_]+$", name):
             return "{} can only contain characters A-Z, a-z, 0-9, dash (-) and underscore (_)".format(name_type)
     else:
         if len(name) == 0:
             return "{} may not be empty".format(name_type)
     return None
+
 
 def verify_url(url):
     """
@@ -152,13 +161,14 @@ def verify_url(url):
 
     @todo: Improve project URL checking.
     """
-    if url == '':
+    if url == "":
         return None
 
-    if url.startswith('http://') or url.startswith('https://'):
-        return None # XXX This is a bit too much trust perhaps.
+    if url.startswith("http://") or url.startswith("https://"):
+        return None  # XXX This is a bit too much trust perhaps.
 
     return "Incorrect url"
+
 
 def create_displayed_base_text(pdata, text):
     """
@@ -176,10 +186,13 @@ def create_displayed_base_text(pdata, text):
     """
     text = text.text
     blng = pdata.get_base_language()
-    if blng is None: return text
+    if blng is None:
+        return text
     str_info = language_file.check_string(pdata.projtype, text, True, None, blng, True)
-    if str_info.has_error or str_info.pieces is None: return text
+    if str_info.has_error or str_info.pieces is None:
+        return text
     return str_info.get_translation_text()
+
 
 def lang_needs_fixing(overview):
     """
@@ -193,6 +206,7 @@ def lang_needs_fixing(overview):
     """
     return overview[data.OUT_OF_DATE] != 0 or overview[data.INVALID] != 0 or overview[data.MISSING] != 0
 
+
 def lang_is_empty(overview):
     """
     Check whether a language is complete empty, that is not even missing strings.
@@ -204,6 +218,7 @@ def lang_is_empty(overview):
     @rtype:  C{bool}
     """
     return sum(overview) == 0
+
 
 def redirect(path, **kwargs):
     """
