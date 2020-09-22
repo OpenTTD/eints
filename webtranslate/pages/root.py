@@ -18,3 +18,8 @@ def root(userauth):
 @route("/robots.txt", method="GET")
 def robots():
     return HTTPResponse("User-agent: *\nDisallow: /", status=200, headers={"content-type": "text/plain"})
+
+
+@route("/healthz", method="GET")
+def healthz():
+    return HTTPResponse("200: OK", status=200, headers={"content-type": "text/plain"})
