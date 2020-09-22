@@ -1,7 +1,10 @@
 """
 Root page.
 """
-from ..bottle import route
+from ..bottle import (
+    HTTPResponse,
+    route,
+)
 from ..protect import protected
 from ..utils import template
 
@@ -10,3 +13,8 @@ from ..utils import template
 @protected(["root", "-", "-"])
 def root(userauth):
     return template("root", userauth=userauth)
+
+
+@route("/healthz", method="GET")
+def healthz():
+    return HTTPResponse("200: OK", status=200, headers={"content-type": "text/plain"})
