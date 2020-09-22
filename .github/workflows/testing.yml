@@ -3,7 +3,7 @@ name: Testing
 on:
   push:
     branches:
-    - master
+    - openttd-github
   pull_request:
     branches:
     - master
@@ -47,7 +47,7 @@ jobs:
     - name: Flake8
       uses: TrueBrain/actions-flake8@v2
       with:
-        path: webtranslate scripts/filter_update_langs scripts/lang_sync
+        path: webtranslate scripts/filter_update_langs scripts/lang_sync scripts/eintsgit.py
 
   black:
     name: Black
@@ -64,7 +64,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install black
-        black -l 120 --exclude webtranslate/bottle.py --check webtranslate scripts/filter_update_langs scripts/lang_sync
+        black -l 120 --exclude webtranslate/bottle.py --check webtranslate scripts/filter_update_langs scripts/lang_sync scripts/eintsgit.py
 
   check_annotations:
     name: Check Annotations
