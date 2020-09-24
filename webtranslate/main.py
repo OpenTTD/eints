@@ -1,6 +1,10 @@
 """
 Main program.
 """
+import sys
+
+from wsgiref.simple_server import WSGIRequestHandler
+
 from webtranslate import bottle, config, users, project_type
 from webtranslate.newgrf import language_info
 
@@ -27,6 +31,14 @@ from webtranslate.pages import (  # noqa
 
 # Get template files from 'views' only.
 bottle.TEMPLATE_PATH = ["./views/"]
+
+
+class NoLog200HandlerHandler(WSGIRequestHandler):
+    def log_message(self, format, *args):
+        # Only log if the status was not successful.
+        if not (200 <= int(args[1]) < 400):
+            WSGIRequestHandler.log_message(self, format, *args)
+            sys.stderr.flush()
 
 
 def run():
@@ -69,4 +81,10 @@ def run():
 
     # With 'mod_wsgi', application does not run from here.
     if config.cfg.server_mode != "mod_wsgi":
-        bottle.run(reloader=False, debug=debug, host=config.cfg.server_host, port=config.cfg.server_port)
+        bottle.run(
+            reloader=False,
+            debug=debug,
+            host=config.cfg.server_host,
+            port=config.cfg.server_port,
+            handler_class=NoLog200HandlerHandler,
+        )
