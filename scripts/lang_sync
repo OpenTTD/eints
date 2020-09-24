@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import base64
 import getopt
 import re
 import sys
@@ -228,11 +229,24 @@ def setup_auth():
             passwd = getpass.getpass()
 
     if user is not None and passwd is not None:
+
+        class ForceHTTPBasicAuthHandler(urllib.request.AbstractBasicAuthHandler, urllib.request.BaseHandler):
+            auth_header = "Authorization"
+
+            # On every request, add an Authorization header
+            def http_request(self, req):
+                user, passwd = self.passwd.find_user_password(None, req.full_url)
+                credentials = "{0}:{1}".format(user, passwd).encode()
+                auth_str = base64.standard_b64encode(credentials).decode()
+                req.add_unredirected_header("Authorization", "Basic {}".format(auth_str.strip()))
+                return req
+
+            https_request = http_request
+
         # If both a user and a password, we can usefully setup authentication.
         pwd_manager = urllib.request.HTTPPasswordMgr()
-        realm = "Web translator"
-        pwd_manager.add_password(realm, user_cfg.base_url, user, passwd)
-        auth_handler = urllib.request.HTTPBasicAuthHandler(pwd_manager)
+        pwd_manager.add_password(None, user_cfg.base_url, user, passwd)
+        auth_handler = ForceHTTPBasicAuthHandler(pwd_manager)
         opener = urllib.request.build_opener(auth_handler)
         urllib.request.install_opener(opener)
 
