@@ -2,6 +2,7 @@
 
 import click
 
+from webtranslate import bottle
 from webtranslate import main
 from webtranslate import sentry
 
@@ -122,6 +123,12 @@ def run(
             fp.write("  </github>\n")
 
         fp.write("</config>\n")
+
+    # Make sure that all files we accept to be transferred, are kept in
+    # memory, and only start creating temp-files for files bigger than
+    # what we accept. This avoids tons of temp-files during normal operation
+    # at the expense of some minor (temporary) increase in memory.
+    bottle.BaseRequest.MEMFILE_MAX = language_file_size
 
     main.run()
 
