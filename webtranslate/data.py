@@ -1302,6 +1302,8 @@ class Change:
     @note: There is at most one L{last_upload} change for each string in each language.
     """
 
+    __slots__ = ("string_name", "case", "base_text", "new_text", "stamp", "user", "last_upload")
+
     def __init__(self, string_name, case, base_text, new_text, stamp, user, last_upload=False):
         assert string_name is not None
         self.string_name = string_name
@@ -1473,6 +1475,8 @@ class Text:
     @type stamp: L{Stamp}
     """
 
+    __slots__ = ("text", "case", "stamp")
+
     def __init__(self, text, case, stamp):
         self.text = text
         self.case = case
@@ -1628,6 +1632,8 @@ class Stamp:
     @ivar number: Index number, to allow more than one operation in a second.
     @type number: C{int}
     """
+
+    __slots__ = ("seconds", "number")
 
     def __init__(self, seconds, number):
         self.seconds = seconds
