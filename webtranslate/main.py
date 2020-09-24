@@ -3,6 +3,8 @@ Main program.
 """
 import logging
 
+from wsgiref.simple_server import WSGIRequestHandler
+
 from . import (
     bottle,
     config,
@@ -36,6 +38,14 @@ log = logging.getLogger(__name__)
 
 # Get template files from 'views' only.
 bottle.TEMPLATE_PATH = ["./views/"]
+
+
+class NoLog200HandlerHandler(WSGIRequestHandler):
+    def log_message(self, format, *args):
+        # Only log if the status was not successful.
+        if not (200 <= int(args[1]) < 400):
+            # Use log.info() instead of parent call, as parent call uses stderr.write().
+            log.info("%s - - [%s] %s", self.address_string(), self.log_date_time_string(), format % args)
 
 
 def run():
@@ -78,7 +88,13 @@ def run():
 
     # With 'mod_wsgi', application does not run from here.
     if config.cfg.server_mode != "mod_wsgi":
-        bottle.run(reloader=False, debug=debug, host=config.cfg.server_host, port=config.cfg.server_port)
+        bottle.run(
+            reloader=False,
+            debug=debug,
+            host=config.cfg.server_host,
+            port=config.cfg.server_port,
+            handler_class=NoLog200HandlerHandler,
+        )
 
 
 if __name__ == "__main__":
