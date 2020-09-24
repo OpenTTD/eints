@@ -5,6 +5,7 @@ import time
 import re
 import calendar
 import json
+import sys
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from webtranslate import loader, project_type
@@ -1306,12 +1307,12 @@ class Change:
 
     def __init__(self, string_name, case, base_text, new_text, stamp, user, last_upload=False):
         assert string_name is not None
-        self.string_name = string_name
-        self.case = case
+        self.string_name = sys.intern(string_name)
+        self.case = sys.intern(case)
         self.base_text = base_text
         self.new_text = new_text
         self.stamp = stamp
-        self.user = user
+        self.user = sys.intern(user)
         self.last_upload = last_upload
 
     def __str__(self):
@@ -1478,8 +1479,8 @@ class Text:
     __slots__ = ("text", "case", "stamp")
 
     def __init__(self, text, case, stamp):
-        self.text = text
-        self.case = case
+        self.text = sys.intern(text)
+        self.case = sys.intern(case)
         self.stamp = stamp
 
     def __str__(self):
