@@ -1,0 +1,58 @@
+name: Eints to Git
+
+# This script has to be in master, despite the code being executed in the
+# "openttd-github" branch. This is because GitHub only allows "schedule" and
+# "workflow_dispatch" to work from the default branch.
+
+on:
+  schedule:
+  - cron: '45 17 * * *'
+  workflow_dispatch:
+
+jobs:
+  eints-to-git:
+    # Prevent this from running on forks
+    if: github.repository == 'OpenTTD/eints'
+    name: Eints To Git
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: openttd-github
+    - name: Checkout OpenTTD-eints-test
+      uses: actions/checkout@v2
+      with:
+        repository: OpenTTD/eints-sandbox
+        path: scripts/eints-sandbox
+        token: ${{ secrets.EINTS_GITHUB_TOKEN }}
+    - name: Checkout OpenTTD
+      uses: actions/checkout@v2
+      with:
+        repository: OpenTTD/OpenTTD
+        path: scripts/OpenTTD
+        token: ${{ secrets.EINTS_GITHUB_TOKEN }}
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Export and push to git
+      run: |
+        cd scripts
+
+        # To allow commits
+        git config --global user.email "translators@openttd.org"
+        git config --global user.name "translators"
+
+        # Check if staging needs committing
+        printf "username:translators\npassword:${TRANSLATORS_STAGING}\n" > user.cfg
+        python eintsgit.py --project openttd-master --working-copy eints-sandbox --base-url https://translator.staging.openttd.org commit-to-git
+        python eintsgit.py --project openttd-master --working-copy eints-sandbox --base-url https://translator.staging.openttd.org --force update-from-git
+
+        # Check if production needs committing
+        # printf "username:translators\npassword:${TRANSLATORS_PRODUCTION}\n" > user.cfg
+        # python eintsgit.py --project openttd-master --working-copy OpenTTD --base-url https://translator.openttd.org commit-to-git
+        # python eintsgit.py --project openttd-master --working-copy OpenTTD --base-url https://translator.openttd.org --force update-from-git
+      env:
+        TRANSLATORS_STAGING: ${{ secrets.TRANSLATORS_STAGING }}
+        TRANSLATORS_PRODUCTION: ${{ secrets.TRANSLATORS_PRODUCTION }}
