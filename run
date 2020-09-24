@@ -113,7 +113,7 @@ def run(
         fp.write(f"  <min-num-changes>{min_num_changes}</min-num-changes>\n")
         fp.write(f"  <change-stable-age>{change_stable_age}</change-stable-age>\n")
 
-        if github_organization:
+        if authentication == "github":
             fp.write("  <github>\n")
             fp.write(f"    <organization>{github_organization}</organization>\n")
             fp.write(f"    <org-api-token>{github_org_api_token}</org-api-token>\n")
