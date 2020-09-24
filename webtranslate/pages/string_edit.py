@@ -369,7 +369,7 @@ def check_page_parameters(prjname, lngname, sname):
     return pmd, bchg, lng, binfo
 
 
-def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, states=None, messages=[]):
+def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, states=None, messages=None):
     """
     Construct a page for editing a string.
 
@@ -402,6 +402,8 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
     """
     if states is None:
         states = {}
+    if messages is None:
+        messages = []
     pdata = pmd.pdata
     projtype = pdata.projtype
 
