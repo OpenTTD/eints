@@ -3,7 +3,7 @@
 <h1>{{pmd.human_name}}</h1>
 <hr />
 <div class="btn-group pull-right" style="padding-top:3px;">
-% if pmd.pdata.url is not '':
+% if pmd.pdata.url != '':
     <a class="btn" href="{{pmd.pdata.url}}">&#187; Project Website</a> |
 % end
     <a class="btn" href="/projsettings/{{pmd.name}}"><i class="icon-cog"></i> Project Settings</a>
