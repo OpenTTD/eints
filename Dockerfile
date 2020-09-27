@@ -18,7 +18,6 @@ WORKDIR /code
 COPY requirements.txt \
         LICENSE.md \
         README.md \
-        run \
         /code/
 # Needed for Sentry to know what version we are running
 RUN echo "${BUILD_VERSION}" > /code/.version
@@ -39,5 +38,5 @@ COPY views /code/views
 COPY webtranslate /code/webtranslate
 
 VOLUME ["/data"]
-ENTRYPOINT ["python", "/code/run", "--project-root", "/data", "--server-host", "0.0.0.0"]
+ENTRYPOINT ["python", "-m", "webtranslate", "--project-root", "/data", "--server-host", "0.0.0.0"]
 CMD []
