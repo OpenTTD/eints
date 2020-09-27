@@ -11,12 +11,16 @@ Homepage and documentation: http://bottlepy.org/
 
 Copyright (c) 2016, Marcel Hellkamp.
 License: MIT (see LICENSE for details)
+
+This version of bottle is changed to fix a few issues with bottle:
+- stdout/stderr was used instead of a logging infrastructure
+- exceptions were not logged via logging infrastructure
 """
 
 from __future__ import with_statement
 
 __author__ = 'Marcel Hellkamp'
-__version__ = '0.12.18'
+__version__ = '0.12.18-eints'
 __license__ = 'MIT'
 
 # The gevent server adapter needs to patch some modules before they are imported
@@ -37,12 +41,15 @@ if __name__ == '__main__':
 
 import base64, cgi, email.utils, functools, hmac, itertools, mimetypes,\
         os, re, subprocess, sys, tempfile, threading, time, warnings, hashlib
+import logging
 
 from datetime import date as datedate, datetime, timedelta
 from tempfile import TemporaryFile
 from traceback import format_exc, print_exc
 from inspect import getargspec
 from unicodedata import normalize
+
+log = logging.getLogger(__name__)
 
 
 try: from simplejson import dumps as json_dumps, loads as json_lds
@@ -878,8 +885,9 @@ class Bottle(object):
             raise
         except Exception:
             if not self.catchall: raise
+            log.exception("Failed to handle request")
             stacktrace = format_exc()
-            environ['wsgi.errors'].write(stacktrace)
+            #environ['wsgi.errors'].write(stacktrace)
             return HTTPError(500, "Internal Server Error", _e(), stacktrace)
 
     def _cast(self, out, peek=None):
@@ -937,6 +945,7 @@ class Bottle(object):
             raise
         except Exception:
             if not self.catchall: raise
+            log.exception("Failed to handle request")
             first = HTTPError(500, 'Unhandled exception', _e(), format_exc())
 
         # These are the inner types allowed in iterator or generator objects.
@@ -969,13 +978,14 @@ class Bottle(object):
             raise
         except Exception:
             if not self.catchall: raise
+            log.exception("Failed to handle request")
             err = '<h1>Critical error while processing request: %s</h1>' \
                   % html_escape(environ.get('PATH_INFO', '/'))
             if DEBUG:
                 err += '<h2>Error:</h2>\n<pre>\n%s\n</pre>\n' \
                        '<h2>Traceback:</h2>\n<pre>\n%s\n</pre>\n' \
                        % (html_escape(repr(_e())), html_escape(format_exc()))
-            environ['wsgi.errors'].write(err)
+            #environ['wsgi.errors'].write(err)
             headers = [('Content-Type', 'text/html; charset=UTF-8')]
             start_response('500 INTERNAL SERVER ERROR', headers, sys.exc_info())
             return [tob(err)]
@@ -2849,8 +2859,8 @@ class FapwsServer(ServerAdapter):
         evwsgi.start(self.host, port)
         # fapws3 never releases the GIL. Complain upstream. I tried. No luck.
         if 'BOTTLE_CHILD' in os.environ and not self.quiet:
-            _stderr("WARNING: Auto-reloading does not work with Fapws3.\n")
-            _stderr("         (Fapws3 breaks python thread support)\n")
+            log.warning("WARNING: Auto-reloading does not work with Fapws3.")
+            log.warning("         (Fapws3 breaks python thread support)")
         evwsgi.set_base_module(base)
         def app(environ, start_response):
             environ['wsgi.multiprocess'] = False
@@ -3122,9 +3132,9 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
 
         server.quiet = server.quiet or quiet
         if not server.quiet:
-            _stderr("Bottle v%s server starting up (using %s)...\n" % (__version__, repr(server)))
-            _stderr("Listening on http://%s:%d/\n" % (server.host, server.port))
-            _stderr("Hit Ctrl-C to quit.\n\n")
+            log.info("Bottle v%s server starting up (using %s)..." % (__version__, repr(server)))
+            log.info("Listening on http://%s:%d/" % (server.host, server.port))
+            log.info("Hit Ctrl-C to quit.")
 
         if reloader:
             lockfile = os.environ.get('BOTTLE_LOCKFILE')
@@ -3142,10 +3152,9 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
     except:
         if not reloader: raise
         if not getattr(server, 'quiet', quiet):
-            print_exc()
+            log.exception("Server error")
         time.sleep(interval)
         sys.exit(3)
-
 
 
 class FileCheckerThread(threading.Thread):
@@ -3747,11 +3756,11 @@ ext = _ImportRedirect('bottle.ext' if __name__ == '__main__' else __name__+".ext
 if __name__ == '__main__':
     opt, args, parser = _cmd_options, _cmd_args, _cmd_parser
     if opt.version:
-        _stdout('Bottle %s\n'%__version__)
+        log.info('Bottle %s'%__version__)
         sys.exit(0)
     if not args:
         parser.print_help()
-        _stderr('\nError: No application specified.\n')
+        log.error('No application specified.')
         sys.exit(1)
 
     sys.path.insert(0, '.')
