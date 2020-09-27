@@ -1,7 +1,13 @@
-from webtranslate.bottle import route, abort
-from webtranslate.utils import redirect, template
-from webtranslate.protect import protected
-from webtranslate import config
+from .. import config
+from ..bottle import (
+    abort,
+    route,
+)
+from ..protect import protected
+from ..utils import (
+    redirect,
+    template,
+)
 
 
 @route("/delete/<prjname>/<lngname>", method="GET")

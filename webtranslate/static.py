@@ -1,4 +1,7 @@
-from webtranslate.bottle import route, static_file
+from .bottle import (
+    route,
+    static_file,
+)
 
 
 @route("/static/:path#.+#", name="static")

@@ -1,10 +1,13 @@
 """
 Page of a single project.
 """
-from webtranslate.bottle import route, abort
-from webtranslate.utils import template
-from webtranslate.protect import protected
-from webtranslate import config
+from .. import config
+from ..bottle import (
+    abort,
+    route,
+)
+from ..protect import protected
+from ..utils import template
 
 
 @route("/project/<prjname>", method="GET")

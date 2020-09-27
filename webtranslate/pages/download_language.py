@@ -1,9 +1,16 @@
 """
 Download a language file.
 """
-from webtranslate.bottle import route, abort, response
-from webtranslate.protect import protected
-from webtranslate import config, data
+from .. import (
+    config,
+    data,
+)
+from ..bottle import (
+    abort,
+    response,
+    route,
+)
+from ..protect import protected
 
 
 def plain_langfile(lines, text_type, text):

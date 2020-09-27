@@ -3,7 +3,7 @@ User authentication information.
 
 Supplies user and authentication context for requests.
 """
-from webtranslate import rights
+from . import rights
 
 
 class UserAuthentication:

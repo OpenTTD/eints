@@ -1,11 +1,19 @@
 """
 Bottle authentication decorator.
 """
-import secrets
 import datetime
-from webtranslate.bottle import request, response, abort
-from webtranslate.utils import redirect
-from webtranslate import config, userauth
+import secrets
+
+from . import (
+    config,
+    userauth,
+)
+from .bottle import (
+    abort,
+    request,
+    response,
+)
+from .utils import redirect
 
 _sessions = dict()
 SESSION_COOKIE = "eints_sid"

@@ -3,8 +3,16 @@ Configuration and global routines of the translator service.
 """
 import os
 import sys
-from webtranslate import data, loader, project_type
-from webtranslate.newgrf import language_info, language_file
+
+from . import (
+    data,
+    loader,
+    project_type,
+)
+from .newgrf import (
+    language_info,
+    language_file,
+)
 
 # Recognized types of project disk storage.
 STORAGE_ONE_FILE = "One large file for the entire project"
@@ -212,7 +220,7 @@ class Config:
         # Redmine configuration.
         rm_node = loader.get_single_child_node(cfg, "redmine", True)
         if rm_node is not None:
-            from webtranslate.users import redmine
+            from .users import redmine
 
             # Initialize the redmine fields.
             redmine.db_type = None
@@ -275,7 +283,7 @@ class Config:
         # github configuration.
         gh_node = loader.get_single_child_node(cfg, "github", True)
         if gh_node is not None:
-            from webtranslate.users import github
+            from .users import github
 
             github.github_org_api_token = get_subnode_text(gh_node, "org-api-token")
             github.github_organization = get_subnode_text(gh_node, "organization")
@@ -285,7 +293,7 @@ class Config:
         # Ldap configuration
         ldap_node = loader.get_single_child_node(cfg, "ldap", True)
         if ldap_node is not None:
-            from webtranslate.users import ldap
+            from .users import ldap
 
             # Initialize the ldap fields.
             ldap.ldap_host = None

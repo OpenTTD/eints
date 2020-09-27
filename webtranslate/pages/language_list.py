@@ -33,9 +33,12 @@ Example::
 
 
 """
-from webtranslate.bottle import route, response
-from webtranslate.protect import protected
-from webtranslate.newgrf import language_info
+from ..bottle import (
+    response,
+    route,
+)
+from ..newgrf import language_info
+from ..protect import protected
 
 
 @route("/language-list", method="GET")

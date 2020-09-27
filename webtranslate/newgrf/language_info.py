@@ -1,10 +1,11 @@
 """
 Meta information about languages.
 """
-from collections import namedtuple
 import os
 import re
 import sys
+
+from collections import namedtuple
 
 # Global variables initialized with L{set_all_languages}.
 all_languages = None

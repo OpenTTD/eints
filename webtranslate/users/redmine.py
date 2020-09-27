@@ -11,7 +11,11 @@ This code is not thread-safe!!
 """
 import hashlib
 import time
-from webtranslate import rights, userauth
+
+from .. import (
+    rights,
+    userauth,
+)
 
 # Also initialized in the config loader.
 db_type = None

@@ -7,7 +7,10 @@ the C{<ldap/>} section in the config file.
 Note that the groups resp. group membership is not project specific.
 """
 
-from webtranslate import rights, userauth
+from .. import (
+    rights,
+    userauth,
+)
 
 # Also initialized in the config loader.
 ldap_host = None

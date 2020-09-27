@@ -2,9 +2,19 @@
 Login/logout
 """
 from urllib.parse import quote
-from webtranslate.bottle import route, request, redirect
-from webtranslate.protect import abort, protected, start_session, stop_session
-from webtranslate import utils, users
+
+from .. import utils, users
+from ..bottle import (
+    redirect,
+    request,
+    route,
+)
+from ..protect import (
+    abort,
+    protected,
+    start_session,
+    stop_session,
+)
 
 
 def login_success(r):

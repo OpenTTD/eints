@@ -1,15 +1,23 @@
 """
 Project data.
 """
-import time
-import re
 import calendar
 import json
+import re
 import sys
+import time
+
 from xml.dom import minidom
 from xml.dom.minidom import Node
-from webtranslate import loader, project_type
-from webtranslate.newgrf import language_file, language_info
+
+from . import (
+    loader,
+    project_type,
+)
+from .newgrf import (
+    language_file,
+    language_info,
+)
 
 
 def get_newest_change(chgs, case):
