@@ -1,6 +1,7 @@
 """
 Configuration and global routines of the translator service.
 """
+import logging
 import os
 import sys
 
@@ -13,6 +14,8 @@ from .newgrf import (
     language_info,
     language_file,
 )
+
+log = logging.getLogger(__name__)
 
 # Recognized types of project disk storage.
 STORAGE_ONE_FILE = "One large file for the entire project"
@@ -137,7 +140,7 @@ class Config:
         Load the 'config.xml' settings into the configuration, mostly paths to find other data.
         """
         if not os.path.isfile(self.config_path):
-            print("Cannot find configuration file " + self.config_path)
+            log.error("Cannot find configuration file %s", self.config_path)
             return
 
         cfg = loader.load_dom(self.config_path)
@@ -145,14 +148,14 @@ class Config:
 
         self.server_mode = get_subnode_text(cfg, "server-mode")
         if self.server_mode not in ("development", "production", "mod_wsgi"):
-            print("Incorrect server-mode in the configuration, aborting!")
+            log.error("Incorrect server-mode in the configuration, aborting!")
             sys.exit(1)
 
         self.server_host = get_subnode_text(cfg, "server-host")
         self.server_port = data.convert_num(get_subnode_text(cfg, "server-port"), 80)
         self.authentication = get_subnode_text(cfg, "authentication")
         if self.authentication not in ("development", "redmine", "github", "ldap"):
-            print("Incorrect authentication in the configuration, aborting!")
+            log.error("Incorrect authentication in the configuration, aborting!")
             sys.exit(1)
 
         self.stable_languages_path = get_subnode_text(cfg, "stable-languages")
@@ -165,13 +168,13 @@ class Config:
 
         self.project_root = get_subnode_text(cfg, "project-root")
         if self.project_root is None or self.project_root == "":
-            print("No project root found, aborting!")
+            log.error("No project root found, aborting!")
             sys.exit(1)
 
         self.project_types = get_subnode_text(cfg, "project-types").split()
         self.project_types = set(ptype for ptype in self.project_types if ptype in project_type.project_types)
         if len(self.project_types) == 0:
-            print("No valid project types found, aborting!")
+            log.error("No valid project types found, aborting!")
             sys.exit(1)
 
         storage_type = get_subnode_text(cfg, "storage-format").strip()
@@ -180,7 +183,7 @@ class Config:
         elif storage_type == "split-languages":
             self.storage_format = STORAGE_SEPARATE_LANGUAGES
         else:
-            print('Unrecognized preferred storage format "{}", aborting!'.format(storage_type))
+            log.error('Unrecognized preferred storage format "%s", aborting!', storage_type)
             sys.exit(1)
 
         self.data_format = get_subnode_text(cfg, "data-format").strip()
@@ -211,7 +214,7 @@ class Config:
         Load 'redmine', 'github' and 'ldap' authentication if they exist.
         """
         if not os.path.isfile(self.config_path):
-            print("Cannot find configuration file " + self.config_path)
+            log.error("Cannot find configuration file %s", self.config_path)
             return
 
         cfg = loader.load_dom(self.config_path)
@@ -235,7 +238,7 @@ class Config:
 
             redmine.db_type = get_subnode_text(rm_node, "db-type")
             if redmine.db_type not in ("postgress", "mysql", "sqlite3"):
-                print("Unknown db type in config, aborting!")
+                log.error("Unknown db type in config, aborting!")
                 sys.exit(1)
             redmine.db_schema = get_subnode_text(rm_node, "db-schema")
             redmine.db_name = get_subnode_text(rm_node, "db-name")
@@ -249,11 +252,11 @@ class Config:
             for node in loader.get_child_nodes(rm_node, "translator-role"):
                 iso_code = node.getAttribute("language")
                 if iso_code not in iso_codes:
-                    print('Language "' + iso_code + '" in translator roles is not known, ignored the entry.')
+                    log.warning('Language "%s" in translator roles is not known, ignored the entry.', iso_code)
                     continue
                 if iso_code in redmine.translator_roles:
-                    print(
-                        'Language "' + iso_code + '" in translator roles is already defined, ignoring the other entry.'
+                    log.warning(
+                        'Language "%s" in translator roles is already defined, ignoring the other entry.', iso_code
                     )
                     continue
                 redmine.translator_roles[iso_code] = loader.collect_text_DOM(node).strip()
@@ -312,11 +315,11 @@ class Config:
             for node in loader.get_child_nodes(ldap_node, "translator-group"):
                 iso_code = node.getAttribute("language")
                 if iso_code not in iso_codes:
-                    print('Language "' + iso_code + '" in translator groups is not known, ignored the entry.')
+                    log.warning('Language "%s" in translator groups is not known, ignored the entry.', iso_code)
                     continue
                 if iso_code in ldap.translator_groups:
-                    print(
-                        'Language "' + iso_code + '" in translator groups is already defined, ignoring the other entry.'
+                    log.warning(
+                        'Language "%s" in translator groups is already defined, ignoring the other entry.', iso_code
                     )
                     continue
                 ldap.translator_groups[iso_code] = loader.collect_text_DOM(node).strip()
@@ -436,7 +439,7 @@ class ProjectCache:
         # Does it exist?
         pmd = self.projects.get(proj_name)
         if pmd is None:
-            print("ERROR: Retrieving project " + proj_name)
+            log.error("Retrieving project %s failed", proj_name)
             return None
 
         # Is it loaded?
@@ -578,7 +581,7 @@ class ProjectMetaData:
             if project.get_base_language() is None:
                 project.base_language = None
                 if len(self.pdata.languages) > 0:
-                    print('Project "' + project.human_name + '" has no base language, dropping all translations')
+                    log.warning('Project "%s" has no base language, dropping all translations', project.human_name)
                 project.languages = {}
 
         process_project_changes(self.pdata)
@@ -777,15 +780,15 @@ def find_project_files(root):
     found_error = False
     for p in projects:
         if p.name in pnames:
-            msg = 'Error: Project "{}" exists twice (as "{}" and as "{}"), please fix.'
-            msg = msg.format(p.name, p.path, pnames[p.name].path)
-            print(msg)
+            log.error(
+                'Project "%s" exists twice (as "%s" and as "%s"), please fix.', p.name, p.path, pnames[p.name].path
+            )
             found_error = True
 
         pnames[p.name] = p
 
     if found_error:
-        print("Aborting.")
+        log.error("One or more errors. Aborting.")
         sys.exit(1)
 
     return projects

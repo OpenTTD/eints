@@ -8,7 +8,10 @@ Special user roles:
  - TRANSLATOR: Translator of a language in a project
  - *:          Always matches
 """
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 
 class UserRightRule:
@@ -93,7 +96,7 @@ def init_page_access():
             continue
         m = rights_pat.match(line)
         if not m:
-            print("Warning: Line {:d} ignored of {}".format(idx + 1, FILENAME))
+            log.warning("Line %d ignored of %s", idx + 1, FILENAME)
             continue
         user = m.group(1)
         grant_access = m.group(2) == "+"

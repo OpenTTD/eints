@@ -10,12 +10,15 @@ A lot of the magic in this file has been copied from hgweb.py in https://bitbuck
 This code is not thread-safe!!
 """
 import hashlib
+import logging
 import time
 
 from .. import (
     rights,
     userauth,
 )
+
+log = logging.getLogger(__name__)
 
 # Also initialized in the config loader.
 db_type = None
@@ -182,7 +185,7 @@ def query(cmd, parms):
         # Connect if not connected.
         if db_connection is None:
             if not connect():
-                print("Eints: Failed to connect to the data base.")
+                log.error("Eints: Failed to connect to the data base.")
                 time.sleep(10)  # Avoid flooding.
                 return None
 
@@ -192,7 +195,7 @@ def query(cmd, parms):
         if cur is not None:
             return cur
 
-        print("Attempt {}, query failed.".format(count))
+        log.warning("Attempt %d, query failed.", count)
         time.sleep(10)
         count = count + 1
 

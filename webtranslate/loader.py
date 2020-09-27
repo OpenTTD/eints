@@ -1,8 +1,12 @@
 """
 Helper functions for loading an Xml tree.
 """
+import logging
+
 from xml.dom import minidom
 from xml.dom.minidom import Node
+
+log = logging.getLogger(__name__)
 
 
 def load_dom(fname):
@@ -98,5 +102,5 @@ def get_single_child_node(node, name, optional=False):
     if optional and len(result) == 0:
         return None
 
-    print('ERROR: Failed to find precisely one child node named "' + name + '"')
+    log.error('Failed to find precisely one child node named "%s"', name)
     return None

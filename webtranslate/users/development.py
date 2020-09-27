@@ -4,12 +4,15 @@ User administration system to use during development.
 In particular the user management is very poor.
 """
 import configparser
+import logging
 import os
 
 from .. import (
     rights,
     userauth,
 )
+
+log = logging.getLogger(__name__)
 
 # Table with user names and plain text passwords.
 _users = None
@@ -96,7 +99,7 @@ def init_projects():
                     ns3 = ns3.strip()
                     if len(ns3) < 3:
                         # User names should be longer-equal to 3 characters.
-                        print("Username {} ignored (too short)".format(ns3))
+                        log.error("Username %s ignored (too short)", ns3)
                         continue
                     names.add(ns3)
             values[k] = names
