@@ -1,6 +1,3 @@
-# Makefile for various tasks
-#
-
 .PHONY: manual epydoc run venv
 
 run: .env/pyvenv.cfg
