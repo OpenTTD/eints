@@ -1,13 +1,24 @@
 import click
+import logging
 
-from webtranslate import bottle
-from webtranslate import main
-from webtranslate import sentry
+from . import bottle
+from . import main
+from .click import click_additional_options
+from .sentry import click_sentry
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
+@click_additional_options
+def click_logging():
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO
+    )
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
+@click_logging
+@click_sentry
 @click.option(
     "--server-mode",
     help="Mode of server.",
@@ -55,12 +66,6 @@ CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 @click.option("--github-org-api-token", help="Valid PAT with scope read:org of the organization.")
 @click.option("--github-oauth2-client-id", help="Client ID for the GitHub OAuth2 Application.")
 @click.option("--github-oauth2-client-secret", help="Client Secret for the GitHub OAuth2 Application.")
-@click.option("--sentry-dsn", help="Sentry DSN.")
-@click.option(
-    "--sentry-environment",
-    help="Environment we are running in (for Sentry).",
-    default="development",
-)
 def run(
     server_mode,
     server_host,
@@ -82,14 +87,10 @@ def run(
     github_org_api_token,
     github_oauth2_client_id,
     github_oauth2_client_secret,
-    sentry_dsn,
-    sentry_environment,
 ):
     """
     Run the program (it was started from the command line).
     """
-
-    sentry.setup_sentry(sentry_dsn, sentry_environment)
 
     with open("config.xml", "w") as fp:
         fp.write('<?xml version="1.0" encoding="UTF-8"?>\n')
