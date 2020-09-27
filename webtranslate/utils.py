@@ -1,6 +1,10 @@
-from webtranslate import data, bottle
-from webtranslate.newgrf import language_file
 import re
+
+from . import (
+    bottle,
+    data,
+)
+from .newgrf import language_file
 
 
 def get_datetime_now_formatted():

@@ -2,9 +2,9 @@
 The type of project decides what language string primitives exist, and how they should be used.
 """
 
-from webtranslate.parameter_info_table import (
-    NEWGRF_PARAMETERS,
+from .parameter_info_table import (
     GS_PARAMETERS,
+    NEWGRF_PARAMETERS,
     OPENTTD_PARAMETERS,
 )
 

@@ -1,4 +1,4 @@
-from webtranslate.parameter_info import ParameterInfo
+from .parameter_info import ParameterInfo
 
 # Formatting (black) and validation (flake8) is disabled for this file.
 # Please keep it nice and clean!

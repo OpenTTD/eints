@@ -4,7 +4,11 @@ User authentication and authorization via github teams.
 """
 import requests
 import requests_oauthlib
-from webtranslate import rights, userauth
+
+from .. import (
+    rights,
+    userauth,
+)
 
 
 github_organization = None

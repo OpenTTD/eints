@@ -1,28 +1,33 @@
 """
 Main program.
 """
-from webtranslate import bottle, config, users, project_type
-from webtranslate.newgrf import language_info
+from . import (
+    bottle,
+    config,
+    project_type,
+    users,
+)
+from .newgrf import language_info
 
 # Import all pages, so they register their endpoints.
-from webtranslate import static  # noqa
-from webtranslate.pages import (  # noqa
-    root,
-    projects,
-    project,
-    newproject,
-    translation,
-    language_list,
-    language_overview,
-    upload_language,
+from . import static  # noqa
+from .pages import (  # noqa
+    delete,
     download_language,
     download_list,
-    string_edit,
-    delete,
-    newlanguage,
-    project_settings,
-    user_profile,
+    language_list,
+    language_overview,
     login,
+    newlanguage,
+    newproject,
+    project_settings,
+    project,
+    projects,
+    root,
+    string_edit,
+    translation,
+    upload_language,
+    user_profile,
 )
 
 # Get template files from 'views' only.

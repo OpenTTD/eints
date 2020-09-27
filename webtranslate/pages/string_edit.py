@@ -1,9 +1,24 @@
 import random
-from webtranslate.bottle import route, abort, request
-from webtranslate.utils import redirect, template
-from webtranslate.protect import protected
-from webtranslate import data, config, utils
-from webtranslate.newgrf import language_file, language_info
+
+from .. import (
+    config,
+    data,
+    utils,
+)
+from ..bottle import (
+    abort,
+    request,
+    route,
+)
+from ..newgrf import (
+    language_file,
+    language_info,
+)
+from ..protect import protected
+from ..utils import (
+    redirect,
+    template,
+)
 
 # Priorities of strings that need editing. Smaller number is more important to do first.
 MISSING_PRIO = 1

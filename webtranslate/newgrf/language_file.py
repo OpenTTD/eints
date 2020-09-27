@@ -1,13 +1,14 @@
 """
 Language file processing.
 """
-import re
 import codecs
-from webtranslate.parameter_info_table import (
+import re
+
+from ..parameter_info_table import (
     CURLY_PARAMETER,
     NL_PARAMETER,
 )
-from webtranslate.newgrf import language_info
+from ..newgrf import language_info
 
 ERROR = "Error"
 WARNING = "Warning"

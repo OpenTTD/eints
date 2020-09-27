@@ -6,9 +6,16 @@ Example::
     en_GB,,2015-06-07T12:33:35Z
 
 """
-from webtranslate.bottle import route, abort, response
-from webtranslate.protect import protected
-from webtranslate import config, data
+from .. import (
+    config,
+    data,
+)
+from ..bottle import (
+    abort,
+    response,
+    route,
+)
+from ..protect import protected
 
 
 def get_newest_change(lang):

@@ -3,9 +3,13 @@ User administration system to use during development.
 
 In particular the user management is very poor.
 """
-import os
 import configparser
-from webtranslate import rights, userauth
+import os
+
+from .. import (
+    rights,
+    userauth,
+)
 
 # Table with user names and plain text passwords.
 _users = None

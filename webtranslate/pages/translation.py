@@ -1,7 +1,13 @@
-from webtranslate.bottle import route, abort
-from webtranslate.utils import template
-from webtranslate.protect import protected
-from webtranslate import data, config
+from .. import (
+    config,
+    data,
+)
+from ..bottle import (
+    abort,
+    route,
+)
+from ..protect import protected
+from ..utils import template
 
 
 class CaseDisplayData:

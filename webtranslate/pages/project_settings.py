@@ -1,10 +1,20 @@
 """
 Settings of a project.
 """
-from webtranslate.bottle import route, abort, request
-from webtranslate.utils import redirect, template
-from webtranslate.protect import protected
-from webtranslate import config, utils
+from .. import (
+    config,
+    utils,
+)
+from ..bottle import (
+    abort,
+    request,
+    route,
+)
+from ..protect import protected
+from ..utils import (
+    redirect,
+    template,
+)
 
 
 @route("/projsettings/<prjname>", method="GET")

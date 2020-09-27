@@ -1,8 +1,14 @@
-from webtranslate.bottle import route, abort
-from webtranslate.utils import template
-from webtranslate.protect import protected
-from webtranslate import config, data
-from webtranslate.newgrf import language_info
+from .. import (
+    config,
+    data,
+)
+from ..bottle import (
+    abort,
+    route,
+)
+from ..newgrf import language_info
+from ..protect import protected
+from ..utils import template
 
 
 @route("/languages", method="GET")

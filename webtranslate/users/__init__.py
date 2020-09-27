@@ -7,7 +7,12 @@ Whatever system you make, it needs to deliver the following interface:
 - get_authentication(user, pwd) -> C{UserAuthentication} to query permissions.
 """
 
-from webtranslate.users import development, redmine, github, ldap
+from . import (
+    development,
+    github,
+    ldap,
+    redmine,
+)
 
 get_authentication = None
 oauth_redirect = None
