@@ -1,11 +1,14 @@
 """
 Meta information about languages.
 """
+import logging
 import os
 import re
 import sys
 
 from collections import namedtuple
+
+log = logging.getLogger(__name__)
 
 # Global variables initialized with L{set_all_languages}.
 all_languages = None
@@ -158,8 +161,9 @@ def parse_file(fname):
     if not all(ll.name in found_lines for ll in recognized if ll.required):
         for ll in recognized:
             if ll.required and ll.name not in found_lines:
-                msg = 'File "{}" is missing required language line ##{} (or it has the wrong format)'
-                print(msg.format(fname, ll.name))
+                log.error(
+                    'File "%s" is missing required language line ##%s (or it has the wrong format)', fname, ll.name
+                )
         sys.exit(1)
 
     return LanguageData(os.path.splitext(os.path.basename(fname))[0], found_lines)

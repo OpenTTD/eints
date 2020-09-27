@@ -3,6 +3,7 @@ Project data.
 """
 import calendar
 import json
+import logging
 import re
 import sys
 import time
@@ -18,6 +19,8 @@ from .newgrf import (
     language_file,
     language_info,
 )
+
+log = logging.getLogger(__name__)
 
 
 def get_newest_change(chgs, case):
@@ -777,7 +780,7 @@ def load_project(xloader, node):
     if not xloader.split_languages:
         if baselang is None or baselang not in project.languages:
             if len(project.languages) > 0:
-                print('Project "' + project.human_name + '" has no base language, dropping all translations')
+                log.warning('Project "%s" has no base language, dropping all translations', project.human_name)
                 project.languages = {}
             project.base_language = None
             return project  # Also skip loading the skeleton.
@@ -824,7 +827,7 @@ def load_project_json(jloader, node):
     if not jloader.split_languages:
         if baselang is None or baselang not in project.languages:
             if len(project.languages) > 0:
-                print('Project "' + project.human_name + '" has no base language, dropping all translations')
+                log.warning('Project "%s" has no base language, dropping all translations', project.human_name)
                 project.languages = {}
             project.base_language = None
             return project  # Also skip loading the skeleton.
