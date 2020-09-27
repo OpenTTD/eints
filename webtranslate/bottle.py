@@ -15,6 +15,7 @@ License: MIT (see LICENSE for details)
 This version of bottle is changed to fix a few issues with bottle:
 - stdout/stderr was used instead of a logging infrastructure
 - exceptions were not logged via logging infrastructure
+- WSGIRefServer did not close server socket on exit
 """
 
 from __future__ import with_statement
@@ -2797,7 +2798,10 @@ class WSGIRefServer(ServerAdapter):
                     address_family = socket.AF_INET6
 
         srv = make_server(self.host, self.port, app, server_cls, handler_cls)
-        srv.serve_forever()
+        try:
+            srv.serve_forever()
+        finally:
+            srv.server_close()
 
 
 class CherryPyServer(ServerAdapter):
