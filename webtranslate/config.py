@@ -439,7 +439,6 @@ class ProjectCache:
         # Does it exist?
         pmd = self.projects.get(proj_name)
         if pmd is None:
-            log.error("Retrieving project %s failed", proj_name)
             return None
 
         # Is it loaded?
