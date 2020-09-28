@@ -384,7 +384,9 @@ def check_page_parameters(prjname, lngname, sname):
     return pmd, bchg, lng, binfo
 
 
-def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, states=None, messages=None):
+def output_string_edit_page(
+    userauth, bchg, binfo, lng, pmd, lngname, sname, states=None, message=None, message_class=None
+):
     """
     Construct a page for editing a string.
 
@@ -417,8 +419,6 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
     """
     if states is None:
         states = {}
-    if messages is None:
-        messages = []
     pdata = pmd.pdata
     projtype = pdata.projtype
 
@@ -503,7 +503,8 @@ def output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, sta
         cases=lng.case,
         related_languages=related_languages,
         tcs=transl_cases,
-        messages=messages,
+        message=message,
+        message_class=message_class,
     )
 
 
@@ -620,11 +621,17 @@ def str_post(userauth, prjname, lngname, sname):
         continue  # Not really needed.
 
     if len(new_state_errors) > 0:
-        msg = {}
-        msg["message"] = "There were error(s)"
-        msg["message_class"] = "error"
         return output_string_edit_page(
-            userauth, bchg, binfo, lng, pmd, lngname, sname, new_state_errors, messages=[msg]
+            userauth,
+            bchg,
+            binfo,
+            lng,
+            pmd,
+            lngname,
+            sname,
+            new_state_errors,
+            message="There were error(s)",
+            message_class="error",
         )
 
     # No errors, store the changes.
