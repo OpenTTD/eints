@@ -110,19 +110,19 @@ def template(tpl, **kwargs):
 
     messages = kwargs.setdefault("messages", [])
 
-    if "message" in kwargs:
-        messages.append({"content": kwargs.get("message"), "class": kwargs.get("message_class", "info")})
+    if kwargs.get("message"):
+        messages.append({"content": kwargs.get("message"), "message_class": kwargs.get("message_class", "info")})
 
     query = bottle.request.query
-    if len(query.get("message", "")) > 0:
-        messages.append({"content": query.get("message"), "class": query.get("message_class", "info")})
+    if query.get("message", ""):
+        messages.append({"content": query.get("message"), "message_class": query.get("message_class", "info")})
 
     # message classes map to bootstrap css alert style names.
     # n.b. default bootstrap alert is yellow (warning), but our default is blue (info)
     message_classes = {"info": "alert-info", "success": "alert-success", "warning": "", "error": "alert-error"}
 
     for msg in messages:
-        msg["class"] = message_classes.get(msg.get("class", "info"), "")
+        msg["class"] = message_classes.get(msg.get("message_class", "info"), "")
 
     return bottle.template(tpl, **kwargs)
 
