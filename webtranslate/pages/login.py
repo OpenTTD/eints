@@ -66,7 +66,7 @@ def login_post(userauth):
         userauth=userauth,
         req_login=req_login,
         req_redirect=req_redirect,
-        message="Try harder!",
+        message="GitHub authentication failed; please try again",
         message_class="error",
     )
 
@@ -82,7 +82,7 @@ def oauth(userauth):
     if userauth.is_auth:
         login_success(req_redirect)
     else:
-        utils.redirect("/", message="Try harder!", message_class="error")
+        utils.redirect("/", message="GitHub authentication failed; please try again", message_class="error")
 
 
 @route("/logout", method="GET")
