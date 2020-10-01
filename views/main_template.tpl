@@ -47,7 +47,7 @@
         {{!base}}
 
         <div class="footer">
-            <a href="http://dev.openttdcoop.org/projects/eints">Web Translator</a> from <a href="http://dev.openttdcoop.org">#openttdcoop</a>
+            <a href="https://github.com/OpenTTD/eints">Web Translator</a> | <a href="https://github.com/OpenTTD/eints/issues">Report a bug</a>
         </div>
     </div>
 </body>
