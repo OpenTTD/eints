@@ -16,7 +16,6 @@ jobs:
 
     - name: Get pull-request commits
       run: |
-        set -x
         # actions/checkout did a merge checkout of the pull-request. As such, the first
         # commit is the merge commit. This means that on HEAD^ is the base branch, and
         # on HEAD^2 are the commits from the pull-request. We now check if those trees
@@ -29,6 +28,7 @@ jobs:
         done
 
         # Just to show which commits we are going to evaluate.
+        echo "Commits in this pull-request:"
         git log --oneline HEAD^..HEAD^2
 
     - name: Checkout commit-checker
@@ -40,6 +40,5 @@ jobs:
 
     - name: Check commits
       run: |
-        set -x
         HOOKS_DIR=./git-hooks/hooks GIT_DIR=.git ./git-hooks/hooks/check-commits.sh HEAD^..HEAD^2
         echo "Commit checks passed"
