@@ -22,19 +22,20 @@ def filter_langfile(filename):
     @rtype:  C{list} of C{str}
     """
     result = []
-    for line in open(filename, "r", encoding="utf-8"):
-        line = line.strip()
-        if not line:
-            continue
+    with open(filename, "r", encoding="utf-8") as lang_file:
+        for line in lang_file:
+            line = line.strip()
+            if not line:
+                continue
 
-        if not line.startswith("#"):
-            break
+            if not line.startswith("#"):
+                break
 
-        if not line.startswith("##"):
-            continue
+            if not line.startswith("##"):
+                continue
 
-        if any(line.startswith(key) for key in filterkeywords):
-            result.append(line)
+            if any(line.startswith(key) for key in filterkeywords):
+                result.append(line)
 
     return result
 
@@ -49,7 +50,8 @@ def read_complete_langfile(filename):
     @return: List of lines.
     @rtype:  C{list} of C{str}
     """
-    return [line.strip() for line in open(filename, "r", encoding="utf-8")]
+    with open(filename, "r", encoding="utf-8") as lang_file:
+        return [line.strip() for line in lang_file]
 
 
 def write_langfile(filename, content):
@@ -62,9 +64,9 @@ def write_langfile(filename, content):
     @param content: List of lines.
     @type  content: C{list} of C{str}
     """
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write("\n".join(content))
-        f.write("\n")
+    with open(filename, "w", encoding="utf-8") as lang_file:
+        lang_file.write("\n".join(content))
+        lang_file.write("\n")
 
 
 # Parse arguments

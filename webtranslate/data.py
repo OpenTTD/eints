@@ -393,10 +393,9 @@ class JsonLoader:
                  object, the project may not have all languages.
         @rtype:  L{Project}
         """
-        handle = open(fname, "rt", encoding="utf-8")
-        data = json.load(handle)
-        handle.close()
-        return load_project_json(self, data)
+        with open(fname, "rt", encoding="utf-8") as handle:
+            data = json.load(handle)
+            return load_project_json(self, data)
 
     def load_language(self, projtype, fname):
         """
@@ -411,10 +410,9 @@ class JsonLoader:
         @return: The loaded language.
         @rtype:  L{Language}
         """
-        handle = open(fname, "rt", encoding="utf-8")
-        data = json.load(handle)
-        handle.close()
-        return load_language_json(projtype, data)
+        with open(fname, "rt", encoding="utf-8") as handle:
+            data = json.load(handle)
+            return load_language_json(projtype, data)
 
 
 class XmlSaver:
@@ -470,9 +468,8 @@ class XmlSaver:
             node.appendChild(self.texts_node)
 
         self.doc.appendChild(node)
-        handle = open(fname, "w", encoding="utf-8")
-        handle.write(self.doc.toprettyxml())
-        handle.close()
+        with open(fname, "w", encoding="utf-8") as handle:
+            handle.write(self.doc.toprettyxml())
 
     def save_language(self, projtype, lng, fname):
         """
@@ -500,9 +497,8 @@ class XmlSaver:
             node.appendChild(self.texts_node)
 
         self.doc.appendChild(node)
-        handle = open(fname, "w", encoding="utf-8")
-        handle.write(self.doc.toprettyxml())
-        handle.close()
+        with open(fname, "w", encoding="utf-8") as handle:
+            handle.write(self.doc.toprettyxml())
 
     def get_textref(self, text):
         """
@@ -551,9 +547,8 @@ class JsonSaver:
         @type  fname: C{str}
         """
         node = save_project_json(self, project)
-        handle = open(fname, "wt", encoding="utf-8")
-        json.dump(node, handle)
-        handle.close()
+        with open(fname, "wt", encoding="utf-8") as handle:
+            json.dump(node, handle)
 
     def save_language(self, projtype, lng, fname):
         """
@@ -571,9 +566,8 @@ class JsonSaver:
         assert self.split_languages
 
         node = save_language_json(projtype, lng)
-        handle = open(fname, "wt", encoding="utf-8")
-        json.dump(node, handle)
-        handle.close()
+        with open(fname, "wt", encoding="utf-8") as handle:
+            json.dump(node, handle)
 
 
 class Project:
