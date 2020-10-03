@@ -16,21 +16,21 @@ def delete_form(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     if pmd.storage_type == config.STORAGE_SEPARATE_LANGUAGES:
         abort(404, "Cannot delete a language, ask the system administrator to remove the language file")
-        return
+        return None
 
     pdata = pmd.pdata
     lng = pdata.languages.get(lngname)
     if lng is None:
         abort(404, "Language does not exist in the project")
-        return
+        return None
 
     if pdata.base_language == lngname:
         abort(404, "Cannot delete base language!")
-        return
+        return None
 
     return template("delete_translation", userauth=userauth, pmd=pmd, lng=lng)
 

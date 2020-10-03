@@ -95,7 +95,7 @@ def protected(page_name):
             else:
                 # Valid user, no project context: Go to project list.
                 redirect("/projects", message="Access denied")
-            return
+            return None
 
         return wrapper
 

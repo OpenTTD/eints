@@ -288,18 +288,18 @@ def fix_string(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     lng = pdata.languages.get(lngname)
     if lng is None:
         abort(404, "Language does not exist in the project")
-        return
+        return None
 
     blng = pdata.get_base_language()
     if blng == lng:
         abort(404, "Language is not a translation")
-        return
+        return None
 
     return fix_string_page(pmd, prjname, lngname, None)
 
@@ -513,7 +513,7 @@ def output_string_edit_page(
 def str_form(userauth, prjname, lngname, sname):
     parms = check_page_parameters(prjname, lngname, sname)
     if parms is None:
-        return
+        return None
 
     pmd, bchg, lng, binfo = parms
     return output_string_edit_page(userauth, bchg, binfo, lng, pmd, lngname, sname, None)
@@ -524,7 +524,7 @@ def str_form(userauth, prjname, lngname, sname):
 def str_post(userauth, prjname, lngname, sname):
     parms = check_page_parameters(prjname, lngname, sname)
     if parms is None:
-        return
+        return None
 
     pmd, bchg, lng, binfo = parms
 
@@ -534,7 +534,7 @@ def str_post(userauth, prjname, lngname, sname):
     base_str = request_forms.get("base")  # Base text translated against in the form.
     if base_str is None or base_str != bchg.base_text.text:
         abort(404, "Base language has been changed, please translate the newer version instead")
-        return
+        return None
 
     # Get changes against bchg
     case_chgs = data.get_all_changes(lng.changes.get(sname), lng.case, bchg)

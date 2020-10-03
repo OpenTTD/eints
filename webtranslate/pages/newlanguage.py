@@ -25,7 +25,7 @@ def new_language_get(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
 
@@ -63,7 +63,7 @@ def new_language_post(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     new_iso = request.forms.language_select
 
@@ -71,7 +71,7 @@ def new_language_post(userauth, prjname):
     if lng_def is None:
         msg = "No language found that can be created"
         abort(404, msg)
-        return
+        return None
 
     return template("makelanguage", userauth=userauth, pmd=pmd, lnginfo=lng_def)
 

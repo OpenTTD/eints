@@ -36,11 +36,11 @@ def page_post(userauth):
     acceptance = utils.verify_name(prjname, "Project identifier", True)
     if acceptance is not None:
         redirect("/newproject", message=acceptance)
-        return
+        return None
 
     if prjname in config.cache.projects:
         redirect("/newproject", message='Project "{}" already exists'.format(prjname))
-        return
+        return None
 
     ptype_name = request.forms.projtype_select
     projtype = None
@@ -50,7 +50,7 @@ def page_post(userauth):
             break
     if projtype is None:
         redirect("/newproject", message="No known project type provided")
-        return
+        return None
     return template("createproject_form", userauth=userauth, projtype_name=projtype.name, prjname=prjname)
 
 

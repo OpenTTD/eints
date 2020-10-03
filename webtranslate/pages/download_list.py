@@ -43,7 +43,7 @@ def download_list(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     response.content_type = "text/plain; charset=UTF-8"
