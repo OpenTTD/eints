@@ -1,3 +1,5 @@
+import functools
+
 from .. import (
     config,
     data,
@@ -35,6 +37,7 @@ class CaseDisplayData:
         return sname + "." + self.case
 
 
+@functools.total_ordering
 class StringDisplayData:
     """
     All data of a string to display in the language overview.
