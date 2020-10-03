@@ -103,12 +103,9 @@ def connect():
         db_connection.set_client_encoding("UTF-8")
 
         if db_schema is not None and db_schema != "":
-            try:
-                cur = db_connection.cursor()
-                cur.execute("SET search_path TO %s", (db_schema,))
-                db_connection.commit()
-            except KeyError:
-                pass
+            cur = db_connection.cursor()
+            cur.execute("SET search_path TO %s", (db_schema,))
+            db_connection.commit()
 
         return True
 
