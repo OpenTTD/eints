@@ -369,7 +369,7 @@ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
         if resp.status != 200:
             return False
 
-        data = resp.read()
+        resp.read()
         return True
 
 
@@ -510,7 +510,8 @@ def get_local_languages():
             if not fname.endswith(user_cfg.lang_ext):
                 continue
             path = os.path.join(spath, fname)
-            verbose_msg = 'File "{}" matches extension'.format(path)
+            if user_cfg.verbose:
+                print('File "{}" matches extension'.format(path))
 
             # Try reading the grflangid from the file.
             grflangid = None
@@ -536,8 +537,7 @@ def get_local_languages():
                 continue
 
             if user_cfg.verbose:
-                verbose_msg = 'File "{}" matches extension, but cannot derive a language from it.'.format(path)
-                print(verbose_msg)
+                print('File "{}" matches extension, but cannot derive a language from it.'.format(path))
 
     local_files_cache = result
 
