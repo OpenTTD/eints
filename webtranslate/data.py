@@ -2,6 +2,7 @@
 Project data.
 """
 import calendar
+import functools
 import json
 import logging
 import re
@@ -1283,6 +1284,7 @@ def load_language_json(projtype, node):
     return lng
 
 
+@functools.total_ordering
 class Change:
     """
     A change (adding a new string in the base language, adding or updating a
@@ -1634,6 +1636,7 @@ def get_text(xloader, ref):
     return xloader.get_textref(ref)
 
 
+@functools.total_ordering
 class Stamp:
     """
     Time stamp.
