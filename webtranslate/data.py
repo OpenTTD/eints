@@ -393,7 +393,7 @@ class JsonLoader:
                  object, the project may not have all languages.
         @rtype:  L{Project}
         """
-        with open(fname, "rt", encoding="utf-8") as handle:
+        with open(fname, "r", encoding="utf-8") as handle:
             data = json.load(handle)
             return load_project_json(self, data)
 
@@ -410,7 +410,7 @@ class JsonLoader:
         @return: The loaded language.
         @rtype:  L{Language}
         """
-        with open(fname, "rt", encoding="utf-8") as handle:
+        with open(fname, "r", encoding="utf-8") as handle:
             data = json.load(handle)
             return load_language_json(projtype, data)
 
@@ -547,7 +547,7 @@ class JsonSaver:
         @type  fname: C{str}
         """
         node = save_project_json(self, project)
-        with open(fname, "wt", encoding="utf-8") as handle:
+        with open(fname, "w", encoding="utf-8") as handle:
             json.dump(node, handle)
 
     def save_language(self, projtype, lng, fname):
@@ -566,7 +566,7 @@ class JsonSaver:
         assert self.split_languages
 
         node = save_language_json(projtype, lng)
-        with open(fname, "wt", encoding="utf-8") as handle:
+        with open(fname, "w", encoding="utf-8") as handle:
             json.dump(node, handle)
 
 
