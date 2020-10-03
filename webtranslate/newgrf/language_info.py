@@ -143,20 +143,18 @@ def parse_file(fname):
     @return: The found meta-information about a language.
     @rtype:  C{LanguageData}
     """
-    handle = open(fname, "rt", encoding="utf-8")
-    found_lines = {}
-    for line in handle:
-        if not line.startswith("##"):
-            continue
+    with open(fname, "rt", encoding="utf-8") as handle:
+        found_lines = {}
+        for line in handle:
+            if not line.startswith("##"):
+                continue
 
-        line = line.rstrip()
-        for ll in recognized:
-            m = ll.pattern.match(line)
-            if m:
-                found_lines[ll.name] = ll.convert(m.group(1))
-                break
-
-    handle.close()
+            line = line.rstrip()
+            for ll in recognized:
+                m = ll.pattern.match(line)
+                if m:
+                    found_lines[ll.name] = ll.convert(m.group(1))
+                    break
 
     if not all(ll.name in found_lines for ll in recognized if ll.required):
         for ll in recognized:

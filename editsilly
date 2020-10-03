@@ -13,22 +13,20 @@ def init():
     names = set()
     if not os.path.isfile(FILENAME): return
 
-    handle = open(FILENAME, 'r')
-    for line in handle:
-        line = line.rstrip()
-        if len(line) == 0 or line[0] == '#':
-            _data.append(('text', line))
-            continue
-        i = line.find(':')
-        if i < 0: continue
-        j = line.find(':', i + 1)
-        if j < 0: continue
-        uname, pwd = line[:i].strip(), line[i+1:j]
-        if uname in names: continue
-        _data.append(('user', uname, pwd))
-        names.add(uname)
-
-    handle.close()
+    with open(FILENAME, 'r') as handle:
+        for line in handle:
+            line = line.rstrip()
+            if len(line) == 0 or line[0] == '#':
+                _data.append(('text', line))
+                continue
+            i = line.find(':')
+            if i < 0: continue
+            j = line.find(':', i + 1)
+            if j < 0: continue
+            uname, pwd = line[:i].strip(), line[i+1:j]
+            if uname in names: continue
+            _data.append(('user', uname, pwd))
+            names.add(uname)
 
 def usage():
     print()
@@ -120,15 +118,14 @@ def main():
             print("Password: " + pwd)
             print()
 
-    handle = open(FILENAME, 'w')
-    for line in _data:
-        if line[0] == 'text':
-            line = line[1]
-            if len(line) != 0 and line[0] != '#': line = '#' + line
-            handle.write(line + '\n')
-        elif line[0] == 'user':
-            handle.write(line[1] + ':' +line[2] + ':\n')
-    handle.close()
+    with open(FILENAME, 'w') as handle:
+        for line in _data:
+            if line[0] == 'text':
+                line = line[1]
+                if len(line) != 0 and line[0] != '#': line = '#' + line
+                handle.write(line + '\n')
+            elif line[0] == 'user':
+                handle.write(line[1] + ':' +line[2] + ':\n')
 
     print(" ******************************************")
     print(" * THIS SYSTEM USES UNENCRYPTED PASSWORDS *")

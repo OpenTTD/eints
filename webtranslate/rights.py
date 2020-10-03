@@ -89,21 +89,19 @@ def init_page_access():
 
     _table = []
     rights_pat = re.compile("\\s*(\\S+)\\s+([-+])\\s+/([^/]+)/([^/]+)/([^/]+)/([^/]+)\\s*$")
-    handle = open(FILENAME, "r", encoding="utf-8")
-    for idx, line in enumerate(handle):
-        line = line.rstrip()
-        if len(line) == 0 or line[0] == "#":
-            continue
-        m = rights_pat.match(line)
-        if not m:
-            log.warning("Line %d ignored of %s", idx + 1, FILENAME)
-            continue
-        user = m.group(1)
-        grant_access = m.group(2) == "+"
-        path = [m.group(3), m.group(4), m.group(5), m.group(6)]
-        _table.append(UserRightRule(user, path, grant_access))
-
-    handle.close()
+    with open(FILENAME, "r", encoding="utf-8") as handle:
+        for idx, line in enumerate(handle):
+            line = line.rstrip()
+            if len(line) == 0 or line[0] == "#":
+                continue
+            m = rights_pat.match(line)
+            if not m:
+                log.warning("Line %d ignored of %s", idx + 1, FILENAME)
+                continue
+            user = m.group(1)
+            grant_access = m.group(2) == "+"
+            path = [m.group(3), m.group(4), m.group(5), m.group(6)]
+            _table.append(UserRightRule(user, path, grant_access))
 
 
 def has_access(page, roles):

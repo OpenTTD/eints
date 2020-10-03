@@ -30,24 +30,22 @@ def init_users():
     if not os.path.isfile(FILENAME):
         return
 
-    handle = open(FILENAME, "r", encoding="utf-8")
-    for line in handle:
-        line = line.rstrip()
-        if len(line) == 0 or line[0] == "#":
-            continue
-        i = line.find(":")
-        if i < 0:
-            continue
-        j = line.find(":", i + 1)
-        if j < 0:
-            j = len(line)
-        uname, pwd = line[:i].strip(), line[i + 1 : j]
+    with open(FILENAME, "r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.rstrip()
+            if len(line) == 0 or line[0] == "#":
+                continue
+            i = line.find(":")
+            if i < 0:
+                continue
+            j = line.find(":", i + 1)
+            if j < 0:
+                j = len(line)
+            uname, pwd = line[:i].strip(), line[i + 1 : j]
 
-        if len(uname) == 0 or len(pwd) == 0:
-            continue
-        _users.add((uname, pwd))
-
-    handle.close()
+            if len(uname) == 0 or len(pwd) == 0:
+                continue
+            _users.add((uname, pwd))
 
 
 def authenticate(user, pwd):

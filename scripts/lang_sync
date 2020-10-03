@@ -515,16 +515,14 @@ def get_local_languages():
 
             # Try reading the grflangid from the file.
             grflangid = None
-            handle = open(path, "r", encoding="utf-8")
-            for line in handle:
-                if line.startswith(utf8_bom):
-                    line = line[len(utf8_bom) :]
-                m = grflangid_pattern.match(line)
-                if m:
-                    grflangid = int(m.group(1), 16)
-                    break
-
-            handle.close()
+            with open(path, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    if line.startswith(utf8_bom):
+                        line = line[len(utf8_bom) :]
+                    m = grflangid_pattern.match(line)
+                    if m:
+                        grflangid = int(m.group(1), 16)
+                        break
 
             # If not found, try to derive it from the filename.
             if grflangid is None:
@@ -1273,19 +1271,19 @@ def run():
 
     setup_auth()
 
-    # Open 'credits' file.
-    if user_cfg.credits_file is None:
-        credits_handle = None
-    else:
-        credits_handle = open(user_cfg.credits_file, "w", encoding="utf-8")
+    credits_handle = None
+    try:
+        if user_cfg.credits_file:
+            credits_handle = open(user_cfg.credits_file, "w", encoding="utf-8")
 
-    for op_type, lng_type in user_cfg.operations:
-        if user_cfg.verbose:
-            print('Performing "{}-{}"'.format(op_type, lng_type))
-        perform_operation(op_type, lng_type, credits_handle)
+        for op_type, lng_type in user_cfg.operations:
+            if user_cfg.verbose:
+                print('Performing "{}-{}"'.format(op_type, lng_type))
+            perform_operation(op_type, lng_type, credits_handle)
 
-    if credits_handle is not None:
-        credits_handle.close()
+    finally:
+        if credits_handle:
+            credits_handle.close()
 
     sys.exit(0)
 
