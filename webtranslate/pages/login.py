@@ -40,7 +40,7 @@ def login(userauth):
         return utils.template("login", userauth=userauth, req_login=req_login, req_redirect=req_redirect)
     else:
         abort(500, "No authentication method")
-        return
+    return None
 
 
 @route("/login", method="POST")
@@ -48,7 +48,7 @@ def login(userauth):
 def login_post(userauth):
     if not users.get_authentication:
         abort(500, "No authentication method")
-        return
+        return None
 
     req_redirect = request.forms.get("redirect")
     req_login = request.forms.get("login")
@@ -59,7 +59,7 @@ def login_post(userauth):
         if userauth.is_auth:
             start_session(userauth)
             login_success(req_redirect)
-            return
+            return None
 
     return utils.template(
         "login",

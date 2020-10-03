@@ -16,7 +16,7 @@ def project(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     base_lng = pdata.get_base_language()

@@ -1331,12 +1331,12 @@ class Change:
 
     def __lt__(self, other):
         if not isinstance(other, Change):
-            return
+            return False
         return self.stamp < other.stamp
 
     def __eq__(self, other):
         if not isinstance(other, Change):
-            return
+            return False
         return self.stamp == other.stamp
 
 
@@ -1499,7 +1499,7 @@ class Text:
 
     def __eq__(self, other):
         if not isinstance(other, Text):
-            return
+            return False
         return self.text == other.text and self.case == other.case and self.stamp == other.stamp
 
     def __ne__(self, other):
@@ -1653,12 +1653,12 @@ class Stamp:
 
     def __lt__(self, other):
         if not isinstance(other, Stamp):
-            return
+            return False
         return self.seconds < other.seconds or (self.seconds == other.seconds and self.number < other.number)
 
     def __eq__(self, other):
         if not isinstance(other, Stamp):
-            return
+            return False
         return self.seconds == other.seconds and self.number == other.number
 
     def __str__(self):

@@ -80,7 +80,7 @@ def connect():
         return True  # Already connected.
 
     if db_name is None or db_name == "":
-        return
+        return False
 
     # Setup connection.
     if db_type == "postgress":

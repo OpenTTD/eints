@@ -76,7 +76,7 @@ def make_langfile(pdata, base_lng, lng, add_func):
     sdict = sdict.get(lng.name)  # Statistics dict for the queried language.
     if sdict is None:
         abort(404, "Missing language statistics")
-        return
+        return None
 
     lines = []
     for skel_type, skel_value in pdata.skeleton:
@@ -152,7 +152,7 @@ def download(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     base_lng = pdata.get_base_language()
@@ -160,7 +160,7 @@ def download(userauth, prjname, lngname):
     lng = pdata.languages.get(lngname)
     if lng is None:
         abort(404, "Language does not exist in the project")
-        return
+        return None
 
     response.content_type = "text/plain; charset=UTF-8"
     return make_langfile(pdata, base_lng, lng, plain_langfile)
@@ -172,7 +172,7 @@ def annotate(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     base_lng = pdata.get_base_language()
@@ -180,7 +180,7 @@ def annotate(userauth, prjname, lngname):
     lng = pdata.languages.get(lngname)
     if lng is None:
         abort(404, "Language does not exist in the project")
-        return
+        return None
 
     response.content_type = "text/plain; charset=UTF-8"
     return make_langfile(pdata, base_lng, lng, annotated_langfile)

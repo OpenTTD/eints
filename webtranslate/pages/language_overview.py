@@ -34,7 +34,7 @@ def language(userauth, lngname):
     lnginfo = language_info.isocode.get(lngname)
     if lnginfo is None:
         abort(404, "Language is unknown")
-        return
+        return None
 
     prjdata = []
     for pmd in config.cache.projects.values():

@@ -28,7 +28,7 @@ def page_get(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     if pdata.projtype.has_grflangid:
@@ -48,12 +48,12 @@ def page_get_subdir(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     linfo = language_info.isocode.get(lngname)
     if linfo is None:
         abort(404, "Language is unknown")
-        return
+        return None
     return template("upload_lang_subdir", userauth=userauth, pmd=pmd, lnginfo=linfo)
 
 
@@ -63,12 +63,12 @@ def page_post_subdir(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     linfo = language_info.isocode.get(lngname)
     if linfo is None:
         abort(404, "Language is unknown")
-        return
+        return None
 
     langfile = request.files.langfile
     override = request.forms.override
@@ -82,12 +82,12 @@ def page_post(userauth, prjname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     if not pdata.projtype.has_grflangid:
         abort(404, "No language identification provided.")
-        return
+        return None
 
     langfile = request.files.langfile
     override = request.forms.override
@@ -122,14 +122,14 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     # Missing language file in the upload.
     if not langfile or not langfile.file:
         abort(404, "Missing language file")
-        return
+        return None
 
     base_language = pdata.get_base_language()
 
     # Cannot download a translation without base language.
     if not is_base and base_language is None:
         abort(404, "Project has no base language")
-        return
+        return None
 
     # Parse language file, and report any errors.
     ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size, lng_data)
@@ -139,7 +139,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     # Is the language allowed?
     if not pdata.projtype.allow_language(ng_data.language_data):
         abort(404, 'Language "{}" may not be uploaded'.format(ng_data.language_data.isocode))
-        return
+        return None
 
     stamp = data.make_stamp()
 
@@ -148,7 +148,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
         result = add_new_language(ng_data, pdata, is_base)
         if not result[0]:
             abort(404, result[0])
-            return
+            return None
         lng = result[1]
         if is_base and base_language is None:
             base_language = lng
@@ -156,7 +156,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
     if is_base:
         if base_language is not None and base_language != lng:
             abort(404, "Cannot change a translation to a base language")
-            return
+            return None
 
         # Add strings as changes.
         for sv in ng_data.strings:
@@ -208,7 +208,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
         # Not a base language -> it is a translation.
         if base_language is not None and base_language == lng:
             abort(404, "Cannot change a base language to a translation")
-            return
+            return None
 
         for sv in ng_data.strings:
             sv.text = language_file.sanitize_text(sv.text)
@@ -252,6 +252,7 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
 
     message = "Successfully uploaded language '" + lng.name + "' " + utils.get_datetime_now_formatted()
     redirect("/project/<prjname>", prjname=projname, message=message)
+    return None
 
 
 def get_blng_change(sv, lng):

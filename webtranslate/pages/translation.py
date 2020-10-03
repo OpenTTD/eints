@@ -71,13 +71,13 @@ def project(userauth, prjname, lngname):
     pmd = config.cache.get_pmd(prjname)
     if pmd is None:
         abort(404, "Project does not exist")
-        return
+        return None
 
     pdata = pmd.pdata
     lng = pdata.languages.get(lngname)
     if lng is None:
         abort(404, "Language does not exist in the project")
-        return
+        return None
     assert pdata.projtype.allow_case or lng.case == [""]
 
     blng = pdata.get_base_language()  # As above we established there is at least one language, this should work.
@@ -86,7 +86,7 @@ def project(userauth, prjname, lngname):
     sdict = sdict.get(lngname)  # Statistics dict for the queried language.
     if sdict is None:
         abort(404, "Missing language statistics")
-        return
+        return None
 
     for sname, bchgs in blng.changes.items():
         cstates = sdict[sname]
