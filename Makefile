@@ -1,7 +1,11 @@
 .PHONY: manual epydoc run venv
 
 run: .env/pyvenv.cfg
+ifeq (,$(wildcard ./config.xml))
 	.env/bin/python -m webtranslate --project-root data
+else
+	.env/bin/python -m webtranslate.main
+endif
 
 venv: .env/pyvenv.cfg
 
