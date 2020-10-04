@@ -163,7 +163,7 @@ def oauth_callback(userauth, request_url):
     @return: Redirect URL
     @rtype:  C{str} or C{None}
     """
-    if userauth is GithubUserAuthentication:
+    if isinstance(userauth, GithubUserAuthentication):
         # Valid session, check authentication
         return userauth.callback(request_url)
     else:
