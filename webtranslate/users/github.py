@@ -163,4 +163,9 @@ def oauth_callback(userauth, request_url):
     @return: Redirect URL
     @rtype:  C{str} or C{None}
     """
-    return userauth.callback(request_url)
+    if userauth is GithubUserAuthentication:
+        # Valid session, check authentication
+        return userauth.callback(request_url)
+    else:
+        # No session. Maybe user went back to /oauth2 after logout.
+        return None
