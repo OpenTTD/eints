@@ -1,6 +1,8 @@
 """
 Main program.
 """
+import logging
+
 from . import (
     bottle,
     config,
@@ -29,6 +31,8 @@ from .pages import (  # noqa
     upload_language,
     user_profile,
 )
+
+log = logging.getLogger(__name__)
 
 # Get template files from 'views' only.
 bottle.TEMPLATE_PATH = ["./views/"]
@@ -75,3 +79,12 @@ def run():
     # With 'mod_wsgi', application does not run from here.
     if config.cfg.server_mode != "mod_wsgi":
         bottle.run(reloader=False, debug=debug, host=config.cfg.server_host, port=config.cfg.server_port)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO
+    )
+    log.info("Using existing config.xml")
+
+    run()

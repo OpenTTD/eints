@@ -8,6 +8,8 @@ from .sentry import click_sentry
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
+log = logging.getLogger(__name__)
+
 
 @click_additional_options
 def click_logging():
@@ -122,6 +124,8 @@ def run(
             fp.write("  </github>\n")
 
         fp.write("</config>\n")
+
+    log.info("Generated config.xml")
 
     # Make sure that all files we accept to be transferred, are kept in
     # memory, and only start creating temp-files for files bigger than
