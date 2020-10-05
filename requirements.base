@@ -1,4 +1,5 @@
 click
+openttd-helpers
 requests
 requests_oauthlib
 sentry-sdk
