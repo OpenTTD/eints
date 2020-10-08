@@ -6,6 +6,8 @@ import logging
 import requests
 import requests_oauthlib
 
+from oauthlib.oauth2 import AccessDeniedError
+
 from .. import (
     rights,
     userauth,
@@ -109,7 +111,11 @@ class GithubUserAuthentication(userauth.UserAuthentication):
                 self.teams = request_teams(self.name)
 
                 return self.redirect
-
+        except AccessDeniedError:
+            # The user denied access to our application; that is fine, just
+            # don't log the user in and show him an error (which is exactly
+            # what happens if we do absolutely nothing)
+            pass
         except Exception:
             log.exception("Failed to get user information")
 
