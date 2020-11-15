@@ -1,7 +1,10 @@
 """
 Root page.
 """
-from ..bottle import route
+from ..bottle import (
+    HTTPResponse,
+    route,
+)
 from ..protect import protected
 from ..utils import template
 
@@ -10,3 +13,8 @@ from ..utils import template
 @protected(["root", "-", "-"])
 def root(userauth):
     return template("root", userauth=userauth)
+
+
+@route("/robots.txt", method="GET")
+def robots():
+    return HTTPResponse("User-agent: *\nDisallow: /", status=200, headers={"content-type": "text/plain"})
