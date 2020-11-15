@@ -18,12 +18,15 @@ from .utils import redirect
 _sessions = dict()
 SESSION_COOKIE = "eints_sid"
 MAX_SESSION_AGE = datetime.timedelta(hours=16)
+LOGIN_TIMEOUT = datetime.timedelta(minutes=10)
 
 
 def cleanup_sessions():
     now = datetime.datetime.utcnow()
     for sid, session in list(_sessions.items()):
-        if now > session.expires:
+        if not session.is_auth and now > session.login_timeout:
+            del _sessions[sid]
+        elif now > session.expires:
             del _sessions[sid]
 
 
@@ -32,6 +35,7 @@ def start_session(userauth):
 
     userauth.sid = secrets.token_hex(32)
     userauth.expires = datetime.datetime.utcnow() + MAX_SESSION_AGE
+    userauth.login_timeout = datetime.datetime.utcnow() + LOGIN_TIMEOUT
     _sessions[userauth.sid] = userauth
     response.set_cookie(SESSION_COOKIE, userauth.sid, expires=userauth.expires, httponly=True)
 
