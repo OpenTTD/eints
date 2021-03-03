@@ -22,7 +22,8 @@ COPY requirements.txt \
 # Needed for Sentry to know what version we are running
 RUN echo "${BUILD_VERSION}" > /code/.version
 
-RUN pip --no-cache-dir install -r requirements.txt
+RUN pip --no-cache-dir install -U pip \
+    && pip --no-cache-dir install -r requirements.txt
 
 # Validate that what was installed was what was expected
 RUN pip freeze 2>/dev/null > requirements.installed \
