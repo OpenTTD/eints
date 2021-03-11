@@ -193,7 +193,7 @@ def create_displayed_base_text(pdata, text):
     blng = pdata.get_base_language()
     if blng is None:
         return text
-    str_info = language_file.check_string(pdata.projtype, text, True, None, blng, True)
+    str_info = language_file.check_string(pdata.projtype, text, True, None, blng, True, save_pieces=True)
     if str_info.has_error or str_info.pieces is None:
         return text
     return str_info.get_translation_text()
