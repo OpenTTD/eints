@@ -103,6 +103,8 @@ if not os.path.isdir(outputdir):
 # Read input language definitions
 inputlangs = {}
 for f in os.listdir(inputdir):
+    if f in {"CMakeLists.txt"}:
+        continue
     n = os.path.join(inputdir, f)
     if not os.path.isfile(n):
         continue
