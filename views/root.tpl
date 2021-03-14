@@ -2,7 +2,8 @@
 <h1 class="eint-heading-icon eint-icon-globe">Web Translator</h1>
 <p>Welcome to the web translator service of OpenTTD.</p>
 <ul>
-    <li><a href="/project/openttd-master">OpenTTD master</a></li>
+    <li><a href="languages">List of languages</a></li>
+    <li><a href="projects">List of projects</a></li>
     <li><a target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/usage.html">Read the manual</a></li>
 </ul>
 
