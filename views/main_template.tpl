@@ -22,7 +22,8 @@
             <div class="navbar-inner">
                 <ul class="nav">
                     <li><a href="/"><i class="icon-home"></i> Home</a></li>
-                    <li><a href="/project/openttd-master"><i class="icon-list-alt"></i> OpenTTD</a></li>
+                    <li><a href="/languages"><i class="icon-list-alt"></i> Languages</a></li>
+                    <li><a href="/projects"><i class="icon-list-alt"></i> Projects</a></li>
                 </ul>
                 <ul class="nav pull-right">
                     <li><a target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/usage.html"><i class="icon-book"></i> Manual</a></li>
