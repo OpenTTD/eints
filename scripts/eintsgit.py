@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import subprocess
-import re
 import os
 import os.path
 import sys
@@ -17,7 +16,6 @@ commit_user = "translators <translators@openttd.org>"
 commit_message = "Update: Translations from eints\n"
 
 # Source structure
-lang_dir = "src/lang"
 git_remote = "origin"
 git_branch = "master"
 git_remote_branch = git_remote + "/" + git_branch
@@ -29,6 +27,39 @@ git_command = "git"
 # Temporary files
 lock_file = "/tmp/eints.lock"
 msg_file = "/tmp/eints.msg"
+
+
+class Settings:
+    def __init__(self):
+        self.base_url = None
+        self.project = None
+        self.lang_dir = None
+        self.unstable_lang_dir = None
+        self.lang_file_ext = None
+        self.working_copy = None
+
+    def get_lang_sync_params(self):
+        result = [
+            "--user-password-file",
+            eints_login_file,
+            "--base-url",
+            self.base_url,
+            "--project",
+            self.project,
+            "--lang-dir",
+            self.lang_dir,
+            "--lang-file-ext",
+            self.lang_file_ext,
+        ]
+        if self.unstable_lang_dir:
+            result.extend(["--unstable-lang-dir", self.unstable_lang_dir])
+        return result
+
+    def get_working_dirs(self):
+        result = [self.lang_dir]
+        if self.unstable_lang_dir:
+            result.append(self.unstable_lang_dir)
+        return result
 
 
 class FileLock:
@@ -79,10 +110,7 @@ def print_info(msg):
     print("[{:%Y-%m-%d %H:%M:%S}] {}".format(datetime.datetime.now(), msg))
 
 
-is_modified_lang = re.compile(r" M " + lang_dir + r"/[\w\-/\\]+\.txt\Z")
-
-
-def git_status():
+def git_status(settings):
     """
     Check whether working copy is in a valid status,
     and whether there are modifies.
@@ -97,20 +125,14 @@ def git_status():
     @rtype:  C{bool}
     """
 
-    msg = subprocess.check_output([git_command, "status", "-s"], universal_newlines=True)
-    modified = False
-    for line in msg.splitlines():
-        if len(line) == 0:
-            continue
-        if is_modified_lang.match(line):
-            modified = True
-        else:
-            raise Exception("Invalid checkout status: {}".format(line))
-
-    return modified
+    msg = subprocess.check_output(
+        [git_command, "status", "-s", *settings.get_working_dirs()],
+        universal_newlines=True,
+    )
+    return msg.strip() != ""
 
 
-def git_pull():
+def git_pull(settings):
     """
     Update working copy, and revert all modifications.
 
@@ -121,23 +143,23 @@ def git_pull():
     subprocess.check_call([git_command, "fetch", git_remote])
     subprocess.check_call([git_command, "clean", "-f", os.environ.get("GIT_WORK_TREE")])
     changes = subprocess.check_output(
-        [git_command, "diff", "--name-only", "HEAD.." + git_remote_branch], universal_newlines=True
+        [git_command, "diff", "--name-only", "HEAD.." + git_remote_branch],
+        universal_newlines=True,
     )
     subprocess.check_call([git_command, "reset", "--hard", git_remote_branch])
 
     for line in changes.splitlines():
-        if line.startswith(lang_dir) >= 0:
+        if line.startswith(settings.lang_dir) >= 0:
+            return True
+        if settings.lang_dir and line.startswith(settings.lang_dir) >= 0:
             return True
 
     return False
 
 
-def git_push(lang_dir, msg_file, dry_run):
+def git_push(settings, msg_file, dry_run):
     """
     Commit and push working copy.
-
-    @param lang_dir: Path to lang directory.
-    @type  lang_dir: C{str}
 
     @param msg_file: Path to file with commit message.
     @type  msg_file: C{str}
@@ -146,53 +168,30 @@ def git_push(lang_dir, msg_file, dry_run):
     @type  dry_run: C{bool}
     """
 
-    subprocess.check_call([git_command, "add", lang_dir])
+    subprocess.check_call([git_command, "add", *settings.get_working_dirs()])
     subprocess.check_call([git_command, "commit", "--author", commit_user, "-F", msg_file])
     if not dry_run:
         subprocess.check_call([git_command, "push"])
 
 
-def eints_upload(base_url, lang_dir, project_id):
+def eints_upload(settings):
     """
     Update base language and translations to Eints.
-
-    @param lang_dir: Path to lang directory.
-    @type  lang_dir: C{str}
-
-    @param project_id: Eints project Id.
-    @type  project_id: C{str}
     """
 
     subprocess.check_call(
         [
             lang_sync_command,
-            "--user-password-file",
-            eints_login_file,
-            "--base-url",
-            base_url,
-            "--lang-file-ext",
-            ".txt",
-            "--project",
-            project_id,
-            "--lang-dir",
-            lang_dir,
-            "--unstable-lang-dir",
-            os.path.join(lang_dir, "unfinished"),
+            *settings.get_lang_sync_params(),
             "upload-base",
             "upload-translations",
         ]
     )
 
 
-def eints_download(base_url, lang_dir, project_id, credits_file):
+def eints_download(settings, credits_file):
     """
     Download translations from Eints.
-
-    @param lang_dir: Path to lang directory.
-    @type  lang_dir: C{str}
-
-    @param project_id: Eints project Id.
-    @type  project_id: C{str}
 
     @param credits_file: File for translator credits.
     @type  credits_file: C{str}
@@ -201,18 +200,7 @@ def eints_download(base_url, lang_dir, project_id, credits_file):
     subprocess.check_call(
         [
             lang_sync_command,
-            "--user-password-file",
-            eints_login_file,
-            "--base-url",
-            base_url,
-            "--lang-file-ext",
-            ".txt",
-            "--project",
-            project_id,
-            "--lang-dir",
-            lang_dir,
-            "--unstable-lang-dir",
-            os.path.join(lang_dir, "unfinished"),
+            *settings.get_lang_sync_params(),
             "--credits",
             credits_file,
             "download-translations",
@@ -220,15 +208,9 @@ def eints_download(base_url, lang_dir, project_id, credits_file):
     )
 
 
-def update_eints_from_git(base_url, lang_dir, project_id, force):
+def update_eints_from_git(settings, force):
     """
     Perform the complete operation from syncing Eints from the repository.
-
-    @param lang_dir: Path to lang directory.
-    @type  lang_dir: C{str}
-
-    @param project_id: Eints project Id.
-    @type  project_id: C{str}
 
     @param force: Upload even if no changes.
     @type  force: C{bool}
@@ -236,21 +218,15 @@ def update_eints_from_git(base_url, lang_dir, project_id, force):
 
     with FileLock(lock_file):
         print_info("Check updates from git")
-        if git_pull() or force:
+        if git_pull(settings) or force:
             print_info("Upload translations")
-            eints_upload(base_url, lang_dir, project_id)
+            eints_upload(settings)
         print_info("Done")
 
 
-def commit_eints_to_git(base_url, lang_dir, project_id, dry_run):
+def commit_eints_to_git(settings, dry_run):
     """
     Perform the complete operation from commit Eints changes to the repository.
-
-    @param lang_dir: Path to lang directory.
-    @type  lang_dir: C{str}
-
-    @param project_id: Eints project Id.
-    @type  project_id: C{str}
 
     @param dry_run: Do not commit, leave as modified.
     @type  dry_run: C{bool}
@@ -259,13 +235,13 @@ def commit_eints_to_git(base_url, lang_dir, project_id, dry_run):
     with FileLock(lock_file):
         # Upload first in any case.
         print_info("Update from git")
-        git_pull()
+        git_pull(settings)
         print_info("Upload/Merge translations")
-        eints_upload(base_url, lang_dir, project_id)
+        eints_upload(settings)
 
         print_info("Download translations")
-        eints_download(base_url, lang_dir, project_id, msg_file)
-        if git_status():
+        eints_download(settings, msg_file)
+        if git_status(settings):
             print_info("Commit changes")
             # Assemble commit messge
             with open(msg_file, "r+", encoding="utf-8") as f:
@@ -275,7 +251,7 @@ def commit_eints_to_git(base_url, lang_dir, project_id, dry_run):
                 f.write(commit_message)
                 f.write(cred)
 
-            git_push(lang_dir, msg_file, dry_run)
+            git_push(settings, msg_file, dry_run)
         print_info("Done")
 
 
@@ -286,7 +262,19 @@ def run():
 
     try:
         opts, args = getopt.getopt(
-            sys.argv[1:], "h", ["help", "force", "dry-run", "base-url=", "project=", "working-copy="]
+            sys.argv[1:],
+            "h",
+            [
+                "help",
+                "force",
+                "dry-run",
+                "base-url=",
+                "project=",
+                "lang-dir=",
+                "unstable-lang-dir=",
+                "lang-file-ext=",
+                "working-copy=",
+            ],
         )
     except getopt.GetoptError as err:
         print("eintsgit: " + str(err) + ' (try "eintsgit --help")')
@@ -295,9 +283,8 @@ def run():
     # Parse options
     force = False
     dry_run = False
-    project_id = None
-    working_copy = None
-    base_url = None
+    settings = Settings()
+
     for opt, val in opts:
         if opt in ("--help", "-h"):
             print(
@@ -323,6 +310,15 @@ with <options>:
 
 --working-copy
     Path to git working copy
+
+--lang-dir=LANG_DIR
+    Path of the directory containing the language files at the local disc.
+
+--unstable-lang-dir=UNSTABLE_LANG_DIR
+    Path of the directory containing the unstable language files at the local disc.
+
+--lang-file-ext=LANG_EXT
+    Filename suffix used by the language files.
 
 --base-url
     URL where eints is at
@@ -351,25 +347,12 @@ commit-to-git
             dry_run = True
             continue
 
-        if opt == "--base-url":
-            if base_url:
-                print("Duplicate --base-url option")
+        key = opt[2:].replace("-", "_")
+        if hasattr(settings, key):
+            if getattr(settings, key):
+                print("Duplicate {} option".format(opt))
                 sys.exit(2)
-            base_url = val
-            continue
-
-        if opt == "--project":
-            if project_id:
-                print("Duplicate --project option")
-                sys.exit(2)
-            project_id = val
-            continue
-
-        if opt == "--working-copy":
-            if working_copy:
-                print("Duplicate --working-copy option")
-                sys.exit(2)
-            working_copy = val
+            setattr(settings, key, val)
             continue
 
         raise ValueError("Unknown option {} encountered.".format(opt))
@@ -393,24 +376,29 @@ commit-to-git
 
     # Check options
     if do_update or do_commit:
-        if project_id is None:
-            print("No --project specified")
-            sys.exit(2)
+        lsp = settings.get_lang_sync_params()
+        for k, v in zip(lsp[0::2], lsp[1::2]):
+            if v is None:
+                print("No {} specified".format(k))
+                sys.exit(2)
 
-        if working_copy:
-            working_copy = os.path.abspath(working_copy)
-            os.environ["GIT_WORK_TREE"] = working_copy
-            os.environ["GIT_DIR"] = os.path.join(working_copy, ".git")
+        if settings.working_copy:
+            settings.working_copy = os.path.abspath(settings.working_copy)
+            settings.lang_dir = os.path.join(settings.working_copy, settings.lang_dir)
+            if settings.unstable_lang_dir:
+                settings.unstable_lang_dir = os.path.join(settings.working_copy, settings.unstable_lang_dir)
+            os.environ["GIT_WORK_TREE"] = settings.working_copy
+            os.environ["GIT_DIR"] = os.path.join(settings.working_copy, ".git")
         else:
             print("No --working-copy specified")
             sys.exit(2)
 
     # Execute operations
     if do_update:
-        update_eints_from_git(base_url, os.path.join(working_copy, lang_dir), project_id, force)
+        update_eints_from_git(settings, force)
 
     if do_commit:
-        commit_eints_to_git(base_url, os.path.join(working_copy, lang_dir), project_id, dry_run)
+        commit_eints_to_git(settings, dry_run)
 
     sys.exit(0)
 
