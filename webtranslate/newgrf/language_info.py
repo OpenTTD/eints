@@ -70,6 +70,9 @@ class LanguageData:
     @ivar plural: Plural form number.
     @type plural: C{int}
 
+    @ivar textdir: Text direction: "ltr" or "rtl"
+    @type textdir: C{str}
+
     @ivar grflangid: Language id according to the NewGRF system.
     @type grflangid: C{int}
 
@@ -89,6 +92,7 @@ class LanguageData:
         self.ownname = found_lines["ownname"]
         self.isocode = found_lines["isocode"]
         self.plural = found_lines["plural"]
+        self.textdir = found_lines["textdir"]
         self.grflangid = found_lines["grflangid"]
 
         gender = found_lines.get("gender")
@@ -127,6 +131,7 @@ recognized = [
     LanguageLine("ownname", re.compile("##ownname +(.*) *$"), as_str, True),
     LanguageLine("isocode", re.compile("##isocode +([a-z][a-z]_[A-Z][A-Z]) *$"), as_str, True),
     LanguageLine("plural", re.compile("##plural +((0[xX])?[0-9A-Fa-f]+) *$"), as_int, True),
+    LanguageLine("textdir", re.compile("##textdir +(ltr|rtl) *$"), as_str, True),
     LanguageLine("grflangid", re.compile("##grflangid +((0[xX])?[0-9A-Fa-f]+) *$"), as_int, True),
     LanguageLine("gender", re.compile("##gender +(.*) *$"), as_strlist, False),
     LanguageLine("case", re.compile("##case +(.*) *$"), as_strlist, False),
