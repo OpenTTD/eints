@@ -2,5 +2,6 @@
 ##ownname Magyar
 ##isocode hu_HU
 ##plural 2
+##textdir ltr
 ##grflangid 0x24
 ##case t ba

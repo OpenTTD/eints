@@ -2,4 +2,5 @@
 ##ownname English (US)
 ##isocode en_US
 ##plural 0
+##textdir ltr
 ##grflangid 0x00

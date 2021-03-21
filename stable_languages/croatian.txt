@@ -2,6 +2,7 @@
 ##ownname Hrvatski
 ##isocode hr_HR
 ##plural 6
+##textdir ltr
 ##grflangid 0x38
 ##gender male female middle
 ##case nom gen dat aku vok lok ins

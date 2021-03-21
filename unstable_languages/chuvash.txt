@@ -2,4 +2,5 @@
 ##ownname Чӑвашла
 ##isocode cv_RU
 ##plural 0
+##textdir ltr
 ##grflangid 0x0b

@@ -2,5 +2,6 @@
 ##ownname 한국어
 ##isocode ko_KR
 ##plural 11
+##textdir ltr
 ##grflangid 0x3a
 ##gender m f

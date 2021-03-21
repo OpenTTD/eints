@@ -2,4 +2,5 @@
 ##ownname Македонски
 ##isocode mk_MK
 ##plural 0
+##textdir ltr
 ##grflangid 0x26

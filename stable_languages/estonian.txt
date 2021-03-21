@@ -2,5 +2,6 @@
 ##ownname Eesti keel
 ##isocode et_EE
 ##plural 0
+##textdir ltr
 ##grflangid 0x34
 ##case g in sü

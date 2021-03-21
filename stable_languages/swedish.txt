@@ -2,4 +2,5 @@
 ##ownname Svenska
 ##isocode sv_SE
 ##plural 0
+##textdir ltr
 ##grflangid 0x2e

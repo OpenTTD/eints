@@ -2,4 +2,5 @@
 ##ownname English (AU)
 ##isocode en_AU
 ##plural 0
+##textdir ltr
 ##grflangid 0x3d

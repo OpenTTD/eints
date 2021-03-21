@@ -2,4 +2,5 @@
 ##ownname Melayu
 ##isocode ms_MY
 ##plural 0
+##textdir ltr
 ##grflangid 0x3c

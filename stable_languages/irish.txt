@@ -2,4 +2,5 @@
 ##ownname Gaeilge
 ##isocode ga_IE
 ##plural 4
+##textdir ltr
 ##grflangid 0x08

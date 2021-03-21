@@ -2,4 +2,5 @@
 ##ownname Cymraeg
 ##isocode cy_GB
 ##plural 0
+##textdir ltr
 ##grflangid 0x0f

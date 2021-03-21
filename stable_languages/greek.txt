@@ -2,6 +2,7 @@
 ##ownname Ελληνικά
 ##isocode el_GR
 ##plural 2
+##textdir ltr
 ##grflangid 0x1e
 ##gender m f n
 ##case subs date geniki

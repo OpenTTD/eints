@@ -2,4 +2,5 @@
 ##ownname Suomi
 ##isocode fi_FI
 ##plural 0
+##textdir ltr
 ##grflangid 0x35

@@ -2,5 +2,6 @@
 ##ownname Galego
 ##isocode gl_ES
 ##plural 0
+##textdir ltr
 ##grflangid 0x31
 ##gender m f n

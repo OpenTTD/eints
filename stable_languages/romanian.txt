@@ -2,4 +2,5 @@
 ##ownname Românӑ
 ##isocode ro_RO
 ##plural 0
+##textdir ltr
 ##grflangid 0x28

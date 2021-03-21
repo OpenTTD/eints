@@ -2,4 +2,5 @@
 ##ownname Arabic (Egypt)
 ##isocode ar_EG
 ##plural 1
+##textdir rtl
 ##grflangid 0x14

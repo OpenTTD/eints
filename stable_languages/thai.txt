@@ -2,4 +2,5 @@
 ##ownname Thai
 ##isocode th_TH
 ##plural 1
+##textdir ltr
 ##grflangid 0x42

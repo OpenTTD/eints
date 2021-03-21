@@ -2,5 +2,6 @@
 ##ownname Português
 ##isocode pt_PT
 ##plural 0
+##textdir ltr
 ##grflangid 0x36
 ##gender n m f mp fp

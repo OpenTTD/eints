@@ -2,6 +2,7 @@
 ##ownname Srpski
 ##isocode sr_RS
 ##plural 6
+##textdir ltr
 ##grflangid 0x0d
 ##gender muški ženski srednji
 ##case nom big gen dat aku vok lok ins

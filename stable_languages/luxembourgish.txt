@@ -2,4 +2,5 @@
 ##ownname Lëtzebuergesch
 ##isocode lb_LU
 ##plural 0
+##textdir ltr
 ##grflangid 0x23

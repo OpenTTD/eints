@@ -2,6 +2,7 @@
 ##ownname Български
 ##isocode bg_BG
 ##plural 0
+##textdir ltr
 ##grflangid 0x18
 ##gender m f n p
 ##case m f n p
