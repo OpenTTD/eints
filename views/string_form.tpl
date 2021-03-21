@@ -69,7 +69,7 @@
             <div class="control-group {{('error','')[len(tc.transl[0].errors) == 0]}}">
                 <label class="control-label">Translation:</label>
                 <div class="controls">
-                    <textarea class="span8" name="text_{{tc.case}}" id="text_{{tc.case}}" rows="4"
+                    <textarea class="span8" name="text_{{tc.case}}" id="text_{{tc.case}}" rows="4" dir="{{lng.info.textdir}}"
                     % if len(tc.case) == 0:
                         oninput="updatePlaceholder()"
                     % end
@@ -126,7 +126,7 @@
                                 <tr>
                                     <td>{{tl.user}}</td>
                                     <td>{{tl.stamp_desc}} ago</td>
-                                    <td>{{tl.text.text}}</td>
+                                    <td dir="{{lng.info.textdir}}">{{tl.text.text}}</td>
                                 </tr>
                             % end
                         </tbody>
@@ -170,7 +170,7 @@
                     <dl class="dl-horizontal">
                         % for rel in tc.related:
                             <dt style="width: 23em; text-align: left"><a href="/string/{{pmd.name}}/{{lng.name}}/{{rel.sname}}" title="{{rel.sname}}">{{rel.sname}}</a></dt>
-                            <dd style="margin-left: 25em">{{rel.text.text}}<p></p></dd>
+                            <dd style="margin-left: 25em" dir="{{lng.info.textdir}}">{{rel.text.text}}<p></p></dd>
                         % end
                     </dl>
             % end
