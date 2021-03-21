@@ -2,5 +2,6 @@
 ##ownname Urdu
 ##isocode ur_PK
 ##plural 0
+##textdir rtl
 ##grflangid 0x5c
 ##gender m f

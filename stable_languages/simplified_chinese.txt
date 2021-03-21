@@ -2,4 +2,5 @@
 ##ownname 简体中文
 ##isocode zh_CN
 ##plural 1
+##textdir ltr
 ##grflangid 0x56

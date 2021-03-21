@@ -2,6 +2,7 @@
 ##ownname Latviešu
 ##isocode lv_LV
 ##plural 3
+##textdir ltr
 ##grflangid 0x2a
 ##gender m f
 ##case kas

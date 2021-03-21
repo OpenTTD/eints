@@ -2,6 +2,7 @@
 ##ownname Čeština
 ##isocode cs_CZ
 ##plural 10
+##textdir ltr
 ##grflangid 0x15
 ##gender m f n map mnp fp np
 ##case nom gen dat acc voc loc ins big small

@@ -2,5 +2,6 @@
 ##ownname Slovenščina
 ##isocode sl_SI
 ##plural 8
+##textdir ltr
 ##grflangid 0x2c
 ##case r d t

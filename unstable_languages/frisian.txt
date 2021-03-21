@@ -2,4 +2,5 @@
 ##ownname Frysk
 ##isocode fy_NL
 ##plural 0
+##textdir ltr
 ##grflangid 0x32

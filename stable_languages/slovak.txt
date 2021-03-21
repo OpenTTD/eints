@@ -2,6 +2,7 @@
 ##ownname Slovenčina
 ##isocode sk_SK
 ##plural 10
+##textdir ltr
 ##grflangid 0x16
 ##gender m z s
 ##case g

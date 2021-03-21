@@ -2,6 +2,7 @@
 ##ownname Italiano
 ##isocode it_IT
 ##plural 0
+##textdir ltr
 ##grflangid 0x27
 ##gender m ma f
 ##case ms mp fs fp

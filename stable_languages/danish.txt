@@ -2,4 +2,5 @@
 ##ownname Dansk
 ##isocode da_DK
 ##plural 0
+##textdir ltr
 ##grflangid 0x2d

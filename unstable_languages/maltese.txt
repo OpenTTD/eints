@@ -2,4 +2,5 @@
 ##ownname Malti
 ##isocode mt_MT
 ##plural 12
+##textdir ltr
 ##grflangid 0x09

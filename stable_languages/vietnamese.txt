@@ -2,4 +2,5 @@
 ##ownname Tiếng Việt
 ##isocode vi_VN
 ##plural 1
+##textdir ltr
 ##grflangid 0x54

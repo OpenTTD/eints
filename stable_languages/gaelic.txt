@@ -2,6 +2,7 @@
 ##ownname Gàidhlig
 ##isocode gd_GB
 ##plural 13
+##textdir ltr
 ##grflangid 0x13
 ##gender m f
 ##case nom gen dat voc

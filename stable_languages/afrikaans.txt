@@ -2,5 +2,6 @@
 ##ownname Afrikaans
 ##isocode af_ZA
 ##plural 0
+##textdir ltr
 ##grflangid 0x1b
 ##gender male

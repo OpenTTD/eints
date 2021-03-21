@@ -2,6 +2,7 @@
 ##ownname Русский
 ##isocode ru_RU
 ##plural 6
+##textdir ltr
 ##grflangid 0x07
 ##gender m f n p
 ##case m f n p nom gen dat acc abl pre

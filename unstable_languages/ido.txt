@@ -2,4 +2,5 @@
 ##ownname Ido
 ##isocode io_IO
 ##plural 0
+##textdir ltr
 ##grflangid 0x06

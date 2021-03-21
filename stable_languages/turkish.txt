@@ -2,5 +2,6 @@
 ##ownname Türkçe
 ##isocode tr_TR
 ##plural 1
+##textdir ltr
 ##grflangid 0x3e
 ##case tamlanan

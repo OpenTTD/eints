@@ -2,6 +2,7 @@
 ##ownname Latina
 ##isocode la_VA
 ##plural 0
+##textdir ltr
 ##grflangid 0x66
 ##gender m f n mp fp np
 ##case gen acc abl dat

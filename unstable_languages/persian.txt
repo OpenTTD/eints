@@ -2,4 +2,5 @@
 ##ownname فارسی
 ##isocode fa_IR
 ##plural 0
+##textdir rtl
 ##grflangid 0x62

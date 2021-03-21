@@ -2,6 +2,7 @@
 ##ownname Polski
 ##isocode pl_PL
 ##plural 7
+##textdir ltr
 ##grflangid 0x30
 ##gender m f n
 ##case d c b n m w

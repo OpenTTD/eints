@@ -2,4 +2,5 @@
 ##ownname Bahasa Indonesia
 ##isocode id_ID
 ##plural 1
+##textdir ltr
 ##grflangid 0x5a

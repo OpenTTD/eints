@@ -2,4 +2,5 @@
 ##ownname 日本語
 ##isocode ja_JP
 ##plural 1
+##textdir ltr
 ##grflangid 0x39

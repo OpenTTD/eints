@@ -2,5 +2,6 @@
 ##ownname Español (MX)
 ##isocode es_MX
 ##plural 0
+##textdir ltr
 ##grflangid 0x55
 ##gender m f

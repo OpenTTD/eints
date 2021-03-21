@@ -2,6 +2,7 @@
 ##ownname Norsk (nynorsk)
 ##isocode nn_NO
 ##plural 0
+##textdir ltr
 ##grflangid 0x0e
 ##gender masculine feminine neuter
 ##case small
