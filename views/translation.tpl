@@ -35,7 +35,7 @@
                 <li><a href="/string/{{pmd.name}}/{{lng.name}}/{{sdd.sname}}">{{sdd.sname}}</a></li>
             % end
             % for cdd in sdd.cases:
-                <dd>({{cdd.state}}) <strong>{{cdd.get_str_casename(sdd.sname)}}</strong> :{{cdd.text}}</dd>
+                <dd>({{cdd.state}}) <strong>{{cdd.get_str_casename(sdd.sname)}}</strong> :<span dir="{{lng.info.textdir}}">{{cdd.text}}</span></dd>
             % end
             </dl>
         % end
