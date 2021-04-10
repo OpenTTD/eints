@@ -366,7 +366,7 @@ def post_form_upload(url, form_data, form_fentry, form_fname, fdata):
 
     # Perform the request, and return the read data.
     with urllib.request.urlopen(req) as resp:
-        if resp.status != 200:
+        if resp.status != 200 or resp.geturl().find("Successfully") < 0:
             return False
 
         resp.read()
