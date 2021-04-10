@@ -131,8 +131,20 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
         abort(404, "Project has no base language")
         return None
 
+    # Read upload data
+    text = langfile.file.read(config.cfg.language_file_size)
+    if len(text) == config.cfg.language_file_size:
+        abort(400, "Language file too large.")
+        return None
+
+    try:
+        text = str(text, encoding="utf-8")
+    except UnicodeDecodeError:
+        abort(400, "Language file must be utf-8 encoded.")
+        return None
+
     # Parse language file, and report any errors.
-    ng_data = language_file.load_language_file(pdata.projtype, langfile.file, config.cfg.language_file_size, lng_data)
+    ng_data = language_file.load_language_file(pdata.projtype, text, lng_data)
     if len(ng_data.errors) > 0:
         return template("upload_errors", userauth=userauth, pmd=pmd, errors=ng_data.errors)
 
