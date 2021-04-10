@@ -992,18 +992,15 @@ string_pat = re.compile("^([A-Za-z_0-9]+)(\\.[A-Za-z0-9]+)?[ \\t]*:(.*)$")
 bom = codecs.BOM_UTF8.decode("utf-8")
 
 
-def load_language_file(projtype, handle, max_size, lng_data=None):
+def load_language_file(projtype, text, lng_data=None):
     """
     Load a language file.
 
     @param projtype: Project type.
     @type  projtype: L{ProjectType}
 
-    @param handle: File handle.
-    @type  handle: L{io.BufferedReader}
-
-    @param max_size: Maimum allowed size to read from the handle.
-    @type  max_size: C{int}
+    @param text: Language file content.
+    @type  text: C{str}
 
     @param lng_data: Suggested language, if specified.
     @type  lng_data: L{LanguageData} or C{None}
@@ -1019,11 +1016,6 @@ def load_language_file(projtype, handle, max_size, lng_data=None):
         # If the project has no ##grflangid support, and there is lng_data provided, use it.
         data.set_lang(lng_data)
 
-    # Read file, and process the lines.
-    text = handle.read(max_size)
-    if len(text) == max_size:
-        data.add_error(ERROR, None, "File not completely read")
-    text = str(text, encoding="utf-8")
     for lnum, line in enumerate(text.split("\n")):
         line = line.rstrip()
         if line.startswith(bom):
