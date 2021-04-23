@@ -34,7 +34,7 @@ RUN pip freeze 2>/dev/null > requirements.installed \
 COPY rights_example.dat /code/rights.dat
 COPY static /code/static
 COPY stable_languages /code/stable_languages
-COPY unstable_languages /code/unstable_languages
+RUN mkdir -p /code/unstable_languages
 COPY views /code/views
 COPY webtranslate /code/webtranslate
 

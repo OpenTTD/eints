@@ -4,7 +4,6 @@
 #
 
 STABLEDIR="stable_languages"
-UNSTABLEDIR="unstable_languages"
 
 GITURL="https://github.com/OpenTTD/OpenTTD.git"
 WORKDIR="openttd"
@@ -18,6 +17,3 @@ fi
 
 echo "Checking stable languages"
 scripts/filter_update_langs ${WORKDIR}/src/lang ${STABLEDIR}
-
-echo "Checking unstable languages"
-scripts/filter_update_langs ${WORKDIR}/src/lang/unfinished ${UNSTABLEDIR}
