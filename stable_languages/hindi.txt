@@ -1,0 +1,6 @@
+##name Hindi
+##ownname हिन्दी
+##isocode hi_IN
+##plural 0
+##textdir ltr
+##grflangid 0x17
