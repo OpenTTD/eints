@@ -65,3 +65,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install black
         black -l 120 --exclude webtranslate/bottle.py --check webtranslate scripts/filter_update_langs scripts/lang_sync
+
+  check_annotations:
+    name: Check Annotations
+    needs:
+    - docker
+    - flake8
+    - black
+    # not codeql, as that reports its own status
+
+    if: always() && github.event_name == 'pull_request'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check annotations
+      uses: OpenTTD/actions/annotation-check@v2
