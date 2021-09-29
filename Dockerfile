@@ -1,3 +1,21 @@
+FROM python:3.8-slim as builder
+
+WORKDIR /docs
+
+COPY docs /docs
+
+RUN pip --no-cache-dir install -U pip \
+    && pip --no-cache-dir install sphinx
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN make -C /docs
+
+
+
 FROM python:3.8-slim
 
 ARG BUILD_DATE=""
@@ -37,6 +55,8 @@ COPY stable_languages /code/stable_languages
 RUN mkdir -p /code/unstable_languages
 COPY views /code/views
 COPY webtranslate /code/webtranslate
+
+COPY --from=builder /docs/manual/_build/html /code/static/docs
 
 VOLUME ["/data"]
 ENTRYPOINT ["python", "-m", "webtranslate", "--project-root", "/data", "--server-host", "0.0.0.0"]

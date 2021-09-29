@@ -3,7 +3,7 @@
 <h1>
     <a class="eint-header-link" href="/project/{{pmd.name}}">{{pmd.human_name}}</a>
 </h1>
-<a class="pull-right" target="_blank" href="http://bundles.openttdcoop.org/eints/nightlies/LATEST/docs/strings.html">String editing Manual</a>
+<a class="pull-right" target="_blank" href="/static/docs/strings.html">String editing Manual</a>
 <hr />
 <div class="clearfix">
     <h2 class="eint-heading-icon eint-icon-document-1-edit">
