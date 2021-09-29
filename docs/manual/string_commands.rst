@@ -19,38 +19,40 @@ based on project type and command type.
 Non-positional NewGrf string commands
 =====================================
 
-=============== ===========================================================
-Command         Effect
-=============== ===========================================================
-``{}``          Continue at the next line
-``{{}``         Output a ``{``
-``{NBSP}``      Display a non-breaking space
-``{COPYRIGHT}`` Display a copyright symbol
-``{TRAIN}``     Display a train symbol
-``{LORRY}``     Display a truck symbol
-``{BUS}``       Display a bus symbol
-``{PLANE}``     Display a plane symbol
-``{SHIP}``      Display a ship symbol
-``{TINYFONT}``  Switch to a small font
-``{BIGFONT}``   Switch to a big font
-``{BLUE}``      Output following text in blue colour
-``{SILVER}``    Output following text in silver colour
-``{GOLD}``      Output following text in gold colour
-``{RED}``       Output following text in red colour
-``{PURPLE}``    Output following text in purple colour
-``{LTBROWN}``   Output following text in light brown colour
-``{ORANGE}``    Output following text in orange colour
-``{GREEN}``     Output following text in green colour
-``{YELLOW}``    Output following text in yellow colour
-``{DKGREEN}``   Output following text in dark green colour
-``{CREAM}``     Output following text in cream colour
-``{BROWN}``     Output following text in brown colour
-``{WHITE}``     Output following text in white colour
-``{LTBLUE}``    Output following text in light blue colour
-``{GRAY}``      Output following text in gray colour
-``{DKBLUE}``    Output following text in dark blue colour
-``{BLACK}``     Output following text in black colour
-=============== ===========================================================
+================= ===========================================================
+Command           Effect
+================= ===========================================================
+``{}``            Continue at the next line
+``{{}``           Output a ``{``
+``{NBSP}``        Display a non-breaking space
+``{COPYRIGHT}``   Display a copyright symbol
+``{TRAIN}``       Display a train symbol
+``{LORRY}``       Display a truck symbol
+``{BUS}``         Display a bus symbol
+``{PLANE}``       Display a plane symbol
+``{SHIP}``        Display a ship symbol
+``{TINYFONT}``    Switch to a small font
+``{BIGFONT}``     Switch to a big font
+``{BLUE}``        Output following text in blue colour
+``{SILVER}``      Output following text in silver colour
+``{GOLD}``        Output following text in gold colour
+``{RED}``         Output following text in red colour
+``{PURPLE}``      Output following text in purple colour
+``{LTBROWN}``     Output following text in light brown colour
+``{ORANGE}``      Output following text in orange colour
+``{GREEN}``       Output following text in green colour
+``{YELLOW}``      Output following text in yellow colour
+``{DKGREEN}``     Output following text in dark green colour
+``{CREAM}``       Output following text in cream colour
+``{BROWN}``       Output following text in brown colour
+``{WHITE}``       Output following text in white colour
+``{LTBLUE}``      Output following text in light blue colour
+``{GRAY}``        Output following text in gray colour
+``{DKBLUE}``      Output following text in dark blue colour
+``{BLACK}``       Output following text in black colour
+``{PUSH_COLOUR}`` Store the current colour
+``{POP_COLOUR}``  Restore last saved colour
+================= ===========================================================
 
 .. _pos-newgrf-string_commands:
 
@@ -106,8 +108,10 @@ Command                 Effect
 ``{BUS}``               Output a bus symbol
 ``{PLANE}``             Output an aircraft
 ``{SHIP}``              Output a ship symbol
+``{NORMAL_FONT}``       Switch to a normal font
 ``{TINY_FONT}``         Switch to a small font
 ``{BIG_FONT}``          Switch to a big font
+``{MONO_FONT}``         Switch to a mono font
 ``{BLUE}``              Output following text in blue colour
 ``{SILVER}``            Output following text in silver colour
 ``{GOLD}``              Output following text in gold colour
@@ -125,6 +129,8 @@ Command                 Effect
 ``{GRAY}``              Output following text in gray colour
 ``{DKBLUE}``            Output following text in dark blue colour
 ``{BLACK}``             Output following text in black colour
+``{PUSH_COLOUR}``       Store the current colour
+``{POP_COLOUR}``        Restore last saved colour
 ``{LRM}``               Left-to-right mark, zero-width character
 ``{RLM}``               Right-to-left mark, zero-width non-Arabic character
 ``{LRE}``               Treat the following text as embedded left-to-right
