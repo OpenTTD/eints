@@ -24,7 +24,6 @@
                     <li><a href="/"><i class="icon-home"></i> Home</a></li>
                     <li><a href="/languages"><i class="icon-list-alt"></i> Languages</a></li>
                     <li><a href="/projects"><i class="icon-list-alt"></i> Projects</a></li>
-                    <li><a href="/newproject"><i class="icon-plus-sign"></i> New Project</a></li>
                 </ul>
                 <ul class="nav pull-right">
                     <li><a target="_blank" href="/static/docs/usage.html"><i class="icon-book"></i> Manual</a></li>
