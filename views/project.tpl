@@ -20,11 +20,11 @@
         <thead>
             <tr>
                 <th colspan="3">Languages ({{len(pmd.pdata.languages)}})</th>
-                <th colspan="3" style="text-align:center;"><i class="icon-cog"></i> Actions</th>
+                <th colspan="2" style="text-align:center;"><i class="icon-cog"></i> Actions</th>
                 <th colspan="{{len(data.STATE_DISPLAY)}}" style="text-align:center;">Strings ({{len(base_lng.changes)}})</th>
             </tr>
             <tr>
-                <th colspan="6"></th>
+                <th colspan="5"></th>
                 % for s in reversed(data.STATE_DISPLAY):
                     <th class="number">{{s.name}}</th>
                 % end
@@ -36,7 +36,6 @@
                 <td><strong><a href="/translation/{{pmd.name}}/{{base_lng.name}}">{{base_lng.name}}</a></strong></td>
                 <td><strong><a href="/translation/{{pmd.name}}/{{base_lng.name}}">{{base_lng.info.name}}</a></strong></td>
                 <td><strong>(Base Language)</strong></td>
-                <td>-</td>
                 <td><a class="pull-right" href="/download/{{pmd.name}}/{{base_lng.name}}"><i class="icon-download"></i> Download</a></td>
                 % for s in reversed(data.STATE_DISPLAY):
                     % if s.baselng:
@@ -48,7 +47,7 @@
             </tr>
         % if len(transl) == 0:
             <tr>
-                <td colspan="{{6 + len(data.STATE_DISPLAY)}}" class="alert alert-info">To get started with translation, upload a language file</td>
+                <td colspan="{{5 + len(data.STATE_DISPLAY)}}" class="alert alert-info">To get started with translation, upload a language file</td>
             </tr>
         % else:
             % for lng, counts in transl:
@@ -67,7 +66,6 @@
                     % else:
                         <td>Done!</td>
                     % end
-                    <td><a class="pull-right" href="/delete/{{pmd.name}}/{{lng.name}}"><i class="icon-remove-circle"></i> Delete</a></td>
                     <td><a class="pull-right" href="/download/{{pmd.name}}/{{lng.name}}"><i class="icon-download"></i> Download</a></td>
                     % for s in reversed(data.STATE_DISPLAY):
                         <td class="number">{{counts[s.code]}}</td>
