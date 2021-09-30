@@ -2,14 +2,6 @@
 %from webtranslate import utils, data
 <h1>{{pmd.human_name}}</h1>
 <hr />
-<div class="btn-group pull-right" style="padding-top:3px;">
-% if pmd.pdata.url != '':
-    <a class="btn" href="{{pmd.pdata.url}}">&#187; Project Website</a> |
-% end
-    <a class="btn" href="/projsettings/{{pmd.name}}"><i class="icon-cog"></i> Project Settings</a>
-    <a class="btn" href="/newlanguage/{{pmd.name}}"><i class="icon-plus-sign"></i> Start New Translation</a>
-    <a class="btn" href="/upload/{{pmd.name}}"><i class="icon-upload"></i> Upload Language</a>
-</div>
 <h2 class="eint-heading-icon eint-icon-drawer-open">Project Overview</h2>
 % if base_lng is None:
     <p class="alert alert-info"><strong>To get started, please <a href="/upload/{{pmd.name}}">upload a lang file</a> to use as base language.</strong></p>
