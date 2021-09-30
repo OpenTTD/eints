@@ -34,8 +34,13 @@ OWNER + /makeproject/*/-/add
 OWNER      + /string/*/*/*
 TRANSLATOR + /string/*/*/*
 
-# Language file uploading, language deletion and creation
+# Language creation is allowed for all projects, but steam-data
+OWNER      + /makelanguage/steam-data/*/*
+*          - /makelanguage/steam-data/*/*
+OWNER      + /makelanguage/*/*/*
+TRANSLATOR + /makelanguage/*/*/*
+
+# Language file uploading, language deletion
 OWNER + /upload/*/-/*
 OWNER + /delete/*/*/*
-OWNER + /makelanguage/*/*/*
 OWNER + /projsettings/*/-/*
