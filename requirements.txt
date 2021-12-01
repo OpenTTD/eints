@@ -1,5 +1,5 @@
 certifi==2021.10.8
-charset-normalizer==2.0.6
+charset-normalizer==2.0.8
 click==8.0.1
 idna==3.2
 oauthlib==3.1.1
