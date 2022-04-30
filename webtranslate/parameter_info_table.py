@@ -51,7 +51,7 @@ _NEWGRF_PARAMETERS = [
     ParameterInfo("WEIGHT",         [PP_],      0,    False, True ),
     ParameterInfo("WEIGHT_SHORT",   [PP_],      0,    False, True ),
     ParameterInfo("CARGO_LONG",     [P_G, PP_], 1,    False, True ),
-    ParameterInfo("CARGO_SHORT",    [P__, PP_], 1,    False, True ),  # short cargo description, only ### tons, or ### litres
+    ParameterInfo("CARGO_SHORT",    [P_G, PP_], 1,    False, True ),  # short cargo description, only ### tons, or ### litres
     ParameterInfo("CARGO_TINY",     [P__, PP_], 1,    False, True ),  # tiny cargo description with only the amount
     ParameterInfo("CARGO_NAME",     [P_G],      None, True,  True ),
     ParameterInfo("HEX",            [PP_],      0,    False, True ),
@@ -103,7 +103,7 @@ _GS_PARAMETERS = [
 
     ParameterInfo("INDUSTRY",          [P_G],      None, True,  True ),  # takes an industry number.
     ParameterInfo("CARGO_LONG",        [P_G, PP_], 1,    False, True ),
-    ParameterInfo("CARGO_SHORT",       [P__, PP_], 1,    False, True ),  # short cargo description, only ### tons, or ### litres
+    ParameterInfo("CARGO_SHORT",       [P_G, PP_], 1,    False, True ),  # short cargo description, only ### tons, or ### litres
     ParameterInfo("CARGO_TINY",        [P__, PP_], 1,    False, True ),  # tiny cargo description with only the amount
     ParameterInfo("CARGO_LIST",        [P__],      None, True,  True ),
     ParameterInfo("POWER",             [PP_],      0,    False, True ),
