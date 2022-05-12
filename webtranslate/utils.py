@@ -66,8 +66,8 @@ time_descriptions = [
     TimeDescription("hours", False, 60 * 60, 48),
     TimeDescription("days", False, 24 * 60 * 60, 14),
     TimeDescription("weeks", False, 7 * 24 * 60 * 60, 6),
-    TimeDescription("months", False, 30 * 7 * 24 * 60 * 60, 24),
-    TimeDescription("years", False, 52 * 7 * 24 * 60 * 60, 10000),
+    TimeDescription("months", False, 30 * 24 * 60 * 60, 24),
+    TimeDescription("years", False, 365 * 24 * 60 * 60, 10000),
 ]
 
 
