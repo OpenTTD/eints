@@ -86,6 +86,7 @@ class Translation:
             self.user = user
             self.trans_base = lchg.base_text
             self.text = lchg.new_text
+            self.last_upload = lchg.last_upload
             if saved:
                 self.stamp_desc = utils.get_relative_time(lchg.stamp, now)
                 self.stamp = str(lchg.stamp)
@@ -97,6 +98,7 @@ class Translation:
             self.trans_base = self.current_base
             txt = data.Text("", "", None)  # This breaks assumptions on the Text class.
             self.text = txt
+            self.last_upload = False
             self.stamp_desc = None
             self.stamp = None
 

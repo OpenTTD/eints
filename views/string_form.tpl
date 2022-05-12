@@ -104,7 +104,10 @@
                     <div class="controls">
                         <span class="help-block">Translation created by "{{tc.transl[0].user}}"
                             % if tc.transl[0].stamp_desc is not None:
-                                ({{tc.transl[0].stamp_desc}} ago)
+                                (<span title="{{tc.transl[0].stamp}}">{{tc.transl[0].stamp_desc}} ago</span>)
+                            % end
+                            % if not tc.transl[0].last_upload:
+                                (commit pending)
                             % end
                         </span>
                     </div>
@@ -125,7 +128,12 @@
                             % for tl in tc.transl[1:]:
                                 <tr>
                                     <td>{{tl.user}}</td>
-                                    <td>{{tl.stamp_desc}} ago</td>
+                                    <td>
+                                        <span title="{{tl.stamp}}">{{tl.stamp_desc}} ago</span>
+                                        % if tl.last_upload:
+                                            (committed)
+                                        % end
+                                    </td>
                                     <td dir="{{lng.info.textdir}}">{{tl.text.text}}</td>
                                 </tr>
                             % end
