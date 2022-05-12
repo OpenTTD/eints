@@ -242,14 +242,16 @@ def handle_upload(userauth, pmd, projname, langfile, override, is_base, lng_data
                 if chgs is None:
                     lng.changes[sv.name] = [chg]
                 else:
-                    for c in chgs:
-                        c.last_upload = False
                     chgs.append(chg)
             elif override:  # Override existing entry.
                 chg.stamp = stamp
                 chg.user = userauth.name
-                for c in chgs:
-                    c.last_upload = c == chg
+
+            # Set the change as the "last uploaded" one
+            for c in chgs:
+                c.last_upload = False
+
+            chg.last_upload = True
 
         # Update language properties as well.
         copy_lng_properties(pdata.projtype, ng_data, lng)
