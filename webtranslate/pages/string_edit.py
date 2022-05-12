@@ -487,7 +487,7 @@ def output_string_edit_page(
             if n[:3] != lng.name[:3] or n == lng.name:
                 continue
 
-            related = data.get_newest_change(lng.changes.get(sname), "")
+            related = data.get_newest_change(l.changes.get(sname), "")
             if related is not None:
                 related_languages.append((l, related))
     related_languages.sort(key=lambda x: x[0].name)
