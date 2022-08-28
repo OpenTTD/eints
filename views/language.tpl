@@ -18,7 +18,7 @@
         <tbody>
         % for pmd, exists, lstate in prjdata:
             <tr>
-            <td><a href="/project/{{pmd.name}}">{{pmd.human_name}}</a></td>
+            <td><a href="/translation/{{pmd.name}}/{{lnginfo.isocode}}">{{pmd.human_name}}</a></td>
             % if exists:
                 % if utils.lang_needs_fixing(lstate):
                   <td><a href="/fix/{{pmd.name}}/{{lnginfo.isocode}}">Start fixing</a></td>
