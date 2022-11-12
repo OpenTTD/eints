@@ -165,6 +165,7 @@ Command                Plural Effect
 ``{CARGO_TINY}``          no  Tiny cargo description with only the amount.
 ``{CARGO_LIST}``          no
 ``{POWER}``               no
+``{POWER_TO_WEIGHT}``     no
 ``{VOLUME_LONG}``         no
 ``{VOLUME_SHORT}``        no
 ``{WEIGHT_LONG}``         no

@@ -107,6 +107,7 @@ _GS_PARAMETERS = [
     ParameterInfo("CARGO_TINY",        [P__, PP_], 1,    False, True ),  # tiny cargo description with only the amount
     ParameterInfo("CARGO_LIST",        [P__],      None, True,  True ),
     ParameterInfo("POWER",             [PP_],      0,    False, True ),
+    ParameterInfo("POWER_TO_WEIGHT",   [PP_],      0,    False, True ),
     ParameterInfo("VOLUME_LONG",       [PP_],      0,    False, True ),
     ParameterInfo("VOLUME_SHORT",      [PP_],      0,    False, True ),
     ParameterInfo("WEIGHT_LONG",       [PP_],      0,    False, True ),
