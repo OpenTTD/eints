@@ -47,7 +47,7 @@ def language_list(userauth):
     response.content_type = "text/plain; charset=UTF-8"
 
     lines = ["isocode,grflangid,filename,is_stable,name,ownname,plural,gender,case"]
-    langs = sorted(language_info.all_languages, key=lambda l: l.isocode)
+    langs = sorted(language_info.all_languages, key=lambda lang: lang.isocode)
     for lng in langs:
         line = "{},0x{:02x},{},{},{},{},{},{},{}".format(
             lng.isocode,

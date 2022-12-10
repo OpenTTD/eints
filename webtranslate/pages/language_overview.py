@@ -17,7 +17,7 @@ def languages(userauth):
     """
     Get an overview of used languages over all projects.
     """
-    languages = sorted(language_info.all_languages, key=lambda l: l.isocode)
+    languages = sorted(language_info.all_languages, key=lambda lang: lang.isocode)
     return template("languages", userauth=userauth, lnginfos=languages)
 
 
