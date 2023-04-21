@@ -152,6 +152,7 @@ Positional GameScript string commands
 ====================== ====== ==============================================================
 Command                Plural Effect
 ====================== ====== ==============================================================
+``{COLOUR}``              no  Change the colour for following text.
 ``{STRING1}``             no  Replaced by {STRING} in the translation.
 ``{STRING2}``             no  Replaced by {STRING} in the translation.
 ``{STRING3}``             no  Replaced by {STRING} in the translation.
