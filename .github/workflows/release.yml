@@ -1,0 +1,15 @@
+name: Release
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  release:
+    name: Release
+    uses: OpenTTD/actions/.github/workflows/rw-entry-release-docker-nomad.yml@v4
+    secrets: inherit
+    with:
+      service: eints-prod
+      url: https://eints.openttd.org/

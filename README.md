@@ -1,5 +1,7 @@
 # Eints
 
+[![GitHub License](https://img.shields.io/github/license/OpenTTD/eints)](https://github.com/OpenTTD/eints/blob/main/LICENSE)
+
 ## About
 
 Eints Is a Newgrf Translation Service.
