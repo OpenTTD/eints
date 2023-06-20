@@ -240,6 +240,7 @@ def setup_auth():
                 credentials = "{0}:{1}".format(user, passwd).encode()
                 auth_str = base64.standard_b64encode(credentials).decode()
                 req.add_unredirected_header("Authorization", "Basic {}".format(auth_str.strip()))
+                req.add_unredirected_header("User-Agent", "eints-lang-sync/1.0")
                 return req
 
             https_request = http_request
