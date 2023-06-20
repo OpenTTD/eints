@@ -62,6 +62,20 @@ log = logging.getLogger(__name__)
 @click.option("--github-oauth2-client-id", help="Client ID for the GitHub OAuth2 Application.")
 @click.option("--github-oauth2-client-secret", help="Client Secret for the GitHub OAuth2 Application.")
 @click.option("--translators-password", help="Password for the translators account.")
+@click.option(
+    "--github-api-url",
+    help="GitHub API URL to use.",
+    default="https://api.github.com",
+    show_default=True,
+    metavar="URL",
+)
+@click.option(
+    "--github-url",
+    help="GitHub URL to use.",
+    default="https://github.com",
+    show_default=True,
+    metavar="URL",
+)
 def run(
     server_mode,
     server_host,
@@ -84,6 +98,8 @@ def run(
     github_oauth2_client_id,
     github_oauth2_client_secret,
     translators_password,
+    github_api_url,
+    github_url,
 ):
     """
     Run the program (it was started from the command line).
@@ -117,6 +133,8 @@ def run(
             fp.write(f"    <oauth2-client-id>{github_oauth2_client_id}</oauth2-client-id>\n")
             fp.write(f"    <oauth2-client-secret>{github_oauth2_client_secret}</oauth2-client-secret>\n")
             fp.write(f"    <translators-password>{translators_password or ''}</translators-password>\n")
+            fp.write(f"    <github-api-url>{github_api_url}</github-api-url>\n")
+            fp.write(f"    <github-url>{github_url}</github-url>\n")
             fp.write("  </github>\n")
 
         fp.write("</config>\n")

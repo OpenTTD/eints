@@ -294,6 +294,8 @@ class Config:
             github.github_oauth_client_id = get_subnode_text(gh_node, "oauth2-client-id")
             github.github_oauth_client_secret = get_subnode_text(gh_node, "oauth2-client-secret")
             protect.translators_password = get_subnode_text(gh_node, "translators-password")
+            github.github_api_url = get_subnode_text(gh_node, "github-api-url")
+            github.github_url = get_subnode_text(gh_node, "github-url")
 
         # Ldap configuration
         ldap_node = loader.get_single_child_node(cfg, "ldap", True)
