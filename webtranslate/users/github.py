@@ -20,6 +20,8 @@ github_organization = None
 github_org_api_token = None
 github_oauth_client_id = None
 github_oauth_client_secret = None
+github_api_url = None
+github_url = None
 
 
 def request_teams(name):
@@ -51,7 +53,7 @@ def request_teams(name):
 
         variables = {"org": github_organization, "user": name}
         r = requests.post(
-            "https://api.github.com/graphql",
+            f"{github_api_url}/graphql",
             headers={"Authorization": "bearer " + github_org_api_token},
             json={"query": query, "variables": variables},
         )
@@ -96,12 +98,12 @@ class GithubUserAuthentication(userauth.UserAuthentication):
             self.state = None  # single use, forget now
 
             oauth.fetch_token(
-                "https://github.com/login/oauth/access_token",
+                f"{github_url}/login/oauth/access_token",
                 client_secret=github_oauth_client_secret,
                 authorization_response=request_url,
             )
             if oauth.authorized:
-                info = oauth.get("https://api.github.com/user").json()
+                info = oauth.get(f"{github_api_url}/user").json()
 
                 self.name = info["login"]  # can be changed, and reassigned to someone else
                 self.userid = int(info["id"])  # persistent
