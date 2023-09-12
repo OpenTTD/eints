@@ -16,4 +16,4 @@ jobs:
     secrets: inherit
     with:
       service: eints-preview
-      url: https://eints-preview.openttd.org/
+      url: https://translator-preview.openttd.org/
