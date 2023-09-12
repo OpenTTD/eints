@@ -7,35 +7,28 @@
     <link type="text/css" href="{{ url('static', path='css/bootstrap.min.css') }}" rel="stylesheet">
     <!-- load order is significant for css, our over-rides on bootstrap must load after bootstrap -->
     <link type="text/css" href="{{ url('static', path='css/style.css') }}" rel="stylesheet">
-    <script type="text/javascript" src="{{ url('static', path='js/jquery-1.9.1.min.js') }}"></script>
     <script type="text/javascript" src="{{ url('static', path='js/bootstrap.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url('static', path='js/bootstrap-filestyle-0.1.0.js') }}"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $(":file").filestyle({classButton:"btn-info"});
-        });
-    </script>
 </head>
 <body>
     <div class="container">
-        <div class="navbar eint-navbar">
-            <div class="navbar-inner">
-                <ul class="nav">
-                    <li><a href="/"><i class="icon-home"></i> Home</a></li>
-                    <li><a href="/languages"><i class="icon-list-alt"></i> Languages</a></li>
-                    <li><a href="/projects"><i class="icon-list-alt"></i> Projects</a></li>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary eint-navbar">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="icon-home"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/languages"><i class="icon-list-alt"></i> Languages</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/projects"><i class="icon-list-alt"></i> Projects</a></li>
                 </ul>
-                <ul class="nav pull-right">
-                    <li><a target="_blank" href="/static/docs/usage.html"><i class="icon-book"></i> Manual</a></li>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" target="_blank" href="/static/docs/usage.html"><i class="icon-book"></i> Manual</a></li>
                     %if userauth.is_auth:
-                        <li><a href="/userprofile"><i class="icon-user"></i> Profile ({{ userauth.name }})</a></li>
-                        <li><a href="/logout"><i class="icon-user"></i> Logout</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/userprofile"><i class="icon-user"></i> Profile ({{ userauth.name }})</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout"><i class="icon-user"></i> Logout</a></li>
                     %else:
-                        <li><a href="/login?redirect={{ quote(request.path) }}"><i class="icon-user"></i> Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/login?redirect={{ quote(request.path) }}"><i class="icon-user"></i> Login</a></li>
                     %end
                 </ul>
             </div>
-        </div>
+        </nav>
 
         %for message in messages:
             <div id="message-slot" class="alert {{message['class']}}">
@@ -45,9 +38,12 @@
         <!-- content from calling template -->
         {{!base}}
 
-        <div class="footer">
-            <a href="https://github.com/OpenTTD/eints">Web Translator</a> | <a href="https://github.com/OpenTTD/eints/issues">Report a bug</a>
-        </div>
+        <footer class="py-3 my-4">
+            <ul class="nav justify-content-center border-top pb-3 mb-3">
+                <li class="nav-item"><a class="nav-link px-2 text-muted" href="https://github.com/OpenTTD/eints">Web Translator</a></li>
+                <li class="nav-item"><a class="nav-link px-2 text-muted" href="https://github.com/OpenTTD/eints/issues">Report a bug</a></li>
+            </ul>
+        </footer>
     </div>
 </body>
 </html>
