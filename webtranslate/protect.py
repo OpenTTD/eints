@@ -118,6 +118,9 @@ def protected(page_name):
                 return func(userauth, *a, **ka)
             elif not userauth.is_auth:
                 # Not logged in.
+                if request.path == "/login":
+                    # Help devs out with some very basic protection against a redirect loop
+                    raise RuntimeError("No access to /login, rights.dat configuration is missing")
                 redirect("/login", redirect=request.path)
             elif prjname is not None and prjname in config.cache.projects:
                 # Valid user, but insufficient permissions: Go to project page.
