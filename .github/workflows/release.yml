@@ -12,4 +12,4 @@ jobs:
     secrets: inherit
     with:
       service: eints-prod
-      url: https://eints.openttd.org/
+      url: https://translator.openttd.org/
