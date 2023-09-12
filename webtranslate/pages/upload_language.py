@@ -38,7 +38,7 @@ def page_get(userauth, prjname):
             "upload_lang_select",
             userauth=userauth,
             pmd=pmd,
-            lnginfos=sorted(pdata.get_all_languages(), lambda lang: lang.isocode),
+            lnginfos=sorted(pdata.get_all_languages(), key=lambda lang: lang.isocode),
         )
 
 
