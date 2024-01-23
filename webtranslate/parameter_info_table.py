@@ -152,6 +152,7 @@ _GS_PARAMETERS = [
     ParameterInfo("PLANE",             [], None, False, True ),
     ParameterInfo("SHIP",              [], None, False, True ),
     ParameterInfo("NBSP",              [], None, False, False),
+    ParameterInfo("ZWSP",              [], None, False, False),
     ParameterInfo("COPYRIGHT",         [], None, False, True ),
 
     # The following are directional formatting codes used to get the RTL strings right:
