@@ -116,6 +116,11 @@ _GS_PARAMETERS = [
     ParameterInfo("FORCE",             [PP_],      0,    False, True ),
     ParameterInfo("VELOCITY",          [PP_],      0,    False, True ),
     ParameterInfo("HEIGHT",            [PP_],      0,    False, True ),
+    ParameterInfo("UNITS_DAYS_OR_SECONDS",   [PP_], 0,   False, True ),
+    ParameterInfo("UNITS_MONTHS_OR_MINUTES", [PP_], 0,   False, True ),
+    ParameterInfo("UNITS_YEARS_OR_PERIODS",  [PP_], 0,   False, True ),
+    ParameterInfo("UNITS_YEARS_OR_MINUTES",  [PP_], 0,   False, True ),
+
     ParameterInfo("DATE_TINY",         [P__],      None, False, True ),
     ParameterInfo("DATE_SHORT",        [P__],      None, True,  True ),
     ParameterInfo("DATE_LONG",         [P__],      None, True,  True ),
