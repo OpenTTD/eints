@@ -9,6 +9,7 @@ A lot of the magic in this file has been copied from hgweb.py in https://bitbuck
 
 This code is not thread-safe!!
 """
+
 import hashlib
 import logging
 import time

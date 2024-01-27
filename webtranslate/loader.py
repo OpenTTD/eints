@@ -1,6 +1,7 @@
 """
 Helper functions for loading an Xml tree.
 """
+
 import logging
 
 from xml.dom import minidom

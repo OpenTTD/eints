@@ -1,6 +1,7 @@
 """
 Projects overview page.
 """
+
 from .. import config
 from ..bottle import route
 from ..protect import protected

@@ -1,6 +1,7 @@
 """
 Settings of a project.
 """
+
 from .. import (
     config,
     utils,

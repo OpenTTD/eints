@@ -1,6 +1,7 @@
 """
 Root page.
 """
+
 from ..bottle import (
     HTTPResponse,
     route,

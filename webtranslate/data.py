@@ -1,6 +1,7 @@
 """
 Project data.
 """
+
 import calendar
 import functools
 import json
