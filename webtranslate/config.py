@@ -1,6 +1,7 @@
 """
 Configuration and global routines of the translator service.
 """
+
 import logging
 import os
 import sys

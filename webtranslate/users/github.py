@@ -2,6 +2,7 @@
 User authentication and authorization via github teams.
 
 """
+
 import logging
 import requests
 import requests_oauthlib

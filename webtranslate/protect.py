@@ -1,6 +1,7 @@
 """
 Bottle authentication decorator.
 """
+
 import datetime
 import secrets
 

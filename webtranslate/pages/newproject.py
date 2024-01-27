@@ -1,6 +1,7 @@
 """
 Create a new project.
 """
+
 from .. import (
     config,
     project_type,

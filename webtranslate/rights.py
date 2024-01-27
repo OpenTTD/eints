@@ -8,6 +8,7 @@ Special user roles:
  - TRANSLATOR: Translator of a language in a project
  - *:          Always matches
 """
+
 import logging
 import re
 

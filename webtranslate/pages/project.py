@@ -1,6 +1,7 @@
 """
 Page of a single project.
 """
+
 from .. import config
 from ..bottle import (
     abort,

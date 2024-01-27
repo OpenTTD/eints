@@ -3,6 +3,7 @@ User authentication information.
 
 Supplies user and authentication context for requests.
 """
+
 from . import rights
 
 
