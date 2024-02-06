@@ -199,7 +199,7 @@ class StringAvoidanceCache:
         return self.cache.get(name)
 
 
-def find_string(pmd, lngname):
+def find_string(pmd, lngname, last_sname):
     """
     Find a string to translate.
     Collects the strings with the highest priority (the smallest number), and picks one at random.
@@ -209,6 +209,9 @@ def find_string(pmd, lngname):
 
     @param lngname: Language name.
     @type  lngname: C{str}
+
+    @param last_sname: Last string translated, if any.
+    @type  last_sname: C{str} or C{None}
 
     @return: Name of a string with a highest priority (lowest prio number), if available.
     @rtype:  C{str} or C{None}
@@ -240,6 +243,22 @@ def find_string(pmd, lngname):
             continue
         str_coll.append(sname)
 
+    # If we have a string name, try to find the first one that looks really similar.
+    if last_sname and last_sname.count("_") > 1:
+        last_sname_one = "_".join(last_sname.split("_")[:-1])
+        for _prio, strs in sorted(str_lists.items()):
+            for sname in strs:
+                if sname.startswith(last_sname_one) and sname != last_sname:
+                    return sname
+
+    # This facilitates the same as above for strings like _CREAM, _DARK_BLUE, _DEFAULT, ...
+    if last_sname and last_sname.count("_") > 2:
+        last_sname_two = "_".join(last_sname.split("_")[:-2])
+        for _prio, strs in sorted(str_lists.items()):
+            for sname in strs:
+                if sname.startswith(last_sname_two) and sname != last_sname:
+                    return sname
+
     # Collect high priority strings, until we have enough, or we run out of strings.
     cur_strings = set()
     for _prio, strs in sorted(str_lists.items()):
@@ -258,21 +277,38 @@ def find_string(pmd, lngname):
     if len(cur_strings) > len(sac.cache):
         cur_strings.difference_update(sac.cache.keys())
         sel = random.choice(list(cur_strings))
-        sac.add(sel)
-        return sel
     else:
         # Just try them all, and pick the best one.
         best_val = None
-        best_name = None
+        sel = None
         for sname in cur_strings:
             idx = sac.find(sname)
             if idx is None:
                 sac.add(sname)
                 return sname
             if best_val is None or best_val < idx:
-                best_val, best_name = idx, sname
-        sac.add(best_name)
-        return best_name
+                best_val, sel = idx, sname
+
+    # Check if this string matches something in a block, and pick the first
+    # of that block. That way you go through _1, _2, _3, etc. in order.
+    if sel.count("_") > 1:
+        sel_one = "_".join(sel.split("_")[:-1])
+        for _prio, strs in sorted(str_lists.items()):
+            for sname in strs:
+                if sname.startswith(sel_one) and sname != sel:
+                    sac.add(sname)
+                    return sname
+
+    if sel.count("_") > 2:
+        sel_two = "_".join(sel.split("_")[:-2])
+        for _prio, strs in sorted(str_lists.items()):
+            for sname in strs:
+                if sname.startswith(sel_two) and sname != sel:
+                    sac.add(sname)
+                    return sname
+
+    sac.add(sel)
+    return sel
 
 
 @route("/fix/<prjname>/<lngname>", method="GET")
@@ -303,10 +339,10 @@ def fix_string(userauth, prjname, lngname):
         abort(404, "Language is not a translation")
         return None
 
-    return fix_string_page(pmd, prjname, lngname, None)
+    return fix_string_page(pmd, prjname, lngname)
 
 
-def fix_string_page(pmd, prjname, lngname, message):
+def fix_string_page(pmd, prjname, lngname, message=None, last_sname=None):
     """
     Jump to a string edit page to fix a string.
 
@@ -321,8 +357,11 @@ def fix_string_page(pmd, prjname, lngname, message):
 
     @param message: Message to display, if any.
     @type  message: C{str} or C{None}
+
+    @param last_sname: Last string translated, if any.
+    @type  last_sname: C{str} or C{None}
     """
-    sname = find_string(pmd, lngname)
+    sname = find_string(pmd, lngname, last_sname)
     if sname is None:
         if message is None:
             message = "All strings are up-to-date, perhaps some translations need rewording?"
@@ -654,4 +693,4 @@ def str_post(userauth, prjname, lngname, sname):
         message = "Successfully updated string '" + sname + "' " + utils.get_datetime_now_formatted()
     else:
         message = None
-    return fix_string_page(pmd, prjname, lngname, message)
+    return fix_string_page(pmd, prjname, lngname, message, sname)
