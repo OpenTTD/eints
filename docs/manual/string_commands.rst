@@ -149,59 +149,59 @@ Formatting Code <http://www.unicode.org/unicode/reports/tr9/#Directional_Formatt
 Positional GameScript string commands
 =====================================
 
-============================ ====== ============================================================================
-Command                      Plural Effect
-============================ ====== ============================================================================
-``{COLOUR}``                    no  Change the colour for following text.
-``{STRING1}``                   no  Replaced by {STRING} in the translation.
-``{STRING2}``                   no  Replaced by {STRING} in the translation.
-``{STRING3}``                   no  Replaced by {STRING} in the translation.
-``{STRING4}``                   no  Replaced by {STRING} in the translation.
-``{STRING5}``                   no  Replaced by {STRING} in the translation.
-``{STRING6}``                   no  Replaced by {STRING} in the translation.
-``{STRING7}``                   no  Replaced by {STRING} in the translation.
-``{INDUSTRY}``                  no  Industry, takes an industry number.
-``{CARGO_LONG}``                no
-``{CARGO_SHORT}``               no  Short cargo description, only ``### tons``, or ``### litres``.
-``{CARGO_TINY}``                no  Tiny cargo description with only the amount.
-``{CARGO_LIST}``                no
-``{POWER}``                     no
-``{POWER_TO_WEIGHT}``           no
-``{VOLUME_LONG}``               no
-``{VOLUME_SHORT}``              no
-``{WEIGHT_LONG}``               no
-``{WEIGHT_SHORT}``              no
-``{FORCE}``                     no
-``{VELOCITY}``                  no
-``{HEIGHT}``                    no
-``{UNITS_DAYS_OR_SECONDS}``     no  Time duration in days or seconds, depending on timekeeping units setting.
-``{UNITS_MONTHS_OR_MINUTES}``   no  Time duration in months or minutes, depending on timekeeping units setting.
-``{UNITS_YEARS_OR_PERIODS}``    no  Time duration in years or periods, depending on timekeeping units setting.
-``{UNITS_YEARS_OR_MINUTES}``    no  Time duration in years or minutes, depending on timekeeping units setting.
-``{DATE_TINY}``                 no
-``{DATE_SHORT}``                no
-``{DATE_LONG}``                 no
-``{DATE_ISO}``                  no
-``{STRING}``                    no
-``{RAW_STRING}``                no  Replaced by {STRING} in the translation.
-``{COMMA}``                    yes  Number with comma.
-``{DECIMAL}``                  yes  Number with comma and fractional part.
-``{NUM}``                      yes  Signed number.
-``{ZEROFILL_NUM}``             yes  Unsigned number with zero fill, e.g. ``02``.
-``{BYTES}``                    yes  Unsigned number with "bytes", i.e. ``1.02 MiB`` or ``123 KiB``.
-``{HEX}``                      yes  Hexadecimally printed number.
-``{CURRENCY_LONG}``            yes
-``{CURRENCY_SHORT}``           yes  Compact currency.
-``{WAYPOINT}``                  no
-``{STATION}``                   no
-``{DEPOT}``                     no
-``{TOWN}``                      no
-``{GROUP}``                     no
-``{SIGN}``                      no
-``{ENGINE}``                    no
-``{VEHICLE}``                   no
-``{COMPANY}``                   no
-``{COMPANY_NUM}``               no
-``{PRESIDENT_NAME}``            no
-============================ ====== ============================================================================
+============================= ====== ============================================================================
+Command                       Plural Effect
+============================= ====== ============================================================================
+``{COLOUR}``                     no  Change the colour for following text.
+``{STRING1}``                    no  Replaced by {STRING} in the translation.
+``{STRING2}``                    no  Replaced by {STRING} in the translation.
+``{STRING3}``                    no  Replaced by {STRING} in the translation.
+``{STRING4}``                    no  Replaced by {STRING} in the translation.
+``{STRING5}``                    no  Replaced by {STRING} in the translation.
+``{STRING6}``                    no  Replaced by {STRING} in the translation.
+``{STRING7}``                    no  Replaced by {STRING} in the translation.
+``{INDUSTRY}``                   no  Industry, takes an industry number.
+``{CARGO_LONG}``                 no
+``{CARGO_SHORT}``                no  Short cargo description, only ``### tons``, or ``### litres``.
+``{CARGO_TINY}``                 no  Tiny cargo description with only the amount.
+``{CARGO_LIST}``                 no
+``{POWER}``                      no
+``{POWER_TO_WEIGHT}``            no
+``{VOLUME_LONG}``                no
+``{VOLUME_SHORT}``               no
+``{WEIGHT_LONG}``                no
+``{WEIGHT_SHORT}``               no
+``{FORCE}``                      no
+``{VELOCITY}``                   no
+``{HEIGHT}``                     no
+``{UNITS_DAYS_OR_SECONDS}``      no  Time duration in days or seconds, depending on timekeeping units setting.
+``{UNITS_MONTHS_OR_MINUTES}``    no  Time duration in months or minutes, depending on timekeeping units setting.
+``{UNITS_YEARS_OR_PERIODS}``     no  Time duration in years or periods, depending on timekeeping units setting.
+``{UNITS_YEARS_OR_MINUTES}``     no  Time duration in years or minutes, depending on timekeeping units setting.
+``{DATE_TINY}``                  no
+``{DATE_SHORT}``                 no
+``{DATE_LONG}``                  no
+``{DATE_ISO}``                   no
+``{STRING}``                     no
+``{RAW_STRING}``                 no  Replaced by {STRING} in the translation.
+``{COMMA}``                     yes  Number with comma.
+``{DECIMAL}``                   yes  Number with comma and fractional part.
+``{NUM}``                       yes  Signed number.
+``{ZEROFILL_NUM}``              yes  Unsigned number with zero fill, e.g. ``02``.
+``{BYTES}``                     yes  Unsigned number with "bytes", i.e. ``1.02 MiB`` or ``123 KiB``.
+``{HEX}``                       yes  Hexadecimally printed number.
+``{CURRENCY_LONG}``             yes
+``{CURRENCY_SHORT}``            yes  Compact currency.
+``{WAYPOINT}``                   no
+``{STATION}``                    no
+``{DEPOT}``                      no
+``{TOWN}``                       no
+``{GROUP}``                      no
+``{SIGN}``                       no
+``{ENGINE}``                     no
+``{VEHICLE}``                    no
+``{COMPANY}``                    no
+``{COMPANY_NUM}``                no
+``{PRESIDENT_NAME}``             no
+============================= ====== ============================================================================
 
