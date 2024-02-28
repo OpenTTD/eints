@@ -1,58 +1,9 @@
-/* to make this project easy to maintain, I've mostly stuck to vanilla Bootstrap styles - andythenorth */
-
 /* bootstrap over-rides, not too many because it's a headache to maintain too many */
-
-/* bootstrap h1 and h2 are seriously too big, so over-ride them */
-h1 {
-    font-size:30px;
-}
-h2 {
-    font-size:22px;
-}
-h3 {
-    font-size:18px;
-}
-h4 {
-    font-size:16px;
-}
 
 /* end of bootstrap over-rides */
 
 
 /* eint styles */
-
-.eint-navbar {
-	margin-top:25px;
-}
-
-.eint-header-link {
-    color:inherit;
-}
-
-.eint-form-actions {
-    margin:30px;
-    float:right;
-}
-.eint-file-upload {
-    margin-left:-98px;
-}
-.eint-form-value-as-text {
-    margin-top:5px;
-}
-
-.footer {
-    width:100%;
-    margin:0;
-    margin-top:50px;
-    padding:6px 0;
-    clear:both;
-    float:left;
-    background-image:url('/static/img/footer_bg.png');
-    background-repeat:repeat-x;
-    text-align:center;
-    color:#bbb;
-    font-size:12px;
-}
 
 .eint-heading-icon {
     padding-left:40px;
