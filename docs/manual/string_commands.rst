@@ -102,6 +102,7 @@ Command                 Effect
 ``{}``                  Continue at the next line
 ``{{}``                 Output a ``{``
 ``{NBSP}``              Display a non-breaking space
+``{ZWSP}``              Insert a breaking zero-width space
 ``{COPYRIGHT}``         Display a copyright symbol
 ``{TRAIN}``             Output a train symbol
 ``{LORRY}``             Output a truck symbol
