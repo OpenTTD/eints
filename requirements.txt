@@ -1,10 +1,10 @@
-certifi==2024.6.2
+certifi==2024.8.30
 charset-normalizer==3.3.2
 click==8.1.7
-idna==3.7
+idna==3.10
 oauthlib==3.2.2
 openttd-helpers==1.4.0
 requests==2.32.3
 requests-oauthlib==2.0.0
-sentry-sdk==2.7.1
-urllib3==2.2.2
+sentry-sdk==2.14.0
+urllib3==2.2.3
