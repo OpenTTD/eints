@@ -1,4 +1,4 @@
-FROM python:3.8-slim as builder
+FROM python:3.8-slim AS builder
 
 WORKDIR /docs
 
