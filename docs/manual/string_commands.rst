@@ -101,6 +101,7 @@ Command                 Effect
 ======================= ============================================================================
 ``{}``                  Continue at the next line
 ``{{}``                 Output a ``{``
+``{SPACE}``             Display a regular space, only used for trailing spaces.
 ``{NBSP}``              Display a non-breaking space
 ``{COPYRIGHT}``         Display a copyright symbol
 ``{TRAIN}``             Output a train symbol
