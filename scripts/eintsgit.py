@@ -13,7 +13,7 @@ eints_login_file = "user.cfg"
 
 # Commit credentials
 commit_user = "translators <translators@openttd.org>"
-commit_message = "Update: Translations from eints\n"
+commit_message = "Update: Translations from eints\n\n"
 
 # Source structure
 git_remote = "origin"
