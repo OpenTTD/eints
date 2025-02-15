@@ -1,4 +1,4 @@
-FROM python:3.8-slim AS builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /docs
 
@@ -16,7 +16,7 @@ RUN make -C /docs
 
 
 
-FROM python:3.8-slim
+FROM python:3.11-slim
 
 ARG BUILD_DATE=""
 ARG BUILD_VERSION="dev"

@@ -14,4 +14,4 @@ jobs:
     uses: OpenTTD/actions/.github/workflows/rw-entry-testing-docker-py.yml@v5
     with:
       python-path: webtranslate scripts/filter_update_langs scripts/lang_sync scripts/eintsgit.py
-      python-version: 3.8
+      python-version: 3.11
