@@ -610,8 +610,8 @@ def perform_operation(op_type, lang_type, credits_handle):
             break
 
     if blng is None:
-        print("Error: No base language found (neither from Eints nor given with --base-lang)")
-        sys.exit(1)
+        # use default value
+        blng = get_languagedata_by_isocode("en_GB")
 
     # Filter languages.
     path_base = None
@@ -1131,6 +1131,7 @@ Getting project information:
     In case Eints does not know the base language (mostly at initial import),
     this option can be used to specify it manually. It can either be the isocode,
     or the ##grflangid (a string of the form "0x[HEX][HEX]").
+    (Default: "en_GB")
 
 --credits=FNAME
     Credits for translation string changes are written in the provided FNAME.
