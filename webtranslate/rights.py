@@ -118,8 +118,6 @@ def has_access(page, roles):
     @return: Whether access is granted.
     @rtype:  C{bool}
     """
-    global _table
-
     if "USER" not in roles:
         roles = set(["SOMEONE"])
 

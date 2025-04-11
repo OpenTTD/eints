@@ -62,8 +62,6 @@ def authenticate(user, pwd):
     @return: Whether the combination is valid (C{True} means 'valid').
     @rtype:  C{bool}
     """
-    global _users
-
     if len(pwd) == 0:
         return False
     return (user, pwd) in _users
