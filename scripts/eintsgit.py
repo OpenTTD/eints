@@ -208,34 +208,44 @@ def eints_download(settings, credits_file):
     )
 
 
-def update_eints_from_git(settings, force):
+def update_eints_from_git(settings, force, pull):
     """
     Perform the complete operation from syncing Eints from the repository.
 
     @param force: Upload even if no changes.
     @type  force: C{bool}
+
+    @param pull: Pull from remote, or use working copy as-it.
+    @type  pull: C{bool}
     """
 
     with FileLock(lock_file):
-        print_info("Check updates from git")
-        if git_pull(settings) or force:
+        has_changes = False
+        if pull:
+            print_info("Check updates from git")
+            has_changes = git_pull(settings)
+        if has_changes or force:
             print_info("Upload translations")
             eints_upload(settings)
         print_info("Done")
 
 
-def commit_eints_to_git(settings, dry_run):
+def commit_eints_to_git(settings, dry_run, pull):
     """
     Perform the complete operation from commit Eints changes to the repository.
 
     @param dry_run: Do not commit, leave as modified.
     @type  dry_run: C{bool}
+
+    @param pull: Pull from remote, or use working copy as-it.
+    @type  pull: C{bool}
     """
 
     with FileLock(lock_file):
         # Upload first in any case.
-        print_info("Update from git")
-        git_pull(settings)
+        if pull:
+            print_info("Update from git")
+            git_pull(settings)
         print_info("Upload/Merge translations")
         eints_upload(settings)
 
@@ -267,6 +277,7 @@ def run():
             [
                 "help",
                 "force",
+                "pull",
                 "dry-run",
                 "base-url=",
                 "project=",
@@ -283,6 +294,7 @@ def run():
     # Parse options
     force = False
     dry_run = False
+    pull = False
     settings = Settings()
 
     for opt, val in opts:
@@ -301,6 +313,9 @@ with <options>:
 
 --force
     See individual operations below
+
+--pull
+    Update working copy from remote
 
 --dry-run
     See individual operations below
@@ -341,6 +356,10 @@ commit-to-git
 
         if opt == "--force":
             force = True
+            continue
+
+        if opt == "--pull":
+            pull = True
             continue
 
         if opt == "--dry-run":
@@ -395,10 +414,10 @@ commit-to-git
 
     # Execute operations
     if do_update:
-        update_eints_from_git(settings, force)
+        update_eints_from_git(settings, force, pull)
 
     if do_commit:
-        commit_eints_to_git(settings, dry_run)
+        commit_eints_to_git(settings, dry_run, pull)
 
     sys.exit(0)
 
