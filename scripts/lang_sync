@@ -176,8 +176,6 @@ def setup_auth():
     """
     Setup the authentication for connecting to Eints.
     """
-    global user_cfg
-
     user, passwd = None, None
 
     # Read the file if provided.
@@ -275,8 +273,6 @@ def build_url(suffix):
     @param suffix: Path to retrieve from, at L{UserConfig.base_url}
     @type  suffix: C{str}
     """
-    global user_cfg
-
     assert suffix[0] == "/"
     if user_cfg.base_url[-1] == "/":
         return user_cfg.base_url + suffix[1:]
@@ -420,7 +416,7 @@ def get_eints_languages():
     @return: Available language information for the project as returned by Eints.
     @rtype:  C{list} of L{EintsLanguageInfo}
     """
-    global user_cfg, eints_files_cache
+    global eints_files_cache
 
     if eints_files_cache is not None:
         return eints_files_cache
@@ -498,7 +494,7 @@ def get_local_languages():
     @return: Found language files.
     @rtype:  C{list} of L{LocalLanguageInfo}
     """
-    global user_cfg, local_files_cache
+    global local_files_cache
 
     if local_files_cache is not None:
         return local_files_cache
@@ -582,8 +578,6 @@ def perform_operation(op_type, lang_type, credits_handle):
     @param credits_handle: If available, output stream for writing credits of language file changes.
     @type  credits_handle: C{file} or C{None}
     """
-    global user_cfg
-
     if op_type == "create":
         assert lang_type == "project"
         # Project creation operation.
@@ -639,8 +633,6 @@ def perform_create_project():
     """
     Create a new project in Eints.
     """
-    global user_cfg
-
     assert user_cfg.project_desc is not None
 
     if user_cfg.project_type not in KNOWN_PROJECT_TYPES:

@@ -75,7 +75,7 @@ def connect():
     @return: Whether we are connected (not 100% certain).
     @rtype:  C{bool}
     """
-    global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
+    global db_connection
 
     if db_connection is not None:
         return True  # Already connected.
@@ -142,7 +142,7 @@ def _do_command(cmd, parms):
     @return: Cursor with the result, if all went well, else C{None}
     @rtype:  db cursor, or C{None}
     """
-    global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
+    global db_connection
 
     if db_type == "postgress":
         import psycopg2
@@ -176,8 +176,6 @@ def query(cmd, parms):
     @return: Cursor with the result, if all went well, else C{None}
     @rtype:  db cursor, or C{None}
     """
-    global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
-
     count = 0
     while count < 3:
         # Connect if not connected.
@@ -225,9 +223,6 @@ def get_authentication(user, pwd):
     @return: UserAuthentication object to test accesses with.
     @rtype: C{UserAuthentication}
     """
-    global db_type, db_schema, db_name, db_password, db_user, db_host, db_port, db_connection
-    global owner_role, translator_roles
-
     # Verify user.
     # Note that failure to authenticate is not fatal, it falls back to an 'unknown' user.
     if user is not None and user != "" and pwd is not None:

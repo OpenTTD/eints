@@ -63,7 +63,7 @@ def init():
     """
     Initialize the user admin system.
     """
-    global server, ldap_host
+    global server
     import ldap3
 
     rights.init_page_access()
@@ -89,7 +89,6 @@ def get_authentication(user, pwd):
     # Note that failure to authenticate is not fatal, it falls back to an 'unknown' user.
     groups = set()
     if user is not None and user != "" and pwd is not None and pwd != "":
-        global server, ldap_basedn_users, ldap_basedn_groups
         import ldap3
 
         try:
