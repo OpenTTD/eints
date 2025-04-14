@@ -6,5 +6,5 @@ oauthlib==3.2.2
 openttd-helpers==1.4.0
 requests==2.32.3
 requests-oauthlib==2.0.0
-sentry-sdk==2.21.0
+sentry-sdk==2.25.0
 urllib3==2.3.0
