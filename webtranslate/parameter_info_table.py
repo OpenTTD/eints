@@ -186,7 +186,9 @@ _OPENTTD_PARAMETERS = [
     ParameterInfo("DOWN_ARROW",        [],    None, False, True ),
     ParameterInfo("CHECKMARK",         [],    None, False, True ),
     ParameterInfo("CROSS",             [],    None, False, True ),
-    ParameterInfo("RIGHT_ARROW",       [],    None, False, False),  # left/right arrows are not critical due to LTR/RTL languages
+    # left/right arrows are not critical due to LTR/RTL languages
+    ParameterInfo("LEFT_ARROW",        [],    None, False, False),
+    ParameterInfo("RIGHT_ARROW",       [],    None, False, False),
     ParameterInfo("SMALL_LEFT_ARROW",  [],    None, False, False),
     ParameterInfo("SMALL_RIGHT_ARROW", [],    None, False, False),
 ]
