@@ -109,6 +109,8 @@ Command                 Effect
 ``{BUS}``               Output a bus symbol
 ``{PLANE}``             Output an aircraft
 ``{SHIP}``              Output a ship symbol
+``{TOWN_ICON}``         Output a town symbol
+``{CITY_ICON}``         Output a city symbol
 ``{NORMAL_FONT}``       Switch to a normal font
 ``{TINY_FONT}``         Switch to a small font
 ``{BIG_FONT}``          Switch to a big font

@@ -156,6 +156,8 @@ _GS_PARAMETERS = [
     ParameterInfo("BUS",               [], None, False, True ),
     ParameterInfo("PLANE",             [], None, False, True ),
     ParameterInfo("SHIP",              [], None, False, True ),
+    ParameterInfo("TOWN_ICON",         [], None, False, True ),
+    ParameterInfo("CITY_ICON",         [], None, False, True ),
     ParameterInfo("SPACE",             [], None, False, False),
     ParameterInfo("NBSP",              [], None, False, False),
     ParameterInfo("COPYRIGHT",         [], None, False, True ),
