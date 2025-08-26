@@ -1,0 +1,6 @@
+##name Maori (New Zealand)
+##ownname Te Reo Māori o Aotearoa
+##isocode mi_NZ
+##plural 0
+##textdir ltr
+##grflangid 0x40
