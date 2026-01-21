@@ -299,8 +299,7 @@ def run():
 
     for opt, val in opts:
         if opt in ("--help", "-h"):
-            print(
-                """\
+            print("""\
 eintsgit -- Synchronize language files between git and Eints.
 
 eintsgit <options> <operations>
@@ -350,8 +349,7 @@ commit-to-git
     Update working copy, merge and download translations from Eints, commit and push.
     With --dry-run stop before pushing and leave commits local.
 
-"""
-            )
+""")
             sys.exit(0)
 
         if opt == "--force":

@@ -6,7 +6,6 @@ import sys
 
 import os.path
 
-
 # Keywords to use from OpenTTD langfiles
 filterkeywords = ["##name", "##ownname", "##isocode", "##plural", "##textdir", "##grflangid", "##gender", "##case"]
 
