@@ -2,7 +2,7 @@ certifi==2026.10.23
 charset-normalizer==3.5.2
 click==8.5.0
 idna==3.20
-oauthlib==4.0.0
+oauthlib==4.0.1
 openttd-helpers==2.0.0
 packaging==26.3
 requests==2.34.2
